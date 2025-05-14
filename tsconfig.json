@@ -1,0 +1,25 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "target": "ES6",
+    "module": "commonjs",
+    "strict": true, // MUST HAVE
+    "esModuleInterop": true,
+    "skipLibCheck": true, // Speeds up compilation
+    "forceConsistentCasingInFileNames": true
+  }
+}
