@@ -82,26 +82,14 @@ const supplierSchema = z.object({
 });
 
 const purchaseOrderSchema = z.object({
-  supplierId: z.number().min(1, {
+  supplierId: z.coerce.number().min(1, {
     message: "Supplier must be selected.",
   }),
   orderDate: z.coerce.string().min(2, {
     message: "Order Date must be at least 2 characters.",
   }),
-  status: z
-    .string()
-    .min(2, {
-      message: "Order Status must be at least 2 characters.",
-    })
-    .optional(),
-  deliverDate: z.coerce.string().min(2, {
+  deliveryDate: z.coerce.string().min(2, {
     message: "Delivery Date must be at least 2 characters.",
-  }),
-  receivedDate: z.coerce.string().min(2, {
-    message: "Received Date must be at least 2 characters.",
-  }),
-  totalAmount: z.coerce.number().min(1, {
-    message: "Total Amount must be at least 1.",
   }),
   // orderBy: z.number().min(1, {
   //   message: "Order By must be at least 1.",
@@ -112,6 +100,19 @@ const purchaseOrderSchema = z.object({
   notes: z.string().optional().nullable(),
 });
 
+const purchaseOrderItemSchema = z.object({
+  productId: z.number().min(1, {
+    message: "Product must be selected.",
+  }),
+  quantity: z.coerce.number().min(1, {
+    message: "Quantity must be at least 1.",
+  }),
+  unitPrice: z.coerce.number().min(1, {
+    message: "Unit Price must be at least 1.",
+  }),
+  discount: z.coerce.number().optional().nullable(),
+});
+
 export default {
   categorySchema,
   userSchema,
@@ -119,4 +120,5 @@ export default {
   productSchema,
   supplierSchema,
   purchaseOrderSchema,
+  purchaseOrderItemSchema,
 };

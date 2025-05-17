@@ -11,12 +11,19 @@ import {
 import { Button } from "@/components/ui/button";
 import services, { type APIResponse } from "../../services";
 import { Toaster } from "@/components/ui/sonner";
-import { Pencil } from "lucide-react";
-import useToggle from "@/hooks/useToggle";
+import { Pencil, Plus } from "lucide-react";
 import Pager from "@/components/Pager";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import formatCurrency from "@/utils";
+import { Badge } from "@/components/ui/badge";
+import type { Supplier } from "../Suppliers";
+import type { User } from "../Users";
+import type { Product } from "../Products";
+import { format } from "date-fns";
+import { cx } from "class-variance-authority";
 
 export default function PurchaseOrders() {
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<APIResponse<PurchaseOrder[]>>({
     data: [],
@@ -25,21 +32,16 @@ export default function PurchaseOrders() {
     currentPage: 0,
   });
 
-  const [selected, setSelected] = React.useState<PurchaseOrder | null>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
     limit: 10,
     page: 1,
   });
-  const [toggle, handleToggle] = useToggle({
-    addModal: false,
-    editModal: false,
-  });
 
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await services.purchaseOrderServices.get(filter);
+      const response = await services.purchaseOrderServices.getAll(filter);
       const data = response.data;
       setData(data);
     } catch (error) {
@@ -59,7 +61,6 @@ export default function PurchaseOrders() {
       page,
     }));
   }, [page]);
-
   return (
     <div>
       <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
@@ -68,12 +69,8 @@ export default function PurchaseOrders() {
 
           <div className="ml-auto">
             <Link to="/purchases/new">
-              <Button
-                onClick={() => {
-                  handleToggle({ addModal: true });
-                }}
-              >
-                Add
+              <Button>
+                <Plus /> Add
               </Button>
             </Link>
           </div>
@@ -87,37 +84,37 @@ export default function PurchaseOrders() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead className="text-right"></TableHead>
+                <TableHead>Supplier</TableHead>
+                <TableHead>Order By</TableHead>
+                <TableHead>Total Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Order Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data?.data?.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">
-                    {item.name}
-                    <p className="text-xs text-muted-foreground">
-                      {item.address}
-                    </p>
-                  </TableCell>
+              {data.data?.map((item) => (
+                <TableRow
+                  className="cursor-pointer"
+                  key={item.id}
+                  onClick={() => {
+                    console.log(item.id);
+                    navigate(`/purchases/${item.id}`);
+                  }}
+                >
+                  <TableCell className="font-medium">{item.id}</TableCell>
+                  <TableCell>{item.supplier.name}</TableCell>
+                  <TableCell>{item.orderByUser.name}</TableCell>
+                  <TableCell>{formatCurrency(item.totalAmount)}</TableCell>
                   <TableCell>
-                    {item.contact}
-                    <p className="text-xs text-muted-foreground">
-                      {item.phone}
-                    </p>
-                  </TableCell>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setSelected(item);
-                        handleToggle({ editModal: true });
-                      }}
+                    <Badge
+                      className={cx(
+                        `capitalize status-${item.status.toLowerCase()}`
+                      )}
                     >
-                      <Pencil size={16} />
-                    </Button>
-                  </TableHead>
+                      {item.status.toLowerCase()}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{format(item.orderDate, "dd/MM/yy")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -126,26 +123,6 @@ export default function PurchaseOrders() {
         </>
       )}
 
-      {toggle.addModal && (
-        <AddModal
-          isOpen={true}
-          onClose={() => {
-            handleToggle({ addModal: false });
-          }}
-          cb={getData}
-        />
-      )}
-
-      {toggle.editModal && (
-        <EditModal
-          isOpen={true}
-          onClose={() => {
-            handleToggle({ editModal: false });
-          }}
-          cb={getData}
-          data={selected as PurchaseOrder}
-        />
-      )}
       <Toaster position="bottom-right" richColors />
     </div>
   );
@@ -162,4 +139,16 @@ export interface PurchaseOrder {
   orderBy: number;
   receivedBy: number;
   notes: string;
+  supplier: Supplier;
+  orderByUser: User;
+  purchaseOrderItems: PurchaseOrderItem[];
+}
+
+export interface PurchaseOrderItem {
+  id?: number;
+  productId: number;
+  quantity: number;
+  unitPrice: number;
+  discount: number;
+  product: Product;
 }

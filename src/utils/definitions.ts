@@ -7,13 +7,13 @@ export const ROUTES = {
   SUPPLIERS: "/suppliers",
   PURCHASE_ORDERS: "/purchases",
   PURCHASE_ORDERS_CREATE: "/purchases/new",
+  PURCHASE_ORDERS_DETAILS: "/purchases/:id",
 };
 
 export const ORDER_STATUS = {
-  DRAFT: "DRAFT",
   PENDING: "PENDING",
-  APPROVED: "APPROVED",
-  REJECTED: "REJECTED",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
 };
 
 export const PAGINATION = {

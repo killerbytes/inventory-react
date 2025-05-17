@@ -17,7 +17,7 @@ export default function Modal({
   isOpen: boolean;
   onOpenChange: () => void;
   title: string;
-  description: string;
+  description?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {

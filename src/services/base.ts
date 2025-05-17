@@ -13,8 +13,12 @@ export default class BaseService<T> {
     const response = await this.http.post(`${this.url}`, data);
     return response;
   };
-  get = async (params) => {
-    const response = await this.http.get(`${this.url}`, { params });
+  getAll = async (params) => {
+    const response = await this.http.get(`${this.url}/`, { params });
+    return response;
+  };
+  get = async (id) => {
+    const response = await this.http.get(`${this.url}/${id}`);
     return response;
   };
 

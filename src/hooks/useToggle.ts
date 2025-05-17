@@ -1,26 +1,24 @@
 import React from "react";
 
-interface ToggleState<T> {
-  [key: string]: T;
+interface ToggleState<> {
+  [key: string]: boolean;
 }
 
-type UseToggleResult<T> = [T, (item: Partial<ToggleState<T>>) => void] & {
-  toggle: T;
-  handleToggle: (item: Partial<ToggleState<T>>) => void;
+type UseToggleResult = [ToggleState, (item: Partial<ToggleState>) => void] & {
+  toggle: ToggleState;
+  handleToggle: (item: Partial<ToggleState>) => void;
 };
 
-export default function useToggle<T>(
-  state: ToggleState<T>
-): UseToggleResult<T> {
-  const [toggle, setToggle] = React.useState<ToggleState<T>>(state);
-  const handleToggle = React.useCallback((item: Partial<ToggleState<T>>) => {
-    setToggle((prevState) => ({ ...prevState, ...item } as ToggleState<T>));
+export default function useToggle(state: ToggleState): UseToggleResult {
+  const [toggle, setToggle] = React.useState<ToggleState>(state);
+  const handleToggle = React.useCallback((item: Partial<ToggleState>) => {
+    setToggle((prevState) => ({ ...prevState, ...item } as ToggleState));
   }, []);
 
   const result = Object.assign([toggle, handleToggle], {
     toggle,
     handleToggle,
-  }) as UseToggleResult<T>;
+  }) as UseToggleResult;
   result.toggle = result[0];
   result.handleToggle = result[1];
 

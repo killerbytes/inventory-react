@@ -6,4 +6,8 @@ export default class PurchaseOrderService extends BaseService<PurchaseOrder> {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/purchase" });
   }
+  updateStatus = async (id, data) => {
+    const response = await this.http.patch(`${this.url}/${id}/status`, data);
+    return response;
+  };
 }

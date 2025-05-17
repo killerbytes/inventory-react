@@ -52,7 +52,7 @@ export default function Header() {
     <header className="bg-gray-800 text-white ">
       <div className="container mx-auto flex justify-between items-center p-4">
         <h1 className="text-2xl font-bold">My Hardware</h1>
-        <nav>
+        <nav className="hidden md:block">
           <ul className="flex space-x-4">
             <li>
               <a href="/" className="hover:text-gray-400">
@@ -93,19 +93,20 @@ export default function Header() {
             </li>
           </ul>
         </nav>
-        <div></div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <div className="font-medium">{user?.name.charAt(0)}</div>
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="ml-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                <div className="font-medium">{user?.name.charAt(0)}</div>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

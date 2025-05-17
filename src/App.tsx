@@ -9,6 +9,7 @@ import PurchaseOrders from "./pages/PurchaseOrders";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
 import PurchaseCreate from "./pages/PurchaseOrders/Create";
+import PurchaseDetails from "./pages/PurchaseOrders/Details";
 import { useApiData, type ApiDataType } from "./hooks/useApiData";
 import { GlobalContext } from "./components/GlobalContext";
 import { ROUTES } from "./utils/definitions";
@@ -69,6 +70,14 @@ function App() {
               element={
                 <Layout>
                   <PurchaseCreate />
+                </Layout>
+              }
+            />
+            <Route
+              path={"/purchases/:id"}
+              element={
+                <Layout>
+                  <PurchaseDetails />
                 </Layout>
               }
             />

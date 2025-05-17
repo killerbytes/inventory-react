@@ -123,3 +123,32 @@ button,
 a {
   cursor: pointer;
 }
+
+h1,
+h2,
+h3,
+h4 {
+  @apply scroll-m-20 tracking-tight font-semibold;
+}
+/* h1 {
+  @apply text-4xl font-extrabold  lg:text-5xl;
+}
+h2 {
+  @apply border-b pb-2 text-3xl  first:mt-0;
+}
+h3 {
+  @apply text-2xl;
+}
+h4 {
+  @apply text-xl;
+} */
+
+div[class^="status-"] {
+  @apply text-white px-2 py-1 rounded-md;
+}
+.status-completed {
+  @apply bg-green-500;
+}
+.status-pending {
+  @apply bg-gray-500;
+}

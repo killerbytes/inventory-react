@@ -18,7 +18,6 @@ export default class Http {
         "x-access-token": token,
       },
     });
-    console.log(window.location.pathname);
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
