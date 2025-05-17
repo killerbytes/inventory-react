@@ -40,7 +40,7 @@ export default function Products() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await services.productServices.get(filter);
+      const response = await services.productServices.getAll(filter);
       const data = response.data;
       setData(data);
     } catch (error) {

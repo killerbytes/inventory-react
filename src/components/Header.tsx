@@ -22,6 +22,7 @@ import {
 
 import { GlobalContext } from "./GlobalContext";
 import type { User } from "@/pages/Users";
+import { ROUTES } from "@/utils/definitions";
 
 export default function Header() {
   const [user, setUser] = React.useState<User | null>(null);
@@ -55,41 +56,14 @@ export default function Header() {
         <nav className="hidden md:block">
           <ul className="flex space-x-4">
             <li>
-              <a href="/" className="hover:text-gray-400">
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="/users" className="hover:text-gray-400">
-                Users
-              </a>
-            </li>
-
-            <li>
-              <Link to="/products" className="hover:text-gray-400">
-                Products
-              </Link>
-            </li>
-            <li>
-              <Link to="/categories" className="hover:text-gray-400">
-                Categories
-              </Link>
-            </li>
-            <li>
-              <Link to="/suppliers" className="hover:text-gray-400">
-                Suppliers
-              </Link>
-            </li>
-            <li>
-              <Link to="/purchases" className="hover:text-gray-400">
+              <Link to={ROUTES.PURCHASE_ORDERS} className="hover:text-gray-400">
                 Purchases
               </Link>
             </li>
-
             <li>
-              <a href="/about" className="hover:text-gray-400">
-                About
-              </a>
+              <Link to={ROUTES.SALES_ORDERS} className="hover:text-gray-400">
+                Sales
+              </Link>
             </li>
           </ul>
         </nav>
@@ -103,6 +77,28 @@ export default function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem>
+                <Link to={ROUTES.USERS}> Users</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link to={ROUTES.PRODUCTS}>Products</Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem>
+                <Link to={ROUTES.CATEGORIES}> Categories</Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem>
+                <Link to={ROUTES.SUPPLIERS}> Suppliers</Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem>
+                <Link to={ROUTES.INVENTORY}> Inventory</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

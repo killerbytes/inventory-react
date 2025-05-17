@@ -10,7 +10,7 @@ import type { Supplier } from "../Suppliers";
 import { ORDER_STATUS, ROUTES } from "@/utils/definitions";
 import { useNavigate, useParams } from "react-router";
 import type { PurchaseOrder, PurchaseOrderItem } from ".";
-import PurchaseOrderForm from "./PurchaseOrderForm";
+import PurchaseOrderForm from "./SalesOrderForm";
 import ProductsTable from "./ProductsTable";
 import {
   AlertDialog,
@@ -36,7 +36,7 @@ export default function Create() {
 
   async function onSubmit() {
     try {
-      await services.purchaseOrderServices.updateStatus(id, {
+      await services.salesOrderServices.updateStatus(id, {
         status: ORDER_STATUS.COMPLETED,
       });
       toast.success(`Purchase Order created successfully`);
@@ -48,11 +48,11 @@ export default function Create() {
 
   const getData = useCallback(async () => {
     try {
-      const response = await services.purchaseOrderServices.get(id);
+      const response = await services.salesOrderServices.get(id);
       const data = response.data;
       setData(data);
     } catch (error) {
-      navigate(ROUTES.PURCHASE_ORDERS);
+      if (error.status === 404) navigate(ROUTES.SALES_ORDERS);
       toast.error("Submission failed - " + error?.response.data.error.message);
     }
   }, []);
@@ -68,7 +68,7 @@ export default function Create() {
         <Button
           type="button"
           variant="ghost"
-          onClick={() => navigate(ROUTES.PURCHASE_ORDERS)}
+          onClick={() => navigate(ROUTES.SALES_ORDERS)}
           className="mb-4"
         >
           <MoveLeft /> Back
@@ -98,7 +98,7 @@ export default function Create() {
       </div>
 
       <ProductsTable
-        items={data?.purchaseOrderItems as PurchaseOrderItem[]}
+        items={data?.salesOrderItems as PurchaseOrderItem[]}
         className="mb-4"
       />
       <DialogFooter className="mt-auto">

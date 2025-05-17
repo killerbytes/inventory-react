@@ -1,15 +1,20 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import Home from "./pages/Home";
-import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Users from "./pages/Users";
 import Layout from "./components/Layout";
 import Products from "./pages/Products";
-import PurchaseOrders from "./pages/PurchaseOrders";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
+import Inventory from "./pages/Inventory";
+import InventoryTransactions from "./pages/Inventory/Transactions";
+import PurchaseOrders from "./pages/PurchaseOrders";
 import PurchaseCreate from "./pages/PurchaseOrders/Create";
 import PurchaseDetails from "./pages/PurchaseOrders/Details";
+import SalesOrders from "./pages/SalesOrders";
+import SalesCreate from "./pages/SalesOrders/Create";
+import SalesDetails from "./pages/SalesOrders/Details";
+
 import { useApiData, type ApiDataType } from "./hooks/useApiData";
 import { GlobalContext } from "./components/GlobalContext";
 import { ROUTES } from "./utils/definitions";
@@ -74,7 +79,7 @@ function App() {
               }
             />
             <Route
-              path={"/purchases/:id"}
+              path={`${ROUTES.PURCHASE_ORDERS}/:id`}
               element={
                 <Layout>
                   <PurchaseDetails />
@@ -90,6 +95,48 @@ function App() {
                 </Layout>
               }
             />
+            <Route
+              path={ROUTES.INVENTORY}
+              element={
+                <Layout>
+                  <Inventory />
+                </Layout>
+              }
+            />
+            <Route
+              path={ROUTES.INVENTORY_TRANSACTIONS}
+              element={
+                <Layout>
+                  <InventoryTransactions />
+                </Layout>
+              }
+            />
+            <Route
+              path={ROUTES.SALES_ORDERS_CREATE}
+              element={
+                <Layout>
+                  <SalesCreate />
+                </Layout>
+              }
+            />
+            <Route
+              path={`${ROUTES.SALES_ORDERS}/:id`}
+              element={
+                <Layout>
+                  <SalesDetails />
+                </Layout>
+              }
+            />
+
+            <Route
+              path={ROUTES.SALES_ORDERS}
+              element={
+                <Layout>
+                  <SalesOrders />
+                </Layout>
+              }
+            />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </GlobalContext.Provider>

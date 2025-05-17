@@ -40,7 +40,7 @@ export default function Users() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await services.userServices.get(filter);
+      const response = await services.userServices.getAll(filter);
       const data = response.data;
       setData(data);
     } catch (error) {

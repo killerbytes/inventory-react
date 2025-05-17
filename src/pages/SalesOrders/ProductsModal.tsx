@@ -41,9 +41,9 @@ export default function ProductsModal({
   exclude?: Array<number>;
 }) {
   const { store, fetchData } = useContext(GlobalContext) || {};
-  const [products, setProducts] = React.useState<Product[]>([]);
-  const { purchaseOrderItemSchema } = validations;
-  const schema = purchaseOrderItemSchema;
+  const [inventorys, setProducts] = React.useState<Product[]>([]);
+  const { salesOrderItemSchema } = validations;
+  const schema = salesOrderItemSchema;
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -53,18 +53,20 @@ export default function ProductsModal({
   });
 
   const items = exclude
-    ? products.filter((p) => !exclude?.includes(p.id))
-    : products;
+    ? inventorys.filter((p) => !exclude?.includes(p.id))
+    : inventorys;
 
   async function onSubmit(values: z.infer<typeof schema>) {
     try {
       const item: PurchaseOrderItem = {
         ...values,
-        product: products.find((p) => p.id === values.productId) as Product,
+        inventory: inventorys.find(
+          (p) => p.id === values.inventoryId
+        ) as Product,
       } as PurchaseOrderItem;
 
       onAdd(item);
-      toast.success(`Added: ${item.product.name} x ${item.quantity}`);
+      toast.success(`Added: ${item.inventory.product.name} x ${item.quantity}`);
       form.reset();
       onClose();
     } catch (error) {
@@ -73,24 +75,22 @@ export default function ProductsModal({
     }
   }
 
-  React.useEffect(() => {
-    if (fetchData) {
-      fetchData("products", async () => {
-        const { data } = await services.productServices.list();
-        return data;
-      });
-    }
-  }, [fetchData]);
+  const getData = async () => {
+    const { data } = await services.inventoryServices.list();
+    setProducts(data);
+  };
 
   React.useEffect(() => {
-    if (store?.products) {
-      setProducts(store.products as Product[]);
-    }
-  }, [store?.products]);
+    getData();
+  }, []);
 
   React.useEffect(() => {
-    form.setValue("productId", items[0]?.id);
-  }, [form, items]);
+    if (store?.inventorys) {
+      setProducts(store.inventorys as Product[]);
+    }
+  }, [store?.inventorys]);
+
+  // form.setValue("inventoryId", items[0]?.id);
 
   return (
     <>
@@ -98,11 +98,12 @@ export default function ProductsModal({
         isOpen={isOpen}
         onOpenChange={onClose}
         title="Add Product"
-        description="Add a product to the purchase order"
+        description="Add a inventory to the purchase order"
       >
         <Form {...form}>
           <form
             onSubmit={(e) => {
+              console.log(form.formState.errors);
               e.preventDefault();
               form
                 .handleSubmit(onSubmit)(e)
@@ -114,7 +115,7 @@ export default function ProductsModal({
           >
             <FormField
               control={form.control}
-              name="productId"
+              name="inventoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Product</FormLabel>
@@ -125,12 +126,16 @@ export default function ProductsModal({
                     }}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a product" />
+                      <SelectValue placeholder="Select a inventory" />
                     </SelectTrigger>
                     <SelectContent>
-                      {items?.map((product) => (
-                        <SelectItem key={product.id} value={String(product.id)}>
-                          {product.name}
+                      {items?.map((item) => (
+                        <SelectItem
+                          key={item.id}
+                          value={String(item.id)}
+                          disabled={item.quantity === 0}
+                        >
+                          {item.product.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

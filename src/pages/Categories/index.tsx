@@ -40,7 +40,7 @@ export default function Categories() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await services.categoryServices.get(filter);
+      const response = await services.categoryServices.getAll(filter);
       const data = response.data;
       setData(data);
     } catch (error) {

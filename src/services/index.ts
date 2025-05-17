@@ -5,6 +5,8 @@ import ProductService from "./products";
 import UserService from "./users";
 import SupplierService from "./suppliers";
 import PurchaseOrderService from "./purchaseOrder";
+import InventoryService from "./inventory";
+import SalesOrderService from "./salesOrder";
 
 const http = new Http();
 
@@ -15,6 +17,8 @@ export default {
   productServices: new ProductService({ http }),
   supplierServices: new SupplierService({ http }),
   purchaseOrderServices: new PurchaseOrderService({ http }),
+  inventoryServices: new InventoryService({ http }),
+  salesOrderServices: new SalesOrderService({ http }),
 };
 
 export type APIResponse<T> = {
@@ -27,4 +31,9 @@ export type APIResponse<T> = {
 export interface ApiError {
   field?: string;
   message: string;
+}
+
+export interface Filter {
+  limit: number;
+  page: number;
 }

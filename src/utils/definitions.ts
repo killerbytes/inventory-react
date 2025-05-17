@@ -8,6 +8,12 @@ export const ROUTES = {
   PURCHASE_ORDERS: "/purchases",
   PURCHASE_ORDERS_CREATE: "/purchases/new",
   PURCHASE_ORDERS_DETAILS: "/purchases/:id",
+  SALES_ORDERS: "/sales",
+  SALES_ORDERS_CREATE: "/sales/new",
+  SALES_ORDERS_DETAILS: "/sales/:id",
+
+  INVENTORY: "/inventory",
+  INVENTORY_TRANSACTIONS: "/inventory/transactions",
 };
 
 export const ORDER_STATUS = {

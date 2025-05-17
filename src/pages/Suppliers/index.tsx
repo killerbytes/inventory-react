@@ -40,7 +40,7 @@ export default function Suppliers() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await services.supplierServices.get(filter);
+      const response = await services.supplierServices.getAll(filter);
       const data = response.data;
       setData(data);
     } catch (error) {

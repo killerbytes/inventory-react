@@ -12,35 +12,36 @@ import type { Supplier } from "../Suppliers";
 import useDebounce from "@/hooks/useDebounce";
 import { ROUTES } from "@/utils/definitions";
 import { useNavigate } from "react-router";
-import type { PurchaseOrderItem } from ".";
-import PurchaseOrderForm from "./PurchaseOrderForm";
+import type { SalesOrderItem } from ".";
 import ProductsTable from "./ProductsTable";
+import SalesOrderForm from "./SalesOrderForm";
 
 export default function Create() {
   const navigate = useNavigate();
   const defaultValues = localStorage.getItem(
-    `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`
+    `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
   )
     ? JSON.parse(
         localStorage.getItem(
-          `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`
+          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
         ) as string
       )
     : {
+        customer: "Azid",
         orderDate: new Date().toISOString(),
         deliveryDate: new Date().toISOString(),
       };
 
-  const [items, setItems] = React.useState<PurchaseOrderItem[]>(
+  const [items, setItems] = React.useState<SalesOrderItem[]>(
     defaultValues.items || []
   );
   const [supplier, setSupplier] = React.useState<Supplier>(
     defaultValues.supplier || null
   );
-  const { purchaseOrderSchema } = validations;
+  const { salesOrderSchema } = validations;
 
-  const form = useForm<z.infer<typeof purchaseOrderSchema>>({
-    resolver: zodResolver(purchaseOrderSchema),
+  const form = useForm<z.infer<typeof salesOrderSchema>>({
+    resolver: zodResolver(salesOrderSchema),
 
     defaultValues,
   });
@@ -49,30 +50,25 @@ export default function Create() {
 
   const debouncedFormData = useDebounce(formData, 500);
 
-  async function onSubmit(values: z.infer<typeof purchaseOrderSchema>) {
+  async function onSubmit(values: z.infer<typeof salesOrderSchema>) {
     try {
-      await services.purchaseOrderServices.create({
+      await services.salesOrderServices.create({
         ...values,
-        purchaseOrderItems: items,
+        salesOrderItems: items,
       });
-      toast.success(`Purchase Order created successfully`);
-      localStorage.removeItem(
-        `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`
-      );
-      navigate(ROUTES.PURCHASE_ORDERS);
+      toast.success(`Sales Order created successfully`);
+      // localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
+      // navigate(ROUTES.SALES_ORDERS);
     } catch (error) {
       const { errors } = (
         error as { response: { data: { errors: ApiError[] } } }
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(
-            err.field as keyof z.infer<typeof purchaseOrderSchema>,
-            {
-              type: "server",
-              message: err.message,
-            }
-          );
+          form.setError(err.field as keyof z.infer<typeof salesOrderSchema>, {
+            type: "server",
+            message: err.message,
+          });
         }
       });
       if (errors.length === 1) {
@@ -87,7 +83,7 @@ export default function Create() {
     const draft =
       JSON.parse(
         localStorage.getItem(
-          `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`
+          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
         ) as string
       ) || {};
     const newDraft = { ...form.getValues(), supplier, items };
@@ -95,7 +91,7 @@ export default function Create() {
     if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
       console.log("saving...", draft, newDraft);
       localStorage.setItem(
-        `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
+        `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
         JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v))
       );
     }
@@ -110,14 +106,14 @@ export default function Create() {
       <Button
         type="button"
         variant="ghost"
-        onClick={() => navigate(ROUTES.PURCHASE_ORDERS)}
+        onClick={() => navigate(ROUTES.SALES_ORDERS)}
         className="mb-4"
       >
         <MoveLeft /> Back
       </Button>
-      <h2 className="mb-4">Create Purchase Order</h2>
+      <h2 className="mb-4">Create Sales Order</h2>
       <div className="mb-12">
-        <PurchaseOrderForm
+        <SalesOrderForm
           form={form}
           supplier={supplier}
           onSupplierChange={setSupplier}

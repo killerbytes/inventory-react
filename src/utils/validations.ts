@@ -113,6 +113,32 @@ const purchaseOrderItemSchema = z.object({
   discount: z.coerce.number().optional().nullable(),
 });
 
+const salesOrderSchema = z.object({
+  customer: z.string().min(2, {
+    message: "Customer must be at least 2 characters.",
+  }),
+  orderDate: z.coerce.string().min(2, {
+    message: "Order Date must be at least 2 characters.",
+  }),
+  deliveryDate: z.coerce.string().min(2, {
+    message: "Delivery Date must be at least 2 characters.",
+  }),
+  notes: z.string().optional().nullable(),
+});
+
+const salesOrderItemSchema = z.object({
+  inventoryId: z.number().min(1, {
+    message: "Product must be selected.",
+  }),
+  quantity: z.coerce.number().min(1, {
+    message: "Quantity must be at least 1.",
+  }),
+  unitPrice: z.coerce.number().min(1, {
+    message: "Unit Price must be at least 1.",
+  }),
+  discount: z.coerce.number().optional().nullable(),
+});
+
 export default {
   categorySchema,
   userSchema,
@@ -121,4 +147,6 @@ export default {
   supplierSchema,
   purchaseOrderSchema,
   purchaseOrderItemSchema,
+  salesOrderSchema,
+  salesOrderItemSchema,
 };
