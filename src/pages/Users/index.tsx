@@ -148,14 +148,3 @@ export default function Users() {
     </div>
   );
 }
-
-export interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  isActive: boolean;
-  isAdmin: boolean;
-  password: string;
-  confirmPassword: string;
-}

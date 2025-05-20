@@ -18,32 +18,32 @@ import SalesOrderForm from "./SalesOrderForm";
 
 export default function Create() {
   const navigate = useNavigate();
-  const defaultValues = localStorage.getItem(
-    `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
-  )
-    ? JSON.parse(
-        localStorage.getItem(
-          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
-        ) as string
-      )
-    : {
-        customer: "Azid",
-        orderDate: new Date().toISOString(),
-        deliveryDate: new Date().toISOString(),
-      };
+  // const defaultValues = localStorage.getItem(
+  //   `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
+  // )
+  //   ? JSON.parse(
+  //       localStorage.getItem(
+  //         `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
+  //       ) as string
+  //     )
+  //   : {
+  //       customer: "Azid",
+  //       orderDate: new Date().toISOString(),
+  //       deliveryDate: new Date().toISOString(),
+  //     };
 
-  const [items, setItems] = React.useState<SalesOrderItem[]>(
-    defaultValues.items || []
-  );
-  const [supplier, setSupplier] = React.useState<Supplier>(
-    defaultValues.supplier || null
-  );
+  const [items, setItems] = React.useState<SalesOrderItem[]>([]);
+  const [supplier, setSupplier] = React.useState<Supplier>(null);
   const { salesOrderSchema } = validations;
 
   const form = useForm<z.infer<typeof salesOrderSchema>>({
     resolver: zodResolver(salesOrderSchema),
 
-    defaultValues,
+    defaultValues: {
+      customer: "Azid",
+      orderDate: new Date().toISOString(),
+      deliveryDate: new Date().toISOString(),
+    },
   });
 
   const formData = useWatch({ control: form.control });
@@ -60,46 +60,46 @@ export default function Create() {
       // localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
       // navigate(ROUTES.SALES_ORDERS);
     } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof salesOrderSchema>, {
-            type: "server",
-            message: err.message,
-          });
-        }
-      });
-      if (errors.length === 1) {
-        toast.error(errors[0].message);
-      } else {
-        toast.error("Submission failed");
-      }
+      // const { errors } = (
+      //   error as { response: { data: { errors: ApiError[] } } }
+      // ).response.data;
+      // errors.forEach((err: ApiError) => {
+      //   if (err.field) {
+      //     form.setError(err.field as keyof z.infer<typeof salesOrderSchema>, {
+      //       type: "server",
+      //       message: err.message,
+      //     });
+      //   }
+      // });
+      // if (errors.length === 1) {
+      //   toast.error(errors[0].message);
+      // } else {
+      toast.error(`Submission failed, ${error.response.data.error.details}`);
+      // }
     }
   }
 
-  const saveDraft = useCallback(() => {
-    const draft =
-      JSON.parse(
-        localStorage.getItem(
-          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
-        ) as string
-      ) || {};
-    const newDraft = { ...form.getValues(), supplier, items };
+  // const saveDraft = useCallback(() => {
+  //   const draft =
+  //     JSON.parse(
+  //       localStorage.getItem(
+  //         `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`
+  //       ) as string
+  //     ) || {};
+  //   const newDraft = { ...form.getValues(), supplier, items };
 
-    if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
-      console.log("saving...", draft, newDraft);
-      localStorage.setItem(
-        `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
-        JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v))
-      );
-    }
-  }, [form, items, supplier]);
+  //   if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
+  //     console.log("saving...", draft, newDraft);
+  //     localStorage.setItem(
+  //       `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+  //       JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v))
+  //     );
+  //   }
+  // }, [form, items, supplier]);
 
-  React.useEffect(() => {
-    saveDraft();
-  }, [debouncedFormData, items, supplier, saveDraft]);
+  // React.useEffect(() => {
+  //   saveDraft();
+  // }, [debouncedFormData, items, supplier, saveDraft]);
 
   return (
     <div>

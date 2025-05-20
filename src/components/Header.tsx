@@ -23,10 +23,20 @@ import {
 import { GlobalContext } from "./GlobalContext";
 import type { User } from "@/pages/Users";
 import { ROUTES } from "@/utils/definitions";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 
 export default function Header() {
   const [user, setUser] = React.useState<User | null>(null);
   const { store, fetchData } = useContext(GlobalContext || null) || {};
+
+  const getInitials = (name: string) => {
+    const names = name.split(" ");
+    let initials = names[0].substring(0, 1).toUpperCase();
+    if (names.length > 1) {
+      initials += names[1].substring(0, 1).toUpperCase();
+    }
+    return initials;
+  };
 
   React.useEffect(() => {
     if (
@@ -71,9 +81,13 @@ export default function Header() {
         <div className="ml-4">
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                <div className="font-medium">{user?.name.charAt(0)}</div>
-              </div>
+              {user?.name && (
+                <Avatar>
+                  <AvatarFallback className="text-primary">
+                    {getInitials(user?.name)}
+                  </AvatarFallback>
+                </Avatar>
+              )}
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem>Profile</DropdownMenuItem>

@@ -127,28 +127,3 @@ export default function PurchaseOrders() {
     </div>
   );
 }
-
-export interface PurchaseOrder {
-  id?: number;
-  supplierId: number;
-  orderDate: string;
-  status: string;
-  deliveryDate: string;
-  receivedDate: string;
-  totalAmount: number;
-  orderBy: number;
-  receivedBy: number;
-  notes: string;
-  supplier: Supplier;
-  orderByUser: User;
-  purchaseOrderItems: PurchaseOrderItem[];
-}
-
-export interface PurchaseOrderItem {
-  id?: number;
-  productId: number;
-  quantity: number;
-  unitPrice: number;
-  discount: number;
-  product: Product;
-}

@@ -89,7 +89,10 @@ export default function ProductsModal({
   }, [store?.products]);
 
   React.useEffect(() => {
-    form.setValue("productId", items[0]?.id);
+    if (items.length === 0) return;
+    setTimeout(() => {
+      form.setValue("productId", items[0]?.id);
+    });
   }, [form, items]);
 
   return (
@@ -121,7 +124,8 @@ export default function ProductsModal({
                   <Select
                     value={String(field.value)}
                     onValueChange={(value) => {
-                      field.onChange(parseInt(value));
+                      console.log("changing", form.getValues(), field);
+                      field.onChange(value);
                     }}
                   >
                     <SelectTrigger className="w-full">

@@ -52,7 +52,7 @@ export default function Create() {
       const data = response.data;
       setData(data);
     } catch (error) {
-      if (error.status === 404) navigate(ROUTES.SALES_ORDERS);
+      // if (error.status === 404) navigate(ROUTES.SALES_ORDERS);
       toast.error("Submission failed - " + error?.response.data.error.message);
     }
   }, []);
@@ -81,9 +81,9 @@ export default function Create() {
         </div>
       </div>
       <div className="mb-12">
-        <div className="font-medium">Supplier</div>
+        <div className="font-medium">Customer</div>
         <div className="flex justify-between">
-          <SupplierPanel supplier={data?.supplier as Supplier} />
+          {data?.customer}
           <div>
             <div className="flex">
               <div className="font-medium w-[150px]">Order Date</div>

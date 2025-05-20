@@ -20,7 +20,6 @@ export default function ProductsTable({
   const [toggle, handleToggle] = useToggle({
     addProductsModal: false,
   });
-  console.log(items);
   const checkboxColumn = {
     id: "select",
     header: ({ table }) => (

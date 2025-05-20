@@ -101,7 +101,7 @@ const purchaseOrderSchema = z.object({
 });
 
 const purchaseOrderItemSchema = z.object({
-  productId: z.number().min(1, {
+  productId: z.coerce.number().min(1, {
     message: "Product must be selected.",
   }),
   quantity: z.coerce.number().min(1, {

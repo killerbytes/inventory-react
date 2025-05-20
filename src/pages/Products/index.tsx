@@ -147,12 +147,3 @@ export default function Products() {
     </div>
   );
 }
-
-export interface Product {
-  id: number;
-  name: string;
-  description: string;
-  categoryId: string;
-  category: Category;
-  reorderLevel: number;
-}

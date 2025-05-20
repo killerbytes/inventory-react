@@ -16,11 +16,9 @@ import Pager from "@/components/Pager";
 import { Link, useNavigate } from "react-router-dom";
 import formatCurrency from "@/utils";
 import { Badge } from "@/components/ui/badge";
-import type { Supplier } from "../Suppliers";
-import type { User } from "../Users";
-import type { Product } from "../Products";
 import { format } from "date-fns";
 import { cx } from "class-variance-authority";
+import type { SalesOrder } from "@/services/salesOrder";
 
 export default function SalesOrders() {
   const navigate = useNavigate();
@@ -85,7 +83,7 @@ export default function SalesOrders() {
               <TableRow>
                 <TableHead className="w-[100px]">Name</TableHead>
                 <TableHead>Customer</TableHead>
-                <TableHead>Order By</TableHead>
+                <TableHead>Received By</TableHead>
                 <TableHead>Total Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Order Date</TableHead>
@@ -103,7 +101,7 @@ export default function SalesOrders() {
                 >
                   <TableCell className="font-medium">{item.id}</TableCell>
                   <TableCell>{item.customer}</TableCell>
-                  <TableCell>{item.orderByUser.name}</TableCell>
+                  <TableCell>{item.receivedByUser.name}</TableCell>
                   <TableCell>{formatCurrency(item.totalAmount)}</TableCell>
                   <TableCell>
                     <Badge
@@ -126,29 +124,4 @@ export default function SalesOrders() {
       <Toaster position="bottom-right" richColors />
     </div>
   );
-}
-
-export interface SalesOrder {
-  id?: number;
-  customer: string;
-  orderDate: string;
-  status: string;
-  deliveryDate: string;
-  receivedDate: string;
-  totalAmount: number;
-  orderBy: number;
-  receivedBy: number;
-  notes: string;
-  supplier: Supplier;
-  orderByUser: User;
-  salesOrderItems: SalesOrderItem[];
-}
-
-export interface SalesOrderItem {
-  id?: number;
-  productId: number;
-  quantity: number;
-  unitPrice: number;
-  discount: number;
-  product: Product;
 }

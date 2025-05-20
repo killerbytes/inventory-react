@@ -102,11 +102,3 @@ export default function Inventory() {
     </div>
   );
 }
-
-export interface Inventory {
-  id: number;
-  name: string;
-  quantity: number;
-  updatedAt: Date;
-  product: Product;
-}

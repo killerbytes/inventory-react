@@ -1,8 +1,7 @@
-import type { Inventory } from "@/pages/Inventory";
 import BaseService from "./base";
 import type Http from "./http";
 import type { Filter } from ".";
-import type { Product } from "@/pages/Products";
+import type { Product } from "./products";
 
 export default class InventoryService extends BaseService<Inventory> {
   constructor(props: { http: Http }) {
@@ -18,6 +17,8 @@ export default class InventoryService extends BaseService<Inventory> {
 
 export interface Inventory {
   id: number;
-  product: Product;
+  name: string;
   quantity: number;
+  updatedAt: Date;
+  product: Product;
 }

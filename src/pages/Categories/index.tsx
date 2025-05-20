@@ -139,9 +139,3 @@ export default function Categories() {
     </div>
   );
 }
-
-export interface Category {
-  id: number;
-  name: string;
-  description: string;
-}
