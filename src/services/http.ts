@@ -27,7 +27,7 @@ export default class Http {
           case 401:
           case 403:
             localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
-            window.location = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
 
             return Promise.reject(error);
           default:

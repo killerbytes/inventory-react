@@ -27,6 +27,9 @@ import useToggle from "@/hooks/useToggle";
 import SupplierPanel from "@/components/SupplierPanel";
 import { format } from "date-fns";
 import { cx } from "class-variance-authority";
+import type { ColumnDef } from "@tanstack/react-table";
+import formatCurrency from "@/utils";
+import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
 
 export default function Create() {
   const [data, setData] = React.useState<PurchaseOrder | null>(null);
@@ -60,6 +63,41 @@ export default function Create() {
   React.useEffect(() => {
     getData();
   }, []);
+
+  const columns: ColumnDef<PurchaseOrderItem>[] = [
+    {
+      accessorKey: "inventory",
+      header: "Product",
+      cell: ({ row }) => (
+        <div className="font-medium">
+          {row.getValue("inventory")?.product?.name}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "quantity",
+      header: () => <div className="text-right">Quantity</div>,
+      cell: ({ row }) => (
+        <div className="text-right ">{row.getValue("quantity")}</div>
+      ),
+    },
+    {
+      accessorKey: "discount",
+      header: () => <div className="text-right">Discount</div>,
+      cell: ({ row }) => (
+        <div className="text-right ">{row.getValue("discount")}</div>
+      ),
+    },
+    {
+      accessorKey: "unitPrice",
+      header: () => <div className="text-right">Unit Price</div>,
+      cell: ({ row }) => (
+        <div className="text-right ">
+          {formatCurrency(row.getValue("unitPrice"))}
+        </div>
+      ),
+    },
+  ];
 
   console.log(data);
   return (
@@ -99,7 +137,23 @@ export default function Create() {
 
       <ProductsTable
         items={data?.salesOrderItems as PurchaseOrderItem[]}
-        className="mb-4"
+        columns={columns}
+        footer={
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={2}>Total Amount</TableCell>
+              <TableCell className="text-right">
+                {data?.salesOrderItems &&
+                  formatCurrency(
+                    data?.salesOrderItems.reduce(
+                      (acc, item) => acc + item.unitPrice * item.quantity,
+                      0
+                    )
+                  )}
+              </TableCell>
+            </TableRow>
+          </TableFooter>
+        }
       />
       <DialogFooter className="mt-auto">
         {data?.status === ORDER_STATUS.PENDING && (

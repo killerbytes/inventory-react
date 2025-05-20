@@ -36,11 +36,13 @@ export function DataTable<T>({
   columns,
   children,
   onUpdate,
+  emptyText = "No results found",
 }: {
   data: T[];
   columns: ColumnDef<T>[];
   children?: React.ReactNode;
   onUpdate?: React.Dispatch<React.SetStateAction<T[]>>;
+  emptyText?: string;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -156,7 +158,7 @@ export function DataTable<T>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {emptyText}
                 </TableCell>
               </TableRow>
             )}

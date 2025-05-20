@@ -1,21 +1,11 @@
 import services from "@/services";
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -80,7 +70,7 @@ export default function Header() {
 
         <div className="ml-4">
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
               {user?.name && (
                 <Avatar>
                   <AvatarFallback className="text-primary">
@@ -93,27 +83,29 @@ export default function Header() {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to={ROUTES.USERS}> Users</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to={ROUTES.PRODUCTS}>Products</Link>
               </DropdownMenuItem>
 
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to={ROUTES.CATEGORIES}> Categories</Link>
               </DropdownMenuItem>
 
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to={ROUTES.SUPPLIERS}> Suppliers</Link>
               </DropdownMenuItem>
 
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to={ROUTES.INVENTORY}> Inventory</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+              <DropdownMenuItem asChild onClick={handleLogout}>
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
