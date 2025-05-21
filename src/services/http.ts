@@ -40,12 +40,12 @@ export default class Http {
     return localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
   };
   getHeaders = () => {
-    return { headers: { "x-access-token": this.getToken() } };
+    return { "x-access-token": this.getToken() };
   };
   get = (url: string, payload: object) => {
     return this.axiosInstance.get(url, {
       ...payload,
-      ...this.getHeaders(),
+      headers: this.getHeaders(),
     });
   };
   post = (url: string, data: object, payload: object) => {

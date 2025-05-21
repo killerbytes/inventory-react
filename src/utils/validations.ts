@@ -81,27 +81,43 @@ const supplierSchema = z.object({
     .nullable(),
 });
 
-const purchaseOrderSchema = z.object({
-  supplierId: z.coerce.number().min(1, {
-    message: "Supplier must be selected.",
-  }),
-  orderDate: z.coerce.string().min(2, {
-    message: "Order Date must be at least 2 characters.",
-  }),
-  deliveryDate: z.coerce.string().min(2, {
-    message: "Delivery Date must be at least 2 characters.",
-  }),
-  // orderBy: z.number().min(1, {
-  //   message: "Order By must be at least 1.",
-  // }),
-  // receivedBy: z.number().min(1, {
-  //   message: "Received By must be at least 1.",
-  // }),
-  notes: z.string().optional().nullable(),
-});
-
 const purchaseOrderItemSchema = z.object({
   productId: z.coerce.number().min(1, {
+    message: "Product must be selected.",
+  }),
+  quantity: z.coerce.number().min(1, {
+    message: "Quantity must be at least 1.",
+  }),
+  unitPrice: z.coerce.number().min(1, {
+    message: "Unit Price must be at least 1.",
+  }),
+  discount: z.coerce.number().optional().nullable(),
+  product: z.any(),
+});
+
+const purchaseOrderSchema = z.object({
+  supplierId: z.coerce
+    .number()
+    .min(1, { message: "Supplier must be selected." }),
+  orderDate: z.string().min(2, {
+    message: "Order Date must be at least 2 characters.",
+  }),
+  deliveryDate: z.string().min(2, {
+    message: "Delivery Date must be at least 2 characters.",
+  }),
+  notes: z.string().optional().nullable(),
+  purchaseOrderItems: z.array(purchaseOrderItemSchema).min(1, {
+    message: "At least one item must be added.",
+  }),
+  status: z.string().optional().nullable(),
+  receivedDate: z.string().optional().nullable(),
+  totalAmount: z.number().optional().nullable(),
+  orderBy: z.number().optional().nullable(),
+  receivedBy: z.number().optional().nullable(),
+});
+
+const salesOrderItemSchema = z.object({
+  inventoryId: z.number().min(1, {
     message: "Product must be selected.",
   }),
   quantity: z.coerce.number().min(1, {
@@ -124,19 +140,9 @@ const salesOrderSchema = z.object({
     message: "Delivery Date must be at least 2 characters.",
   }),
   notes: z.string().optional().nullable(),
-});
-
-const salesOrderItemSchema = z.object({
-  inventoryId: z.number().min(1, {
-    message: "Product must be selected.",
+  salesOrderItemSchema: z.array(salesOrderItemSchema).min(1, {
+    message: "At least one item must be added.",
   }),
-  quantity: z.coerce.number().min(1, {
-    message: "Quantity must be at least 1.",
-  }),
-  unitPrice: z.coerce.number().min(1, {
-    message: "Unit Price must be at least 1.",
-  }),
-  discount: z.coerce.number().optional().nullable(),
 });
 
 export default {

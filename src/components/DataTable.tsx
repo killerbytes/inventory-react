@@ -13,15 +13,9 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -30,19 +24,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cx } from "class-variance-authority";
 
 export function DataTable<T>({
   data,
   columns,
   children,
-  onUpdate,
   emptyText = "No results found",
+  tableClassname,
 }: {
   data: T[];
   columns: ColumnDef<T>[];
   children?: React.ReactNode;
-  onUpdate?: React.Dispatch<React.SetStateAction<T[]>>;
   emptyText?: string;
+  tableClassname?: string;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -81,7 +76,7 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="w-full mb-4">
+    <div className="w-full">
       <div className="flex items-center py-4">
         {table.getSelectedRowModel().rows.length !== 0 && (
           <Button onClick={handleRemoveSelected} variant="outline">
@@ -115,7 +110,12 @@ export function DataTable<T>({
           </DropdownMenuContent>
         </DropdownMenu> */}
       </div>
-      <div className="rounded-md border">
+      <div
+        className={cx(
+          "rounded-md border overflow-hidden",
+          tableClassname && tableClassname
+        )}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

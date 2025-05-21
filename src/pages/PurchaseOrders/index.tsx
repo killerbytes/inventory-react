@@ -70,7 +70,7 @@ export default function PurchaseOrders() {
           <div className="ml-auto">
             <Link to="/purchases/new">
               <Button>
-                <Plus /> Add
+                <Plus /> Create
               </Button>
             </Link>
           </div>
@@ -97,7 +97,6 @@ export default function PurchaseOrders() {
                   className="cursor-pointer"
                   key={item.id}
                   onClick={() => {
-                    console.log(item.id);
                     navigate(`/purchases/${item.id}`);
                   }}
                 >
@@ -122,8 +121,6 @@ export default function PurchaseOrders() {
           <Pager data={data} page={page} setPage={setPage} />
         </>
       )}
-
-      <Toaster position="bottom-right" richColors />
     </div>
   );
 }

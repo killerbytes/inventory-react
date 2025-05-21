@@ -27,6 +27,10 @@ import useToggle from "@/hooks/useToggle";
 import SupplierPanel from "@/components/SupplierPanel";
 import { format } from "date-fns";
 import { cx } from "class-variance-authority";
+import { DataTable } from "@/components/DataTable";
+import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
+import formatCurrency from "@/utils";
+import type { ColumnDef } from "@tanstack/react-table";
 
 export default function Create() {
   const [data, setData] = React.useState<PurchaseOrder | null>(null);
@@ -61,7 +65,34 @@ export default function Create() {
     getData();
   }, []);
 
-  console.log(data);
+  const columns: ColumnDef<PurchaseOrderItem>[] = [
+    {
+      accessorKey: "product",
+      header: "Product",
+      cell: ({ row }) => (
+        <div className="font-medium">
+          {(row.getValue("product") as PurchaseOrderItem["product"]).name}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "quantity",
+      header: () => <div className="text-right">Quantity</div>,
+      cell: ({ row }) => (
+        <div className="text-right ">{row.getValue("quantity")}</div>
+      ),
+    },
+    {
+      accessorKey: "unitPrice",
+      header: () => <div className="text-right">Unit Price</div>,
+      cell: ({ row }) => (
+        <div className="text-right ">
+          {formatCurrency(row.getValue("unitPrice"))}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
       <div>
@@ -93,14 +124,34 @@ export default function Create() {
               <div className="font-medium w-[150px]">Delivery Date</div>
               {data?.deliveryDate ? format(data.deliveryDate, "PPP") : "-"}
             </div>
+            <div className="flex">
+              <div className="font-medium w-[150px]">Ordered By</div>
+              {data?.orderByUser?.name}
+            </div>
+            <div className="flex">
+              <div className="font-medium w-[150px]">Received By</div>
+              {data?.receivedByUser?.name}
+            </div>
           </div>
         </div>
       </div>
 
-      <ProductsTable
-        items={data?.purchaseOrderItems as PurchaseOrderItem[]}
-        className="mb-4"
-      />
+      <DataTable data={data?.purchaseOrderItems || []} columns={columns}>
+        <TableFooter>
+          <TableRow>
+            <TableCell colSpan={2}>Total Amount</TableCell>
+            <TableCell className="text-right">
+              {data?.purchaseOrderItems &&
+                formatCurrency(
+                  data?.purchaseOrderItems.reduce(
+                    (acc, item) => acc + item.unitPrice * item.quantity,
+                    0
+                  )
+                )}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
+      </DataTable>
       <DialogFooter className="mt-auto">
         {data?.status === ORDER_STATUS.PENDING && (
           <AlertDialog

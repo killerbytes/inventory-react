@@ -1,11 +1,10 @@
 import services from "@/services";
-import { getDate } from "date-fns";
 import React from "react";
 
 export default function Home() {
   const getData = async () => {
     try {
-      const response = await services.categoryServices.get({
+      const response = await services.categoryServices.getAll({
         limit: 10,
         page: 1,
       });

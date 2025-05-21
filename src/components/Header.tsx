@@ -103,8 +103,10 @@ export default function Header() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem asChild onClick={handleLogout}>
-                Logout
+              <DropdownMenuItem>
+                <Link to={ROUTES.LOGIN} onClick={handleLogout}>
+                  Logout
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

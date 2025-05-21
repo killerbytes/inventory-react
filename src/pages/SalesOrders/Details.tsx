@@ -10,8 +10,6 @@ import type { Supplier } from "../Suppliers";
 import { ORDER_STATUS, ROUTES } from "@/utils/definitions";
 import { useNavigate, useParams } from "react-router";
 import type { PurchaseOrder, PurchaseOrderItem } from ".";
-import PurchaseOrderForm from "./SalesOrderForm";
-import ProductsTable from "./ProductsTable";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +28,7 @@ import { cx } from "class-variance-authority";
 import type { ColumnDef } from "@tanstack/react-table";
 import formatCurrency from "@/utils";
 import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/DataTable";
 
 export default function Create() {
   const [data, setData] = React.useState<PurchaseOrder | null>(null);
@@ -131,30 +130,30 @@ export default function Create() {
               <div className="font-medium w-[150px]">Delivery Date</div>
               {data?.deliveryDate ? format(data.deliveryDate, "PPP") : "-"}
             </div>
+            <div className="flex">
+              <div className="font-medium w-[150px]">Received By</div>
+              {data?.receivedByUser?.name}
+            </div>
           </div>
         </div>
       </div>
 
-      <ProductsTable
-        items={data?.salesOrderItems as PurchaseOrderItem[]}
-        columns={columns}
-        footer={
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={2}>Total Amount</TableCell>
-              <TableCell className="text-right">
-                {data?.salesOrderItems &&
-                  formatCurrency(
-                    data?.salesOrderItems.reduce(
-                      (acc, item) => acc + item.unitPrice * item.quantity,
-                      0
-                    )
-                  )}
-              </TableCell>
-            </TableRow>
-          </TableFooter>
-        }
-      />
+      <DataTable data={data?.salesOrderItems || []} columns={columns}>
+        <TableFooter>
+          <TableRow>
+            <TableCell colSpan={3}>Total Amount</TableCell>
+            <TableCell className="text-right">
+              {data?.salesOrderItems &&
+                formatCurrency(
+                  data?.salesOrderItems.reduce(
+                    (acc, item) => acc + item.unitPrice * item.quantity,
+                    0
+                  )
+                )}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
+      </DataTable>
       <DialogFooter className="mt-auto">
         {data?.status === ORDER_STATUS.PENDING && (
           <AlertDialog
