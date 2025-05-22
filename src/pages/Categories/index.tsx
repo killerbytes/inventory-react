@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
-import services, { type APIResponse } from "../../services";
+import services, { type APIResponse, type Category } from "../../services";
 import { Toaster } from "@/components/ui/sonner";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import AddModal from "./AddModal";
 import EditModal from "./EditModal";
 import useToggle from "@/hooks/useToggle";
@@ -73,7 +73,7 @@ export default function Categories() {
                 handleToggle({ addModal: true });
               }}
             >
-              Add
+              <Plus /> Add Category
             </Button>
           </div>
         </div>

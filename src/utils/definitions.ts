@@ -23,6 +23,7 @@ export const ORDER_STATUS = {
 };
 
 export const PAGINATION = {
-  PAGE_SIZE: 10,
+  PAGE: 1,
+  PAGE_SIZE: 15,
   PAGE_SIZE_OPTIONS: [10, 20, 30],
 };

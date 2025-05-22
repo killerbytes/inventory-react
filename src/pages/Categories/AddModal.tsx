@@ -1,8 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
 import * as z from "zod";
-
 import {
   Form,
   FormControl,
@@ -12,14 +10,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-
 import { Input } from "@/components/ui/input";
 import Modal from "@/components/Modal";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import services from "@/services";
+import services, { type ApiError, type Category } from "@/services";
 import { useContext } from "react";
 import { GlobalContext } from "@/components/GlobalContext";
+import { categorySchema } from "@/schemas";
 
 export default function AddModal({
   isOpen,
@@ -31,8 +29,7 @@ export default function AddModal({
   cb: () => void;
 }) {
   const { invalidate } = useContext(GlobalContext) || {};
-  const { categorySchema } = validations;
-  const form = useForm<z.infer<typeof categorySchema>>({
+  const form = useForm<Category>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: "aaaaakillerbytes",
@@ -40,14 +37,10 @@ export default function AddModal({
     },
   });
 
-  interface ApiError {
-    field?: string;
-    message: string;
-  }
-
-  async function onSubmit(values: z.infer<typeof categorySchema>) {
+  async function onSubmit(values: Category) {
     try {
-      await services.categoryServices.create(values);
+      const { name, description } = values;
+      await services.categoryServices.create({ name, description });
       toast.success(`Submitted: ${values.name} (${values.description})`);
       form.reset();
       if (invalidate) {

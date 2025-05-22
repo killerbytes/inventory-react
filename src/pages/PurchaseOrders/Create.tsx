@@ -3,7 +3,7 @@ import { MoveLeft, Pencil } from "lucide-react";
 import * as z from "zod";
 import { toast } from "sonner";
 import services, { type ApiError } from "@/services";
-import validations from "@/utils/validations";
+import validations from "@/schemas";
 import {
   useFieldArray,
   useForm,

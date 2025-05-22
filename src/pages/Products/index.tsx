@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
-import services, { type APIResponse } from "../../services";
+import services, { type APIResponse, type Product } from "../../services";
 import { Toaster } from "@/components/ui/sonner";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import AddModal from "./AddModal";
 import EditModal from "./EditModal";
 import useToggle from "@/hooks/useToggle";
 import Pager from "@/components/Pager";
-import type { Category } from "../Categories";
+import { PAGINATION } from "@/utils/definitions";
 
 export default function Products() {
   const [page, setPage] = React.useState(1);
@@ -29,8 +29,8 @@ export default function Products() {
   const [selected, setSelected] = React.useState<Product | null>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
-    limit: 10,
-    page: 1,
+    limit: PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
   });
   const [toggle, handleToggle] = useToggle({
     addModal: false,
@@ -63,17 +63,16 @@ export default function Products() {
 
   return (
     <div>
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear mb-4">
         <div className="flex w-full items-center px-2">
-          <h1 className="font-medium">Products</h1>
-
+          <h1 className="scroll-m-20 font-semibold tracking-tight">Products</h1>
           <div className="ml-auto">
             <Button
               onClick={() => {
                 handleToggle({ addModal: true });
               }}
             >
-              Add
+              <Plus /> Add Product
             </Button>
           </div>
         </div>

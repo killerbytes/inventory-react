@@ -1,8 +1,5 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
-import * as z from "zod";
-
 import {
   Form,
   FormControl,
@@ -12,14 +9,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-
 import { Input } from "@/components/ui/input";
 import Modal from "@/components/Modal";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import services from "@/services";
+import services, { type ApiError, type Supplier } from "@/services";
 import { useContext } from "react";
 import { GlobalContext } from "@/components/GlobalContext";
+import { supplierSchema } from "@/schemas";
 
 export default function AddModal({
   isOpen,
@@ -31,22 +28,23 @@ export default function AddModal({
   cb: () => void;
 }) {
   const { invalidate } = useContext(GlobalContext) || {};
-  const { supplierSchema } = validations;
-  const form = useForm<z.infer<typeof supplierSchema>>({
+  const form = useForm<Supplier>({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
       name: "aaaaakillerbytes",
     },
   });
 
-  interface ApiError {
-    field?: string;
-    message: string;
-  }
-
-  async function onSubmit(values: z.infer<typeof supplierSchema>) {
+  async function onSubmit(values: Supplier) {
     try {
-      await services.supplierServices.create(values);
+      const { name, address, contact, phone, email } = values;
+      await services.supplierServices.create({
+        name,
+        address,
+        contact,
+        phone,
+        email,
+      });
       toast.success(`Submitted: ${values.name}`);
       form.reset();
       if (invalidate) {
@@ -59,7 +57,7 @@ export default function AddModal({
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof supplierSchema>, {
+          form.setError(err.field as keyof Supplier, {
             type: "server",
             message: err.message,
           });

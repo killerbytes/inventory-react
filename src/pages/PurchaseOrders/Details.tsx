@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import services from "@/services";
-import validations from "@/utils/validations";
+import validations from "@/schemas";
 import type { Supplier } from "../Suppliers";
 import { ORDER_STATUS, ROUTES } from "@/utils/definitions";
 import { useNavigate, useParams } from "react-router";

@@ -1,10 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
 import { Checkbox } from "@/components/ui/checkbox";
-
-import * as z from "zod";
-
 import {
   Form,
   FormControl,
@@ -19,8 +15,9 @@ import { Input } from "@/components/ui/input";
 import Modal from "@/components/Modal";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import services, { type ApiError } from "@/services";
-import type { User } from ".";
+import type { ApiError, User } from "@/services";
+import { userSchema } from "@/schemas";
+import services from "@/services";
 
 export default function EditModal({
   isOpen,
@@ -33,20 +30,15 @@ export default function EditModal({
   cb: () => void;
   data: User;
 }) {
-  const { userSchema } = validations;
-  const schema = userSchema.omit({
-    password: true,
-    confirmPassword: true,
-    username: true,
-  });
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<User>({
+    resolver: zodResolver(userSchema),
     defaultValues: { ...data, isActive: !!data.isActive },
   });
 
-  async function onSubmit(values: z.infer<typeof schema>) {
+  async function onSubmit(values: User) {
     try {
-      await services.userServices.update(data.id, values);
+      const { name, email, isActive } = values;
+      await services.userServices.update(data.id, { name, email, isActive });
       toast.success(`Submitted: ${values.name} (${values.email})`);
       form.reset();
       onClose();
@@ -56,7 +48,7 @@ export default function EditModal({
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof schema>, {
+          form.setError(err.field as keyof User, {
             type: "server",
             message: err.message,
           });

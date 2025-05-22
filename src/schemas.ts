@@ -1,6 +1,7 @@
 import * as z from "zod";
 
-const userSchema = z.object({
+export const userSchema = z.object({
+  id: z.number().optional(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
@@ -11,7 +12,6 @@ const userSchema = z.object({
     message: "Please enter a valid email address.",
   }),
   isActive: z.boolean().optional(),
-  password: z.string(),
   // .min(8, {
   //   message: "Password must be at least 8 characters.",
   // })
@@ -27,15 +27,28 @@ const userSchema = z.object({
   // .regex(/[^a-zA-Z0-9]/, {
   //   message: "Password must contain at least one special character.",
   // }),
-  confirmPassword: z.string(),
 });
 
-const loginSchema = userSchema.pick({
-  username: true,
-  password: true,
+export const signupSchema = userSchema
+  .extend({
+    password: z.string(),
+    confirmPassword: z.string(),
+  })
+  .omit({
+    id: true,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords must match.",
+  });
+
+export const loginSchema = z.object({
+  username: z.string(),
+  password: z.string(),
 });
 
-const categorySchema = z.object({
+export const categorySchema = z.object({
+  id: z.number().optional().nullable(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
@@ -44,31 +57,28 @@ const categorySchema = z.object({
   }),
 });
 
-const productSchema = z.object({
+export const productSchema = z.object({
+  id: z.number().optional(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   categoryId: z.number().min(1, {
     message: "Category must be selected.",
   }),
+  category: z.any(),
   description: z.string().optional().nullable(),
   reorderLevel: z.coerce.number().optional(),
 });
 
-const supplierSchema = z.object({
+export const supplierSchema = z.object({
+  id: z.number().optional().nullable(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   address: z.string().min(2, {
     message: "Address must be at least 2 characters.",
   }),
-  contact: z
-    .string()
-    .min(2, {
-      message: "Contact must be at least 2 characters.",
-    })
-    .optional()
-    .nullable(),
+  contact: z.string().optional(),
   phone: z.string().min(2, {
     message: "Phone must be at least 2 characters.",
   }),
@@ -77,11 +87,10 @@ const supplierSchema = z.object({
     .email({
       message: "Please enter a valid email address.",
     })
-    .optional()
-    .nullable(),
+    .optional(),
 });
 
-const purchaseOrderItemSchema = z.object({
+export const purchaseOrderItemSchema = z.object({
   productId: z.coerce.number().min(1, {
     message: "Product must be selected.",
   }),
@@ -95,7 +104,7 @@ const purchaseOrderItemSchema = z.object({
   product: z.any(),
 });
 
-const purchaseOrderSchema = z.object({
+export const purchaseOrderSchema = z.object({
   supplierId: z.coerce
     .number()
     .min(1, { message: "Supplier must be selected." }),
@@ -116,7 +125,7 @@ const purchaseOrderSchema = z.object({
   receivedBy: z.number().optional().nullable(),
 });
 
-const salesOrderItemSchema = z.object({
+export const salesOrderItemSchema = z.object({
   inventoryId: z.number().min(1, {
     message: "Product must be selected.",
   }),
@@ -129,7 +138,7 @@ const salesOrderItemSchema = z.object({
   discount: z.coerce.number().optional().nullable(),
 });
 
-const salesOrderSchema = z.object({
+export const salesOrderSchema = z.object({
   customer: z.string().min(2, {
     message: "Customer must be at least 2 characters.",
   }),
@@ -145,14 +154,35 @@ const salesOrderSchema = z.object({
   }),
 });
 
+export const inventorySchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  description: z.string().min(2, {
+    message: "Description must be at least 2 characters.",
+  }),
+  reorderLevel: z.coerce.number().optional(),
+});
+
+export const inventoryItemSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  description: z
+    .string()
+    .min(2, { message: "Description must be at least 2 characters." }),
+  reorderLevel: z.coerce.number().optional(),
+});
+
 export default {
-  categorySchema,
   userSchema,
+  signupSchema,
   loginSchema,
+  categorySchema,
   productSchema,
   supplierSchema,
   purchaseOrderSchema,
   purchaseOrderItemSchema,
   salesOrderSchema,
   salesOrderItemSchema,
+  inventorySchema,
+  inventoryItemSchema,
 };

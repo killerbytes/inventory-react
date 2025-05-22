@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
+import validations from "@/schemas";
 import * as z from "zod";
 import qs from "query-string";
 import {

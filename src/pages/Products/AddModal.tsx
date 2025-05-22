@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
+import { productSchema } from "@/schemas";
 import * as z from "zod";
 import {
   Select,
@@ -23,10 +23,13 @@ import { Input } from "@/components/ui/input";
 import Modal from "@/components/Modal";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import services, { type ApiError } from "@/services";
+import services, {
+  type ApiError,
+  type Category,
+  type Product,
+} from "@/services";
 import React, { useContext } from "react";
 import { GlobalContext } from "@/components/GlobalContext";
-import type { Category } from "../Categories";
 
 export default function AddModal({
   isOpen,
@@ -38,11 +41,8 @@ export default function AddModal({
   cb: () => void;
 }) {
   const { store, fetchData } = useContext(GlobalContext) || {};
-
   const [categories, setCategories] = React.useState<Category[]>([]);
-  const { productSchema } = validations;
-
-  const form = useForm<z.infer<typeof productSchema>>({
+  const form = useForm<Product>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "aaaaakillerbytes",

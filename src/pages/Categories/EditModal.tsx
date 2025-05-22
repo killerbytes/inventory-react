@@ -1,8 +1,7 @@
 import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
-import * as z from "zod";
+import { categorySchema } from "@/schemas";
 import {
   Form,
   FormControl,
@@ -26,9 +25,8 @@ import { Input } from "@/components/ui/input";
 import Modal from "@/components/Modal";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import services from "@/services";
+import services, { type ApiError, type Category } from "@/services";
 import { Trash2 } from "lucide-react";
-import type { Category } from ".";
 import { GlobalContext } from "@/components/GlobalContext";
 
 export default function EditModal({
@@ -43,22 +41,16 @@ export default function EditModal({
   data: Category;
 }) {
   const { invalidate } = useContext(GlobalContext) || {};
-  const { categorySchema } = validations;
   const [confirm, setConfirm] = React.useState(false);
-  const schema = categorySchema;
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<Category>({
+    resolver: zodResolver(categorySchema),
     defaultValues: { ...data },
   });
 
-  interface ApiError {
-    field?: string;
-    message: string;
-  }
-
-  async function onSubmit(values: z.infer<typeof schema>) {
+  async function onSubmit(values: Category) {
     try {
-      await services.categoryServices.update(data.id, values);
+      const { name, description } = values;
+      await services.categoryServices.update(data.id, { name, description });
       toast.success(`Submitted: ${values.name}`);
       form.reset();
       onClose();
@@ -71,7 +63,7 @@ export default function EditModal({
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof schema>, {
+          form.setError(err.field as keyof Category, {
             type: "server",
             message: err.message,
           });
@@ -94,7 +86,7 @@ export default function EditModal({
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof schema>, {
+          form.setError(err.field as keyof Category, {
             type: "server",
             message: err.message,
           });

@@ -1,15 +1,11 @@
 import React, { useCallback } from "react";
 import { MoveLeft } from "lucide-react";
-import * as z from "zod";
 import { toast } from "sonner";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import services from "@/services";
-import validations from "@/utils/validations";
-import type { Supplier } from "../Suppliers";
 import { ORDER_STATUS, ROUTES } from "@/utils/definitions";
 import { useNavigate, useParams } from "react-router";
-import type { PurchaseOrder, PurchaseOrderItem } from ".";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,15 +18,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import useToggle from "@/hooks/useToggle";
-import SupplierPanel from "@/components/SupplierPanel";
 import { format } from "date-fns";
 import { cx } from "class-variance-authority";
 import type { ColumnDef } from "@tanstack/react-table";
 import formatCurrency from "@/utils";
 import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
 import { DataTable } from "@/components/DataTable";
-
-export default function Create() {
+export default function SalesOrderDetails() {
   const [data, setData] = React.useState<PurchaseOrder | null>(null);
   const [toggle, handleToggle] = useToggle({ confirmModal: false });
   const navigate = useNavigate();
@@ -41,24 +35,27 @@ export default function Create() {
       await services.salesOrderServices.updateStatus(id, {
         status: ORDER_STATUS.COMPLETED,
       });
-      toast.success(`Purchase Order created successfully`);
-      navigate(ROUTES.PURCHASE_ORDERS);
-    } catch (error) {
-      toast.error("Submission failed - " + error?.response.data.error);
+      toast.success(`Sales Order completed successfully`);
+      navigate(ROUTES.SALES_ORDERS);
+    } catch (error: any) {
+      toast.error(
+        "Submission failed - " + (error?.response?.data?.error || error.message)
+      );
     }
   }
-
   const getData = useCallback(async () => {
     try {
       const response = await services.salesOrderServices.get(id);
       const data = response.data;
       setData(data);
     } catch (error) {
-      // if (error.status === 404) navigate(ROUTES.SALES_ORDERS);
-      toast.error("Submission failed - " + error?.response.data.error.message);
+      if (error?.response?.status === 404) navigate(ROUTES.SALES_ORDERS);
+      toast.error(
+        "Failed to load order - " +
+          (error?.response?.data?.error?.message || error.message)
+      );
     }
-  }, []);
-
+  }, [id, navigate]);
   React.useEffect(() => {
     getData();
   }, []);

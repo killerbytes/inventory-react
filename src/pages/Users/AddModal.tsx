@@ -1,8 +1,4 @@
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
-import * as z from "zod";
-
 import {
   Form,
   FormControl,
@@ -17,7 +13,9 @@ import { Input } from "@/components/ui/input";
 import Modal from "@/components/Modal";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import services from "@/services";
+import services, { type ApiError, type Signup } from "@/services";
+import { signupSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function AddModal({
   isOpen,
@@ -28,9 +26,8 @@ export default function AddModal({
   onClose: () => void;
   cb: () => void;
 }) {
-  const { userSchema } = validations;
-  const form = useForm<z.infer<typeof userSchema>>({
-    resolver: zodResolver(userSchema),
+  const form = useForm<Signup>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
       username: "killerbytes",
       email: "joelcarlos02@gmail.com",
@@ -40,33 +37,26 @@ export default function AddModal({
     },
   });
 
-  interface ApiError {
-    field?: string;
-    message: string;
-  }
-
-  async function onSubmit(values: z.infer<typeof userSchema>) {
+  async function onSubmit(values: Signup) {
     try {
       await services.userServices.create(values);
       toast.success(`Submitted: ${values.username} (${values.email})`);
       form.reset();
       onClose();
+      cb();
     } catch (error) {
       const { errors } = (
         error as { response: { data: { errors: ApiError[] } } }
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof userSchema>, {
+          form.setError(err.field as keyof Signup, {
             type: "server",
             message: err.message,
           });
         }
       });
-
       toast.error("Submission failed");
-    } finally {
-      cb();
     }
   }
 
@@ -80,7 +70,6 @@ export default function AddModal({
       <Form {...form}>
         <form
           onSubmit={(e) => {
-            console.log(form.getValues(), form.formState.errors);
             e.preventDefault();
             form
               .handleSubmit(onSubmit)(e)

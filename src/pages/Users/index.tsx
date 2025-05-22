@@ -10,9 +10,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import services, { type APIResponse } from "../../services";
+import services, { type APIResponse, type User } from "../../services";
 import { Toaster } from "@/components/ui/sonner";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import AddModal from "./AddModal";
 import EditModal from "./EditModal";
 import useToggle from "@/hooks/useToggle";
@@ -73,7 +73,7 @@ export default function Users() {
                 handleToggle({ addModal: true });
               }}
             >
-              Add
+              <Plus /> Add User
             </Button>
           </div>
         </div>

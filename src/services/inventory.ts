@@ -1,7 +1,6 @@
 import BaseService from "./base";
 import type Http from "./http";
-import type { Filter } from ".";
-import type { Product } from "./products";
+import type { Filter, Inventory } from ".";
 
 export default class InventoryService extends BaseService<Inventory> {
   constructor(props: { http: Http }) {
@@ -13,12 +12,4 @@ export default class InventoryService extends BaseService<Inventory> {
     });
     return response;
   };
-}
-
-export interface Inventory {
-  id: number;
-  name: string;
-  quantity: number;
-  updatedAt: Date;
-  product: Product;
 }

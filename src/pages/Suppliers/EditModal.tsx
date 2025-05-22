@@ -1,8 +1,6 @@
 import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
-import * as z from "zod";
 import {
   Form,
   FormControl,
@@ -26,10 +24,10 @@ import { Input } from "@/components/ui/input";
 import Modal from "@/components/Modal";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import services, { type ApiError } from "@/services";
+import services, { type ApiError, type Supplier } from "@/services";
 import { Trash2 } from "lucide-react";
 import { GlobalContext } from "@/components/GlobalContext";
-import type { Supplier } from ".";
+import { supplierSchema } from "@/schemas";
 
 export default function EditModal({
   isOpen,
@@ -43,15 +41,13 @@ export default function EditModal({
   data: Supplier;
 }) {
   const { invalidate } = useContext(GlobalContext) || {};
-  const { supplierSchema } = validations;
   const [confirm, setConfirm] = React.useState(false);
-  const schema = supplierSchema;
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<Supplier>({
+    resolver: zodResolver(supplierSchema),
     defaultValues: { ...data },
   });
 
-  async function onSubmit(values: z.infer<typeof schema>) {
+  async function onSubmit(values: Supplier) {
     try {
       await services.supplierServices.update(data.id, values);
       toast.success(`Submitted: ${values.name}`);
@@ -66,7 +62,7 @@ export default function EditModal({
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof schema>, {
+          form.setError(err.field as keyof Supplier, {
             type: "server",
             message: err.message,
           });
@@ -89,7 +85,7 @@ export default function EditModal({
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof schema>, {
+          form.setError(err.field as keyof Supplier, {
             type: "server",
             message: err.message,
           });

@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import validations from "@/utils/validations";
+import validations from "@/schemas";
 import {
   Select,
   SelectContent,
@@ -25,10 +25,8 @@ import { Input } from "@/components/ui/input";
 import Modal from "@/components/Modal";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import services from "@/services";
+import services, { type Category, type Product } from "@/services";
 import React, { useContext, useEffect } from "react";
-import type { Product } from ".";
-import type { Category } from "../Categories";
 import { GlobalContext } from "@/components/GlobalContext";
 
 export default function EditModal({
@@ -62,7 +60,13 @@ export default function EditModal({
 
   async function onSubmit(values: z.infer<typeof schema>) {
     try {
-      await services.productServices.update(data.id, values);
+      const { name, description, categoryId, reorderLevel } = values;
+      await services.productServices.update(data.id, {
+        name,
+        description,
+        categoryId,
+        reorderLevel,
+      });
       toast.success(`Submitted: ${values.name}`);
       form.reset();
       onClose();
@@ -91,7 +95,7 @@ export default function EditModal({
         return data;
       });
     }
-  }, []);
+  }, [fetchData]);
 
   useEffect(() => {
     if (store?.categories) {
