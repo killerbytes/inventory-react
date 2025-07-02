@@ -42,29 +42,26 @@ export default class Http {
   getHeaders = () => {
     return { "x-access-token": this.getToken() };
   };
-  get = (url: string, payload: object) => {
+  get = (url: string, payload: object | null = null) => {
     return this.axiosInstance.get(url, {
       ...payload,
       headers: this.getHeaders(),
     });
   };
-  post = (url: string, data: object, payload: object) => {
+  post = (url: string, payload: object) => {
     const config = {
-      params: payload,
       headers: this.getHeaders(),
     };
-    return this.axiosInstance.post(url, data, config);
+    return this.axiosInstance.post(url, payload, config);
   };
-  patch = (url: string, data: object, payload: object) => {
+  patch = (url: string, data: object) => {
     const config = {
-      params: payload,
       headers: this.getHeaders(),
     };
     return this.axiosInstance.patch(url, data, config);
   };
-  delete = (url: string, payload: object) => {
+  delete = (url: string) => {
     const config = {
-      params: payload,
       headers: this.getHeaders(),
     };
     return this.axiosInstance.delete(url, config);

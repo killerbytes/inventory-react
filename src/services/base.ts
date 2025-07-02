@@ -1,8 +1,8 @@
 import type Http from "./http";
 
 export default class BaseService<T> {
-  private http: Http;
-  private url: string;
+  protected http: Http;
+  protected url: string;
 
   constructor(props: Props) {
     this.http = props.http;
@@ -13,21 +13,21 @@ export default class BaseService<T> {
     const response = await this.http.post(`${this.url}`, data);
     return response;
   };
-  getAll = async (params) => {
+  getAll = async (params: any) => {
     const response = await this.http.get(`${this.url}/`, { params });
     return response;
   };
-  get = async (id) => {
+  get = async (id: string) => {
     const response = await this.http.get(`${this.url}/${id}`);
     return response;
   };
 
-  update = async (id, data) => {
+  update = async (id: string, data: any) => {
     const response = await this.http.patch(`${this.url}/${id}`, data);
     return response;
   };
 
-  delete = async (id) => {
+  delete = async (id: string) => {
     const response = await this.http.delete(`${this.url}/${id}`);
     return response;
   };
