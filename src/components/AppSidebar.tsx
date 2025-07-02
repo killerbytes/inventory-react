@@ -22,7 +22,7 @@ import Header from "./Header";
 const items = [
   {
     title: "Dashboard",
-    url: "#",
+    url: ROUTES.DASHBOARD,
     icon: Home,
   },
   {

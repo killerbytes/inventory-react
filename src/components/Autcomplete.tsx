@@ -17,14 +17,25 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import React from "react";
 
-export default function Autocomplete(props) {
-  const { value, items, placeholder, onChange } = props;
-  const [open, setOpen] = React.useState(false);
+interface AutocompleteProps<T> {
+  value: T;
+  items: T[];
+  placeholder: string;
+  onChange: (value: T) => void;
+  valueKey?: string;
+}
 
+export default function Autocomplete<T>({
+  value,
+  items,
+  placeholder,
+  onChange,
+  valueKey = "name",
+}: AutocompleteProps<T>) {
+  const [open, setOpen] = React.useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild className="w-full">
-        {/* <FormControl> */}
         <Button
           variant="outline"
           role="combobox"
@@ -34,11 +45,15 @@ export default function Autocomplete(props) {
           )}
         >
           {value
-            ? items.find((item) => item.id === value.id)?.name
+            ? valueKey.split(".").reduce(
+                (obj, key) => obj?.[key],
+                items.find((item) => {
+                  return item.id === value?.id;
+                }),
+              )
             : placeholder}
           <ChevronsUpDown className="opacity-50" />
         </Button>
-        {/* </FormControl> */}
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <Command>
@@ -48,15 +63,15 @@ export default function Autocomplete(props) {
             <CommandGroup>
               {items.map((item) => (
                 <CommandItem
+                  disabled={item.quantity === 0}
                   value={item.id}
                   key={item.id}
                   onSelect={() => {
-                    // form.setValue("productId", item.id);
                     onChange(item);
                     setOpen(false);
                   }}
                 >
-                  {item.name}
+                  {valueKey.split(".").reduce((obj, key) => obj?.[key], item)}
                   <Check
                     className={cn(
                       "ml-auto",

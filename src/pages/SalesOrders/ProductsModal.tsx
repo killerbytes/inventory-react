@@ -7,13 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import validations from "@/schemas";
@@ -26,6 +20,7 @@ import {
 } from "@/services";
 import { GlobalContext } from "@/components/GlobalContext";
 import { DialogFooter } from "@/components/ui/dialog";
+import Autocomplete from "@/components/Autcomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import React, { useContext } from "react";
@@ -45,21 +40,21 @@ export default function ProductsModal({
 }) {
   const { store } = useContext(GlobalContext) || {};
   const [inventory, setInventory] = React.useState<Inventory[]>([]);
+  const [value, setValue] = React.useState<Inventory | null>(null);
   const { salesOrderItemSchema } = validations;
-  const schema = salesOrderItemSchema;
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof salesOrderItemSchema>>({
+    resolver: zodResolver(salesOrderItemSchema),
     defaultValues: {
-      quantity: 1,
-      unitPrice: 10,
+      // quantity: 1,
+      // unitPrice: 10,
     },
   });
 
-  const items = exclude
+  const items: Inventory[] = exclude
     ? inventory.filter((p) => !exclude?.includes(p.id))
     : inventory;
 
-  async function onSubmit(values: z.infer<typeof schema>) {
+  async function onSubmit(values: z.infer<typeof salesOrderItemSchema>) {
     try {
       const item: SalesOrderItem = {
         ...values,
@@ -114,36 +109,24 @@ export default function ProductsModal({
             <FormField
               control={form.control}
               name="inventoryId"
-              render={({ field }) => (
-                <FormItem>
+              render={() => (
+                <FormItem className="flex flex-col">
                   <FormLabel>Product</FormLabel>
-                  <Select
-                    value={String(field.value)}
-                    onValueChange={(value) => {
-                      field.onChange(value.id);
+                  <Autocomplete
+                    value={value}
+                    items={items}
+                    valueKey={"product.name"}
+                    placeholder="Product"
+                    onChange={(value) => {
+                      form.setValue("inventoryId", value.id);
+                      form.setValue("inventory", value);
+                      setValue(value);
                     }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a inventory" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      {items?.map((item) => (
-                        <SelectItem
-                          key={item.id}
-                          value={item.id}
-                          disabled={item.quantity === 0}
-                        >
-                          {item.product.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {field.value && (
+                  />
+                  {value?.quantity && (
                     <FormDescription>
                       Stock:{" "}
-                      <span className="font-semibold">
-                        {field.value?.quantity}
-                      </span>
+                      <span className="font-semibold">{value.quantity}</span>
                     </FormDescription>
                   )}
 
@@ -151,6 +134,7 @@ export default function ProductsModal({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="quantity"
@@ -177,7 +161,7 @@ export default function ProductsModal({
                 </FormItem>
               )}
             />
-            <FormField
+            {/* <FormField
               control={form.control}
               name="discount"
               render={({ field }) => (
@@ -189,7 +173,7 @@ export default function ProductsModal({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <DialogFooter>
               <Button type="submit">Save changes</Button>

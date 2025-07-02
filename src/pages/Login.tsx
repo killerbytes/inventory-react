@@ -2,7 +2,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -11,7 +10,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,15 +18,13 @@ import { useForm } from "react-hook-form";
 import validations from "@/schemas";
 import { toast } from "sonner";
 import qs from "query-string";
-import React from "react";
 import * as z from "zod";
 
-import { authServices, type ApiError } from "@/services";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Navigate, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Modal from "@/components/Modal";
+import { useNavigate } from "react-router";
+import { authServices } from "@/services";
 import { cn } from "@/lib/utils";
 
 export default function Login() {
@@ -38,7 +34,7 @@ export default function Login() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "killerbytes",
+      username: "user1",
       password: "1234",
     },
   });
@@ -56,7 +52,7 @@ export default function Login() {
       form.reset();
       navigate(typeof callbackUrl === "string" ? callbackUrl : "/");
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error(`Login failed, ${error.response.data.message}`);
     }
   }

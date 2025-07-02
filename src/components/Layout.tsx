@@ -14,7 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       <main className="flex-grow container mx-auto flex flex-col h-screen">
-        <div className="flex justify-between items-center bg-foreground text-background p-4 h-16">
+        <div className="flex justify-between items-center bg-foreground text-background p-4 h-16 mb-4">
           <SidebarTrigger />
           <User />
         </div>

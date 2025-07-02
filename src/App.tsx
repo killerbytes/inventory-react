@@ -1,19 +1,19 @@
+import InventoryTransactions from "./pages/Inventory/Transactions";
+import PurchaseDetails from "./pages/PurchaseOrders/Details";
 import { BrowserRouter, Routes, Route } from "react-router";
-import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
-import Users from "./pages/Users";
-import Layout from "./components/Layout";
-import Products from "./pages/Products";
+import PurchaseCreate from "./pages/PurchaseOrders/Create";
+import SalesDetails from "./pages/SalesOrders/Details";
+import SalesCreate from "./pages/SalesOrders/Create";
+import PurchaseOrders from "./pages/PurchaseOrders";
+import SalesOrders from "./pages/SalesOrders";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
 import Inventory from "./pages/Inventory";
-import InventoryTransactions from "./pages/Inventory/Transactions";
-import PurchaseOrders from "./pages/PurchaseOrders";
-import PurchaseCreate from "./pages/PurchaseOrders/Create";
-import PurchaseDetails from "./pages/PurchaseOrders/Details";
-import SalesOrders from "./pages/SalesOrders";
-import SalesCreate from "./pages/SalesOrders/Create";
-import SalesDetails from "./pages/SalesOrders/Details";
+import Layout from "./components/Layout";
+import Products from "./pages/Products";
+import NotFound from "./pages/NotFound";
+import Users from "./pages/Users";
+import Home from "./pages/Home";
 
 import { useApiData, type ApiDataType } from "./hooks/useApiData";
 import { GlobalContext } from "./components/GlobalContext";
@@ -31,7 +31,7 @@ function App() {
           <Routes>
             <Route path={ROUTES.LOGIN} element={<Login />} />
             <Route
-              path={ROUTES.HOME}
+              path={ROUTES.DASHBOARD}
               element={
                 <Layout>
                   <Home />
@@ -143,7 +143,7 @@ function App() {
               element={
                 <Layout>
                   <Test />
-                 </Layout>
+                </Layout>
               }
             />
 

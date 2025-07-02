@@ -1,5 +1,4 @@
 import { ORDER_TYPE } from "./utils/definitions";
-import { ca } from "date-fns/locale";
 import * as z from "zod";
 
 export const userSchema = z.object({
@@ -152,19 +151,31 @@ export const purchaseOrderSchema = z
     path: ["dueDate"], // This connects the error to the dueDate field
   });
 
-export const salesOrderItemSchema = z.object({
-  inventoryId: z.number().min(1, {
-    message: "Product must be selected.",
-  }),
-  quantity: z.coerce.number().min(1, {
-    message: "Quantity must be at least 1.",
-  }),
-  unitPrice: z.coerce.number().min(1, {
-    message: "Unit Price must be at least 1.",
-  }),
-  discount: z.coerce.number().optional().nullable(),
-  inventory: z.any(),
-});
+export const salesOrderItemSchema = z
+  .object({
+    inventoryId: z.number().min(1, {
+      message: "Product must be selected.",
+    }),
+    quantity: z.coerce.number().min(1, {
+      message: "Quantity must be at least 1.",
+    }),
+    unitPrice: z.coerce.number().min(1, {
+      message: "Unit Price must be at least 1.",
+    }),
+    discount: z.coerce.number().optional().nullable(),
+    inventory: z.any(),
+  })
+  .refine(
+    (data) => {
+      console.log(data);
+
+      return data.quantity <= data.inventory.quantity;
+    },
+    {
+      message: "Stock quantity is less than the requested quantity.",
+      path: ["quantity"],
+    },
+  );
 
 export const salesOrderSchema = z.object({
   id: z.number().optional().nullable(),
@@ -191,34 +202,22 @@ export const salesOrderSchema = z.object({
   receivedByUser: z.any(),
 });
 
-export const inventorySchema = z
-  .object({
-    id: z.number().optional().nullable(),
-    productId: z.number().min(1, {
-      message: "Product must be selected.",
-    }),
-    product: z.any(),
-    quantity: z.coerce.number().min(1, {
-      message: "Quantity must be at least 1.",
-    }),
-    price: z.coerce.number().min(1, {
-      message: "Price must be at least 1.",
-    }),
-    updatedAt: z.coerce.string().min(2, {
-      message: "Updated At must be at least 2 characters.",
-    }),
-  })
-  .refine(
-    (data) => {
-      console.log(data);
-
-      return data.quantity > 0;
-    },
-    {
-      message: "Quantity must be greater than 0.",
-      path: ["quantity"],
-    },
-  );
+export const inventorySchema = z.object({
+  id: z.number().optional().nullable(),
+  productId: z.number().min(1, {
+    message: "Product must be selected.",
+  }),
+  product: z.any(),
+  quantity: z.coerce.number().min(1, {
+    message: "Quantity must be at least 1.",
+  }),
+  price: z.coerce.number().min(1, {
+    message: "Price must be at least 1.",
+  }),
+  updatedAt: z.coerce.string().min(2, {
+    message: "Updated At must be at least 2 characters.",
+  }),
+});
 
 export const inventoryTransactionSchema = z.object({
   id: z.number().optional().nullable(),

@@ -88,7 +88,7 @@ function DataTable<T>(props) {
   };
 
   return (
-    <div className={cx("w-full", className)}>
+    <div className={cx("w-full overflow-auto", className)}>
       {table.getSelectedRowModel().rows.length !== 0 && (
         <div className="flex items-center py-4">
           <Button onClick={handleRemoveSelected} variant="outline">
@@ -102,7 +102,7 @@ function DataTable<T>(props) {
           tableClassname && tableClassname,
         )}
       >
-        <Table>
+        <Table className="overflow">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

@@ -37,7 +37,7 @@ import React from "react";
 export default function Create() {
   const navigate = useNavigate();
   const [toggle, handleToggle] = useToggle({
-    addProductsModal: true,
+    addProductsModal: false,
   });
   const { salesOrderSchema } = validations;
 
@@ -222,34 +222,38 @@ export default function Create() {
   };
 
   return (
-    <div>
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => navigate(ROUTES.SALES_ORDERS)}
-        className="mb-4"
-      >
-        <MoveLeft /> Back
-      </Button>
+    <>
+      <div>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => navigate(ROUTES.SALES_ORDERS)}
+          className="mb-4"
+        >
+          <MoveLeft /> Back
+        </Button>
+      </div>
       <h2 className="mb-4">Create Sales Order</h2>
       <Form {...form}>
-        <form className="space-y-8">
-          <FormField
-            control={form.control}
-            name="customer"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Customer</FormLabel>
-                <Input
-                  {...field}
-                  placeholder="Customer Name"
-                  className="w-full"
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex gap-4">
+        <form>
+          <div className="mb-4">
+            <FormField
+              control={form.control}
+              name="customer"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Customer</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="Customer Name"
+                    className="w-full"
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex gap-4 mb-4">
             <FormField
               control={form.control}
               name="orderDate"
@@ -273,26 +277,28 @@ export default function Create() {
               )}
             />
           </div>
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter some notes..."
-                    className="resize-none"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="mb-4">
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter some notes..."
+                      className="resize-none"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <div>
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mb-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mb-4">
               <Button
                 onClick={() => handleToggle({ addProductsModal: true })}
                 variant="outline"
@@ -343,8 +349,9 @@ export default function Create() {
         </form>
       </Form>
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-12">
+      <div className="flex mt-auto mb-4 align-bottom">
         <Button
+          className="ml-auto"
           onClick={(e) => {
             e.preventDefault();
             console.log(form.formState.errors);
@@ -372,6 +379,6 @@ export default function Create() {
           exclude={fields.map((item) => item.inventoryId)}
         />
       )}
-    </div>
+    </>
   );
 }

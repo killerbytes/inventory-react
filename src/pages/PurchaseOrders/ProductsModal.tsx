@@ -53,13 +53,12 @@ export default function ProductsModal({
   const { store, fetchData } = useContext(GlobalContext) || {};
   const [products, setProducts] = React.useState<Product[]>([]);
   const { purchaseOrderItemSchema } = validations;
-  const schema = purchaseOrderItemSchema;
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof purchaseOrderItemSchema>>({
+    resolver: zodResolver(purchaseOrderItemSchema),
     defaultValues: {
       quantity: 1,
       unitPrice: 10,
-      productId: 95,
+      // productId: 95,
     },
   });
 
@@ -67,7 +66,7 @@ export default function ProductsModal({
     ? products.filter((p) => !exclude?.includes(p.id))
     : products;
 
-  async function onSubmit(values: z.infer<typeof schema>) {
+  async function onSubmit(values: z.infer<typeof purchaseOrderItemSchema>) {
     try {
       const item: PurchaseOrderItem = {
         ...values,

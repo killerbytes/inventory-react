@@ -341,7 +341,7 @@ export default function Create() {
             control={form.control}
             name="orderDate"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="w-full">
                 <FormLabel>Order Date</FormLabel>
                 <DatePicker field={field} />
                 <FormMessage />
@@ -352,7 +352,7 @@ export default function Create() {
             control={form.control}
             name="deliveryDate"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="w-full">
                 <FormLabel>Delivery Date</FormLabel>
                 <DatePicker field={field} />
                 <FormMessage />
@@ -395,7 +395,7 @@ export default function Create() {
             control={form.control}
             name="purchaseOrderItems"
             render={() => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormControl>
                   <DataTable
                     data={fields}
@@ -428,7 +428,7 @@ export default function Create() {
             )}
           />
         </div>
-        <div className="flex justify-between mt-auto mb-4 align-bottom">
+        <div className="flex mt-auto mb-4 align-bottom">
           <Label className="hover:bg-accent/50 flex items-start flex-col rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950">
             <FormField
               control={form.control}
@@ -472,7 +472,7 @@ export default function Create() {
           </Label>
 
           <Button
-            className="mt-auto"
+            className="mt-auto ml-auto"
             onClick={(e) => {
               e.preventDefault();
               console.log(form.formState.errors);
