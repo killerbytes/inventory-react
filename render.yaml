@@ -6,6 +6,5 @@ static_sites:
       - type: rewrite
         source: "/*"
         destination: "/index.html"
-    envVars:
-      - key: NODE_ENV
-        value: production
+        force: true # Override any default behavior
+
