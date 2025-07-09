@@ -1,0 +1,11 @@
+static_sites:
+  - name: my-vite-app
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist # Vite's default output folder
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+    envVars:
+      - key: NODE_ENV
+        value: production
