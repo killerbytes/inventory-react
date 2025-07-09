@@ -45,8 +45,8 @@ export default function ProductsModal({
   const form = useForm<z.infer<typeof salesOrderItemSchema>>({
     resolver: zodResolver(salesOrderItemSchema),
     defaultValues: {
-      // quantity: 1,
-      // unitPrice: 10,
+      quantity: 1,
+      unitPrice: 0,
     },
   });
 
@@ -120,6 +120,7 @@ export default function ProductsModal({
                     onChange={(value) => {
                       form.setValue("inventoryId", value.id);
                       form.setValue("inventory", value);
+                      form.setValue("unitPrice", value?.price);
                       setValue(value);
                     }}
                   />

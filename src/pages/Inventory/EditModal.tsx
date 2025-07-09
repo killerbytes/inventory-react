@@ -42,7 +42,7 @@ export default function EditModal({
 
   async function onSubmit(values: Inventory) {
     try {
-      await inventoryServices.update(data.id, values);
+      await inventoryServices.updatePrice(data.id, values);
       toast.success(`Submitted: ${values.product.name}`);
       form.reset();
       onClose();

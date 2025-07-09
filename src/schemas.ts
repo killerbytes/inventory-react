@@ -167,8 +167,6 @@ export const salesOrderItemSchema = z
   })
   .refine(
     (data) => {
-      console.log(data);
-
       return data.quantity <= data.inventory.quantity;
     },
     {

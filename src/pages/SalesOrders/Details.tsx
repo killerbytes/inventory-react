@@ -90,21 +90,36 @@ export default function SalesOrderDetails() {
         <div className="text-right ">{row.getValue("quantity")}</div>
       ),
     },
+
     {
-      accessorKey: "discount",
-      header: () => <div className="text-right">Discount</div>,
-      cell: ({ row }) => (
-        <div className="text-right ">{row.getValue("discount")}</div>
-      ),
+      accessorKey: "originalPrice",
+      header: () => <div className="text-right">Original Price</div>,
+      cell: ({ row }) => {
+        return (
+          <div
+            className={cx(
+              "text-right",
+              {
+                "text-red-500":
+                  row.getValue("unitPrice") < row.getValue("originalPrice"),
+              },
+              {
+                "text-green-500":
+                  row.getValue("unitPrice") > row.getValue("originalPrice"),
+              },
+            )}
+          >
+            {formatCurrency(row.getValue("originalPrice"))}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "unitPrice",
       header: () => <div className="text-right">Unit Price</div>,
-      cell: ({ row }) => (
-        <div className="text-right ">
-          {formatCurrency(row.getValue("unitPrice"))}
-        </div>
-      ),
+      meta: {
+        className: "text-right",
+      },
     },
   ];
 
@@ -149,10 +164,21 @@ export default function SalesOrderDetails() {
         </div>
       </div>
 
-      <DataTable data={data?.salesOrderItems || []} columns={columns}>
-        <TableFooter>
+      <DataTable
+        data={data?.salesOrderItems || []}
+        columns={columns}
+        footer={
           <TableRow>
-            <TableCell colSpan={3}>Total Amount</TableCell>
+            <TableCell colSpan={2}>Total Amount</TableCell>
+            <TableCell className="text-right">
+              {data?.salesOrderItems &&
+                formatCurrency(
+                  data?.salesOrderItems.reduce(
+                    (acc, item) => acc + item.originalPrice * item.quantity,
+                    0,
+                  ),
+                )}
+            </TableCell>
             <TableCell className="text-right">
               {data?.salesOrderItems &&
                 formatCurrency(
@@ -163,8 +189,8 @@ export default function SalesOrderDetails() {
                 )}
             </TableCell>
           </TableRow>
-        </TableFooter>
-      </DataTable>
+        }
+      ></DataTable>
       <DialogFooter className="mt-auto">
         {data?.status === ORDER_STATUS.COMPLETED && (
           <AlertDialog>

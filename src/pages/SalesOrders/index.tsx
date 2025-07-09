@@ -7,11 +7,7 @@ import {
   type APIResponse,
   type SalesOrder,
 } from "@/services";
-import {
-  ORDER_STATUS,
-  ORDER_STATUS_OPTIONS,
-  PAGINATION,
-} from "@/utils/definitions";
+import { ROUTES, ORDER_STATUS_OPTIONS, PAGINATION } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
 import { Link, useNavigate } from "react-router-dom";
@@ -118,7 +114,7 @@ export default function SalesOrders() {
           <h1 className="font-medium">Sales Orders</h1>
 
           <div className="ml-auto">
-            <Link to="/sales/new">
+            <Link to={ROUTES.SALES_ORDERS_CREATE}>
               <Button>
                 <Plus /> Create Order
               </Button>
@@ -154,7 +150,7 @@ export default function SalesOrders() {
           <DataTable
             data={data.data || []}
             columns={columns}
-            onRowClick={(item) => navigate(`/purchases/${item.id}`)}
+            onRowClick={(item) => navigate(`${ROUTES.SALES_ORDERS}/${item.id}`)}
             footer={
               <TableRow>
                 <TableCell colSpan={4}>Total Amount</TableCell>

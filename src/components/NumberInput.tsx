@@ -1,30 +1,33 @@
 import { NumericFormat } from "react-number-format";
+import useDebounce from "@/hooks/useDebounce";
+import React from "react";
 
 export default function NumberInput({
   value,
   onChange,
-  onUpdate,
+  // onUpdate,
   type = "number",
 }: {
   value: number;
   onChange: (value: number) => void;
-  onUpdate: () => void;
+  // onUpdate: () => void;
   type?: "number" | "currency";
 }) {
   const onFocus = (e) => {
     e.target.select();
   };
 
+  // console.log(value);
   return (
     <NumericFormat
       value={value}
-      onBlur={onUpdate}
+      // onBlur={onUpdate}
       onFocus={onFocus}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          onUpdate();
-        }
-      }}
+      // onKeyDown={(e) => {
+      //   if (e.key === "Enter") {
+      //     onUpdate();
+      //   }
+      // }}
       onValueChange={(values) => {
         const { floatValue } = values;
         onChange(floatValue ?? 0);

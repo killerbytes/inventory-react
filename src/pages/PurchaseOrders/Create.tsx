@@ -19,17 +19,14 @@ import {
   useWatch,
   type FieldArrayWithId,
 } from "react-hook-form";
-import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
 import { GlobalContext } from "@/components/GlobalContext";
 import type { ColumnDef } from "@tanstack/react-table";
 import React, { useCallback, useContext } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import EditableCell from "@/components/EditableCell";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
-import { formatCurrency } from "@/utils/formatters";
-import NumberInput from "@/components/NumberInput";
-import { DataTable } from "@/components/DataTable";
 import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
@@ -46,6 +43,7 @@ import validations from "@/schemas";
 import { addWeeks } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import Table from "./Table";
 import * as z from "zod";
 
 export default function Create() {
@@ -71,6 +69,7 @@ export default function Create() {
         orderDate: new Date().toISOString(),
         deliveryDate: new Date().toISOString(),
         dueDate: addWeeks(new Date(), 1).toISOString(),
+        isCheckPayment: true,
       };
 
   const [supplier, setSupplier] = React.useState<Supplier>(
@@ -82,9 +81,9 @@ export default function Create() {
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues,
   });
+
   const {
     control,
-
     formState: { errors },
   } = form;
 
@@ -103,6 +102,7 @@ export default function Create() {
     if (fetchData) {
       fetchData("suppliers", async () => {
         const { data } = await supplierServices.list();
+        setSuppliers(data);
         return data;
       });
     }
@@ -193,14 +193,15 @@ export default function Create() {
     {
       accessorKey: "product",
       header: "Product",
-      cell: ({ row }) => {
-        return (row.getValue("product") as PurchaseOrderItem["product"]).name;
-      },
+      cell: ({ row }) => (
+        <div className="font-medium">
+          {(row.getValue("product") as { name: string })?.name}
+        </div>
+      ),
     },
     {
       header: () => <div className="text-right">Quantity</div>,
       accessorKey: "quantity",
-      accessorFn: (row) => row.quantity,
       id: "quantity",
       size: 10,
       meta: {
@@ -210,53 +211,14 @@ export default function Create() {
     {
       header: () => <div className="text-right">Unit Price</div>,
       accessorKey: "unitPrice",
-      accessorFn: (row) => row.unitPrice,
       id: "unitPrice",
 
       meta: {
         className: "text-right",
         type: "currency",
       },
-
-      // cell: ({ row }) => (
-      //   <div className="text-right ">
-      //     {formatCurrency(row.getValue("unitPrice"))}
-      //   </div>
-      // ),
     },
   ];
-
-  // Extracted cell renderer as a React component to allow hook usage
-  function EditableCell({
-    getValue,
-    cell,
-    row: { index },
-    column: { id },
-    table,
-  }) {
-    const initialValue = getValue();
-    const type = cell.column.columnDef.meta?.type;
-    const [value, setValue] = React.useState(initialValue);
-
-    const onUpdate = () => {
-      table.options.meta?.updateData(index, id, value);
-    };
-
-    React.useEffect(() => {
-      setValue(initialValue);
-    }, [initialValue]);
-
-    return (
-      <NumberInput
-        value={value}
-        type={type}
-        onUpdate={onUpdate}
-        onChange={(e) => {
-          setValue(e.value);
-        }}
-      />
-    );
-  }
 
   const defaultColumn = {
     cell: EditableCell,
@@ -265,22 +227,20 @@ export default function Create() {
   const meta = {
     updateData: (rowIndex: number, columnId: string, value: string) => {
       // Ensure purchaseOrderItems exists and required fields are present
-      const items = formData.purchaseOrderItems ?? [];
+      // const items = formData.purchaseOrderItems ?? [];
+      const items = fields;
       const currentItem = items[rowIndex] ?? {};
       // Fallbacks for required fields
       const updatedItem = {
-        productId: currentItem.productId ?? 0,
-        quantity: currentItem.quantity ?? 0,
-        unitPrice: currentItem.unitPrice ?? 0,
-        discount: currentItem.discount ?? null,
-        inventory: currentItem.inventory,
         ...currentItem,
         [columnId]: value,
       };
-      update(rowIndex, updatedItem);
+
+      if (currentItem) {
+        update(rowIndex, updatedItem);
+      }
     },
   };
-
   return (
     <>
       <div>
@@ -318,19 +278,7 @@ export default function Create() {
                     setSupplier(value);
                   }}
                 />
-                {/* <div
-                    className="flex gap-2 items-center group"
-                    onClick={() => handleToggle({ supplierModal: true })}
-                  >
-                    {supplier ? (
-                      <SupplierPanel supplier={supplier} editable={true} />
-                    ) : (
-                      <Button type="button" variant="outline">
-                        <Pencil size={16} className="" />
-                        Select
-                      </Button>
-                    )}
-                  </div> */}
+
                 <FormMessage />
               </FormItem>
             )}
@@ -360,6 +308,38 @@ export default function Create() {
             )}
           />
         </div>
+
+        <div className="mb-10">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-8 mb-4">
+            <Button
+              type="button"
+              onClick={() => handleToggle({ addProductsModal: true })}
+              variant="default"
+            >
+              <Plus />
+              Add a Product
+            </Button>
+          </div>
+          <FormField
+            control={form.control}
+            name="purchaseOrderItems"
+            render={() => (
+              <FormItem className="w-full">
+                <FormControl>
+                  <Table
+                    data={fields}
+                    columns={columns}
+                    defaultColumn={defaultColumn}
+                    meta={meta}
+                    form={form}
+                    errors={errors}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="notes"
@@ -378,69 +358,19 @@ export default function Create() {
             </FormItem>
           )}
         />
-
-        <div>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-8 mb-4">
-            <Button
-              type="button"
-              onClick={() => handleToggle({ addProductsModal: true })}
-              variant="default"
-            >
-              <Plus />
-              Add a Product
-            </Button>
-          </div>
-
-          <FormField
-            control={form.control}
-            name="purchaseOrderItems"
-            render={() => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <DataTable
-                    data={fields}
-                    columns={columns}
-                    defaultColumn={defaultColumn}
-                    meta={meta}
-                    tableClassname={cx({
-                      "border-red-500": errors.purchaseOrderItems,
-                    })}
-                  >
-                    <TableFooter>
-                      <TableRow>
-                        <TableCell></TableCell>
-                        <TableCell colSpan={2}>Total Amount</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(
-                            fields.reduce(
-                              (acc, item) =>
-                                acc + item.unitPrice * item.quantity,
-                              0,
-                            ),
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    </TableFooter>
-                  </DataTable>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="flex mt-auto mb-4 align-bottom">
-          <Label className="hover:bg-accent/50 flex items-start flex-col rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950">
+        <div className="mt-auto mb-4 align-bottom flex">
+          <div>
             <FormField
               control={form.control}
               name="isCheckPayment"
               render={({ field }) => {
                 return (
-                  <FormItem className="flex flex-row gap-2">
+                  <FormItem className="flex flex-row gap-2 mb-2">
                     <FormControl>
                       <Checkbox
-                        checked={field.value}
+                        checked={!!field.value}
                         onCheckedChange={(checked) => {
-                          form.setValue("isCheckPayment", checked);
+                          form.setValue("isCheckPayment", checked === true);
                         }}
                       />
                     </FormControl>
@@ -451,25 +381,35 @@ export default function Create() {
                 );
               }}
             />
-            <div
-              className={cn(
-                "grid gap-1.5 font-normal",
-                !isCheckPayment && "opacity-50",
+            <Label
+              className={cx(
+                {
+                  "bg-accent/50": !isCheckPayment,
+                  "bg-blue-50": isCheckPayment,
+                },
+                "hover:bg-accent/50 flex items-start flex-col rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950",
               )}
             >
-              <FormField
-                control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Due Date</FormLabel>
-                    <DatePicker field={field} disabled={!isCheckPayment} />
-                    <FormMessage />
-                  </FormItem>
+              <div
+                className={cn(
+                  "grid gap-1.5 font-normal",
+                  !isCheckPayment && "opacity-50",
                 )}
-              />
-            </div>
-          </Label>
+              >
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Due Date</FormLabel>
+                      <DatePicker field={field} disabled={!isCheckPayment} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </Label>
+          </div>
 
           <Button
             className="mt-auto ml-auto"

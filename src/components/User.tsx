@@ -11,7 +11,7 @@ import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 
 import { authServices, type User } from "@/services";
-import { GlobalContext } from "./GlobalContext";
+import { UserContext } from "./UserContext";
 
 export default function User() {
   const getInitials = (name: string) => {
@@ -24,7 +24,7 @@ export default function User() {
   };
 
   const [user, setUser] = React.useState<User | null>(null);
-  const { store, fetchData } = useContext(GlobalContext || null) || {};
+  const { store, fetchData } = useContext(UserContext || null) || {};
 
   React.useEffect(() => {
     if (
@@ -48,7 +48,6 @@ export default function User() {
     localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
     window.location.href = "/login";
   };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

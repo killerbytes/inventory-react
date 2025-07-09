@@ -37,6 +37,7 @@ function DataTable<T>(props) {
     className,
     footer,
     onRowClick,
+    onUpdate,
   }: {
     data: T[];
     columns: ColumnDef<T>[];
@@ -48,6 +49,7 @@ function DataTable<T>(props) {
     className?: string;
     footer?: React.ReactNode;
     onRowClick?: (item: T) => void;
+    onUpdate?: (data: T[]) => void;
   } = props;
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -83,7 +85,9 @@ function DataTable<T>(props) {
       .getFilteredRowModel()
       .rows.filter((row) => !row.getIsSelected())
       .map((row) => row.original);
-    if (onUpdate) onUpdate(filteredData);
+    if (onUpdate) {
+      onUpdate(filteredData);
+    }
     setRowSelection({});
   };
 

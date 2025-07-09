@@ -1,33 +1,26 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import React from "react";
 
-import {
-  ORDER_STATUS_OPTIONS,
-  PAGINATION,
-  ROUTES,
-  TRANSACTION_TYPE,
-  TRANSACTION_TYPE_OPTIONS,
-} from "@/utils/definitions";
 import {
   inventoryServices,
   type APIResponse,
   type Filter,
   type InventoryTransaction,
 } from "@/services";
+import {
+  PAGINATION,
+  ROUTES,
+  TRANSACTION_TYPE,
+  TRANSACTION_TYPE_OPTIONS,
+} from "@/utils/definitions";
 import { formatDateTime } from "@/utils/formatters";
+import { DataTable } from "@/components/DataTable";
+import { ColumnDef } from "@tanstack/react-table";
 import SelectComponent from "@/components/Select";
 import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { MoveLeft } from "lucide-react";
 import Pager from "@/components/Pager";
 
@@ -71,6 +64,74 @@ export default function InventoryTransactions() {
       page,
     }));
   }, [page]);
+
+  const columns: ColumnDef<InventoryTransaction>[] = [
+    {
+      accessorKey: "orderId",
+      header: "Order",
+    },
+    {
+      accessorKey: "inventory.product.name",
+      header: "Name",
+    },
+    {
+      accessorKey: "previousValue",
+      header: "Previous Value",
+      meta: {
+        className: "text-right",
+      },
+    },
+    {
+      accessorKey: "newValue",
+      header: "New Value",
+      meta: {
+        className: "text-right",
+      },
+    },
+    {
+      accessorKey: "orderType",
+      header: "Order Type",
+      meta: {
+        className: "text-center",
+      },
+      cell: ({ row }) => {
+        return (
+          <Link
+            to={`${row.getValue("orderType") === "SALES" ? ROUTES.SALES_ORDERS : ROUTES.PURCHASE_ORDERS}/${row.getValue("orderId")}`}
+          >
+            {row.getValue("orderId")}
+          </Link>
+        );
+      },
+    },
+    {
+      accessorKey: "transactionType",
+      header: "Transaction Type",
+      cell: ({ row }) => {
+        return (
+          <Badge
+            className={cx("text-xs", {
+              "bg-red-500":
+                row.getValue("transactionType") ===
+                TRANSACTION_TYPE.CANCELLATION,
+              "bg-green-500":
+                row.getValue("transactionType") === TRANSACTION_TYPE.PURCHASE,
+              "bg-yellow-500":
+                row.getValue("transactionType") === TRANSACTION_TYPE.SALE,
+            })}
+          >
+            {row.getValue("transactionType")}
+          </Badge>
+        );
+      },
+    },
+
+    {
+      accessorKey: "updatedAt",
+      header: "Updated At",
+      cell: ({ row }) => formatDateTime(row.getValue("updatedAt")),
+    },
+  ];
 
   return (
     <div>
@@ -121,13 +182,18 @@ export default function InventoryTransactions() {
             }}
           />
 
-          <Table>
+          <DataTable
+            data={data.data || []}
+            columns={columns}
+            // onRowClick={(item) => navigate(`/purchases/${item.id}`)}
+          ></DataTable>
+
+          {/* <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-auto">Order</TableHead>
                 <TableHead className="w-auto">Name</TableHead>
                 <TableHead className="text-right">Previous Value</TableHead>
-                <TableHead className="text-right">Value</TableHead>
                 <TableHead className="text-right">New Value</TableHead>
                 <TableHead className="text-right">Order Type</TableHead>
                 <TableHead className="text-right">Transaction Type</TableHead>
@@ -150,7 +216,6 @@ export default function InventoryTransactions() {
                   <TableCell className="text-right">
                     {item.previousValue}
                   </TableCell>
-                  <TableCell className="text-right">{item.value}</TableCell>
                   <TableCell className="text-right">{item.newValue}</TableCell>
                   <TableCell className="text-right">{item.orderType}</TableCell>
                   <TableCell className="text-right">
@@ -174,7 +239,8 @@ export default function InventoryTransactions() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </Table> */}
+
           <Pager data={data} page={page} setPage={setPage} />
         </>
       )}
