@@ -17,14 +17,14 @@ export const formatCurrency = (value: number) => {
 };
 
 export const formatDate = (value: string) => {
-  return format(value, DATE_FORMAT);
+  return value && format(value, DATE_FORMAT);
 };
 
 export const formatDateTime = (
   value: string,
   formatStr: string = DATETIME_FORMAT,
 ) => {
-  return format(value, formatStr);
+  return value && format(value, formatStr);
 };
 
 export const getStatus = (status: string | null | undefined, next = false) => {

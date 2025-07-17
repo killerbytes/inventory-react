@@ -75,3 +75,31 @@ export const ORDER_STATUS = {
     description: "Order has been cancelled",
   },
 };
+
+export const MODE_OF_PAYMENT = {
+  CASH: "CASH",
+  CHECK: "CHECK",
+} as const;
+
+export const MODE_OF_PAYMENT_OPTIONS = [
+  { value: "CASH", label: "Cash" },
+  { value: "CHECK", label: "Check" },
+];
+
+export const UNIT = {
+  BOX: "BOX",
+  BAG: "BAG",
+  CAN: "CAN",
+  KG: "KG",
+  LB: "LB",
+  PCS: "PCS",
+};
+
+export const UNIT_OPTIONS = [
+  { value: "BOX", label: "Box" },
+  { value: "BAG", label: "Bag" },
+  { value: "GAL", label: "Gal" },
+  { value: "PACK", label: "Pack" },
+  { value: "SET", label: "Set" },
+  { value: "PCS", label: "Pcs" },
+];

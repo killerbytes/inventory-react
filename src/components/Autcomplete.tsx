@@ -27,9 +27,9 @@ interface AutocompleteProps<T> {
 
 export default function Autocomplete<T>({
   value,
-  items,
-  placeholder,
   onChange,
+  items = [],
+  placeholder,
   valueKey = "name",
 }: AutocompleteProps<T>) {
   const [open, setOpen] = React.useState(false);
@@ -44,14 +44,16 @@ export default function Autocomplete<T>({
             !value && "text-muted-foreground",
           )}
         >
-          {value
+          {value?.[valueKey]}
+          {/* {value
             ? valueKey.split(".").reduce(
                 (obj, key) => obj?.[key],
                 items.find((item) => {
+                  console.log(item.id, value.id, item.id === value.id);
                   return item.id === value?.id;
                 }),
               )
-            : placeholder}
+            : placeholder} */}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>

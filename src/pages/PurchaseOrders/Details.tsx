@@ -23,11 +23,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { MODE_OF_PAYMENT, ORDER_STATUS, ROUTES } from "@/utils/definitions";
 import { formatCurrency, formatDate, getStatus } from "@/utils/formatters";
 import { FieldArrayWithId, useFieldArray, useForm } from "react-hook-form";
 import { CircleCheckBig, MoveLeft, Trash2 } from "lucide-react";
-import { TableCell, TableRow } from "@/components/ui/table";
-import { ORDER_STATUS, ROUTES } from "@/utils/definitions";
 import SupplierPanel from "@/components/SupplierPanel";
 import type { ColumnDef } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,7 +34,7 @@ import { useNavigate, useParams } from "react-router";
 import EditableCell from "@/components/EditableCell";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DataTable } from "@/components/DataTable";
+import PurchaseOrderForm from "./PurchaseOrderForm";
 import { Button } from "@/components/ui/button";
 import { purchaseOrderSchema } from "@/schemas";
 import { cx } from "class-variance-authority";
@@ -60,23 +59,40 @@ export default function Create() {
   });
   const {
     reset,
-    setValue,
     control,
     formState: { errors },
   } = form;
 
-  const { fields, append, update } = useFieldArray({
+  const { fields, update } = useFieldArray({
     control,
     name: "purchaseOrderItems",
   });
 
-  async function onSubmit(values) {
+  async function onSubmit(values: PurchaseOrder) {
     try {
       console.log(values);
-      await purchaseOrderServices.updateStatus(parseInt(id as string), {
+
+      await purchaseOrderServices.updateStatus(id, {
         status: nextStatus.key,
-      } as PurchaseOrder);
-      toast.success(`Purchase Order created successfully`);
+      });
+      toast.success(`Purchase Order completed`);
+      navigate(ROUTES.PURCHASE_ORDERS);
+    } catch (error: any) {
+      toast.error("Submission failed - " + error?.response.data.error);
+    }
+  }
+
+  async function onSubmitReceivedOrder(values: PurchaseOrder) {
+    try {
+      console.log(values);
+      await purchaseOrderServices.update(id, {
+        ...values,
+      });
+
+      // await purchaseOrderServices.updateStatus(parseInt(id as string), {
+      //   status: nextStatus.key,
+      // } as PurchaseOrder);
+      toast.success(`Purchase Order received`);
       navigate(ROUTES.PURCHASE_ORDERS);
     } catch (error: any) {
       toast.error("Submission failed - " + error?.response.data.error);
@@ -155,35 +171,8 @@ export default function Create() {
 
   const columns: ColumnDef<FieldArrayWithId<PurchaseOrderItem>>[] = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: "product",
+      accessorKey: "product.name",
       header: "Product",
-      cell: ({ row }) => (
-        <div className="font-medium">
-          {(row.getValue("product") as { name: string })?.name}
-        </div>
-      ),
     },
     {
       header: () => <div className="text-right">Quantity</div>,
@@ -195,6 +184,12 @@ export default function Create() {
       },
     },
     {
+      header: "Unit",
+      accessorKey: "unit",
+      id: "unit",
+      size: 10,
+    },
+    {
       header: () => <div className="text-right">Unit Price</div>,
       accessorKey: "unitPrice",
       id: "unitPrice",
@@ -204,11 +199,39 @@ export default function Create() {
         type: "currency",
       },
     },
-  ];
+    {
+      header: () => <div className="text-right">Discount</div>,
+      accessorKey: "discount",
+      id: "discount",
 
-  const defaultColumn = {
-    cell: EditableCell,
-  };
+      meta: {
+        className: "text-right",
+        type: "currency",
+      },
+    },
+    {
+      header: "Note",
+      accessorKey: "discountNote",
+      id: "discountNote",
+    },
+    {
+      header: () => <div className="text-right">Amount</div>,
+      accessorKey: "amount",
+      id: "amount",
+      meta: {
+        className: "text-right",
+        type: "currency",
+      },
+      cell: ({ row }) => {
+        return formatCurrency(
+          (
+            row.getValue("quantity") * row.getValue("unitPrice") -
+            row.getValue("discount")
+          ).toFixed(2),
+        );
+      },
+    },
+  ];
 
   const meta = {
     updateData: (rowIndex: number, columnId: string, value: string) => {
@@ -240,243 +263,222 @@ export default function Create() {
         </Button>
       </div>
       <Form {...form}>
-        <div className="mb-4 md:flex md:justify-between items-center">
-          <h1 className="my-4">Purchase Order #{id}</h1>
-          <div className="flex gap-2">
-            {data?.isCheckPayment && (
-              <>
-                <Badge
-                  className={cx("relative titlecase", `status-check-payment`)}
-                >
-                  Check Payment
-                </Badge>
+        {data?.status === ORDER_STATUS.PENDING.key ? (
+          <PurchaseOrderForm form={form} onSubmit={onSubmitReceivedOrder} />
+        ) : (
+          <>
+            <div className="mb-4 md:flex md:justify-between items-center">
+              <h1 className="my-4">
+                Purchase Order #{data?.purchaseOrderNumber}
+              </h1>
+              <div className="flex gap-2">
+                {data?.modeOfPayment === MODE_OF_PAYMENT.CHECK && (
+                  <>
+                    <Badge
+                      className={cx(
+                        "relative titlecase",
+                        `status-check-payment`,
+                      )}
+                    >
+                      Check Payment
+                    </Badge>
 
-                {data?.isCheckPaymentPaid && (
-                  <Badge className="text-white bg-green-700">
-                    <CircleCheckBig size="1.5rem" /> Paid
+                    {/* {data?.isCheckPaymentPaid && (
+                    <Badge className="text-white bg-green-700">
+                      <CircleCheckBig size="1.5rem" /> Paid
+                    </Badge>
+                  )} */}
+                  </>
+                )}
+                {data?.status && (
+                  <Badge
+                    className={cx(
+                      "capitalize",
+                      `status-${data?.status.toLowerCase()}`,
+                    )}
+                  >
+                    {getStatus(data?.status).label}
                   </Badge>
                 )}
-              </>
-            )}
-            {data?.status && (
-              <Badge
-                className={cx(
-                  "capitalize",
-                  `status-${data?.status.toLowerCase()}`,
-                )}
-              >
-                {getStatus(data?.status).label}
-              </Badge>
-            )}
-          </div>
-        </div>
-        <div className="md:flex md:justify-between">
-          <div className="mb-4">
-            <SupplierPanel supplier={data?.supplier as Supplier} />
-          </div>
-          <div className="mb-4">
-            <div>
-              {data?.isCheckPayment && (
-                <div className="flex">
-                  <div className="font-medium w-[150px]">Due Date</div>
-                  <span
-                    className={cx({
-                      "text-red-500 font-semibold": !data?.isCheckPaymentPaid,
-                    })}
-                  >
-                    {data?.dueDate ? formatDate(data.dueDate) : "-"}
-                  </span>
-                </div>
-              )}
-
-              <div className="flex">
-                <div className="font-medium w-[150px]">Delivery Date</div>
-                {data?.deliveryDate ? formatDate(data.deliveryDate) : "-"}
               </div>
             </div>
-          </div>
-        </div>
-
-        <FormField
-          control={form.control}
-          name="purchaseOrderItems"
-          render={() => (
-            <FormItem className="w-full">
-              <FormControl>
-                <Table
-                  data={fields}
-                  columns={columns}
-                  defaultColumn={defaultColumn}
-                  meta={meta}
-                  form={form}
-                  errors={errors}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* <DataTable
-          data={data?.purchaseOrderItems || []}
-          columns={columns}
-          footer={
-            <>
-              <TableRow>
-                <TableCell colSpan={2}>Total Amount</TableCell>
-                <TableCell className="text-right">
-                  {data?.purchaseOrderItems &&
-                    formatCurrency(
-                      data?.purchaseOrderItems.reduce(
-                        (acc, item) => acc + item.unitPrice * item.quantity,
-                        0,
-                      ),
-                    )}
-                </TableCell>
-              </TableRow>
-            </>
-          }
-        /> */}
-        <div className="mt-auto">
-          <div className="mb-4">
-            <div className="mb-4">
-              <div className="flex gap-4">
-                <div className="font-medium w-[150px]">Order Date</div>
-                <Tooltip content={data?.orderByUser?.name}>
-                  <div>
-                    {data?.orderDate ? formatDate(data.orderDate) : "-"}
-                  </div>
-                </Tooltip>
-              </div>
-              <div className="flex gap-4">
-                <div className="font-medium w-[150px]">Received Date</div>
-                {data?.receivedDate ? (
-                  <Tooltip content={data?.receivedByUser?.name}>
-                    {formatDate(data.receivedDate)}
-                  </Tooltip>
-                ) : (
-                  "-"
-                )}
-              </div>
-              <div className="flex gap-4">
-                <div className="font-medium w-[150px]">Completed Date</div>
-                {data?.completedDate ? (
-                  <Tooltip content={data?.completedByUser?.name}>
-                    {formatDate(data.completedDate)}
-                  </Tooltip>
-                ) : (
-                  "-"
-                )}
-              </div>
-              <div className="flex gap-4">
-                <div className="font-medium w-[150px]">Cancelled Date</div>
-                {data?.cancelledDate ? (
-                  <Tooltip content={data?.cancelledByUser?.name}>
-                    {formatDate(data.cancelledDate)}
-                  </Tooltip>
-                ) : (
-                  "-"
-                )}
-              </div>
-            </div>
-            {data?.status === ORDER_STATUS.CANCELLED.key && (
+            <div className="md:flex md:justify-between">
               <div className="mb-4">
-                Cancellation Reason:
-                <p>{data?.cancellationReason}</p>
+                <SupplierPanel supplier={data?.supplier as Supplier} />
               </div>
-            )}
-            <div className="mb-8">
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter some notes..."
-                        className="resize-none"
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              Notes:
-              <p>{data?.notes}</p>
+              <div className="mb-4">
+                <div>
+                  {data?.modeOfPayment === MODE_OF_PAYMENT.CHECK && (
+                    <>
+                      <div className="flex">
+                        <div className="font-medium w-[150px]">
+                          Check Number
+                        </div>
+                        <span>{data?.checkNumber}</span>
+                      </div>
+                      <div className="flex">
+                        <div className="font-medium w-[150px]">Due Date</div>
+                        <span className={cx("text-red-500 font-semibold")}>
+                          {data?.dueDate ? formatDate(data.dueDate) : "-"}
+                        </span>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="flex">
+                    <div className="font-medium w-[150px]">Delivery Date</div>
+                    {data?.deliveryDate ? formatDate(data.deliveryDate) : "-"}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="mt-auto flex justify-end gap-4 align-end mb-4">
-            {data?.status === ORDER_STATUS.PENDING.key && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="mr-auto">
-                    <Trash2 />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you sure you want to delete this order?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Delete this order
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={onDeleleOrder}>
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-            <div className="ml-auto flex items-end justify-between">
-              {data?.status === ORDER_STATUS.COMPLETED.key && (
-                <CancelForm onSubmit={onCancelOrder} />
+
+            {data?.internalNotes && <p>{data?.internalNotes}</p>}
+            {data?.notes && <p>{data?.notes}</p>}
+
+            <FormField
+              control={form.control}
+              name="purchaseOrderItems"
+              render={() => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Table
+                      data={fields}
+                      columns={columns}
+                      // defaultColumn={defaultColumn}
+                      // meta={meta}
+                      form={form}
+                      errors={errors}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-              {data?.status !== ORDER_STATUS.COMPLETED.key &&
-                data?.status !== ORDER_STATUS.CANCELLED.key && (
+            />
+
+            <div className="mt-auto">
+              <div className="mb-4">
+                <div className="mb-4">
+                  <div className="flex gap-4">
+                    <div className="font-medium w-[150px]">Order Date</div>
+                    <Tooltip content={data?.orderByUser?.name}>
+                      <div>
+                        {data?.orderDate ? formatDate(data.orderDate) : "-"}
+                      </div>
+                    </Tooltip>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="font-medium w-[150px]">Received Date</div>
+                    {data?.receivedDate ? (
+                      <Tooltip content={data?.receivedByUser?.name}>
+                        {formatDate(data.receivedDate)}
+                      </Tooltip>
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="font-medium w-[150px]">Completed Date</div>
+                    {data?.completedDate ? (
+                      <Tooltip content={data?.completedByUser?.name}>
+                        {formatDate(data.completedDate)}
+                      </Tooltip>
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="font-medium w-[150px]">Cancelled Date</div>
+                    {data?.cancelledDate ? (
+                      <Tooltip content={data?.cancelledByUser?.name}>
+                        {formatDate(data.cancelledDate)}
+                      </Tooltip>
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                </div>
+                {data?.status === ORDER_STATUS.CANCELLED.key && (
+                  <div className="mb-4">
+                    Cancellation Reason:
+                    <p>{data?.cancellationReason}</p>
+                  </div>
+                )}
+              </div>
+              <div className="mt-auto flex justify-end gap-4 align-end mb-4">
+                {data?.status === ORDER_STATUS.PENDING.key && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button className="status-completed capitalize">
-                        Order {nextStatus?.label}
+                      <Button variant="destructive" className="mr-auto">
+                        <Trash2 />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>
-                          Confirm <span>{nextStatus?.label}</span> order
+                          Are you sure you want to delete this order?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          {nextStatus?.description}
+                          Delete this order
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={(e) => {
-                            e.preventDefault();
-                            console.log(form.formState.errors);
-                            form
-                              .handleSubmit(onSubmit)(e)
-                              .catch((error) => {
-                                console.error("Form submission error:", error);
-                              });
-                          }}
-                        >
+                        <AlertDialogAction onClick={onDeleleOrder}>
                           Continue
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 )}
+                <div className="ml-auto flex items-end justify-between">
+                  {data?.status === ORDER_STATUS.COMPLETED.key && (
+                    <CancelForm onSubmit={onCancelOrder} />
+                  )}
+                  {data?.status !== ORDER_STATUS.COMPLETED.key &&
+                    data?.status !== ORDER_STATUS.CANCELLED.key && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button className="status-completed capitalize">
+                            Order {nextStatus?.label}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Confirm <span>{nextStatus?.label}</span> order
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {nextStatus?.description}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={(e) => {
+                                e.preventDefault();
+                                console.log(form.formState.errors);
+                                form
+                                  .handleSubmit(onSubmit)(e)
+                                  .catch((error) => {
+                                    console.error(
+                                      "Form submission error:",
+                                      error,
+                                    );
+                                  });
+                              }}
+                            >
+                              Continue
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </Form>
     </>
   );

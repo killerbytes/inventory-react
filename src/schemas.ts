@@ -1,5 +1,6 @@
-import { ORDER_TYPE } from "./utils/definitions";
+import { MODE_OF_PAYMENT, ORDER_TYPE, UNIT } from "./utils/definitions";
 import * as z from "zod";
+import path from "path";
 
 export const userSchema = z.object({
   id: z.number().optional(),
@@ -47,6 +48,21 @@ export const loginSchema = z.object({
   username: z.string(),
   password: z.string(),
 });
+
+// export const loginSchema = z
+//   .object({
+//     password: z.string().min(1, "Password is required"),
+//     confirmPassword: z.string().optional().nullable(),
+//   })
+//   .superRefine((data, ctx) => {
+//     if (data.password && !data.confirmPassword) {
+//       ctx.addIssue({
+//         path: ["confirmPassword"],
+//         code: z.ZodIssueCode.custom,
+//         message: "Check number is required when payment is by check",
+//       });
+//     }
+//   });
 
 export const categorySchema = z.object({
   id: z.number().optional().nullable(),
@@ -98,10 +114,12 @@ export const purchaseOrderItemSchema = z.object({
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
+  unit: z.enum(Object.values(UNIT) as [string, ...string[]]),
   unitPrice: z.coerce.number().min(1, {
     message: "Unit Price must be at least 1.",
   }),
   discount: z.coerce.number().optional().nullable(),
+  discountNote: z.string().optional().nullable(),
   inventory: z.any(),
 });
 
@@ -113,42 +131,59 @@ export const cancelPurchaseOrderSchema = z.object({
 
 export const purchaseOrderSchema = z
   .object({
-    id: z.number().optional().nullable(),
+    id: z.number().optional(),
+    purchaseOrderNumber: z
+      .string({
+        required_error: "PO number is required",
+      })
+      .min(2, { message: "PO number is required" }),
     supplierId: z.coerce
-      .number()
-      .min(1, { message: "Supplier must be selected." }),
+      .number({
+        required_error: "Supplier is required",
+        invalid_type_error: "Supplier is required",
+      })
+      .min(1, { message: "Supplier is required." }),
+    internalNotes: z.string().optional().nullable(),
     notes: z.string().optional().nullable(),
     purchaseOrderItems: z.array(purchaseOrderItemSchema).min(1, {
-      message: "At least one item must be added.",
+      message: "At least one product is required.",
     }),
-    status: z.string().optional().nullable(),
-    orderBy: z.number().optional().nullable(),
-    orderDate: z.coerce.string().min(2, {
-      message: "Order Date must be at least 2 characters.",
-    }),
-    deliveryDate: z.coerce.string().min(2, {
-      message: "Delivery Date must be at least 2 characters.",
-    }),
+    status: z.string().optional(),
+    orderBy: z.number().optional(),
+    orderDate: z.string(),
+    deliveryDate: z.string(),
     receivedBy: z.number().optional().nullable(),
-    receivedDate: z.coerce.string().optional().nullable(),
+    receivedDate: z.date().optional().nullable(),
     completedBy: z.number().optional().nullable(),
     cancelledBy: z.number().optional().nullable(),
-    completedDate: z.coerce.string().optional().nullable(),
-    cancelledDate: z.coerce.string().optional().nullable(),
+    completedDate: z.date().optional().nullable(),
+    cancelledDate: z.date().optional().nullable(),
     totalAmount: z.string().optional(),
     supplier: z.any(),
     orderByUser: z.any(),
     receivedByUser: z.any(),
     completedByUser: z.any(),
     cancelledByUser: z.any(),
-    isCheckPayment: z.boolean().optional().nullable(),
-    isCheckPaymentPaid: z.boolean().optional().nullable(),
-    dueDate: z.coerce.string().optional().nullable(),
+    dueDate: z.string().optional(),
     cancellationReason: z.string().optional().nullable(),
+    modeOfPayment: z.enum(
+      Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
+    ),
+    checkNumber: z.string().optional(),
   })
-  .refine((data) => !data.isCheckPayment || data.dueDate, {
-    message: "Due date is required when payment is by check",
-    path: ["dueDate"], // This connects the error to the dueDate field
+  .superRefine((data, ctx) => {
+    if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
+      ctx.addIssue({
+        path: ["checkNumber"],
+        code: z.ZodIssueCode.custom,
+        message: "Check number is required when payment is by check",
+      });
+      ctx.addIssue({
+        path: ["dueDate"],
+        code: z.ZodIssueCode.custom,
+        message: "Due date is required when payment is by check",
+      });
+    }
   });
 
 export const salesOrderItemSchema = z
@@ -180,18 +215,18 @@ export const salesOrderSchema = z.object({
   customer: z.string().min(2, {
     message: "Customer must be at least 2 characters.",
   }),
-  orderDate: z.coerce.string().min(2, {
-    message: "Order Date must be at least 2 characters.",
+  orderDate: z.date({
+    required_error: "Order Date is required",
   }),
-  deliveryDate: z.coerce.string().min(2, {
-    message: "Delivery Date must be at least 2 characters.",
+  deliveryDate: z.date({
+    required_error: "Delivery Date is required",
   }),
   notes: z.string().optional().nullable(),
   salesOrderItems: z.array(salesOrderItemSchema).min(1, {
     message: "At least one item must be added.",
   }),
   status: z.string().optional().nullable(),
-  receivedDate: z.string().optional().nullable(),
+  receivedDate: z.date().optional(),
   totalAmount: z.coerce.number().optional().nullable(),
   orderBy: z.number().optional().nullable(),
   receivedBy: z.number().optional().nullable(),
@@ -206,15 +241,11 @@ export const inventorySchema = z.object({
     message: "Product must be selected.",
   }),
   product: z.any(),
-  quantity: z.coerce.number().min(1, {
-    message: "Quantity must be at least 1.",
-  }),
+  quantity: z.coerce.number().optional().nullable(),
   price: z.coerce.number().min(1, {
     message: "Price must be at least 1.",
   }),
-  updatedAt: z.coerce.string().min(2, {
-    message: "Updated At must be at least 2 characters.",
-  }),
+  updatedAt: z.date(),
 });
 
 export const inventoryTransactionSchema = z.object({
@@ -236,9 +267,7 @@ export const inventoryTransactionSchema = z.object({
   transactionType: z.string().min(2, {
     message: "Transaction Type must be at least 2 characters.",
   }),
-  updatedAt: z.coerce.string().min(2, {
-    message: "Updated At must be at least 2 characters.",
-  }),
+  updatedAt: z.date(),
   orderId: z.number().min(1, {
     message: "Order must be selected.",
   }),

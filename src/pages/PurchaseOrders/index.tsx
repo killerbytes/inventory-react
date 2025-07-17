@@ -1,15 +1,14 @@
 import {
-  PurchaseOrderItem,
   purchaseOrderServices,
   type APIResponse,
   type PurchaseOrder,
 } from "@/services";
 import {
-  ORDER_STATUS,
+  MODE_OF_PAYMENT,
   ORDER_STATUS_OPTIONS,
   PAGINATION,
 } from "@/utils/definitions";
-import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
+import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
 import { Link, useNavigate } from "react-router-dom";
@@ -58,18 +57,11 @@ export default function PurchaseOrders() {
     }
   }, [range]);
 
-  const totalCompletedAmount = React.useMemo(() => {
-    return data.data?.reduce((acc, item) => {
-      return item.status === ORDER_STATUS.COMPLETED.key
-        ? acc + (parseFloat(item.totalAmount) || 0)
-        : acc;
-    }, 0);
-  }, [data]);
-
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await purchaseOrderServices.getAll(filter);
+      console.log(data);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -89,7 +81,11 @@ export default function PurchaseOrders() {
     }));
   }, [page]);
 
-  const columns: ColumnDef<PurchaseOrderItem>[] = [
+  const columns: ColumnDef<PurchaseOrder>[] = [
+    {
+      accessorKey: "purchaseOrderNumber",
+      header: "PO #",
+    },
     {
       accessorKey: "supplier.name",
       header: "Supplier",
@@ -102,14 +98,9 @@ export default function PurchaseOrders() {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
+        const status = row.original.status?.toLowerCase();
         return (
-          <Badge
-            className={cx(
-              `capitalize status-${row.getValue("status").toLowerCase()}`,
-            )}
-          >
-            {row.getValue("status").toLowerCase()}
-          </Badge>
+          <Badge className={cx(`capitalize status-${status}`)}>{status}</Badge>
         );
       },
     },
@@ -117,6 +108,20 @@ export default function PurchaseOrders() {
       accessorKey: "orderDate",
       header: "Order Date",
       cell: ({ row }) => formatDate(row.getValue("orderDate")),
+    },
+    {
+      accessorKey: "deliveryDate",
+      header: "Delivery Date",
+      cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
+    },
+    {
+      accessorKey: "modeOfPayment",
+      header: "Payment Mode",
+      cell: ({ row }) => {
+        return row.getValue("modeOfPayment") === MODE_OF_PAYMENT.CHECK
+          ? row.original.checkNumber
+          : MODE_OF_PAYMENT.CASH;
+      },
     },
     {
       accessorKey: "totalAmount",
@@ -145,20 +150,15 @@ export default function PurchaseOrders() {
       </header>
       <div className="flex gap-2 justify-between">
         <div>
-          <DateRangePicker
-            className="mb-4"
-            field={{
-              value: range,
-              onChange: setRange,
-            }}
-          />
+          <DateRangePicker className="mb-4" value={range} onChange={setRange} />
         </div>
         <div className="w-1/4">
           <Select
             options={ORDER_STATUS_OPTIONS}
+            value={ORDER_STATUS_OPTIONS[0].value}
             onChange={(selected) => {
               if (selected === "ALL") {
-                setFilter(({ status, ...prev }) => ({ ...prev }));
+                setFilter(({ ...prev }) => ({ ...prev, status: "" }));
               } else {
                 setFilter((prev) => ({ ...prev, status: selected }));
               }
@@ -173,14 +173,16 @@ export default function PurchaseOrders() {
           <DataTable
             data={data.data || []}
             columns={columns}
-            onRowClick={(item) => navigate(`/purchases/${item.id}`)}
+            onRowClick={(item: PurchaseOrder) =>
+              navigate(`/purchases/${item.id}`)
+            }
             footer={
               <TableRow>
-                <TableCell colSpan={4}>Total Amount</TableCell>
+                <TableCell colSpan={7}>Total Amount</TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(
                     data.data.reduce(
-                      (acc, item) => acc + parseFloat(item.totalAmount),
+                      (acc, item) => acc + parseFloat(item.totalAmount ?? "0"),
                       0,
                     ),
                   )}

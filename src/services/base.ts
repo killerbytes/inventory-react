@@ -1,6 +1,6 @@
 import type Http from "./http";
 
-export default class BaseService<T> {
+export default class BaseService<T extends object> {
   protected http: Http;
   protected url: string;
 
@@ -17,12 +17,12 @@ export default class BaseService<T> {
     const response = await this.http.get(`${this.url}/`, { params });
     return response;
   };
-  get = async (id: string) => {
+  get = async (id: string | undefined) => {
     const response = await this.http.get(`${this.url}/${id}`);
     return response;
   };
 
-  update = async (id: string, data: any) => {
+  update = async (id: string, data: T) => {
     const response = await this.http.patch(`${this.url}/${id}`, data);
     return response;
   };

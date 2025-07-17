@@ -69,30 +69,8 @@ export default function InventoryTransactions() {
     {
       accessorKey: "orderId",
       header: "Order",
-    },
-    {
-      accessorKey: "inventory.product.name",
-      header: "Name",
-    },
-    {
-      accessorKey: "previousValue",
-      header: "Previous Value",
       meta: {
-        className: "text-right",
-      },
-    },
-    {
-      accessorKey: "newValue",
-      header: "New Value",
-      meta: {
-        className: "text-right",
-      },
-    },
-    {
-      accessorKey: "orderType",
-      header: "Order Type",
-      meta: {
-        className: "text-center",
+        className: "text-center font-medium",
       },
       cell: ({ row }) => {
         return (
@@ -105,8 +83,52 @@ export default function InventoryTransactions() {
       },
     },
     {
+      accessorKey: "inventory.product.name",
+      header: "Name",
+    },
+    {
+      accessorKey: "previousValue",
+      header: () => <div className="text-right">Previous Value</div>,
+      meta: {
+        className: "text-right",
+      },
+    },
+    {
+      accessorKey: "value",
+      header: () => <div className="text-right">Value</div>,
+      meta: {
+        className: "text-right",
+      },
+    },
+    {
+      accessorKey: "newValue",
+      header: () => <div className="text-right">New Value</div>,
+      meta: {
+        className: "text-right",
+      },
+    },
+    // {
+    //   accessorKey: "orderType",
+    //   header: () => <div className="text-center">Order Type</div>,
+    //   meta: {
+    //     className: "text-center",
+    //   },
+    //   cell: ({ row }) => {
+    //     return (
+    //       <Link
+    //         to={`${row.getValue("orderType") === "SALES" ? ROUTES.SALES_ORDERS : ROUTES.PURCHASE_ORDERS}/${row.getValue("orderId")}`}
+    //       >
+    //         {row.getValue("orderId")}
+    //       </Link>
+    //     );
+    //   },
+    // },
+    {
       accessorKey: "transactionType",
       header: "Transaction Type",
+      meta: {
+        className: "text-center",
+      },
       cell: ({ row }) => {
         return (
           <Badge
@@ -129,6 +151,7 @@ export default function InventoryTransactions() {
     {
       accessorKey: "updatedAt",
       header: "Updated At",
+      className: "text-right",
       cell: ({ row }) => formatDateTime(row.getValue("updatedAt")),
     },
   ];
@@ -146,7 +169,7 @@ export default function InventoryTransactions() {
         </Button>
       </div>
 
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear mb-4">
         <div className="flex w-full items-center px-2">
           <h1 className="font-medium">Inventory History</h1>
         </div>

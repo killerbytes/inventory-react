@@ -75,13 +75,17 @@ export default function EditModal({
         <Form {...form}>
           <form
             onSubmit={(e) => {
-              console.log(form.formState.errors);
-              e.preventDefault();
-              form
-                .handleSubmit(onSubmit)(e)
-                .catch((error) => {
-                  console.error("Form submission error:", error);
-                });
+              try {
+                console.log(form.formState.errors);
+                e.preventDefault();
+                form
+                  .handleSubmit(onSubmit)(e)
+                  .catch((error) => {
+                    console.error("Form submission error:", error);
+                  });
+              } catch (error) {
+                console.log("alet", error);
+              }
             }}
             className="space-y-8"
           >

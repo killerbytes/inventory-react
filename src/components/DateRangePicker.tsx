@@ -1,5 +1,4 @@
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import type { ControllerRenderProps } from "react-hook-form";
 import type { DateRange } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "./ui/calendar";
@@ -9,7 +8,8 @@ import { cn } from "@/lib/utils";
 import React from "react";
 
 interface DateRangePickerProps {
-  field: ControllerRenderProps<any, any>;
+  value?: DateRange;
+  onChange: (value: DateRange) => void;
   className?: string;
   placeholder?: string;
   disabled?: (date: Date) => boolean;
@@ -17,7 +17,8 @@ interface DateRangePickerProps {
 }
 
 export default function DateRangePicker({
-  field,
+  value,
+  onChange,
   className,
   placeholder = "Pick a date range",
   disabled,
@@ -27,21 +28,20 @@ export default function DateRangePicker({
 
   const handleSelect = (selectedRange: DateRange | undefined) => {
     if (!selectedRange) {
-      field.onChange({ from: undefined, to: undefined });
+      onChange({ from: undefined, to: undefined });
       return;
     }
 
-    field.onChange(selectedRange);
-
+    onChange(selectedRange);
     // Close the popover only when both dates are selected
     if (selectedRange.from && selectedRange.to) {
-      setOpen(false);
+      // setOpen(false);
     }
   };
 
   const clearSelection = (e: React.MouseEvent) => {
     e.stopPropagation();
-    field.onChange({ from: undefined, to: undefined });
+    onChange({ from: undefined, to: undefined });
   };
 
   return (
@@ -52,24 +52,24 @@ export default function DateRangePicker({
           variant={"outline"}
           className={cn(
             "w-[300px] justify-start text-left font-normal group",
-            !field.value?.from && "text-muted-foreground",
+            !value?.from && "text-muted-foreground",
             className,
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {field.value?.from ? (
-            field.value.to ? (
+          {value?.from ? (
+            value.to ? (
               <>
-                {format(field.value.from, "LLL dd, y")} -{" "}
-                {format(field.value.to, "LLL dd, y")}
+                {format(value.from, "LLL dd, y")} -{" "}
+                {format(value.to, "LLL dd, y")}
               </>
             ) : (
-              format(field.value.from, "LLL dd, y")
+              format(value.from, "LLL dd, y")
             )
           ) : (
             <span>{placeholder}</span>
           )}
-          {field.value?.from && (
+          {value?.from && (
             <span
               className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
               onClick={clearSelection}
@@ -79,14 +79,15 @@ export default function DateRangePicker({
           )}
         </Button>
       </PopoverTrigger>
+      {console.log(value)}
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           initialFocus
           mode="range"
-          defaultMonth={field.value?.from || new Date()}
+          defaultMonth={value?.from || new Date()}
           selected={{
-            from: field.value?.from,
-            to: field.value?.to,
+            from: value?.from,
+            to: value?.to,
           }}
           onSelect={handleSelect}
           numberOfMonths={numberOfMonths}

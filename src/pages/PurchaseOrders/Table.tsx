@@ -29,22 +29,40 @@ export default function Table({
       columns={columns}
       defaultColumn={defaultColumn}
       meta={meta}
-      onUpdate={(data: PurchaseOrderItem[]) => {
-        form.setValue("purchaseOrderItems", data);
-      }}
+      // onUpdate={(data: PurchaseOrderItem[]) => {
+      //   form.setValue("purchaseOrderItems", data);
+      // }}
       tableClassname={cx({
         "border-red-500": errors.purchaseOrderItems,
       })}
       footer={
         <>
           <TableRow>
-            <TableCell></TableCell>
-            <TableCell colSpan={2}>Total Amount</TableCell>
+            {meta?.updateData && <TableCell></TableCell>}
+            <TableCell colSpan={3}>Total Amount</TableCell>
             <TableCell className="text-right">
               {formatCurrency(
                 data.reduce(
                   (acc: number, item: PurchaseOrderItem) =>
                     acc + item.unitPrice * item.quantity,
+                  0,
+                ),
+              )}
+            </TableCell>
+            <TableCell className="text-right">
+              {formatCurrency(
+                data.reduce(
+                  (acc: number, item: PurchaseOrderItem) => acc + item.discount,
+                  0,
+                ),
+              )}
+            </TableCell>
+            <TableCell className="text-right"></TableCell>
+            <TableCell className="text-right">
+              {formatCurrency(
+                data.reduce(
+                  (acc: number, item: PurchaseOrderItem) =>
+                    acc + item.unitPrice * item.quantity - item.discount,
                   0,
                 ),
               )}

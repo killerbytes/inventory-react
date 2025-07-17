@@ -1,20 +1,22 @@
 import {
-  Select,
+  Select as SelectComponent,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
-function SelectComponent<T extends { value: string; label: string }>({
+function Select<T extends { value: string; label: string }>({
   onChange,
   options,
+  value,
 }: {
-  onChange: () => { value: string; label: string };
+  onChange: (value: string) => void;
   options: T[];
+  value: string;
 }) {
   return (
-    <Select defaultValue="ALL" onValueChange={onChange}>
+    <SelectComponent defaultValue={value} onValueChange={onChange}>
       <SelectTrigger className="w-full">
         <SelectValue />
       </SelectTrigger>
@@ -25,8 +27,8 @@ function SelectComponent<T extends { value: string; label: string }>({
           </SelectItem>
         ))}
       </SelectContent>
-    </Select>
+    </SelectComponent>
   );
 }
 
-export default SelectComponent;
+export default Select;

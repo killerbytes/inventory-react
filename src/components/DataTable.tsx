@@ -112,7 +112,7 @@ function DataTable<T>(props) {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className={header.className}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(

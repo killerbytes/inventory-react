@@ -28,12 +28,14 @@ import { GlobalContext } from "@/components/GlobalContext";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Autocomplete from "@/components/Autcomplete";
+import { UNIT_OPTIONS } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { productServices } from "@/services";
 import type { Product } from "../Products";
 import type { PurchaseOrderItem } from ".";
 import React, { useContext } from "react";
+import Select from "@/components/Select";
 import Modal from "@/components/Modal";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -146,6 +148,19 @@ export default function ProductsModal({
                   <FormLabel>Quantity</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="unit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unit</FormLabel>
+                  <FormControl>
+                    <Select {...field} options={UNIT_OPTIONS} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

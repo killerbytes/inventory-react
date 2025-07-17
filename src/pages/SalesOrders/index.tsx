@@ -40,8 +40,21 @@ export default function SalesOrders() {
   const [filter, setFilter] = React.useState({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    status: "",
+    status: "ALL",
+    // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
+    // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
+
+  React.useEffect(() => {
+    const { from, to } = range || {};
+    if (from && to) {
+      setFilter((prev) => ({
+        ...prev,
+        startDate: from.toISOString(),
+        endDate: to.toISOString(),
+      }));
+    }
+  }, [range]);
 
   const getData = React.useCallback(async () => {
     setLoading(true);
@@ -132,6 +145,7 @@ export default function SalesOrders() {
         <div className="w-1/4">
           <Select
             options={ORDER_STATUS_OPTIONS}
+            value={filter.status}
             onChange={(selected) => {
               if (selected === "ALL") {
                 setFilter(({ status, ...prev }) => ({ ...prev }));
@@ -164,7 +178,7 @@ export default function SalesOrders() {
                 </TableCell>
               </TableRow>
             }
-          ></DataTable>
+          />
           {data.totalPages > 1 && (
             <Pager data={data} page={page} setPage={setPage} />
           )}
