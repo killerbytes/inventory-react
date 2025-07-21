@@ -79,7 +79,6 @@ export default function DateRangePicker({
           )}
         </Button>
       </PopoverTrigger>
-      {console.log(value)}
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           initialFocus

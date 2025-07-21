@@ -1,26 +1,27 @@
 import React from "react";
 
 import {
-  inventoryServices,
-  type APIResponse,
-  type Filter,
-  type InventoryTransaction,
-} from "@/services";
-import {
+  ORDER_STATUS_OPTIONS,
   PAGINATION,
   ROUTES,
   TRANSACTION_TYPE,
   TRANSACTION_TYPE_OPTIONS,
 } from "@/utils/definitions";
-import { formatDateTime } from "@/utils/formatters";
+import {
+  inventoryServices,
+  type APIResponse,
+  type Filter,
+  type InventoryTransaction,
+} from "@/services";
+import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import SelectComponent from "@/components/Select";
 import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import Select from "@/components/Select";
 import { MoveLeft } from "lucide-react";
 import Pager from "@/components/Pager";
 
@@ -38,7 +39,7 @@ export default function InventoryTransactions() {
   const [filter, setFilter] = React.useState<Filter>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    q: "",
+    // q: "",
   });
 
   const getData = React.useCallback(async () => {
@@ -46,6 +47,7 @@ export default function InventoryTransactions() {
     try {
       const response = await inventoryServices.transactions(filter);
       const data = response.data;
+
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -75,7 +77,7 @@ export default function InventoryTransactions() {
       cell: ({ row }) => {
         return (
           <Link
-            to={`${row.getValue("orderType") === "SALES" ? ROUTES.SALES_ORDERS : ROUTES.PURCHASE_ORDERS}/${row.getValue("orderId")}`}
+            to={`${row.original.orderType === "SALES" ? ROUTES.SALES_ORDERS : ROUTES.PURCHASE_ORDERS}/${row.getValue("orderId")}`}
           >
             {row.getValue("orderId")}
           </Link>
@@ -92,6 +94,15 @@ export default function InventoryTransactions() {
       meta: {
         className: "text-right",
       },
+      cell: ({ row }) => {
+        return (
+          <div className="text-right">
+            {row.original.transactionType === TRANSACTION_TYPE.ADJUSTMENT
+              ? formatCurrency(row.getValue("previousValue"))
+              : parseInt(row.getValue("previousValue"))}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "value",
@@ -99,12 +110,30 @@ export default function InventoryTransactions() {
       meta: {
         className: "text-right",
       },
+      cell: ({ row }) => {
+        return (
+          <div className="text-right">
+            {row.original.transactionType === TRANSACTION_TYPE.ADJUSTMENT
+              ? formatCurrency(row.getValue("value"))
+              : parseInt(row.getValue("value"))}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "newValue",
       header: () => <div className="text-right">New Value</div>,
       meta: {
         className: "text-right",
+      },
+      cell: ({ row }) => {
+        return (
+          <div className="text-right">
+            {row.original.transactionType === TRANSACTION_TYPE.ADJUSTMENT
+              ? formatCurrency(row.getValue("newValue"))
+              : parseInt(row.getValue("newValue"))}
+          </div>
+        );
       },
     },
     // {
@@ -150,12 +179,10 @@ export default function InventoryTransactions() {
 
     {
       accessorKey: "updatedAt",
-      header: "Updated At",
-      className: "text-right",
+      header: "Modified",
       cell: ({ row }) => formatDateTime(row.getValue("updatedAt")),
     },
   ];
-
   return (
     <div>
       <div>
@@ -174,7 +201,7 @@ export default function InventoryTransactions() {
           <h1 className="font-medium">Inventory History</h1>
         </div>
       </header>
-      <div>
+      <div className="flex gap-2 justify-between">
         <Input
           placeholder="Search history"
           className="w-full mb-4"
@@ -186,83 +213,25 @@ export default function InventoryTransactions() {
             }));
           }}
         />
+        <Select
+          className="mb-4"
+          options={TRANSACTION_TYPE_OPTIONS}
+          value={TRANSACTION_TYPE_OPTIONS[0].value}
+          onChange={(selected) => {
+            console.log(selected);
+            if (selected === "ALL") {
+              setFilter(({ ...prev }) => ({ ...prev, transactionType: "" }));
+            } else {
+              setFilter((prev) => ({ ...prev, transactionType: selected }));
+            }
+          }}
+        />
       </div>
       {loading ? (
         <p>Loading...</p>
       ) : (
         <>
-          <SelectComponent
-            options={TRANSACTION_TYPE_OPTIONS}
-            onChange={(selected) => {
-              if (selected.value === "ALL") {
-                setFilter(({ transactionType, ...prev }) => ({ ...prev }));
-              } else {
-                setFilter((prev) => ({
-                  ...prev,
-                  transactionType: selected.value,
-                }));
-              }
-            }}
-          />
-
-          <DataTable
-            data={data.data || []}
-            columns={columns}
-            // onRowClick={(item) => navigate(`/purchases/${item.id}`)}
-          ></DataTable>
-
-          {/* <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-auto">Order</TableHead>
-                <TableHead className="w-auto">Name</TableHead>
-                <TableHead className="text-right">Previous Value</TableHead>
-                <TableHead className="text-right">New Value</TableHead>
-                <TableHead className="text-right">Order Type</TableHead>
-                <TableHead className="text-right">Transaction Type</TableHead>
-                <TableHead className="text-right">Last Update</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.data?.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">
-                    <Link
-                      to={`${item.orderType === "SALES" ? ROUTES.SALES_ORDERS : ROUTES.PURCHASE_ORDERS}/${item.orderId}`}
-                    >
-                      {item.orderId}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {item.inventory.product.name}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {item.previousValue}
-                  </TableCell>
-                  <TableCell className="text-right">{item.newValue}</TableCell>
-                  <TableCell className="text-right">{item.orderType}</TableCell>
-                  <TableCell className="text-right">
-                    <Badge
-                      className={cx("text-xs", {
-                        "bg-red-500":
-                          item.transactionType ===
-                          TRANSACTION_TYPE.CANCELLATION,
-                        "bg-green-500":
-                          item.transactionType === TRANSACTION_TYPE.PURCHASE,
-                        "bg-yellow-500":
-                          item.transactionType === TRANSACTION_TYPE.SALE,
-                      })}
-                    >
-                      {item.transactionType}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {formatDateTime(item.updatedAt)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table> */}
+          <DataTable data={data.data || []} columns={columns}></DataTable>
 
           <Pager data={data} page={page} setPage={setPage} />
         </>

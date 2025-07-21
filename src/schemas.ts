@@ -108,9 +108,13 @@ export const supplierSchema = z.object({
 });
 
 export const purchaseOrderItemSchema = z.object({
-  productId: z.coerce.number().min(1, {
-    message: "Product must be selected.",
-  }),
+  id: z.coerce.number().optional().nullable(),
+  productId: z.coerce
+    .number()
+    .min(1, {
+      message: "Product must be selected.",
+    })
+    .nullable(),
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
@@ -153,23 +157,23 @@ export const purchaseOrderSchema = z
     orderDate: z.string(),
     deliveryDate: z.string(),
     receivedBy: z.number().optional().nullable(),
-    receivedDate: z.date().optional().nullable(),
+    receivedDate: z.string().optional().nullable(),
     completedBy: z.number().optional().nullable(),
     cancelledBy: z.number().optional().nullable(),
-    completedDate: z.date().optional().nullable(),
-    cancelledDate: z.date().optional().nullable(),
+    completedDate: z.string().optional().nullable(),
+    cancelledDate: z.string().optional().nullable(),
     totalAmount: z.string().optional(),
     supplier: z.any(),
     orderByUser: z.any(),
     receivedByUser: z.any(),
     completedByUser: z.any(),
     cancelledByUser: z.any(),
-    dueDate: z.string().optional(),
+    dueDate: z.string().optional().nullable(),
     cancellationReason: z.string().optional().nullable(),
     modeOfPayment: z.enum(
       Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
     ),
-    checkNumber: z.string().optional(),
+    checkNumber: z.string().optional().nullable(),
   })
   .superRefine((data, ctx) => {
     if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
@@ -245,7 +249,7 @@ export const inventorySchema = z.object({
   price: z.coerce.number().min(1, {
     message: "Price must be at least 1.",
   }),
-  updatedAt: z.date(),
+  updatedAt: z.string(),
 });
 
 export const inventoryTransactionSchema = z.object({

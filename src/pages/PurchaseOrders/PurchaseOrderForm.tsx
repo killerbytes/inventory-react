@@ -16,7 +16,6 @@ import {
   FieldArrayWithId,
   useFieldArray,
   UseFormReturn,
-  useWatch,
 } from "react-hook-form";
 import { MODE_OF_PAYMENT_OPTIONS, UNIT_OPTIONS } from "@/utils/definitions";
 import { useProductStore, useSupplierStore } from "@/stores";
@@ -29,7 +28,6 @@ import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import useDebounce from "@/hooks/useDebounce";
 import ProductsModal from "./ProductsModal";
 import { Plus, Trash2 } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
@@ -39,13 +37,8 @@ import React from "react";
 
 export default function PurchaseOrderForm({
   form,
-  onSubmit,
-  isCreate = false,
-  readOnly,
 }: {
   form: UseFormReturn<PurchaseOrder>;
-  onSubmit: (values: PurchaseOrder) => void;
-  isCreate?: boolean;
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
   const { products, setProducts } = useProductStore();
@@ -62,11 +55,12 @@ export default function PurchaseOrderForm({
   const { fields, append, update, remove } = useFieldArray({
     control,
     name: "purchaseOrderItems",
+    keyName: "fieldId",
   });
 
-  const formData = useWatch({ control: form.control });
+  const modeOfPayment = form.watch("modeOfPayment");
 
-  const exclude = fields.map((item) => item.product?.id);
+  const exclude = fields.map((item) => item.productId);
   const items = exclude
     ? products.filter((p) => !exclude?.includes(p.id))
     : products;
@@ -108,6 +102,9 @@ export default function PurchaseOrderForm({
     {
       accessorKey: "product",
       header: "Product",
+      meta: {
+        className: "w-2/8",
+      },
       cell: ({ row }) => (
         <Autocomplete
           value={row.getValue("product")}
@@ -130,18 +127,17 @@ export default function PurchaseOrderForm({
       header: () => <div className="text-right">Quantity</div>,
       accessorKey: "quantity",
       id: "quantity",
-      size: 10,
       meta: {
-        className: "text-right",
+        className: "text-right w-1/8",
       },
     },
     {
       header: "Unit",
       accessorKey: "unit",
       id: "unit",
-      size: 10,
+      size: 1000,
       meta: {
-        className: "text-right",
+        className: "text-right w-1/8",
       },
       cell: ({ row }) => (
         <div className="font-medium">
@@ -159,7 +155,7 @@ export default function PurchaseOrderForm({
       header: () => <div className="text-right">Unit Price</div>,
       accessorKey: "unitPrice",
       id: "unitPrice",
-
+      size: 10,
       meta: {
         className: "text-right",
         type: "currency",
@@ -216,31 +212,6 @@ export default function PurchaseOrderForm({
       }
     },
   };
-
-  const debouncedFormData = useDebounce(formData, 500);
-
-  const saveDraft = React.useCallback(() => {
-    const draft =
-      JSON.parse(
-        localStorage.getItem(
-          `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
-        ) as string,
-      ) || {};
-    const newDraft = { ...form.getValues() };
-
-    if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
-      localStorage.setItem(
-        `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
-        JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v)),
-      );
-    }
-  }, [form]);
-
-  React.useEffect(() => {
-    if (isCreate) {
-      saveDraft();
-    }
-  }, [debouncedFormData, saveDraft]);
 
   return (
     <>
@@ -328,15 +299,12 @@ export default function PurchaseOrderForm({
               <FormItem
                 className={cx(
                   "mb-4",
-                  formData.modeOfPayment !== "CHECK" && "opacity-50",
+                  modeOfPayment !== "CHECK" && "opacity-50",
                 )}
               >
                 <FormLabel>Check Number</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    disabled={formData.modeOfPayment !== "CHECK"}
-                  />
+                  <Input {...field} disabled={modeOfPayment !== "CHECK"} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -349,10 +317,7 @@ export default function PurchaseOrderForm({
           render={({ field }) => (
             <FormItem className="mb-4">
               <FormLabel>Due Date</FormLabel>
-              <DatePicker
-                {...field}
-                disabled={formData.modeOfPayment !== "CHECK"}
-              />
+              <DatePicker {...field} disabled={modeOfPayment !== "CHECK"} />
               <FormMessage />
             </FormItem>
           )}
@@ -414,7 +379,6 @@ export default function PurchaseOrderForm({
                   columns={columns}
                   defaultColumn={defaultColumn}
                   meta={meta}
-                  form={form}
                   errors={errors}
                 />
               </FormControl>
@@ -423,23 +387,46 @@ export default function PurchaseOrderForm({
           )}
         />
       </div>
-      <div className="mt-auto mb-4 align-bottom flex">
-        <Button
-          className="mt-auto ml-auto"
-          onClick={(e) => {
-            e.preventDefault();
-            console.log(form.getValues(), form.formState.errors);
-            form
-              .handleSubmit(onSubmit)(e)
-              .catch((error) => {
-                console.error("Form submission error:", error);
-              });
-          }}
-          type="button"
-        >
+      {/* <div className="mt-auto mb-4 align-bottom flex">
+        <Button className="mt-auto ml-auto" type="button">
           {isCreate ? "Create Order" : "Receive Order"}
         </Button>
-      </div>
+
+        <div className="flex items-center">
+          <Button
+            variant="outline"
+            className={"rounded-r-none"}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              console.log(form.getValues(), form.formState.errors);
+              form
+                .handleSubmit(onSubmit)(e)
+                .catch((error) => {
+                  console.error("Form submission error:", error);
+                });
+            }}
+          >
+            Receive Order
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className={"rounded-l-none border-l-0 px-2"}
+              >
+                <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>
+                <Save />
+                Save
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div> */}
 
       {toggle.addProductsModal && (
         <ProductsModal

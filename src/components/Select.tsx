@@ -5,19 +5,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cx } from "class-variance-authority";
 
 function Select<T extends { value: string; label: string }>({
   onChange,
   options,
   value,
+  className,
 }: {
   onChange: (value: string) => void;
   options: T[];
   value: string;
+  className?: string;
 }) {
   return (
     <SelectComponent defaultValue={value} onValueChange={onChange}>
-      <SelectTrigger className="w-full">
+      <SelectTrigger className={cx("w-full", className)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

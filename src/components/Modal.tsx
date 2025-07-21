@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import React from "react";
 
 export default function Modal({
   isOpen,
@@ -19,7 +19,6 @@ export default function Modal({
   title: string;
   description?: string;
   children: React.ReactNode;
-  footer?: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(isOpen);
 
@@ -27,7 +26,7 @@ export default function Modal({
     <Dialog
       open={open}
       onOpenChange={() => {
-        setOpen(!open);
+        setOpen(false);
         setTimeout(() => {
           onOpenChange();
         }, 500);

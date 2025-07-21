@@ -11,6 +11,7 @@ import {
   signupSchema,
   inventorySchema,
   inventoryTransactionSchema,
+  purchaseOrderCreateSchema,
 } from "../schemas";
 import PurchaseOrderService from "./purchaseOrder";
 import SalesOrderService from "./salesOrder";
@@ -71,6 +72,7 @@ type Category = z.infer<typeof categorySchema>;
 type Product = z.infer<typeof productSchema>;
 type Supplier = z.infer<typeof supplierSchema>;
 type PurchaseOrder = z.infer<typeof purchaseOrderSchema>;
+type PurchaseOrderCreate = z.infer<typeof purchaseOrderCreateSchema>;
 type PurchaseOrderItem = z.infer<typeof purchaseOrderItemSchema>;
 type SalesOrder = z.infer<typeof salesOrderSchema>;
 type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
@@ -84,6 +86,7 @@ export type {
   Category,
   Product,
   Supplier,
+  PurchaseOrderCreate,
   PurchaseOrder,
   PurchaseOrderItem,
   SalesOrder,

@@ -9,13 +9,31 @@ import { useForm, useWatch } from "react-hook-form";
 import { MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
 import PurchaseOrderForm from "./PurchaseOrderForm";
 import { Button } from "@/components/ui/button";
+import { purchaseOrderSchema } from "@/schemas";
+import useDebounce from "@/hooks/useDebounce";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router";
 import { MoveLeft } from "lucide-react";
-import validations from "@/schemas";
 import { addWeeks } from "date-fns";
 import { toast } from "sonner";
+import React from "react";
 import * as z from "zod";
+
+const purchaseOrderItemDefault = {
+  quantity: 1,
+  discountNote: "",
+};
+
+const purchaseOrderDefault = {
+  purchaseOrderNumber: "123123123",
+  supplierId: 1,
+  modeOfPayment: MODE_OF_PAYMENT_OPTIONS[1].value,
+  orderDate: new Date().toISOString(),
+  deliveryDate: new Date().toISOString(),
+  checkNumber: "",
+  dueDate: addWeeks(new Date(), 1).toISOString(),
+  purchaseOrderItems: Array.from({ length: 5 }, () => purchaseOrderItemDefault),
+};
 
 export default function Create() {
   const navigate = useNavigate();
@@ -28,17 +46,7 @@ export default function Create() {
           `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
         ) as string,
       )
-    : {
-        purchaseOrderNumber: "",
-        modeOfPayment: MODE_OF_PAYMENT_OPTIONS[1].value,
-        orderDate: new Date().toISOString(),
-        deliveryDate: new Date().toISOString(),
-        checkNumber: "",
-        dueDate: addWeeks(new Date(), 1).toISOString(),
-        purchaseOrderItems: [],
-      };
-
-  const { purchaseOrderSchema } = validations;
+    : purchaseOrderDefault;
 
   const form = useForm<PurchaseOrder>({
     resolver: zodResolver(purchaseOrderSchema),
@@ -47,8 +55,7 @@ export default function Create() {
 
   async function onSubmit(values: PurchaseOrder) {
     try {
-      const { supplier, ...rest } = values;
-      await purchaseOrderServices.create(rest);
+      await purchaseOrderServices.create(values);
       toast.success(`Purchase Order created successfully`);
       localStorage.removeItem(
         `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
@@ -77,6 +84,38 @@ export default function Create() {
     }
   }
 
+  // async function onSaveDraft() {
+  //   try {
+  //     console.log(form.getValues());
+  //   } catch (error) {
+  //     toast.error("Submission failed");
+  //   }
+  // }
+
+  const saveDraft = React.useCallback(() => {
+    const draft =
+      JSON.parse(
+        localStorage.getItem(
+          `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
+        ) as string,
+      ) || {};
+    const newDraft = { ...form.getValues() };
+
+    if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
+      localStorage.setItem(
+        `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
+        JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v)),
+      );
+    }
+  }, [form]);
+  const formData = useWatch({ control: form.control });
+
+  const debouncedFormData = useDebounce(formData, 500);
+
+  React.useEffect(() => {
+    // saveDraft();
+  }, [debouncedFormData, saveDraft]);
+
   return (
     <>
       <div>
@@ -91,7 +130,32 @@ export default function Create() {
       </div>
       <h2 className="mb-4">Create Purchase Order</h2>
       <Form {...form}>
-        <PurchaseOrderForm form={form} onSubmit={onSubmit} isCreate />
+        <PurchaseOrderForm form={form} />
+
+        <div className="flex justify-end mt-auto mb-10">
+          <Button
+            // className={"rounded-r-none"}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              const { purchaseOrderItems, ...rest } = form.getValues();
+
+              form.reset({
+                ...rest,
+                purchaseOrderItems: purchaseOrderItems.filter(
+                  (item) => item.productId,
+                ),
+              });
+              form
+                .handleSubmit(onSubmit)(e)
+                .catch((error) => {
+                  console.error("Form submission error:", error);
+                });
+            }}
+          >
+            Create Order
+          </Button>
+        </div>
       </Form>
     </>
   );

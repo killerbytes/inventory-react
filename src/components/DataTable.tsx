@@ -51,7 +51,6 @@ function DataTable<T>(props) {
     onRowClick?: (item: T) => void;
     onUpdate?: (data: T[]) => void;
   } = props;
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -79,7 +78,9 @@ function DataTable<T>(props) {
       columnVisibility,
       rowSelection,
     },
+    manualPagination: true,
   });
+
   const handleRemoveSelected = () => {
     const filteredData = table
       .getFilteredRowModel()

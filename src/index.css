@@ -177,6 +177,7 @@ h4 {
 div[class*="status-"] {
   @apply text-white px-2 py-1;
 }
+.status-cash,
 .status-completed {
   @apply bg-green-500;
 }
@@ -189,7 +190,7 @@ div[class*="status-"] {
 .status-cancelled {
   @apply bg-red-500;
 }
-.status-check-payment {
+.status-check {
   @apply bg-yellow-500;
 }
 

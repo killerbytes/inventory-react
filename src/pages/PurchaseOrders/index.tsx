@@ -17,9 +17,9 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
+import Badge from "@/components/Badge";
 import { Plus } from "lucide-react";
 import React from "react";
 
@@ -61,7 +61,6 @@ export default function PurchaseOrders() {
     setLoading(true);
     try {
       const { data } = await purchaseOrderServices.getAll(filter);
-      console.log(data);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -99,9 +98,7 @@ export default function PurchaseOrders() {
       header: "Status",
       cell: ({ row }) => {
         const status = row.original.status?.toLowerCase();
-        return (
-          <Badge className={cx(`capitalize status-${status}`)}>{status}</Badge>
-        );
+        return <Badge type={status} />;
       },
     },
     {
@@ -118,9 +115,7 @@ export default function PurchaseOrders() {
       accessorKey: "modeOfPayment",
       header: "Payment Mode",
       cell: ({ row }) => {
-        return row.getValue("modeOfPayment") === MODE_OF_PAYMENT.CHECK
-          ? row.original.checkNumber
-          : MODE_OF_PAYMENT.CASH;
+        return <Badge type={row.original.modeOfPayment} />;
       },
     },
     {

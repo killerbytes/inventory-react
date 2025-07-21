@@ -33,6 +33,7 @@ export const TRANSACTION_TYPE = {
   SALE: "SALE",
   PURCHASE: "PURCHASE",
   CANCELLATION: "CANCELLATION",
+  ADJUSTMENT: "ADJUSTMENT",
 };
 
 export const TRANSACTION_TYPE_OPTIONS = [
@@ -54,26 +55,10 @@ export const DATETIME_FORMAT = "MMM-dd-yy h:mm:ss a";
 export const STATUS = ["PENDING", "RECEIVED", "COMPLETED", "CANCELLED"];
 
 export const ORDER_STATUS = {
-  PENDING: {
-    key: "PENDING",
-    label: "Pending",
-    description: "Order is pending, waiting for delivery",
-  },
-  RECEIVED: {
-    key: "RECEIVED",
-    label: "Received",
-    description: "Order has been received by the hardware",
-  },
-  COMPLETED: {
-    key: "COMPLETED",
-    label: "Completed",
-    description: "Order has been completed",
-  },
-  CANCELLED: {
-    key: "CANCELLED",
-    label: "Cancelled",
-    description: "Order has been cancelled",
-  },
+  PENDING: "PENDING",
+  RECEIVED: "RECEIVED",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
 };
 
 export const MODE_OF_PAYMENT = {
@@ -89,9 +74,9 @@ export const MODE_OF_PAYMENT_OPTIONS = [
 export const UNIT = {
   BOX: "BOX",
   BAG: "BAG",
-  CAN: "CAN",
-  KG: "KG",
-  LB: "LB",
+  GAL: "GAL",
+  PACK: "PACK",
+  SET: "SET",
   PCS: "PCS",
 };
 

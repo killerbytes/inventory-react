@@ -1,7 +1,7 @@
-import { FieldArrayWithId, FieldErrors, UseFormReturn } from "react-hook-form";
+import { PurchaseOrder, type PurchaseOrderItem } from "@/services";
+import { FieldArrayWithId, FieldErrors } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/utils/formatters";
-import { type PurchaseOrderItem } from "@/services";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { cx } from "class-variance-authority";
@@ -9,10 +9,9 @@ import { cx } from "class-variance-authority";
 type TableProps = {
   data: PurchaseOrderItem[];
   columns: ColumnDef<FieldArrayWithId<PurchaseOrderItem>>[];
-  defaultColumn: Partial<ColumnDef<FieldArrayWithId<PurchaseOrderItem>>>;
-  meta: object;
-  form: UseFormReturn<T>;
-  errors: FieldErrors<T>;
+  defaultColumn?: Partial<ColumnDef<FieldArrayWithId<PurchaseOrderItem>>>;
+  meta?: object;
+  errors: FieldErrors<PurchaseOrder>;
 };
 
 export default function Table({
@@ -20,7 +19,6 @@ export default function Table({
   columns,
   defaultColumn,
   meta,
-  form,
   errors,
 }: TableProps) {
   return (
@@ -29,9 +27,6 @@ export default function Table({
       columns={columns}
       defaultColumn={defaultColumn}
       meta={meta}
-      // onUpdate={(data: PurchaseOrderItem[]) => {
-      //   form.setValue("purchaseOrderItems", data);
-      // }}
       tableClassname={cx({
         "border-red-500": errors.purchaseOrderItems,
       })}
@@ -52,7 +47,8 @@ export default function Table({
             <TableCell className="text-right">
               {formatCurrency(
                 data.reduce(
-                  (acc: number, item: PurchaseOrderItem) => acc + item.discount,
+                  (acc: number, item: PurchaseOrderItem) =>
+                    acc + parseFloat(item.discount?.toString() ?? "0"),
                   0,
                 ),
               )}
@@ -62,7 +58,9 @@ export default function Table({
               {formatCurrency(
                 data.reduce(
                   (acc: number, item: PurchaseOrderItem) =>
-                    acc + item.unitPrice * item.quantity - item.discount,
+                    acc +
+                    item.unitPrice * item.quantity -
+                    parseFloat(item.discount?.toString() ?? "0"),
                   0,
                 ),
               )}
