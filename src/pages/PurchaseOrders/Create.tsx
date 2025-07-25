@@ -6,33 +6,41 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 
-import { MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
-import PurchaseOrderForm from "./PurchaseOrderForm";
+import {
+  MODE_OF_PAYMENT_OPTIONS,
+  ORDER_STATUS,
+  ROUTES,
+} from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { purchaseOrderSchema } from "@/schemas";
 import useDebounce from "@/hooks/useDebounce";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router";
+import OrderForm from "./Form/OrderForm";
 import { MoveLeft } from "lucide-react";
+import { randomInt } from "@/lib/utils";
 import { addWeeks } from "date-fns";
 import { toast } from "sonner";
 import React from "react";
 import * as z from "zod";
 
 const purchaseOrderItemDefault = {
+  productId: null,
   quantity: 1,
+  unit: "",
+  discount: null,
   discountNote: "",
 };
 
 const purchaseOrderDefault = {
-  purchaseOrderNumber: "123123123",
-  supplierId: 1,
-  modeOfPayment: MODE_OF_PAYMENT_OPTIONS[1].value,
+  purchaseOrderNumber: randomInt(1000000, 9999999).toString(),
+  supplierId: randomInt(1, 100),
+  modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
   orderDate: new Date().toISOString(),
   deliveryDate: new Date().toISOString(),
   checkNumber: "",
   dueDate: addWeeks(new Date(), 1).toISOString(),
-  purchaseOrderItems: Array.from({ length: 5 }, () => purchaseOrderItemDefault),
+  purchaseOrderItems: Array.from({ length: 1 }, () => purchaseOrderItemDefault),
 };
 
 export default function Create() {
@@ -52,6 +60,8 @@ export default function Create() {
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues,
   });
+
+  const data = useWatch({ control: form.control, name: "purchaseOrderItems" });
 
   async function onSubmit(values: PurchaseOrder) {
     try {
@@ -110,12 +120,11 @@ export default function Create() {
   }, [form]);
   const formData = useWatch({ control: form.control });
 
-  const debouncedFormData = useDebounce(formData, 500);
+  const debouncedFormData = useDebounce(formData, 1000);
 
   React.useEffect(() => {
     // saveDraft();
   }, [debouncedFormData, saveDraft]);
-
   return (
     <>
       <div>
@@ -130,21 +139,21 @@ export default function Create() {
       </div>
       <h2 className="mb-4">Create Purchase Order</h2>
       <Form {...form}>
-        <PurchaseOrderForm form={form} />
+        <OrderForm form={form} />
 
         <div className="flex justify-end mt-auto mb-10">
           <Button
-            // className={"rounded-r-none"}
             type="button"
             onClick={(e) => {
               e.preventDefault();
               const { purchaseOrderItems, ...rest } = form.getValues();
-
+              const valid = purchaseOrderItems.filter((item) => item.productId);
+              console.log(form.formState.errors);
               form.reset({
                 ...rest,
-                purchaseOrderItems: purchaseOrderItems.filter(
-                  (item) => item.productId,
-                ),
+                purchaseOrderItems: valid.length
+                  ? valid
+                  : [purchaseOrderItemDefault],
               });
               form
                 .handleSubmit(onSubmit)(e)
@@ -157,6 +166,7 @@ export default function Create() {
           </Button>
         </div>
       </Form>
+      {JSON.stringify(data)}
     </>
   );
 }

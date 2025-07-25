@@ -5,7 +5,7 @@ export default function Badge({
   type,
   children,
 }: {
-  type: string | undefined;
+  type?: string | undefined;
   children?: React.ReactNode;
 }) {
   const status = type?.toLowerCase();

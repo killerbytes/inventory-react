@@ -1,3 +1,5 @@
+import { titleCase } from "title-case";
+
 export const ROUTES = {
   DASHBOARD: "/",
   LOGIN: "/login",
@@ -21,14 +23,6 @@ export const ORDER_TYPE = {
   PURCHASE: "PURCHASE",
 };
 
-export const ORDER_STATUS_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "PENDING", label: "Pending" },
-  { value: "RECEIVED", label: "Received" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "CANCELLED", label: "Cancelled" },
-];
-
 export const TRANSACTION_TYPE = {
   SALE: "SALE",
   PURCHASE: "PURCHASE",
@@ -36,12 +30,12 @@ export const TRANSACTION_TYPE = {
   ADJUSTMENT: "ADJUSTMENT",
 };
 
-export const TRANSACTION_TYPE_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "SALE", label: "Sale" },
-  { value: "PURCHASE", label: "Purchase" },
-  { value: "CANCELLATION", label: "Cancellation" },
-];
+export const TRANSACTION_TYPE_OPTIONS = Object.values(TRANSACTION_TYPE).map(
+  (value) => ({
+    value,
+    label: titleCase(value.toLowerCase()),
+  }),
+);
 
 export const PAGINATION = {
   PAGE: 1,
@@ -55,21 +49,30 @@ export const DATETIME_FORMAT = "MMM-dd-yy h:mm:ss a";
 export const STATUS = ["PENDING", "RECEIVED", "COMPLETED", "CANCELLED"];
 
 export const ORDER_STATUS = {
+  ALL: "ALL",
   PENDING: "PENDING",
   RECEIVED: "RECEIVED",
   COMPLETED: "COMPLETED",
   CANCELLED: "CANCELLED",
 };
+export const ORDER_STATUS_OPTIONS = Object.values(ORDER_STATUS).map(
+  (value) => ({
+    value,
+    label: titleCase(value.toLowerCase()),
+  }),
+);
 
 export const MODE_OF_PAYMENT = {
   CASH: "CASH",
   CHECK: "CHECK",
 } as const;
 
-export const MODE_OF_PAYMENT_OPTIONS = [
-  { value: "CASH", label: "Cash" },
-  { value: "CHECK", label: "Check" },
-];
+export const MODE_OF_PAYMENT_OPTIONS = Object.values(MODE_OF_PAYMENT).map(
+  (value) => ({
+    value,
+    label: titleCase(value.toLowerCase()),
+  }),
+);
 
 export const UNIT = {
   BOX: "BOX",
@@ -80,11 +83,7 @@ export const UNIT = {
   PCS: "PCS",
 };
 
-export const UNIT_OPTIONS = [
-  { value: "BOX", label: "Box" },
-  { value: "BAG", label: "Bag" },
-  { value: "GAL", label: "Gal" },
-  { value: "PACK", label: "Pack" },
-  { value: "SET", label: "Set" },
-  { value: "PCS", label: "Pcs" },
-];
+export const UNIT_OPTIONS = Object.values(UNIT).map((value) => ({
+  value,
+  label: titleCase(value.toLowerCase()),
+}));

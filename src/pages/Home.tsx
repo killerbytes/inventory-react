@@ -1,17 +1,17 @@
-import { categoryServices } from "@/services";
 import React from "react";
+import axios from "axios";
 
 export default function Home() {
   const getData = async () => {
-    try {
-      const response = await categoryServices.getAll({
-        limit: 10,
-        page: 1,
-      });
-      const data = response.data;
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+    // try {
+    //   const response = await categoryServices.getAll({
+    //     limit: 10,
+    //     page: 1,
+    //   });
+    //   const data = response.data;
+    // } catch (error) {
+    //   console.error("Error fetching data:", error);
+    // }
   };
 
   React.useEffect(() => {

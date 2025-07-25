@@ -15,9 +15,12 @@ import {
   HomeIcon,
   Target,
 } from "lucide-react";
+import { formatDateTime } from "@/utils/formatters";
 import { ROUTES } from "@/utils/definitions";
 import { Link } from "react-router";
 import Header from "./Header";
+import React from "react";
+import axios from "axios";
 
 const items = [
   {
@@ -43,6 +46,16 @@ const items = [
 ];
 
 export default function AppSidebar() {
+  const [build, setBuild] = React.useState("");
+
+  React.useEffect(() => {
+    const getData = async () => {
+      const res = await axios.get("/data.json");
+      setBuild(res.data.build);
+    };
+    getData();
+  }, []);
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -69,6 +82,10 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <footer className="bg-foreground text-background py-4 text-center mt-auto">
+          &copy; {new Date().getFullYear()} My Hardware.{" "}
+          <div className="text-xs">{formatDateTime(build)}</div>
+        </footer>
       </SidebarContent>
     </Sidebar>
   );

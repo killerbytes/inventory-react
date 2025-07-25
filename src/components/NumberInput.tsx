@@ -5,8 +5,9 @@ export default function NumberInput({
   value,
   onChange,
   type = "number",
+  ...props
 }: {
-  value: number;
+  value: number | null | undefined;
   onChange: (value: number) => void;
   type?: "number" | "currency";
 }) {
@@ -16,6 +17,7 @@ export default function NumberInput({
 
   return (
     <NumericFormat
+      {...props}
       value={value}
       onFocus={onFocus}
       onValueChange={(values) => {

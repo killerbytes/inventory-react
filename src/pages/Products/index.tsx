@@ -9,6 +9,8 @@ import {
 import React from "react";
 
 import { productServices, type APIResponse, type Product } from "@/services";
+import { DataTable } from "@/components/DataTable";
+import { ColumnDef } from "@tanstack/react-table";
 import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,7 +73,7 @@ export default function Products() {
       order: prev.sort === sort && prev.order === "asc" ? "desc" : "asc",
     }));
   };
-  const columns = [
+  const columnsxx = [
     {
       title: "Name",
       dataIndex: "name",
@@ -98,6 +100,31 @@ export default function Products() {
     {
       dataIndex: "actions",
       key: "actions",
+    },
+  ];
+
+  const columns: ColumnDef<Product>[] = [
+    {
+      accessorKey: "name",
+      header: "Product",
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+    },
+    {
+      accessorKey: "category.name",
+      header: "Category",
+      meta: { className: "w-20" },
+    },
+    {
+      accessorKey: "reorderLevel",
+      header: () => <div className="text-right">Reorder Level</div>,
+      meta: { className: "text-right w-10" },
+    },
+    {
+      accessorKey: "unit",
+      header: "Unit",
     },
   ];
 
@@ -135,7 +162,13 @@ export default function Products() {
         <p>Loading...</p>
       ) : (
         <>
-          <Table>
+          <DataTable
+            data={data?.data || []}
+            columns={columns}
+            className="mb-8"
+          />
+
+          {/* <Table>
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
@@ -180,7 +213,7 @@ export default function Products() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </Table> */}
           <Pager data={data} page={page} setPage={setPage} />
         </>
       )}

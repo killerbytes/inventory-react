@@ -96,6 +96,11 @@ export default function Inventory() {
       header: "Description",
     },
     {
+      accessorKey: "product.reorderLevel",
+      header: () => <div className="text-right">Reorder Level</div>,
+      meta: { className: "text-right" },
+    },
+    {
       accessorKey: "quantity",
       header: () => <div className="text-right">Quantity</div>,
       meta: {
@@ -113,9 +118,8 @@ export default function Inventory() {
       ),
     },
     {
-      accessorKey: "product.reorderLevel",
-      header: () => <div className="text-right">Reorder Level</div>,
-      meta: { className: "text-right" },
+      accessorKey: "product.unit",
+      header: "Unit",
     },
     {
       accessorKey: "price",

@@ -12,28 +12,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  FieldArrayWithId,
-  useFieldArray,
-  UseFormReturn,
-} from "react-hook-form";
-import { MODE_OF_PAYMENT_OPTIONS, UNIT_OPTIONS } from "@/utils/definitions";
+import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
 import { useProductStore, useSupplierStore } from "@/stores";
-import EditableCell from "@/components/EditableCell";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
-import { formatCurrency } from "@/utils/formatters";
-import { ColumnDef } from "@tanstack/react-table";
+import NumberInput from "@/components/NumberInput";
 import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
+import ProductList from "../Table/ProductList";
+import { Amount, Table, Unit } from "../Table";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import ProductsModal from "./ProductsModal";
 import { Plus, Trash2 } from "lucide-react";
-import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
-import Table from "./Table";
-import React from "react";
+import React, { useMemo } from "react";
 
 export default function PurchaseOrderForm({
   form,
@@ -42,28 +36,21 @@ export default function PurchaseOrderForm({
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
   const { products, setProducts } = useProductStore();
-  const [toggle, handleToggle] = useToggle({
-    addProductsModal: false,
-    addItemModal: false,
-  });
 
   const {
     control,
+    register,
+    setValue,
     formState: { errors },
   } = form;
 
-  const { fields, append, update, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "purchaseOrderItems",
     keyName: "fieldId",
   });
 
   const modeOfPayment = form.watch("modeOfPayment");
-
-  const exclude = fields.map((item) => item.productId);
-  const items = exclude
-    ? products.filter((p) => !exclude?.includes(p.id))
-    : products;
 
   React.useEffect(() => {
     const getData = async () => {
@@ -85,133 +72,134 @@ export default function PurchaseOrderForm({
     }
   }, []);
 
-  const removeSelected = (value) => {
+  const removeSelected = (value: Row<PurchaseOrderItem>) => {
     remove(value.index);
   };
 
-  const columns: ColumnDef<FieldArrayWithId<PurchaseOrderItem>>[] = [
-    {
-      id: "select",
-      size: 1,
-      cell: ({ row }) => (
-        <Button onClick={() => removeSelected(row)} variant="outline">
-          <Trash2 />
-        </Button>
-      ),
-    },
-    {
-      accessorKey: "product",
-      header: "Product",
-      meta: {
-        className: "w-2/8",
+  const columns = useMemo<ColumnDef<PurchaseOrderItem>[]>(
+    () => [
+      {
+        accessorKey: "index",
+        header: "#",
+        meta: {
+          className: "w-0",
+        },
+        cell: ({ row }) => (
+          <Button onClick={() => removeSelected(row)} variant="outline">
+            <Trash2 />
+          </Button>
+        ),
       },
-      cell: ({ row }) => (
-        <Autocomplete
-          value={row.getValue("product")}
-          items={items}
-          placeholder="Product"
-          onChange={(value) => {
-            // meta.updateData(row.index, "product", value);
-            console.log(row.original, value);
-            update(row.index, {
-              ...row.original,
-              productId: value.id,
-              product: value,
-            });
-            // meta.updateData(row.index, "productId", value.id);
-          }}
-        />
-      ),
-    },
-    {
-      header: () => <div className="text-right">Quantity</div>,
-      accessorKey: "quantity",
-      id: "quantity",
-      meta: {
-        className: "text-right w-1/8",
+      {
+        accessorKey: "productId",
+        header: "Product",
+        meta: {
+          className: "w-100",
+        },
+        cell: ({ row }) => {
+          return (
+            <Controller
+              name={`purchaseOrderItems.${row.index}.productId`}
+              control={control}
+              render={({ field }) => (
+                <ProductList
+                  control={control}
+                  products={products}
+                  field={field}
+                />
+              )}
+            />
+          );
+        },
       },
-    },
-    {
-      header: "Unit",
-      accessorKey: "unit",
-      id: "unit",
-      size: 1000,
-      meta: {
-        className: "text-right w-1/8",
-      },
-      cell: ({ row }) => (
-        <div className="font-medium">
-          <Select
-            value={row.getValue("unit")}
-            onChange={(value) => {
-              meta.updateData(row.index, "unit", value);
+      {
+        accessorKey: "unitPrice",
+        header: "Unit Price",
+        meta: {
+          className: "text-right w-32",
+        },
+        cell: ({ row }) => (
+          <Controller
+            name={`purchaseOrderItems.${row.index}.unitPrice`}
+            control={control}
+            render={(props) => {
+              const { field } = props;
+              const error = errors?.purchaseOrderItems?.[row.index]?.unitPrice;
+
+              return (
+                <NumberInput
+                  {...field}
+                  type="currency"
+                  aria-invalid={error ? "true" : "false"}
+                />
+              );
             }}
-            options={UNIT_OPTIONS}
           />
-        </div>
-      ),
-    },
-    {
-      header: () => <div className="text-right">Unit Price</div>,
-      accessorKey: "unitPrice",
-      id: "unitPrice",
-      size: 10,
-      meta: {
-        className: "text-right",
-        type: "currency",
+        ),
       },
-    },
-    {
-      header: () => <div className="text-right">Discount</div>,
-      accessorKey: "discount",
-      id: "discount",
-
-      meta: {
-        className: "text-right",
-        type: "currency",
+      {
+        accessorKey: "quantity",
+        header: "Quantity",
+        meta: {
+          className: "text-right w-10",
+        },
+        cell: ({ row }) => (
+          <Controller
+            name={`purchaseOrderItems.${row.index}.quantity`}
+            control={control}
+            render={({ field }) => <NumberInput {...field} />}
+          />
+        ),
       },
-    },
-    {
-      header: "Note",
-      accessorKey: "discountNote",
-      id: "discountNote",
-    },
-    {
-      header: () => <div className="text-right">Amount</div>,
-      accessorKey: "amount",
-      id: "amount",
-      cell: ({ row }) => {
-        return formatCurrency(
-          (
-            row.getValue("quantity") * row.getValue("unitPrice") -
-            row.getValue("discount")
-          ).toFixed(2),
-        );
+      {
+        accessorKey: "unit",
+        header: "Unit",
+        cell: ({ row }) => {
+          return (
+            <Unit index={row.index} control={control} setValue={setValue} />
+          );
+        },
       },
-    },
-  ];
+      {
+        accessorKey: "discount",
+        header: "Discount",
+        meta: {
+          className: "text-right w-32",
+          type: "currency",
+        },
+        cell: ({ row }) => (
+          <Controller
+            name={`purchaseOrderItems.${row.index}.discount`}
+            control={control}
+            render={({ field }) => <NumberInput {...field} type="currency" />}
+          />
+        ),
+      },
+      {
+        accessorKey: "discountNote",
+        header: "Discount Note",
+        meta: {
+          className: "w-50",
+        },
+        cell: ({ row }) => (
+          <Input
+            {...register(`purchaseOrderItems.${row.index}.discountNote`)}
+            className="border px-2"
+          />
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: () => <div className="text-right">Amount</div>,
+        meta: {
+          className: "text-right w-20",
+        },
 
-  const defaultColumn = {
-    cell: EditableCell,
-  };
-
-  const meta = {
-    updateData: (rowIndex: number, columnId: string, value: string) => {
-      // Ensure purchaseOrderItems exists and required fields are present
-      // const items = formData.purchaseOrderItems ?? [];
-      const items = fields;
-      const currentItem = items[rowIndex] ?? {};
-      // Fallbacks for required fields
-      const updatedItem = {
-        ...currentItem,
-        [columnId]: value,
-      };
-
-      if (currentItem) {
-        update(rowIndex, updatedItem);
-      }
-    },
-  };
+        cell: ({ row }) => <Amount index={row.index} control={control} />,
+      },
+    ],
+    [register, products, errors],
+  );
 
   return (
     <>
@@ -257,15 +245,16 @@ export default function PurchaseOrderForm({
           <FormItem className="mb-4">
             <FormLabel>Supplier</FormLabel>
             <Autocomplete
-              value={suppliers.find((supplier) => supplier.id === field.value)}
-              items={suppliers}
+              value={
+                suppliers.find((supplier) => supplier.id === field.value)?.name
+              }
+              options={suppliers}
               placeholder="Supplier"
-              onChange={(value) => {
-                if (value && value.id !== undefined) {
-                  form.setValue("supplierId", value.id, {
-                    shouldValidate: true,
-                  });
-                }
+              onChange={(e) => {
+                const value = (e.target as HTMLInputElement).value;
+                form.setValue("supplierId", parseInt(value), {
+                  shouldValidate: true,
+                });
               }}
             />
 
@@ -273,7 +262,6 @@ export default function PurchaseOrderForm({
           </FormItem>
         )}
       />
-
       <div className="flex gap-4 items-start">
         <FormField
           control={form.control}
@@ -332,7 +320,7 @@ export default function PurchaseOrderForm({
             <FormLabel>Internal Notes</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Enter some notes..."
+                placeholder="Enter some internal notes..."
                 className="resize-none"
                 {...field}
                 value={field.value ?? ""}
@@ -363,7 +351,20 @@ export default function PurchaseOrderForm({
 
       <div className="mb-10">
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-8 mb-4">
-          <Button type="button" onClick={() => append({})} variant="default">
+          <Button
+            type="button"
+            onClick={() =>
+              append({
+                productId: null,
+                quantity: 1,
+                unit: "",
+                unitPrice: 0,
+                discount: null,
+                discountNote: "",
+              })
+            }
+            variant="default"
+          >
             <Plus />
             Append
           </Button>
@@ -375,10 +376,9 @@ export default function PurchaseOrderForm({
             <FormItem className="w-full">
               <FormControl>
                 <Table
+                  control={form.control}
                   data={fields}
                   columns={columns}
-                  defaultColumn={defaultColumn}
-                  meta={meta}
                   errors={errors}
                 />
               </FormControl>
@@ -387,59 +387,6 @@ export default function PurchaseOrderForm({
           )}
         />
       </div>
-      {/* <div className="mt-auto mb-4 align-bottom flex">
-        <Button className="mt-auto ml-auto" type="button">
-          {isCreate ? "Create Order" : "Receive Order"}
-        </Button>
-
-        <div className="flex items-center">
-          <Button
-            variant="outline"
-            className={"rounded-r-none"}
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              console.log(form.getValues(), form.formState.errors);
-              form
-                .handleSubmit(onSubmit)(e)
-                .catch((error) => {
-                  console.error("Form submission error:", error);
-                });
-            }}
-          >
-            Receive Order
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className={"rounded-l-none border-l-0 px-2"}
-              >
-                <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>
-                <Save />
-                Save
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div> */}
-
-      {toggle.addProductsModal && (
-        <ProductsModal
-          isOpen={true}
-          onClose={() => {
-            handleToggle({ addProductsModal: false });
-          }}
-          onAdd={(item: PurchaseOrderItem) => {
-            append(item);
-          }}
-          exclude={fields.map((item) => item.productId)}
-        />
-      )}
     </>
   );
 }

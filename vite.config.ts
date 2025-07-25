@@ -1,4 +1,5 @@
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import generateFile from "vite-plugin-generate-file";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -17,6 +18,13 @@ export default defineConfig({
         },
       ],
     }),
+    generateFile([
+      {
+        type: "json", // or 'text', 'asset'
+        output: "./data.json", // Path relative to outDir
+        data: { build: new Date().toISOString() },
+      },
+    ]),
   ],
   resolve: {
     alias: {

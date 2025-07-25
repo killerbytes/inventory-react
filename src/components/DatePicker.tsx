@@ -14,7 +14,7 @@ import { useState } from "react";
 
 interface DatePickerProps {
   onChange: (value: string) => void;
-  value?: string;
+  value?: string | null | undefined;
   className?: string;
   placeholder?: string;
   align?: "start" | "end" | "center";

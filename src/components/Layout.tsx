@@ -24,11 +24,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </UserContext.Provider>
         </div>
         <div className="px-4 flex flex-col h-full ">{children}</div>
-        {/* <footer className="bg-foreground text-background py-4 text-center mt-auto">
-          &copy; {new Date().getFullYear()} My Hardware. All rights reserved.
-        </footer> */}
       </main>
-      <Toaster position="bottom-right" richColors />
+      <Toaster position="bottom-left" richColors />
     </SidebarProvider>
   );
 }

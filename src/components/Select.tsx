@@ -6,27 +6,47 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cx } from "class-variance-authority";
+import { SyntheticEvent } from "react";
 
-function Select<T extends { value: string; label: string }>({
-  onChange,
-  options,
-  value,
-  className,
-}: {
-  onChange: (value: string) => void;
-  options: T[];
-  value: string;
+interface SelectOption {
+  [key: string]: string;
+}
+
+interface SelectProps {
+  onChange: (e: SyntheticEvent<HTMLSelectElement>) => void;
+  options: SelectOption[];
   className?: string;
-}) {
+  value?: string;
+  name?: string;
+  valueKey?: string;
+  labelKey?: string;
+}
+
+function Select(props: SelectProps) {
+  const {
+    onChange,
+    options,
+    className,
+    name,
+    valueKey = "value",
+    labelKey = "label",
+  } = props;
+
+  const handleChange = (value: string) => {
+    const e = {
+      target: { value, name },
+    } as React.ChangeEvent<HTMLSelectElement>;
+    onChange(e);
+  };
   return (
-    <SelectComponent defaultValue={value} onValueChange={onChange}>
+    <SelectComponent {...props} onValueChange={handleChange}>
       <SelectTrigger className={cx("w-full", className)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
+          <SelectItem key={option[valueKey]} value={option[valueKey]}>
+            {option[labelKey]}
           </SelectItem>
         ))}
       </SelectContent>
