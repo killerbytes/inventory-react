@@ -21,17 +21,29 @@ import {
   getCoreRowModel,
   flexRender,
 } from "@tanstack/react-table";
+import {
+  inventoryServices,
+  PurchaseOrder,
+  PurchaseOrderItem,
+} from "@/services";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { PurchaseOrder, PurchaseOrderItem } from "@/services";
 import { createColumnHelper } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { purchaseOrderSchema } from "@/schemas";
 import { Input } from "@/components/ui/input";
 import Select from "@/components/Select";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 export default function Test() {
+  React.useEffect(() => {
+    const getData = async () => {
+      const response = await inventoryServices.list();
+      console.log(response);
+    };
+    getData();
+  }, []);
+
   const form = useForm<PurchaseOrder>({
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues: {

@@ -8,3 +8,11 @@ export function cn(...inputs: ClassValue[]) {
 export function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export function formatLabel(str: string) {
+  return str
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}

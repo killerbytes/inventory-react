@@ -1,0 +1,124 @@
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+import { categoryServices, Product } from "@/services";
+import { DialogFooter } from "@/components/ui/dialog";
+import { UNIT_OPTIONS } from "@/utils/definitions";
+import { Button } from "@/components/ui/button";
+import { UseFormReturn } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { useCategoryStore } from "@/stores";
+import Select from "@/components/Select";
+import React from "react";
+
+export default function ProductForm({
+  form,
+  onSubmit,
+  children,
+}: {
+  form: UseFormReturn<Product>;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  children?: React.ReactNode;
+}) {
+  const { categories, setCategories } = useCategoryStore();
+
+  React.useEffect(() => {
+    const getData = async () => {
+      const { data } = await categoryServices.list();
+      setCategories(data);
+    };
+    if (categories.length === 0) {
+      getData();
+    }
+  }, []);
+
+  return (
+    <Form {...form}>
+      <form onSubmit={onSubmit} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Description"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="categoryId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <Select
+                {...field}
+                options={categories}
+                labelKey="name"
+                valueKey="id"
+              ></Select>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="unit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unit</FormLabel>
+              <FormControl>
+                <Select {...field} options={UNIT_OPTIONS}></Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="reorderLevel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Reorder Level</FormLabel>
+              <FormControl>
+                <Input placeholder="Reorder Level" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <DialogFooter>{children}</DialogFooter>
+      </form>
+    </Form>
+  );
+}

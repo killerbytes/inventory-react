@@ -1,11 +1,10 @@
 import React from "react";
 
 import {
-  ORDER_STATUS_OPTIONS,
+  INVENTORY_TRANSACTION_TYPE,
+  INVENTORY_TRANSACTION_TYPE_OPTIONS,
   PAGINATION,
   ROUTES,
-  TRANSACTION_TYPE,
-  TRANSACTION_TYPE_OPTIONS,
 } from "@/utils/definitions";
 import {
   inventoryServices,
@@ -14,6 +13,7 @@ import {
   type InventoryTransaction,
 } from "@/services";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
+import { MoveLeft, PackageOpen, Pencil } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Link, useNavigate } from "react-router";
@@ -21,8 +21,8 @@ import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { formatLabel } from "@/lib/utils";
 import Select from "@/components/Select";
-import { MoveLeft } from "lucide-react";
 import Pager from "@/components/Pager";
 
 export default function InventoryTransactions() {
@@ -69,7 +69,7 @@ export default function InventoryTransactions() {
 
   const columns: ColumnDef<InventoryTransaction>[] = [
     {
-      accessorKey: "orderId",
+      accessorKey: "reference",
       header: "Order",
       meta: {
         className: "text-center font-medium",
@@ -77,9 +77,9 @@ export default function InventoryTransactions() {
       cell: ({ row }) => {
         return (
           <Link
-            to={`${row.original.orderType === "SALES" ? ROUTES.SALES_ORDERS : ROUTES.PURCHASE_ORDERS}/${row.getValue("orderId")}`}
+            to={`${row.original.orderType === "SALES" ? ROUTES.SALES_ORDERS : ROUTES.PURCHASE_ORDERS}/${row.getValue("reference")}`}
           >
-            {row.getValue("orderId")}
+            {row.getValue("reference")}
           </Link>
         );
       },
@@ -97,7 +97,8 @@ export default function InventoryTransactions() {
       cell: ({ row }) => {
         return (
           <div className="text-right">
-            {row.original.transactionType === TRANSACTION_TYPE.ADJUSTMENT
+            {row.original.transactionType ===
+            INVENTORY_TRANSACTION_TYPE.PRICE_ADJUSTMENT
               ? formatCurrency(row.getValue("previousValue"))
               : parseInt(row.getValue("previousValue"))}
           </div>
@@ -113,7 +114,8 @@ export default function InventoryTransactions() {
       cell: ({ row }) => {
         return (
           <div className="text-right">
-            {row.original.transactionType === TRANSACTION_TYPE.ADJUSTMENT
+            {row.original.transactionType ===
+            INVENTORY_TRANSACTION_TYPE.PRICE_ADJUSTMENT
               ? formatCurrency(row.getValue("value"))
               : parseInt(row.getValue("value"))}
           </div>
@@ -129,32 +131,18 @@ export default function InventoryTransactions() {
       cell: ({ row }) => {
         return (
           <div className="text-right">
-            {row.original.transactionType === TRANSACTION_TYPE.ADJUSTMENT
+            {row.original.transactionType ===
+            INVENTORY_TRANSACTION_TYPE.PRICE_ADJUSTMENT
               ? formatCurrency(row.getValue("newValue"))
               : parseInt(row.getValue("newValue"))}
           </div>
         );
       },
     },
-    // {
-    //   accessorKey: "orderType",
-    //   header: () => <div className="text-center">Order Type</div>,
-    //   meta: {
-    //     className: "text-center",
-    //   },
-    //   cell: ({ row }) => {
-    //     return (
-    //       <Link
-    //         to={`${row.getValue("orderType") === "SALES" ? ROUTES.SALES_ORDERS : ROUTES.PURCHASE_ORDERS}/${row.getValue("orderId")}`}
-    //       >
-    //         {row.getValue("orderId")}
-    //       </Link>
-    //     );
-    //   },
-    // },
+
     {
       accessorKey: "transactionType",
-      header: "Transaction Type",
+      header: () => <div className="text-center">Transaction Type</div>,
       meta: {
         className: "text-center",
       },
@@ -164,14 +152,16 @@ export default function InventoryTransactions() {
             className={cx("text-xs", {
               "bg-red-500":
                 row.getValue("transactionType") ===
-                TRANSACTION_TYPE.CANCELLATION,
+                INVENTORY_TRANSACTION_TYPE.CANCELLATION,
               "bg-green-500":
-                row.getValue("transactionType") === TRANSACTION_TYPE.PURCHASE,
+                row.getValue("transactionType") ===
+                INVENTORY_TRANSACTION_TYPE.PURCHASE,
               "bg-yellow-500":
-                row.getValue("transactionType") === TRANSACTION_TYPE.SALE,
+                row.getValue("transactionType") ===
+                INVENTORY_TRANSACTION_TYPE.SALE,
             })}
           >
-            {row.getValue("transactionType")}
+            {formatLabel(row.getValue("transactionType"))}
           </Badge>
         );
       },
@@ -215,9 +205,10 @@ export default function InventoryTransactions() {
         />
         <Select
           className="mb-4"
-          options={TRANSACTION_TYPE_OPTIONS}
-          value={TRANSACTION_TYPE_OPTIONS[0].value}
+          options={INVENTORY_TRANSACTION_TYPE_OPTIONS}
+          value={INVENTORY_TRANSACTION_TYPE.PRICE_ADJUSTMENT}
           onChange={(selected) => {
+            console.log(selected);
             console.log(selected);
             if (selected === "ALL") {
               setFilter(({ ...prev }) => ({ ...prev, transactionType: "" }));

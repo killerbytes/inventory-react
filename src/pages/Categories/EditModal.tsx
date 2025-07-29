@@ -1,14 +1,4 @@
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Form,
   FormControl,
   FormField,
@@ -17,16 +7,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { categoryServices, type ApiError, type Category } from "@/services";
-import { GlobalContext } from "@/components/GlobalContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
-import React, { useContext } from "react";
 import Modal from "@/components/Modal";
-import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function EditModal({
@@ -40,8 +28,6 @@ export default function EditModal({
   cb: () => void;
   data: Category;
 }) {
-  const { invalidate } = useContext(GlobalContext) || {};
-  const [confirm, setConfirm] = React.useState(false);
   const form = useForm<Category>({
     resolver: zodResolver(categorySchema),
     defaultValues: { ...data },
@@ -50,13 +36,10 @@ export default function EditModal({
   async function onSubmit(values: Category) {
     try {
       const { name, description } = values;
-      await categoryServices.update(data.id, { name, description });
+      await categoryServices.update(String(data.id), { name, description });
       toast.success(`Submitted: ${values.name}`);
       form.reset();
       onClose();
-      if (invalidate) {
-        invalidate("categories");
-      }
     } catch (error) {
       const { errors } = (
         error as { response: { data: { errors: ApiError[] } } }
@@ -74,29 +57,6 @@ export default function EditModal({
       cb();
     }
   }
-
-  const handleDelete = async () => {
-    try {
-      await categoryServices.delete(data.id);
-      toast.success(`Deleted: ${data.name}`);
-      onClose();
-    } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(err.field as keyof Category, {
-            type: "server",
-            message: err.message,
-          });
-        }
-      });
-      toast.error("Deletion failed");
-    } finally {
-      cb();
-    }
-  };
 
   return (
     <>
@@ -139,7 +99,7 @@ export default function EditModal({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="Description" {...field} />
+                    <Textarea placeholder="Description" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -147,39 +107,11 @@ export default function EditModal({
             />
 
             <DialogFooter>
-              <Button
-                type="button"
-                size="icon"
-                variant="destructive"
-                className="mr-auto"
-                onClick={() => {
-                  setConfirm(true);
-                }}
-              >
-                <Trash2 />
-              </Button>
               <Button type="submit">Save changes</Button>
             </DialogFooter>
           </form>
         </Form>
       </Modal>
-      <AlertDialog open={confirm} onOpenChange={setConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

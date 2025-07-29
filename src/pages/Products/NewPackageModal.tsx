@@ -1,7 +1,6 @@
-import { productServices, type Product } from "@/services";
+import { ApiError, productServices, type Product } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Trash, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import ProductForm from "./ProductForm";
 import Modal from "@/components/Modal";
@@ -9,7 +8,7 @@ import validations from "@/schemas";
 import { toast } from "sonner";
 import * as z from "zod";
 
-export default function EditModal({
+export default function NewPackageModal({
   isOpen,
   onClose,
   onSubmit,
@@ -21,34 +20,30 @@ export default function EditModal({
   data: Product;
 }) {
   const { productSchema } = validations;
-  const schema = productSchema;
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<Product>({
+    resolver: zodResolver(productSchema),
     defaultValues: {
       ...data,
     },
   });
 
-  interface ApiError {
-    field?: string;
-    message: string;
-  }
-
-  async function handleSubmit(values: z.infer<typeof schema>) {
+  const handleSubmit = async (values: Product) => {
     try {
       const { name, description, categoryId, unit, reorderLevel } = values;
-      if (!data.id) {
+      if (!data?.id) {
         throw new Error("Product ID is missing");
       }
-      await productServices.update(String(data.id), {
+      const payload = {
         name,
         description,
         categoryId,
         unit,
         reorderLevel,
-      });
+        parentId: data.id,
+      };
+
+      await productServices.create(payload);
       toast.success(`Submitted: ${values.name}`);
-      form.reset();
       onSubmit();
     } catch (error) {
       const { errors } = (
@@ -56,7 +51,7 @@ export default function EditModal({
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof schema>, {
+          form.setError(err.field as keyof Product, {
             type: "server",
             message: err.message,
           });
@@ -64,22 +59,15 @@ export default function EditModal({
       });
       toast.error("Submission failed");
     }
-  }
-
-  async function handleRemove() {
-    const { id } = data;
-    await productServices.delete(String(id));
-    toast.success(`Product ${id} deleted`);
-    onSubmit();
-  }
+  };
 
   return (
     <>
       <Modal
         isOpen={isOpen}
         onOpenChange={onClose}
-        title="Edit Product"
-        description="Update existing product details"
+        title="Repackage product"
+        description={`Repackage ${data.name}`}
       >
         <ProductForm
           form={form}
@@ -93,16 +81,7 @@ export default function EditModal({
               });
           }}
         >
-          <Button
-            type="button"
-            variant="secondary"
-            className="mr-auto"
-            onClick={handleRemove}
-          >
-            <Trash2 color="red" size={16} />
-          </Button>
-
-          <Button type="submit">Save changes</Button>
+          <Button type="submit">Create Product</Button>
         </ProductForm>
       </Modal>
     </>

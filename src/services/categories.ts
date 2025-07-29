@@ -6,4 +6,10 @@ export default class CategoryService extends BaseService<Category> {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/categories" });
   }
+
+  updateSort = async (data: { id: string; order: number }[]) => {
+    const response = await this.http.patch(`${this.url}/updateSort`, data);
+
+    return response;
+  };
 }

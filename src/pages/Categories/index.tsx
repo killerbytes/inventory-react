@@ -1,22 +1,15 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import React from "react";
-
 import { categoryServices, type APIResponse, type Category } from "@/services";
+import { ColumnDef } from "@tanstack/react-table";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import DnDTable from "@/components/DnDTable";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import Pager from "@/components/Pager";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
+import React from "react";
 
 export default function Categories() {
   const [page, setPage] = React.useState(1);
@@ -32,7 +25,7 @@ export default function Categories() {
   const [filter, setFilter] = React.useState({
     limit: 10,
     page: 1,
-    sort: "name",
+    sort: "order",
     order: "asc",
     q: "",
   });
@@ -65,33 +58,50 @@ export default function Categories() {
     }));
   }, [page]);
 
-  const requestSort = (sort: string) => {
-    setFilter((prev) => ({
-      ...prev,
-      sort,
-      order: prev.sort === sort && prev.order === "asc" ? "desc" : "asc",
-    }));
+  const onSubmit = async (data: T[]) => {
+    const sorted = data.map(({ id }) => {
+      return id;
+    });
+    await categoryServices.updateSort(sorted);
   };
 
-  const columns = [
+  const columns: ColumnDef<Category>[] = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      className: "w-[50%]",
+      accessorKey: "name",
+      header: "Name",
+      meta: { className: "w-50" },
     },
     {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-      className: "w-[50%]",
+      accessorKey: "description",
+      header: "Description",
+      size: 10,
+      meta: { className: "!text-wrap" },
     },
     {
-      dataIndex: "actions",
-      key: "actions",
+      accessorKey: "actions",
+      header: () => <div className="text-center">Actions</div>,
+      meta: {
+        className: "w-10",
+      },
+      cell: ({ row }) => {
+        return (
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ editModal: true });
+              }}
+            >
+              <Pencil />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
-
   return (
     <div>
       <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
@@ -127,47 +137,12 @@ export default function Categories() {
         <p>Loading...</p>
       ) : (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    onClick={() => requestSort(column.key)}
-                    style={{ cursor: "pointer" }}
-                    title={column.title}
-                    className={column.className}
-                  >
-                    {column.title}
-                    {filter.sort === column.key && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {filter.order === "asc" ? "↑" : "↓"}
-                      </span>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.data?.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setSelected(item);
-                        handleToggle({ editModal: true });
-                      }}
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                  </TableHead>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DnDTable
+            columns={columns}
+            data={data?.data || []}
+            onSubmit={onSubmit}
+          />
+
           <Pager data={data} page={page} setPage={setPage} />
         </>
       )}
@@ -192,7 +167,6 @@ export default function Categories() {
           data={selected as Category}
         />
       )}
-      <Toaster position="bottom-right" richColors />
     </div>
   );
 }

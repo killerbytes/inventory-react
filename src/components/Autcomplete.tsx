@@ -57,7 +57,7 @@ export default function Autocomplete<T>({
           <CommandInput placeholder={placeholder} className="h-9" />
           <CommandList>
             <CommandEmpty>No products found.</CommandEmpty>
-            <CommandGroup>
+            <CommandGroup heading="Products">
               {options.map((item) => (
                 <CommandItem
                   // disabled={item.quantity === 0}

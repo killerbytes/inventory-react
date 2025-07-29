@@ -7,18 +7,24 @@ import {
 } from "@/services";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { PAGINATION, ROUTES } from "@/utils/definitions";
-import { DataTable } from "@/components/DataTable";
+import { PackageOpen, Pencil } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useToggle from "@/hooks/useToggle";
-import Pager from "@/components/Pager";
+import PackageModal from "./PackageModal";
 import { Link } from "react-router";
 import EditModal from "./EditModal";
+import ItemList from "./ItemList";
+
+interface ItemList {
+  categoryId: string;
+  categoryName: string;
+  inventories: Inventory[];
+}
 
 export default function Inventory() {
-  const [page, setPage] = React.useState(1);
   const [selected, setSelected] = React.useState<Inventory | null>();
   const [data, setData] = React.useState<APIResponse<Inventory[]>>({
     data: [],
@@ -37,12 +43,14 @@ export default function Inventory() {
   });
   const [toggle, handleToggle] = useToggle({
     editModal: false,
+    packageModal: false,
   });
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await inventoryServices.getAll(filter);
-      const data = response.data;
+      const { data }: { data: APIResponse<Inventory[]> } =
+        await inventoryServices.list();
+
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -54,37 +62,6 @@ export default function Inventory() {
   React.useEffect(() => {
     getData();
   }, [filter, getData]);
-
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
-
-  const requestSort = (sort: string) => {
-    setFilter((prev) => ({
-      ...prev,
-      sort,
-      order: prev.sort === sort && prev.order === "asc" ? "desc" : "asc",
-    }));
-  };
-
-  const EditableCell = ({ item }) => {
-    return (
-      <div
-        onClick={() => {
-          setSelected(item);
-          handleToggle({ editModal: true });
-        }}
-        className={cx("bg-gray-200 cursor-pointer", {
-          "text-red-500": item.price <= 0,
-        })}
-      >
-        {formatCurrency(item.price)}
-      </div>
-    );
-  };
 
   const columns: ColumnDef<Inventory>[] = [
     {
@@ -124,21 +101,58 @@ export default function Inventory() {
     {
       accessorKey: "price",
       header: () => <div className="text-right">Price</div>,
-      meta: { className: "text-right" },
-
-      cell: ({ row }) => {
-        //   return row.getValue("quantity") <= 0 ? (
-        //     row.getValue("price")
-        //   ) : (
-        return <EditableCell item={row.original} />;
-        //   );
-      },
+      meta: { className: cx("text-right") },
+      cell: ({ row }) => (
+        <span
+          className={cx({
+            "text-red-500 font-semibold":
+              parseFloat(row.getValue("price")) <= 0,
+          })}
+        >
+          {formatCurrency(row.getValue("price"))}
+        </span>
+      ),
     },
     {
       accessorKey: "updatedAt",
       header: () => <div className="text-right">Updated At</div>,
       meta: { className: "text-right" },
       cell: ({ row }) => formatDate(row.getValue("updatedAt")),
+    },
+    {
+      accessorKey: "actions",
+      header: () => <div className="text-center">Actions</div>,
+      meta: {
+        className: "justify-end flex gap-2",
+      },
+      cell: ({ row }) => {
+        return (
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ editModal: true });
+              }}
+            >
+              <Pencil />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ packageModal: true });
+              }}
+            >
+              <PackageOpen />
+            </Button>
+          </>
+        );
+      },
     },
   ];
 
@@ -170,15 +184,10 @@ export default function Inventory() {
         <p>Loading...</p>
       ) : (
         <>
-          <DataTable
-            data={data?.data || []}
-            columns={columns}
-            className="mb-8"
-          />
-
-          <Pager data={data} page={page} setPage={setPage} />
+          <ItemList data={data || []} columns={columns} />
         </>
       )}
+
       {toggle.editModal && (
         <EditModal
           isOpen={true}
@@ -187,6 +196,16 @@ export default function Inventory() {
           }}
           cb={getData}
           data={selected as Inventory}
+        />
+      )}
+      {toggle.packageModal && (
+        <PackageModal
+          isOpen={true}
+          onClose={() => {
+            handleToggle({ packageModal: false });
+          }}
+          cb={getData}
+          data={selected}
         />
       )}
     </div>

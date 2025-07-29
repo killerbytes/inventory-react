@@ -269,11 +269,7 @@ export default function PurchaseOrderForm({
           render={({ field }) => (
             <FormItem className="mb-4">
               <FormLabel>Mode of Payment</FormLabel>
-              <Select
-                {...field}
-                options={MODE_OF_PAYMENT_OPTIONS}
-                // value={field.value.value}
-              />
+              <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
 
               <FormMessage />
             </FormItem>

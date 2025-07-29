@@ -74,19 +74,23 @@ export const categorySchema = z.object({
   }),
 });
 
-export const productSchema = z.object({
-  id: z.number(),
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+export const productSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    id: z.number().nullish(),
+    name: z.string().min(2, {
+      message: "Name must be at least 2 characters.",
+    }),
+    categoryId: z.number().min(1, {
+      message: "Category must be selected.",
+    }),
+    category: z.any(),
+    description: z.string().nullish(),
+    reorderLevel: z.coerce.number().optional(),
+    unit: z.string(),
+    parentId: z.number().nullish(),
+    subProduct: z.array(productSchema).optional(),
   }),
-  categoryId: z.number().min(1, {
-    message: "Category must be selected.",
-  }),
-  category: z.any(),
-  description: z.string().nullish(),
-  reorderLevel: z.coerce.number().optional(),
-  unit: z.string(),
-});
+);
 
 export const supplierSchema = z.object({
   id: z.number().optional(),

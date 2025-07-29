@@ -1,60 +1,70 @@
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import React from "react";
-
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { productServices, type APIResponse, type Product } from "@/services";
-import { DataTable } from "@/components/DataTable";
+import { PackageOpen, Pencil, Plus } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
+import NewPackageModal from "./NewPackageModal";
 import { Input } from "@/components/ui/input";
-import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
-import Pager from "@/components/Pager";
+import ProductList from "./ProductList";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
+import React from "react";
+
+export interface CategorizedProductList {
+  categoryId: string;
+  categoryName: string;
+  products: Product[];
+}
 
 export default function Products() {
   const [page, setPage] = React.useState(1);
-  const [data, setData] = React.useState<APIResponse<Product[]>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] = React.useState<APIResponse<CategorizedProductList[]>>(
+    {
+      data: [],
+      total: 0,
+      totalPages: 0,
+      currentPage: 0,
+    },
+  );
   const [selected, setSelected] = React.useState<Product | null>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    sort: "name",
+    sort: "categoryId",
     order: "asc",
     q: "",
   });
   const [toggle, handleToggle] = useToggle({
     addModal: false,
     editModal: false,
+    newPackageModal: false,
   });
 
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await productServices.getAll(filter);
-      const data = response.data;
+      const { data }: { data: APIResponse<CategorizedProductList[]> } =
+        await productServices.list();
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, []);
 
+  const handleNewPackage = async () => {
+    handleToggle({ newPackageModal: false });
+    getData();
+  };
   React.useEffect(() => {
     getData();
   }, [filter, getData]);
@@ -65,43 +75,6 @@ export default function Products() {
       page,
     }));
   }, [page]);
-
-  const requestSort = (sort: string) => {
-    setFilter((prev) => ({
-      ...prev,
-      sort,
-      order: prev.sort === sort && prev.order === "asc" ? "desc" : "asc",
-    }));
-  };
-  const columnsxx = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      className: "w-[50%]",
-    },
-    {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-      className: "w-[50%]",
-    },
-    {
-      title: "Category",
-      dataIndex: "category.name",
-      key: "category.name",
-    },
-    {
-      title: "Reorder Level",
-      dataIndex: "reorderLevel",
-      key: "reorderLevel",
-      className: "text-right",
-    },
-    {
-      dataIndex: "actions",
-      key: "actions",
-    },
-  ];
 
   const columns: ColumnDef<Product>[] = [
     {
@@ -125,6 +98,42 @@ export default function Products() {
     {
       accessorKey: "unit",
       header: "Unit",
+      meta: { className: "w-10" },
+    },
+    {
+      accessorKey: "actions",
+      header: () => <div className="text-center">Actions</div>,
+      meta: {
+        className: "w-10",
+      },
+      cell: ({ row }) => {
+        return (
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ editModal: true });
+              }}
+            >
+              <Pencil />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-8"
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ newPackageModal: true });
+              }}
+            >
+              <PackageOpen />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -162,11 +171,27 @@ export default function Products() {
         <p>Loading...</p>
       ) : (
         <>
-          <DataTable
+          <Accordion
+            type="multiple"
+            className="w-full"
+            defaultValue={data.map((item) => item.categoryId)}
+          >
+            {data.map((item) => (
+              <AccordionItem value={item.categoryId}>
+                <AccordionTrigger>{item.categoryName}</AccordionTrigger>
+                <AccordionContent className="flex flex-col gap-4 text-balance">
+                  {/* <DataTable data={item.products || []} columns={columns} /> */}
+                  <ProductList products={item.products} />
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+
+          {/* <DataTable
             data={data?.data || []}
             columns={columns}
             className="mb-8"
-          />
+          /> */}
 
           {/* <Table>
             <TableHeader>
@@ -214,7 +239,6 @@ export default function Products() {
               ))}
             </TableBody>
           </Table> */}
-          <Pager data={data} page={page} setPage={setPage} />
         </>
       )}
 
@@ -224,7 +248,10 @@ export default function Products() {
           onClose={() => {
             handleToggle({ addModal: false });
           }}
-          cb={getData}
+          onSubmit={() => {
+            handleToggle({ addModal: false });
+            getData();
+          }}
         />
       )}
 
@@ -234,7 +261,20 @@ export default function Products() {
           onClose={() => {
             handleToggle({ editModal: false });
           }}
-          cb={getData}
+          onSubmit={() => {
+            handleToggle({ editModal: false });
+            getData();
+          }}
+          data={selected as Product}
+        />
+      )}
+      {toggle.newPackageModal && (
+        <NewPackageModal
+          isOpen={true}
+          onClose={() => {
+            handleToggle({ newPackageModal: false });
+          }}
+          onSubmit={handleNewPackage}
           data={selected as Product}
         />
       )}

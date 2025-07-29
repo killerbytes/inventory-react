@@ -60,7 +60,8 @@ export default function PurchaseOrders() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await purchaseOrderServices.getAll(filter);
+      const { data }: { data: APIResponse<PurchaseOrder[]> } =
+        await purchaseOrderServices.getAll(filter);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);

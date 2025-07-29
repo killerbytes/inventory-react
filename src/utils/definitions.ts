@@ -1,3 +1,4 @@
+import { formatLabel } from "@/lib/utils";
 import { titleCase } from "title-case";
 
 export const ROUTES = {
@@ -23,19 +24,22 @@ export const ORDER_TYPE = {
   PURCHASE: "PURCHASE",
 };
 
-export const TRANSACTION_TYPE = {
-  SALE: "SALE",
+export const INVENTORY_TRANSACTION_TYPE = {
   PURCHASE: "PURCHASE",
+  SALE: "SALE",
+  PRICE_ADJUSTMENT: "PRICE_ADJUSTMENT",
+  RETURN: "RETURN",
   CANCELLATION: "CANCELLATION",
-  ADJUSTMENT: "ADJUSTMENT",
+  BREAK_PACK: "BREAK_PACK",
+  REPACK: "REPACK",
 };
 
-export const TRANSACTION_TYPE_OPTIONS = Object.values(TRANSACTION_TYPE).map(
-  (value) => ({
-    value,
-    label: titleCase(value.toLowerCase()),
-  }),
-);
+export const INVENTORY_TRANSACTION_TYPE_OPTIONS = Object.values(
+  INVENTORY_TRANSACTION_TYPE,
+).map((value) => ({
+  value,
+  label: formatLabel(value),
+}));
 
 export const PAGINATION = {
   PAGE: 1,
@@ -58,7 +62,7 @@ export const ORDER_STATUS = {
 export const ORDER_STATUS_OPTIONS = Object.values(ORDER_STATUS).map(
   (value) => ({
     value,
-    label: titleCase(value.toLowerCase()),
+    label: formatLabel(value),
   }),
 );
 
@@ -81,6 +85,17 @@ export const UNIT = {
   PACK: "PACK",
   SET: "SET",
   PCS: "PCS",
+  KGS: "KGS",
+};
+
+export const UNIT_COLOR = {
+  BOX: "bg-red-500",
+  BAG: "bg-yellow-500",
+  GAL: "bg-green-500",
+  PACK: "bg-blue-500",
+  SET: "bg-purple-500",
+  PCS: "bg-gray-500",
+  KGS: "bg-blue-500",
 };
 
 export const UNIT_OPTIONS = Object.values(UNIT).map((value) => ({
