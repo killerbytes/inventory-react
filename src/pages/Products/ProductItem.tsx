@@ -1,33 +1,36 @@
 import { PackageOpen, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UnitBadge from "@/components/UnitBadge";
-import { Badge } from "@/components/ui/badge";
 import { Product } from "@/services";
 
 export default function ProductItem({
   product,
   sub = false,
+  onSelect,
+  onToggle,
 }: {
   product: Product;
-  sub: boolean;
+  sub?: boolean;
+  onSelect: (product: Product) => void;
+  onToggle: (toggle: {
+    newPackageModal?: boolean;
+    editModal?: boolean;
+  }) => void;
 }) {
   return (
     <div className="flex gap-4 items-center">
-      <div>
-        {product.name} / {product.unit}
-      </div>
+      <div>{product.name}</div>
       <div className="flex gap-2 ml-auto items-center">
         <UnitBadge unit={product.unit} />
-        <Badge>{product.reorderLevel}</Badge>
-        <div className="w-20 justify-end flex">
+        <div className="w-20 justify-end flex gap-2">
           {!sub && (
             <Button
               variant="outline"
               size="icon"
               className="size-8"
               onClick={() => {
-                setSelected(row.original);
-                handleToggle({ newPackageModal: true });
+                onSelect(product);
+                onToggle({ newPackageModal: true });
               }}
             >
               <PackageOpen />
@@ -38,8 +41,8 @@ export default function ProductItem({
             size="icon"
             className="size-8"
             onClick={() => {
-              setSelected(row.original);
-              handleToggle({ editModal: true });
+              onSelect(product);
+              onToggle({ editModal: true });
             }}
           >
             <Pencil />

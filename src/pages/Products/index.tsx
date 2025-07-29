@@ -76,67 +76,6 @@ export default function Products() {
     }));
   }, [page]);
 
-  const columns: ColumnDef<Product>[] = [
-    {
-      accessorKey: "name",
-      header: "Product",
-    },
-    {
-      accessorKey: "description",
-      header: "Description",
-    },
-    {
-      accessorKey: "category.name",
-      header: "Category",
-      meta: { className: "w-20" },
-    },
-    {
-      accessorKey: "reorderLevel",
-      header: () => <div className="text-right">Reorder Level</div>,
-      meta: { className: "text-right w-10" },
-    },
-    {
-      accessorKey: "unit",
-      header: "Unit",
-      meta: { className: "w-10" },
-    },
-    {
-      accessorKey: "actions",
-      header: () => <div className="text-center">Actions</div>,
-      meta: {
-        className: "w-10",
-      },
-      cell: ({ row }) => {
-        return (
-          <div className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8"
-              onClick={() => {
-                setSelected(row.original);
-                handleToggle({ editModal: true });
-              }}
-            >
-              <Pencil />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8"
-              onClick={() => {
-                setSelected(row.original);
-                handleToggle({ newPackageModal: true });
-              }}
-            >
-              <PackageOpen />
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
-
   return (
     <div>
       <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear mb-4">
@@ -178,67 +117,20 @@ export default function Products() {
           >
             {data.map((item) => (
               <AccordionItem value={item.categoryId}>
-                <AccordionTrigger>{item.categoryName}</AccordionTrigger>
+                <AccordionTrigger className="text-accent-foreground ">
+                  {" "}
+                  {item.categoryName}
+                </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 text-balance">
-                  {/* <DataTable data={item.products || []} columns={columns} /> */}
-                  <ProductList products={item.products} />
+                  <ProductList
+                    products={item.products}
+                    onSelect={setSelected}
+                    onToggle={handleToggle}
+                  />
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
-
-          {/* <DataTable
-            data={data?.data || []}
-            columns={columns}
-            className="mb-8"
-          /> */}
-
-          {/* <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    onClick={() => requestSort(column.key)}
-                    style={{ cursor: "pointer" }}
-                    title={column.title}
-                    className={column.className}
-                  >
-                    {column.title}
-                    {filter.sort === column.key && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {filter.order === "asc" ? "↑" : "↓"}
-                      </span>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.data.map((item) => (
-                <TableRow key={item.id} className="group md:hover:bg-slate-100">
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell>{item.category.name}</TableCell>
-                  <TableCell className="text-right">
-                    {item.reorderLevel}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      className="group-hover:opacity-100 md:opacity-0"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setSelected(item);
-                        handleToggle({ editModal: true });
-                      }}
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table> */}
         </>
       )}
 

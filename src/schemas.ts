@@ -85,7 +85,6 @@ export const productSchema: z.ZodType<any> = z.lazy(() =>
     }),
     category: z.any(),
     description: z.string().nullish(),
-    reorderLevel: z.coerce.number().optional(),
     unit: z.string(),
     parentId: z.number().nullish(),
     subProduct: z.array(productSchema).optional(),
@@ -254,6 +253,7 @@ export const inventorySchema = z.object({
   price: z.coerce.number().min(1, {
     message: "Price must be at least 1.",
   }),
+  reorderLevel: z.coerce.number().optional(),
   updatedAt: z.string(),
 });
 

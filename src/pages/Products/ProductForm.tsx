@@ -103,19 +103,6 @@ export default function ProductForm({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="reorderLevel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Reorder Level</FormLabel>
-              <FormControl>
-                <Input placeholder="Reorder Level" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <DialogFooter>{children}</DialogFooter>
       </form>
