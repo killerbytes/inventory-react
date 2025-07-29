@@ -1,4 +1,4 @@
-import { Category } from "@/services";
+import { Category } from "@/types";
 import { create } from "zustand";
 
 type CategoryStore = {

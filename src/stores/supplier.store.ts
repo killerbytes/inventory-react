@@ -1,4 +1,4 @@
-import { Supplier } from "@/services";
+import { Supplier } from "@/types";
 import { create } from "zustand";
 
 type SupplierStore = {

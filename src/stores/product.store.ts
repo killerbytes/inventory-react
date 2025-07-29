@@ -1,4 +1,4 @@
-import { Product } from "@/services";
+import { Product } from "@/types";
 import { create } from "zustand";
 
 type ProductStore = {

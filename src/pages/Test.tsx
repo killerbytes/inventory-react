@@ -36,6 +36,7 @@ import Select from "@/components/Select";
 import React, { useMemo } from "react";
 
 export default function Test() {
+  const [value, setValue] = React.useState<string | null>(2);
   React.useEffect(() => {
     const getData = async () => {
       const response = await inventoryServices.list();
@@ -181,56 +182,100 @@ export default function Test() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const options = [
+    { id: "1", name: "Box" },
+    { id: "2", name: "Bag" },
+    { id: "3", name: "Gal" },
+    { id: "4", name: "Pack" },
+    { id: "5", name: "Set" },
+    { id: "6", name: "Pcs" },
+  ];
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        console.log(form.formState.errors);
-        handleSubmit(onSubmit)(form);
-      }}
-    >
-      <table className="table-auto border">
-        <thead>
-          {table.getHeaderGroups().map((hg) => (
-            <tr key={hg.id}>
-              {hg.headers.map((header) => (
-                <th key={header.id} className="border px-2 py-1">
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="border px-2 py-1">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <button
-        type="button"
-        onClick={() =>
-          append({ productId: 1, unit: "BOX", unitPrice: 1, quantity: 10 })
-        }
-        className="mt-2 bg-blue-500 text-white px-4 py-1"
-      >
-        Add Row
-      </button>
-
-      <button type="submit" className="ml-2 bg-green-500 text-white px-4 py-1">
-        Submit
-      </button>
-      {JSON.stringify(data)}
-    </form>
+    <>
+      <Select
+        options={categories}
+        onChange={(e) => {
+          const { value }: { value: string } = e.target;
+          setValue(value);
+        }}
+        value={String(value)}
+        valueKey="id"
+        labelKey="name"
+      ></Select>
+    </>
   );
 }
+
+const categories = [
+  {
+    id: 5,
+    name: "Plumbing",
+    description:
+      "Water systems components including pipes, fittings, water heaters, faucets, sinks, sump pumps, and toilets",
+    order: 0,
+  },
+  {
+    id: 6,
+    name: "Electrical",
+    description:
+      "Power and lighting systems with wiring, breakers, switches, outlets, lighting fixtures, ceiling fans, and generators",
+    order: 1,
+  },
+  {
+    id: 7,
+    name: "Flooring",
+    description:
+      "Surface coverings like carpet, hardwood, laminate, vinyl, tile, underlayment, and area rugs",
+    order: 2,
+  },
+  {
+    id: 8,
+    name: "Kitchen & Bath",
+    description:
+      "Renovation essentials including cabinets, countertops, sinks, faucets, vanities, bathtubs, showers, and toilets",
+    order: 3,
+  },
+  {
+    id: 9,
+    name: "Doors & Windows",
+    description:
+      "Interior/exterior doors, various window types, and garage doors for entryways and natural light",
+    order: 4,
+  },
+  {
+    id: 10,
+    name: "Garden Center",
+    description:
+      "Plants (trees/shrubs/flowers), soil, mulch, fertilizer, gardening tools, and pest control for landscaping",
+    order: 5,
+  },
+  {
+    id: 1,
+    name: "Building Materials",
+    description:
+      "Foundation materials including lumber, plywood, concrete, roofing, siding, insulation, drywall, and fencing",
+    order: 6,
+  },
+  {
+    id: 2,
+    name: "Hardware",
+    description:
+      "Essential small parts like fasteners (nails, screws), tools accessories, door/window/cabinet hardware, chains, and electrical boxes",
+    order: 7,
+  },
+  {
+    id: 3,
+    name: "Paint & Supplies",
+    description:
+      "Interior/exterior paint, stains, spray paint, brushes, rollers, tape, wallpaper, and painting preparation materials",
+    order: 8,
+  },
+  {
+    id: 4,
+    name: "Tools",
+    description:
+      "Power tools (drills, saws), hand tools (hammers, wrenches), tool storage, and outdoor power equipment (mowers, trimmers)",
+    order: 9,
+  },
+];

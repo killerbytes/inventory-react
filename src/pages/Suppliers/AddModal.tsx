@@ -6,16 +6,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { supplierServices, type ApiError, type Supplier } from "@/services";
-import { GlobalContext } from "@/components/GlobalContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supplierServices } from "@/services";
 import { supplierSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { useContext } from "react";
+import { Supplier } from "@/types";
 import { toast } from "sonner";
 
 export default function AddModal({
@@ -27,7 +26,6 @@ export default function AddModal({
   onClose: () => void;
   cb: () => void;
 }) {
-  const { invalidate } = useContext(GlobalContext) || {};
   const form = useForm<Supplier>({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
@@ -47,9 +45,6 @@ export default function AddModal({
       });
       toast.success(`Submitted: ${values.name}`);
       form.reset();
-      if (invalidate) {
-        invalidate("categories");
-      }
       onClose();
     } catch (error) {
       const { errors } = (

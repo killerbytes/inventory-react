@@ -6,18 +6,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { categoryServices, type ApiError, type Category } from "@/services";
-import { GlobalContext } from "@/components/GlobalContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getErrorMessage } from "@/lib/utils";
+import { categoryServices } from "@/services";
+import { ApiError, Category } from "@/types";
 import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { useContext } from "react";
 import { toast } from "sonner";
-import * as z from "zod";
 
 export default function AddModal({
   isOpen,
@@ -28,7 +27,6 @@ export default function AddModal({
   onClose: () => void;
   cb: () => void;
 }) {
-  const { invalidate } = useContext(GlobalContext) || {};
   const form = useForm<Category>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -40,16 +38,15 @@ export default function AddModal({
   async function onSubmit(values: Category) {
     try {
       const { name, description } = values;
-      await categoryServices.create({ name, description });
+      const res = await categoryServices.create({ name, description });
+      console.log(res);
       toast.success(`Submitted: ${values.name} (${values.description})`);
       form.reset();
-      if (invalidate) {
-        invalidate("categories");
-      }
       onClose();
     } catch (error) {
-      const { errors, message } = error.response.data;
-      console.log(errors);
+      const { errors } = getErrorMessage(error);
+      // const { errors, message } = error.response.data;
+      // console.log(errors);
       errors.forEach((err: ApiError) => {
         if (err.field) {
           const field = err.field;
@@ -59,7 +56,7 @@ export default function AddModal({
           });
         }
       });
-      toast.error(`Submission failed${message && `: ${message}`}`);
+      // toast.error(`Submission failed${message && `: ${message}`}`);
     } finally {
       cb();
     }

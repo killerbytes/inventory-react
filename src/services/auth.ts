@@ -1,13 +1,13 @@
-import type { Product } from "@/pages/Products";
 import BaseService from "./base";
+import { User } from "@/types";
 import type Http from "./http";
 
-export default class ProductService extends BaseService<Product> {
+export default class UserService extends BaseService<User> {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/auth" });
   }
 
-  login = async (data) => {
+  login = async (data: User) => {
     const response = await this.http.post(`${this.url}/login`, data);
     return response;
   };

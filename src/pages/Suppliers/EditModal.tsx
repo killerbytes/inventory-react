@@ -16,18 +16,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { supplierServices, type ApiError, type Supplier } from "@/services";
-import { GlobalContext } from "@/components/GlobalContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supplierServices } from "@/services";
 import { supplierSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
-import React, { useContext } from "react";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
+import { Supplier } from "@/types";
 import { toast } from "sonner";
+import React from "react";
 
 export default function EditModal({
   isOpen,
@@ -40,7 +40,6 @@ export default function EditModal({
   cb: () => void;
   data: Supplier;
 }) {
-  const { invalidate } = useContext(GlobalContext) || {};
   const [confirm, setConfirm] = React.useState(false);
   const form = useForm<Supplier>({
     resolver: zodResolver(supplierSchema),
@@ -53,9 +52,6 @@ export default function EditModal({
       toast.success(`Submitted: ${values.name}`);
       form.reset();
       onClose();
-      if (invalidate) {
-        invalidate("categories");
-      }
     } catch (error) {
       const { errors } = (
         error as { response: { data: { errors: ApiError[] } } }

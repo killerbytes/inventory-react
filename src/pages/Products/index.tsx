@@ -4,14 +4,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { productServices, type APIResponse, type Product } from "@/services";
-import { PackageOpen, Pencil, Plus } from "lucide-react";
-import { ColumnDef } from "@tanstack/react-table";
-import { PAGINATION } from "@/utils/definitions";
+import { categoryServices, productServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import NewPackageModal from "./NewPackageModal";
+import { APIResponse, Product } from "@/types";
 import { Input } from "@/components/ui/input";
+import useDebounce from "@/hooks/useDebounce";
+import { Plus, PlusIcon } from "lucide-react";
+import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
+import Select from "@/components/Select";
 import ProductList from "./ProductList";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
@@ -24,7 +26,9 @@ export interface CategorizedProductList {
 }
 
 export default function Products() {
-  const [page, setPage] = React.useState(1);
+  const [category, setCategory] = React.useState<number>();
+  const { categories, setCategories } = useCategoryStore();
+  const [query, setQuery] = React.useState("");
   const [data, setData] = React.useState<APIResponse<CategorizedProductList[]>>(
     {
       data: [],
@@ -36,11 +40,8 @@ export default function Products() {
   const [selected, setSelected] = React.useState<Product | null>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
-    limit: PAGINATION.PAGE_SIZE,
-    page: PAGINATION.PAGE,
-    sort: "categoryId",
-    order: "asc",
     q: "",
+    categoryId: "ALL",
   });
   const [toggle, handleToggle] = useToggle({
     addModal: false,
@@ -48,18 +49,28 @@ export default function Products() {
     newPackageModal: false,
   });
 
+  const debouncedQuery = useDebounce(query, 500);
+  React.useEffect(() => {
+    setFilter((prev) => ({
+      ...prev,
+      q: debouncedQuery,
+    }));
+  }, [debouncedQuery]);
+
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const { data }: { data: APIResponse<CategorizedProductList[]> } =
-        await productServices.list();
-      setData(data);
+      const res = await productServices.getAll({
+        ...filter,
+        ...(filter.categoryId === "ALL" && { categoryId: null }),
+      });
+      setData(res);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filter]);
 
   const handleNewPackage = async () => {
     handleToggle({ newPackageModal: false });
@@ -70,11 +81,14 @@ export default function Products() {
   }, [filter, getData]);
 
   React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
+    if (categories?.length === 0) {
+      const getData = async () => {
+        const res = await categoryServices.list();
+        setCategories(res);
+      };
+      getData();
+    }
+  }, [categories, setCategories]);
 
   return (
     <div>
@@ -92,17 +106,27 @@ export default function Products() {
           </div>
         </div>
       </header>
-      <div>
+      <div className="flex gap-2 justify-between">
         <Input
           placeholder="Search products"
           className="w-full mb-4"
-          value={filter.q}
+          value={query}
           onChange={(e) => {
-            setFilter((prev) => ({
-              ...prev,
-              q: e.target.value,
-              page: 1,
-            }));
+            setQuery(e.target.value);
+          }}
+        />
+        <Select
+          value={filter.categoryId}
+          options={[{ id: "ALL", name: "ALL" }, ...categories]}
+          className="w-full mb-4"
+          labelKey="name"
+          valueKey="id"
+          onChange={(e) => {
+            const categoryId = (e.target as HTMLInputElement).value;
+            setFilter({
+              ...filter,
+              categoryId,
+            });
           }}
         />
       </div>
@@ -113,20 +137,32 @@ export default function Products() {
           <Accordion
             type="multiple"
             className="w-full"
-            defaultValue={data.map((item) => item.categoryId)}
+            defaultValue={data.data?.map((item) => item.categoryId)}
           >
-            {data.map((item) => (
-              <AccordionItem value={item.categoryId}>
+            {data.data?.map((item) => (
+              <AccordionItem value={item.categoryId} key={item.categoryId}>
                 <AccordionTrigger className="text-accent-foreground ">
-                  {" "}
                   {item.categoryName}
                 </AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-4 text-balance">
+                <AccordionContent className="flex flex-col gap-2 text-balance">
                   <ProductList
                     products={item.products}
                     onSelect={setSelected}
                     onToggle={handleToggle}
                   />
+                  <div className="flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="size-8"
+                      onClick={() => {
+                        setCategory(Number(item.categoryId));
+                        handleToggle({ addModal: true });
+                      }}
+                    >
+                      <PlusIcon />
+                    </Button>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -137,6 +173,7 @@ export default function Products() {
       {toggle.addModal && (
         <AddModal
           isOpen={true}
+          categoryId={category}
           onClose={() => {
             handleToggle({ addModal: false });
           }}

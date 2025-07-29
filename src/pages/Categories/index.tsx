@@ -1,14 +1,16 @@
-import { categoryServices, type APIResponse, type Category } from "@/services";
+import { ApiErrorResponse, APIResponse, Category } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
-import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getErrorMessage } from "@/lib/utils";
+import { categoryServices } from "@/services";
 import DnDTable from "@/components/DnDTable";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import Pager from "@/components/Pager";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
+import { toast } from "sonner";
 import React from "react";
 
 export default function Categories() {
@@ -37,11 +39,11 @@ export default function Categories() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await categoryServices.getAll(filter);
-      const data = response.data;
+      const data = await categoryServices.getAll(filter);
       setData(data);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      const { message } = getErrorMessage(error as ApiErrorResponse);
+      toast.error("Submission failed: " + message);
     } finally {
       setLoading(false);
     }
@@ -58,9 +60,9 @@ export default function Categories() {
     }));
   }, [page]);
 
-  const onSubmit = async (data: T[]) => {
+  const onSubmit = async (data: Category[]) => {
     const sorted = data.map(({ id }) => {
-      return id;
+      return String(id);
     });
     await categoryServices.updateSort(sorted);
   };

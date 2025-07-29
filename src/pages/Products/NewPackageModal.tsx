@@ -1,12 +1,13 @@
-import { ApiError, productServices, type Product } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/utils";
+import { productServices } from "@/services";
+import { ApiError, Product } from "@/types";
 import { useForm } from "react-hook-form";
 import ProductForm from "./ProductForm";
 import Modal from "@/components/Modal";
 import validations from "@/schemas";
 import { toast } from "sonner";
-import * as z from "zod";
 
 export default function NewPackageModal({
   isOpen,
@@ -20,16 +21,20 @@ export default function NewPackageModal({
   data: Product;
 }) {
   const { productSchema } = validations;
+  const { name, description, categoryId, unit } = data;
   const form = useForm<Product>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      ...data,
+      name,
+      description,
+      categoryId,
+      unit,
     },
   });
 
   const handleSubmit = async (values: Product) => {
     try {
-      const { name, description, categoryId, unit, reorderLevel } = values;
+      const { name, description, categoryId, unit } = values;
       if (!data?.id) {
         throw new Error("Product ID is missing");
       }
@@ -38,7 +43,6 @@ export default function NewPackageModal({
         description,
         categoryId,
         unit,
-        reorderLevel,
         parentId: data.id,
       };
 
@@ -46,9 +50,8 @@ export default function NewPackageModal({
       toast.success(`Submitted: ${values.name}`);
       onSubmit();
     } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
+      const { errors } = getErrorMessage(error);
+
       errors.forEach((err: ApiError) => {
         if (err.field) {
           form.setError(err.field as keyof Product, {
@@ -57,7 +60,6 @@ export default function NewPackageModal({
           });
         }
       });
-      toast.error("Submission failed");
     }
   };
 
@@ -81,7 +83,7 @@ export default function NewPackageModal({
               });
           }}
         >
-          <Button type="submit">Create Product</Button>
+          <Button type="submit">Create Repack</Button>
         </ProductForm>
       </Modal>
     </>

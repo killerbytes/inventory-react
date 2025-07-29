@@ -3,6 +3,13 @@ import axios from "axios";
 
 const baseURL = import.meta.env.VITE_API_URL;
 
+const errorParser = (error: any) => {
+  if (axios.isAxiosError(error) && error.response) {
+    throw error.response.data;
+  }
+  throw error;
+};
+
 export default class Http {
   private axiosInstance: ReturnType<typeof axios.create>;
 
@@ -42,28 +49,48 @@ export default class Http {
   getHeaders = () => {
     return { "x-access-token": this.getToken() };
   };
-  get = (url: string, payload: object | null = null) => {
-    return this.axiosInstance.get(url, {
-      ...payload,
-      headers: this.getHeaders(),
-    });
+  get = async (url: string, payload: object | null = null) => {
+    try {
+      const res = await this.axiosInstance.get(url, {
+        ...payload,
+        headers: this.getHeaders(),
+      });
+      return res.data;
+    } catch (error) {
+      errorParser(error);
+    }
   };
-  post = (url: string, payload: object) => {
+  post = async (url: string, payload: object) => {
     const config = {
       headers: this.getHeaders(),
     };
-    return this.axiosInstance.post(url, payload, config);
+    try {
+      const res = await this.axiosInstance.post(url, payload, config);
+      return res.data;
+    } catch (error) {
+      errorParser(error);
+    }
   };
-  patch = (url: string, data: object) => {
+  patch = async (url: string, data: object) => {
     const config = {
       headers: this.getHeaders(),
     };
-    return this.axiosInstance.patch(url, data, config);
+    try {
+      const res = await this.axiosInstance.patch(url, data, config);
+      return res.data;
+    } catch (error) {
+      errorParser(error);
+    }
   };
-  delete = (url: string) => {
+  delete = async (url: string) => {
     const config = {
       headers: this.getHeaders(),
     };
-    return this.axiosInstance.delete(url, config);
+    try {
+      const res = await this.axiosInstance.delete(url, config);
+      return res.data;
+    } catch (error) {
+      errorParser(error);
+    }
   };
 }

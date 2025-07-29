@@ -1,13 +1,14 @@
-import { productServices, type Product } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Trash, Trash2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/utils";
+import { productServices } from "@/services";
 import { useForm } from "react-hook-form";
+import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import Modal from "@/components/Modal";
-import validations from "@/schemas";
+import { Trash2 } from "lucide-react";
+import { Product } from "@/types";
 import { toast } from "sonner";
-import * as z from "zod";
 
 export default function EditModal({
   isOpen,
@@ -20,10 +21,8 @@ export default function EditModal({
   onSubmit: () => void;
   data: Product;
 }) {
-  const { productSchema } = validations;
-  const schema = productSchema;
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<Product>({
+    resolver: zodResolver(productSchema),
     defaultValues: {
       ...data,
     },
@@ -34,9 +33,9 @@ export default function EditModal({
     message: string;
   }
 
-  async function handleSubmit(values: z.infer<typeof schema>) {
+  async function handleSubmit(values: Product) {
     try {
-      const { name, description, categoryId, unit, reorderLevel } = values;
+      const { name, description, categoryId, unit } = values;
       if (!data.id) {
         throw new Error("Product ID is missing");
       }
@@ -45,7 +44,6 @@ export default function EditModal({
         description,
         categoryId,
         unit,
-        reorderLevel,
       });
       toast.success(`Submitted: ${values.name}`);
       form.reset();
@@ -56,7 +54,7 @@ export default function EditModal({
       ).response.data;
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof z.infer<typeof schema>, {
+          form.setError(err.field as keyof Product, {
             type: "server",
             message: err.message,
           });
@@ -67,10 +65,15 @@ export default function EditModal({
   }
 
   async function handleRemove() {
-    const { id } = data;
-    await productServices.delete(String(id));
-    toast.success(`Product ${id} deleted`);
-    onSubmit();
+    const { id, name } = data;
+    try {
+      await productServices.delete(String(id));
+      toast.success(`Product [${name}] deleted`);
+      onSubmit();
+    } catch (error) {
+      const { message } = getErrorMessage(error);
+      toast.error("Deletion failed: " + message);
+    }
   }
 
   return (
@@ -82,6 +85,7 @@ export default function EditModal({
         description="Update existing product details"
       >
         <ProductForm
+          state="EDIT"
           form={form}
           onSubmit={(e) => {
             e.preventDefault();
@@ -95,11 +99,11 @@ export default function EditModal({
         >
           <Button
             type="button"
-            variant="secondary"
+            variant="destructive"
             className="mr-auto"
             onClick={handleRemove}
           >
-            <Trash2 color="red" size={16} />
+            <Trash2 size={16} />
           </Button>
 
           <Button type="submit">Save changes</Button>

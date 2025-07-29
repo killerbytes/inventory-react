@@ -13,19 +13,15 @@ import { useForm } from "react-hook-form";
 import validations from "@/schemas";
 import * as z from "zod";
 
-import {
-  inventoryServices,
-  type Inventory,
-  type SalesOrderItem,
-} from "@/services";
-import { GlobalContext } from "@/components/GlobalContext";
 import { DialogFooter } from "@/components/ui/dialog";
 import Autocomplete from "@/components/Autcomplete";
+import { Inventory, SalesOrderItem } from "@/types";
 import { Button } from "@/components/ui/button";
+import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
-import React, { useContext } from "react";
 import Modal from "@/components/Modal";
 import { toast } from "sonner";
+import React from "react";
 
 export default function ProductsModal({
   isOpen,
@@ -38,7 +34,6 @@ export default function ProductsModal({
   onAdd: (item: SalesOrderItem) => void;
   exclude?: Array<number>;
 }) {
-  const { store } = useContext(GlobalContext) || {};
   const [inventory, setInventory] = React.useState<Inventory[]>([]);
   const [value, setValue] = React.useState<Inventory | null>(null);
   const { salesOrderItemSchema } = validations;

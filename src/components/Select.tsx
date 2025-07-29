@@ -9,14 +9,14 @@ import { cx } from "class-variance-authority";
 import { SyntheticEvent } from "react";
 
 interface SelectOption {
-  [key: string]: string;
+  [key: string]: string | number | null;
 }
 
 interface SelectProps {
   onChange: (e: SyntheticEvent<HTMLSelectElement>) => void;
   options: SelectOption[];
   className?: string;
-  value?: string;
+  value?: string | number;
   name?: string;
   valueKey?: string;
   labelKey?: string;
@@ -28,24 +28,33 @@ function Select(props: SelectProps) {
     options,
     className,
     name,
+    value,
     valueKey = "value",
     labelKey = "label",
   } = props;
 
   const handleChange = (value: string) => {
     const e = {
-      target: { value, name },
-    } as React.ChangeEvent<HTMLSelectElement>;
+      target: {
+        value: String(value),
+        name,
+      },
+    } as unknown as React.ChangeEvent<HTMLSelectElement>;
     onChange(e);
   };
+
   return (
-    <SelectComponent {...props} onValueChange={handleChange}>
+    <SelectComponent
+      {...props}
+      value={String(value)}
+      onValueChange={handleChange}
+    >
       <SelectTrigger className={cx("w-full", className)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (
-          <SelectItem key={option[valueKey]} value={option[valueKey]}>
+          <SelectItem key={option[valueKey]} value={String(option[valueKey])}>
             {option[labelKey]}
           </SelectItem>
         ))}

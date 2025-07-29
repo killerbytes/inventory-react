@@ -6,14 +6,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { useUserStore } from "@/stores/user.store";
 import { ROUTES } from "@/utils/definitions";
-import React, { useContext } from "react";
+import { authServices } from "@/services";
 import { Link } from "react-router-dom";
+import { User } from "@/types";
+import React from "react";
 
-import { authServices, type User } from "@/services";
-import { UserContext } from "./UserContext";
-
-export default function User() {
+export default function UserIcon() {
   const getInitials = (name: string) => {
     const names = name.split(" ");
     let initials = names[0].substring(0, 1).toUpperCase();
@@ -23,26 +23,19 @@ export default function User() {
     return initials;
   };
 
-  const [user, setUser] = React.useState<User | null>(null);
-  const { store, fetchData } = useContext(UserContext || null) || {};
+  const { user, setUser } = useUserStore();
 
   React.useEffect(() => {
-    if (
-      fetchData &&
-      localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`)
-    ) {
-      fetchData("user", async () => {
-        const { data } = await authServices.me();
-        return data;
-      });
+    const getData = async () => {
+      const user: User = await authServices.me();
+      setUser(user);
+    };
+    if (localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`)) {
+      getData();
     } else {
       handleLogout();
     }
   }, []);
-
-  React.useEffect(() => {
-    setUser(store?.user ?? null);
-  }, [store?.user]);
 
   const handleLogout = () => {
     localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
@@ -53,7 +46,7 @@ export default function User() {
       <DropdownMenuTrigger asChild>
         {user?.name && (
           <Avatar className="cursor-pointer ">
-            <AvatarFallback className="text-primary bg-gray-500 text-white">
+            <AvatarFallback className="text-primary bg-gray-500">
               {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>

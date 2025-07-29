@@ -1,6 +1,5 @@
 import { MODE_OF_PAYMENT, ORDER_TYPE, UNIT } from "./utils/definitions";
 import * as z from "zod";
-import path from "path";
 
 export const userSchema = z.object({
   id: z.number().optional(),
@@ -74,7 +73,17 @@ export const categorySchema = z.object({
   }),
 });
 
-export const productSchema: z.ZodType<any> = z.lazy(() =>
+export interface ProductSchemaType {
+  id?: number | null;
+  name: string;
+  categoryId: number;
+  description?: string | null;
+  unit: string;
+  parentId?: number | null;
+  subProducts?: ProductSchemaType[];
+}
+
+export const productSchema: z.ZodType<ProductSchemaType> = z.lazy(() =>
   z.object({
     id: z.number().nullish(),
     name: z.string().min(2, {
@@ -87,7 +96,7 @@ export const productSchema: z.ZodType<any> = z.lazy(() =>
     description: z.string().nullish(),
     unit: z.string(),
     parentId: z.number().nullish(),
-    subProduct: z.array(productSchema).optional(),
+    subProducts: z.array(productSchema).optional(),
   }),
 );
 

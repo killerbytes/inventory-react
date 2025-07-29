@@ -11,145 +11,138 @@ import Suppliers from "./pages/Suppliers";
 import Inventory from "./pages/Inventory";
 import Layout from "./components/Layout";
 import Products from "./pages/Products";
-import NotFound from "./pages/NotFound";
 import Users from "./pages/Users";
 import Home from "./pages/Home";
 
-import { useApiData, type ApiDataType } from "./hooks/useApiData";
-import { GlobalContext } from "./components/GlobalContext";
 import { ROUTES } from "./utils/definitions";
 import Login from "./pages/Login";
 import Test from "./pages/Test";
 
 function App() {
-  const props: ApiDataType = useApiData();
-
   return (
     <>
       <BrowserRouter>
-        <GlobalContext.Provider value={props}>
-          <Routes>
-            <Route path={ROUTES.LOGIN} element={<Login />} />
-            <Route
-              path={ROUTES.DASHBOARD}
-              element={
-                <Layout>
-                  <Home />
-                </Layout>
-              }
-            />
-            <Route
-              path={ROUTES.SUPPLIERS}
-              element={
-                <Layout>
-                  <Suppliers />
-                </Layout>
-              }
-            />
+        <Routes>
+          <Route path={ROUTES.LOGIN} element={<Login />} />
+          <Route
+            path={ROUTES.DASHBOARD}
+            element={
+              <Layout>
+                <Home />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.SUPPLIERS}
+            element={
+              <Layout>
+                <Suppliers />
+              </Layout>
+            }
+          />
 
-            <Route
-              path={ROUTES.CATEGORIES}
-              element={
-                <Layout>
-                  <Categories />
-                </Layout>
-              }
-            />
-            <Route
-              path={ROUTES.PRODUCTS}
-              element={
-                <Layout>
-                  <Products />
-                </Layout>
-              }
-            />
-            <Route
-              path={ROUTES.USERS}
-              element={
-                <Layout>
-                  <Users />
-                </Layout>
-              }
-            />
-            <Route
-              path={ROUTES.PURCHASE_ORDERS_CREATE}
-              element={
-                <Layout>
-                  <PurchaseCreate />
-                </Layout>
-              }
-            />
-            <Route
-              path={`${ROUTES.PURCHASE_ORDERS}/:id`}
-              element={
-                <Layout>
-                  <PurchaseDetails />
-                </Layout>
-              }
-            />
+          <Route
+            path={ROUTES.CATEGORIES}
+            element={
+              <Layout>
+                <Categories />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.PRODUCTS}
+            element={
+              <Layout>
+                <Products />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.USERS}
+            element={
+              <Layout>
+                <Users />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.PURCHASE_ORDERS_CREATE}
+            element={
+              <Layout>
+                <PurchaseCreate />
+              </Layout>
+            }
+          />
+          <Route
+            path={`${ROUTES.PURCHASE_ORDERS}/:id`}
+            element={
+              <Layout>
+                <PurchaseDetails />
+              </Layout>
+            }
+          />
 
-            <Route
-              path={ROUTES.PURCHASE_ORDERS}
-              element={
-                <Layout>
-                  <PurchaseOrders />
-                </Layout>
-              }
-            />
-            <Route
-              path={ROUTES.INVENTORY}
-              element={
-                <Layout>
-                  <Inventory />
-                </Layout>
-              }
-            />
-            <Route
-              path={ROUTES.INVENTORY_TRANSACTIONS}
-              element={
-                <Layout>
-                  <InventoryTransactions />
-                </Layout>
-              }
-            />
-            <Route
-              path={ROUTES.SALES_ORDERS_CREATE}
-              element={
-                <Layout>
-                  <SalesCreate />
-                </Layout>
-              }
-            />
-            <Route
-              path={`${ROUTES.SALES_ORDERS}/:id`}
-              element={
-                <Layout>
-                  <SalesDetails />
-                </Layout>
-              }
-            />
+          <Route
+            path={ROUTES.PURCHASE_ORDERS}
+            element={
+              <Layout>
+                <PurchaseOrders />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.INVENTORY}
+            element={
+              <Layout>
+                <Inventory />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.INVENTORY_TRANSACTIONS}
+            element={
+              <Layout>
+                <InventoryTransactions />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.SALES_ORDERS_CREATE}
+            element={
+              <Layout>
+                <SalesCreate />
+              </Layout>
+            }
+          />
+          <Route
+            path={`${ROUTES.SALES_ORDERS}/:id`}
+            element={
+              <Layout>
+                <SalesDetails />
+              </Layout>
+            }
+          />
 
-            <Route
-              path={ROUTES.SALES_ORDERS}
-              element={
-                <Layout>
-                  <SalesOrders />
-                </Layout>
-              }
-            />
+          <Route
+            path={ROUTES.SALES_ORDERS}
+            element={
+              <Layout>
+                <SalesOrders />
+              </Layout>
+            }
+          />
 
-            <Route
-              path="test"
-              element={
-                <Layout>
-                  <Test />
-                </Layout>
-              }
-            />
+          <Route
+            path="test"
+            element={
+              <Layout>
+                <Test />
+              </Layout>
+            }
+          />
 
-            {/* <Route path="*" element={<NotFound />} /> */}
-          </Routes>
-        </GlobalContext.Provider>
+          {/* <Route path="*" element={<NotFound />} /> */}
+        </Routes>
       </BrowserRouter>
     </>
   );
