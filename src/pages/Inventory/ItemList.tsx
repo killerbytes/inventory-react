@@ -5,13 +5,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { DataTable } from "@/components/DataTable";
-import { Inventory } from "@/services";
+import { ColumnDef } from "@tanstack/react-table";
+import { Inventory } from "@/types";
 import { useMemo } from "react";
 
 export default function ItemList({
   data,
   columns,
 }: {
+  columns: ColumnDef<Inventory>[];
   data: {
     categoryId: string;
     categoryName: string;

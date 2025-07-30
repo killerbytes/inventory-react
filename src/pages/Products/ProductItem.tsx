@@ -3,10 +3,9 @@ import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import UnitBadge from "@/components/UnitBadge";
 import { cx } from "class-variance-authority";
-import { Fragment } from "react/jsx-runtime";
 import { Product } from "@/types";
 
-function ProductItem({
+export default function ProductItem({
   product,
   sub = false,
   onSelect,
@@ -66,34 +65,5 @@ function ProductItem({
         </div>
       </div>
     </div>
-  );
-}
-
-export default function ProductList({
-  products,
-  ...props
-}: {
-  products: Product[];
-  onSelect: (product: Product) => void;
-  onToggle: (toggle: {
-    newPackageModal?: boolean;
-    editModal?: boolean;
-  }) => void;
-}) {
-  return (
-    <>
-      {products.map((product) => (
-        <Fragment key={product.id}>
-          <ProductItem product={product} {...props} />
-          {product?.subProducts?.map((subItem: Product) => {
-            return (
-              <Fragment key={subItem.id}>
-                <ProductItem product={subItem} sub={true} {...props} />
-              </Fragment>
-            );
-          })}
-        </Fragment>
-      ))}
-    </>
   );
 }

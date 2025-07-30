@@ -1,18 +1,18 @@
 import {
-  productServices,
-  PurchaseOrder,
-  PurchaseOrderItem,
-  supplierServices,
-} from "@/services";
-
-import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  CategorizedProductList,
+  PurchaseOrder,
+  PurchaseOrderItem,
+  Supplier,
+} from "@/types";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { productServices, supplierServices } from "@/services";
 import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
 import { useProductStore, useSupplierStore } from "@/stores";
 import { ColumnDef, Row } from "@tanstack/react-table";
@@ -54,9 +54,20 @@ export default function PurchaseOrderForm({
 
   React.useEffect(() => {
     const getData = async () => {
-      const { data } = await productServices.list();
+      const data: CategorizedProductList[] = await productServices.list();
+      const combined = data.map((item) => {
+        const products = item.products.flatMap((product) => {
+          const { subProducts, ...rest } = product;
+          return [rest, ...(subProducts || [])];
+        });
 
-      setProducts(data);
+        return {
+          ...item,
+          products,
+        };
+      });
+
+      setProducts(combined);
     };
 
     getData();
@@ -64,7 +75,7 @@ export default function PurchaseOrderForm({
 
   React.useEffect(() => {
     const getData = async () => {
-      const { data } = await supplierServices.list();
+      const data: Supplier[] = await supplierServices.list();
       setSuppliers(data);
     };
     if (suppliers.length === 0) {
@@ -104,8 +115,9 @@ export default function PurchaseOrderForm({
               render={({ field }) => (
                 <ProductList
                   control={control}
-                  products={products}
-                  field={field}
+                  list={products}
+                  {...field}
+                  value={field.value}
                 />
               )}
             />
@@ -267,7 +279,7 @@ export default function PurchaseOrderForm({
           control={form.control}
           name="modeOfPayment"
           render={({ field }) => (
-            <FormItem className="mb-4">
+            <FormItem className="mb-4 w-50">
               <FormLabel>Mode of Payment</FormLabel>
               <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
 
@@ -299,7 +311,9 @@ export default function PurchaseOrderForm({
           control={form.control}
           name="dueDate"
           render={({ field }) => (
-            <FormItem className="mb-4">
+            <FormItem
+              className={cx("mb-4", modeOfPayment !== "CHECK" && "opacity-50")}
+            >
               <FormLabel>Due Date</FormLabel>
               <DatePicker {...field} disabled={modeOfPayment !== "CHECK"} />
               <FormMessage />

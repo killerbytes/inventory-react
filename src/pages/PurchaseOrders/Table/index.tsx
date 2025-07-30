@@ -43,32 +43,36 @@ export default function Table({ control, data, columns, errors }: TableProps) {
   );
 
   return (
-    <DataTable
-      data={data}
-      columns={columns}
-      tableClassname={cx({
-        "border-red-500": errors.purchaseOrderItems,
-      })}
-      footer={
-        <>
-          <TableRow>
-            <TableCell colSpan={columns.length === 8 ? 2 : 1}>Total</TableCell>
-            <TableCell className="text-right">
-              {formatCurrency(total?.amount)}
-            </TableCell>
-            <TableCell className="text-right"></TableCell>
-            <TableCell className="text-right"></TableCell>
-            <TableCell className="text-right ">
-              {formatCurrency(total?.discount)}
-            </TableCell>
-            <TableCell className="text-right"></TableCell>
-            <TableCell className="text-right">
-              {formatCurrency(total?.amount - total?.discount)}
-            </TableCell>
-          </TableRow>
-        </>
-      }
-    />
+    <>
+      <DataTable
+        data={data}
+        columns={columns}
+        tableClassname={cx({
+          "border-red-500": errors.purchaseOrderItems,
+        })}
+        footer={
+          <>
+            <TableRow>
+              <TableCell colSpan={columns.length === 8 ? 2 : 1}>
+                Total
+              </TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(total?.amount)}
+              </TableCell>
+              <TableCell className="text-right"></TableCell>
+              <TableCell className="text-right"></TableCell>
+              <TableCell className="text-right ">
+                {formatCurrency(total?.discount)}
+              </TableCell>
+              <TableCell className="text-right"></TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(total?.amount - total?.discount)}
+              </TableCell>
+            </TableRow>
+          </>
+        }
+      />
+    </>
   );
 }
 

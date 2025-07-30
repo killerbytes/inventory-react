@@ -11,6 +11,7 @@ import {
   signupSchema,
   inventorySchema,
   inventoryTransactionSchema,
+  cancelPurchaseOrderSchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -40,6 +41,12 @@ export interface Filter {
   order?: "asc" | "desc";
 }
 
+export interface CategorizedProductList {
+  categoryId: string;
+  categoryName: string;
+  products: Product[];
+}
+
 type User = z.infer<typeof userSchema>;
 type Signup = z.infer<typeof signupSchema>;
 type Login = z.infer<typeof loginSchema>;
@@ -48,6 +55,7 @@ type Product = z.infer<typeof productSchema>;
 type Supplier = z.infer<typeof supplierSchema>;
 type PurchaseOrder = z.infer<typeof purchaseOrderSchema>;
 type PurchaseOrderItem = z.infer<typeof purchaseOrderItemSchema>;
+type CancelPurchaseOrder = z.infer<typeof cancelPurchaseOrderSchema>;
 type SalesOrder = z.infer<typeof salesOrderSchema>;
 type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
 type Inventory = z.infer<typeof inventorySchema>;
@@ -62,6 +70,7 @@ export type {
   Supplier,
   PurchaseOrder,
   PurchaseOrderItem,
+  CancelPurchaseOrder,
   SalesOrder,
   SalesOrderItem,
   Inventory,

@@ -1,4 +1,5 @@
 import { MODE_OF_PAYMENT, ORDER_TYPE, UNIT } from "./utils/definitions";
+import { Category } from "./types";
 import * as z from "zod";
 
 export const userSchema = z.object({
@@ -77,6 +78,7 @@ export interface ProductSchemaType {
   id?: number | null;
   name: string;
   categoryId: number;
+  category: Category;
   description?: string | null;
   unit: string;
   parentId?: number | null;
@@ -253,16 +255,12 @@ export const salesOrderSchema = z.object({
 });
 
 export const inventorySchema = z.object({
-  id: z.number().nullish(),
-  productId: z.number().min(1, {
-    message: "Product must be selected.",
-  }),
+  id: z.number(),
+  productId: z.number(),
   product: z.any(),
-  quantity: z.coerce.number().nullish(),
-  price: z.coerce.number().min(1, {
-    message: "Price must be at least 1.",
-  }),
-  reorderLevel: z.coerce.number().optional(),
+  quantity: z.coerce.number(),
+  price: z.coerce.number(),
+  reorderLevel: z.coerce.number(),
   updatedAt: z.string(),
 });
 
@@ -295,6 +293,7 @@ export default {
   userSchema,
   signupSchema,
   loginSchema,
+  cancelPurchaseOrderSchema,
   categorySchema,
   productSchema,
   supplierSchema,

@@ -89,13 +89,13 @@ export const UNIT = {
 };
 
 export const UNIT_COLOR = {
-  BOX: "bg-red-500",
-  BAG: "bg-yellow-500",
-  GAL: "bg-green-500",
-  PACK: "bg-blue-500",
-  SET: "bg-purple-500",
-  PCS: "bg-gray-500",
-  KGS: "bg-blue-500",
+  BOX: "bg-indigo-400",
+  BAG: "bg-yellow-400",
+  GAL: "bg-green-400",
+  PACK: "bg-blue-400",
+  SET: "bg-purple-400",
+  PCS: "bg-red-400",
+  KGS: "bg-orange-400",
 };
 
 export const UNIT_OPTIONS = Object.values(UNIT).map((value) => ({

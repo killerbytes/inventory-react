@@ -4,10 +4,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { APIResponse, CategorizedProductList, Product } from "@/types";
 import { categoryServices, productServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import NewPackageModal from "./NewPackageModal";
-import { APIResponse, Product } from "@/types";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import { Plus, PlusIcon } from "lucide-react";
@@ -15,15 +15,10 @@ import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import ProductList from "./ProductList";
+import ProductItem from "./ProductItem";
+import React, { Fragment } from "react";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
-import React from "react";
-
-export interface CategorizedProductList {
-  categoryId: string;
-  categoryName: string;
-  products: Product[];
-}
 
 export default function Products() {
   const [category, setCategory] = React.useState<number>();
@@ -141,16 +136,33 @@ export default function Products() {
           >
             {data.data?.map((item) => (
               <AccordionItem value={item.categoryId} key={item.categoryId}>
-                <AccordionTrigger className="text-accent-foreground ">
+                <AccordionTrigger className="bg-accent px-2 rounded-none border py-2">
                   {item.categoryName}
                 </AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-2 text-balance">
-                  <ProductList
-                    products={item.products}
-                    onSelect={setSelected}
-                    onToggle={handleToggle}
-                  />
-                  <div className="flex justify-end">
+                <AccordionContent className="flex flex-col">
+                  {item.products.map((product) => (
+                    <Fragment key={product.id}>
+                      <ProductItem
+                        product={product}
+                        onSelect={setSelected}
+                        onToggle={handleToggle}
+                      />
+                      {product?.subProducts?.map((subItem: Product) => {
+                        return (
+                          <Fragment key={subItem.id}>
+                            <ProductItem
+                              product={subItem}
+                              sub={true}
+                              onSelect={setSelected}
+                              onToggle={handleToggle}
+                            />
+                          </Fragment>
+                        );
+                      })}
+                    </Fragment>
+                  ))}
+
+                  <div className="flex justify-start  py-1">
                     <Button
                       variant="outline"
                       size="icon"

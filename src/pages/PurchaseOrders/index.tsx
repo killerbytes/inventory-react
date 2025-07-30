@@ -60,7 +60,7 @@ export default function PurchaseOrders() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const { data }: { data: APIResponse<PurchaseOrder[]> } =
+      const data: APIResponse<PurchaseOrder[]> =
         await purchaseOrderServices.getAll(filter);
       setData(data);
     } catch (error) {

@@ -1,40 +1,109 @@
-import { Control, ControllerRenderProps, useWatch } from "react-hook-form";
-import Autocomplete from "@/components/Autcomplete";
-import { Product, PurchaseOrder } from "@/services";
-import React from "react";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandList,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CategorizedProductList, PurchaseOrder } from "@/types";
+import { Control, useWatch } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import UnitBadge from "@/components/UnitBadge";
+import { ChevronsUpDown } from "lucide-react";
+import React, { Fragment } from "react";
+import { cn } from "@/lib/utils";
 
 export default function ProductList({
   control,
-  products,
-  field,
+  list,
+  value,
+  onChange,
+  placeholder = "Type to search...",
 }: {
   control: Control<PurchaseOrder>;
-  products: Product[];
-  field: ControllerRenderProps<PurchaseOrder>;
+  list: CategorizedProductList[];
+  value: number | string | undefined | null;
+  onChange: (selected: string) => void;
+  placeholder?: string;
 }) {
-  const [options, setOptions] = React.useState<Product[]>([]);
-
+  const [options, setOptions] = React.useState<CategorizedProductList[]>([]);
+  const [open, setOpen] = React.useState(false);
   const fields = useWatch({
     control,
     name: `purchaseOrderItems`,
   });
 
   React.useEffect(() => {
-    const exclude = fields.map((item) => item.productId);
-    const items = exclude
-      ? products.filter((p) => !exclude?.includes(p.id))
-      : products;
+    const exclude = fields.map((item) => Number(item.productId));
+    const items = list.map((item) => {
+      const products = item.products.filter((product) => {
+        return !exclude.includes(Number(product.id));
+      });
+      return { ...item, products };
+    });
 
     setOptions(items);
-  }, [fields, products]);
+  }, [fields, list]);
+
+  const selected = list
+    .map((option) => {
+      const found = option.products.find(
+        (product) => product.id === Number(value),
+      );
+      return found ? found : null;
+    })
+    .filter(Boolean)[0]?.name;
 
   return (
-    <Autocomplete
-      value={products.find((p) => p.id === field.value)?.name || ""}
-      onChange={field.onChange}
-      options={options}
-      valueKey="id"
-      labelKey="name"
-    />
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
+      <PopoverTrigger asChild className="w-full">
+        <Button
+          variant="outline"
+          role="combobox"
+          className={cn(
+            "w-full justify-between",
+            !value && "text-muted-foreground",
+          )}
+        >
+          {selected}
+          <ChevronsUpDown className="opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+        <Command>
+          <CommandInput placeholder={placeholder} className="h-9" />
+          <CommandList>
+            <CommandEmpty>No products found.</CommandEmpty>
+            {options.map((item) => (
+              <CommandGroup heading={item.categoryName} key={item.categoryName}>
+                {item?.products?.map((product) => (
+                  <Fragment key={product.name}>
+                    <CommandItem
+                      keywords={[product.name]}
+                      value={String(product.id)}
+                      key={product.id}
+                      onSelect={(selected) => {
+                        onChange(selected);
+                        setOpen(false);
+                      }}
+                      className="flex justify-between"
+                    >
+                      {product.name}
+                      <UnitBadge unit={product.unit} />
+                    </CommandItem>
+                  </Fragment>
+                ))}
+              </CommandGroup>
+            ))}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

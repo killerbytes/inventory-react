@@ -1,12 +1,12 @@
-import { Product } from "@/types";
+import { CategorizedProductList } from "@/types";
 import { create } from "zustand";
 
 type ProductStore = {
-  products: Product[];
-  setProducts: (products: Product[]) => void;
+  products: CategorizedProductList[];
+  setProducts: (products: CategorizedProductList[]) => void;
 };
 
 export const useProductStore = create<ProductStore>((set) => ({
   products: [],
-  setProducts: (products: Product[]) => set({ products }),
+  setProducts: (products: CategorizedProductList[]) => set({ products }),
 }));

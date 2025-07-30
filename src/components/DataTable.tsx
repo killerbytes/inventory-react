@@ -131,7 +131,7 @@ function DataTable<T>(props) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   className={cx({ "cursor-pointer": onRowClick })}
-                  key={row.id}
+                  key={row.original.fieldId}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     onRowClick && onRowClick(row.original);

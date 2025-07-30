@@ -10,9 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { cancelPurchaseOrderSchema } from "@/schemas";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { CancelPurchaseOrder } from "@/types";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { z } from "zod";
 
 export const CancelModal = ({
   onClose,
@@ -20,14 +20,14 @@ export const CancelModal = ({
   isOpen,
 }: {
   onClose: () => void;
-  onSubmit: (form: z.infer<typeof cancelPurchaseOrderSchema>) => void;
+  onSubmit: (form: CancelPurchaseOrder) => void;
   isOpen: boolean;
 }) => {
-  const form = useForm<z.infer<typeof cancelPurchaseOrderSchema>>({
+  const form = useForm<CancelPurchaseOrder>({
     resolver: zodResolver(cancelPurchaseOrderSchema),
   });
 
-  const formSubmit = (form: z.infer<typeof cancelPurchaseOrderSchema>) => {
+  const formSubmit = (form: CancelPurchaseOrder) => {
     onSubmit(form);
   };
 

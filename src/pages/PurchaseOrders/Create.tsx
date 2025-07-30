@@ -1,16 +1,10 @@
-import {
-  PurchaseOrder,
-  purchaseOrderServices,
-  type ApiError,
-} from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
+import { purchaseOrderServices } from "@/services";
 
-import {
-  MODE_OF_PAYMENT_OPTIONS,
-  ORDER_STATUS,
-  ROUTES,
-} from "@/utils/definitions";
+import { MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
+import { ApiError, ApiErrorResponse, PurchaseOrder } from "@/types";
+import { getErrorMessage, randomInt } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { purchaseOrderSchema } from "@/schemas";
 import useDebounce from "@/hooks/useDebounce";
@@ -18,7 +12,6 @@ import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router";
 import OrderForm from "./Form/OrderForm";
 import { MoveLeft } from "lucide-react";
-import { randomInt } from "@/lib/utils";
 import { addWeeks } from "date-fns";
 import { toast } from "sonner";
 import React from "react";
@@ -26,7 +19,9 @@ import * as z from "zod";
 
 const purchaseOrderItemDefault = {
   productId: null,
+  unitPrice: 0,
   quantity: 1,
+
   unit: "",
   discount: null,
   discountNote: "",
@@ -40,7 +35,7 @@ const purchaseOrderDefault = {
   deliveryDate: new Date().toISOString(),
   checkNumber: "",
   dueDate: addWeeks(new Date(), 1).toISOString(),
-  purchaseOrderItems: Array.from({ length: 1 }, () => purchaseOrderItemDefault),
+  purchaseOrderItems: Array.from({ length: 3 }, () => purchaseOrderItemDefault),
 };
 
 export default function Create() {
@@ -72,9 +67,7 @@ export default function Create() {
       );
       navigate(ROUTES.PURCHASE_ORDERS);
     } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
+      const { errors } = getErrorMessage(error as ApiErrorResponse);
       errors.forEach((err: ApiError) => {
         if (err.field) {
           form.setError(
@@ -93,14 +86,6 @@ export default function Create() {
       }
     }
   }
-
-  // async function onSaveDraft() {
-  //   try {
-  //     console.log(form.getValues());
-  //   } catch (error) {
-  //     toast.error("Submission failed");
-  //   }
-  // }
 
   const saveDraft = React.useCallback(() => {
     const draft =
@@ -123,7 +108,7 @@ export default function Create() {
   const debouncedFormData = useDebounce(formData, 1000);
 
   React.useEffect(() => {
-    // saveDraft();
+    saveDraft();
   }, [debouncedFormData, saveDraft]);
   return (
     <>

@@ -4,27 +4,29 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ApiErrorResponse, CancelPurchaseOrder, PurchaseOrder } from "@/types";
 import { Ban, EllipsisVertical, MoveLeft, Save, Trash2 } from "lucide-react";
 import { MODE_OF_PAYMENT, ORDER_STATUS, ROUTES } from "@/utils/definitions";
-import { purchaseOrderServices, type PurchaseOrder } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
+import { useForm, useWatch } from "react-hook-form";
+import { purchaseOrderServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { purchaseOrderSchema } from "@/schemas";
+import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
 import { Form } from "@/components/ui/form";
 import { CancelModal } from "./CancelModal";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
-import { useForm } from "react-hook-form";
 import OrderForm from "./Form/OrderForm";
 import Badge from "@/components/Badge";
 import { toast } from "sonner";
 import { z } from "zod";
 
 export default function Create() {
-  const [data, setData] = React.useState<PurchaseOrder | null>(null);
+  // const [data, setData] = React.useState<PurchaseOrder | null>(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const { toggle, handleToggle } = useToggle({
@@ -39,12 +41,11 @@ export default function Create() {
 
   async function onSaveOrder(form: PurchaseOrder) {
     try {
-      console.log(form);
-
       await purchaseOrderServices.update(id!, form);
       toast.success(`Purchase Order saved successfully`);
-    } catch (error: any) {
-      toast.error("Submission failed - " + error?.response.data.error);
+    } catch (error) {
+      const { message } = getErrorMessage(error as ApiErrorResponse);
+      toast.error("Submission failed - " + message);
     }
   }
 
@@ -72,7 +73,7 @@ export default function Create() {
     }
   }
 
-  async function onCancelOrder(form: PurchaseOrder) {
+  async function onCancelOrder(form: CancelPurchaseOrder) {
     try {
       await purchaseOrderServices.cancelOrder(id!, {
         ...form,
@@ -81,20 +82,19 @@ export default function Create() {
       toast.success(`Purchase Order cancelled successfully`);
       navigate(ROUTES.PURCHASE_ORDERS);
     } catch (error) {
-      toast.error(`Submission failed, ${error.response.data.message}`);
+      const { message } = getErrorMessage(error as ApiErrorResponse);
+      toast.error(`Submission failed, ${message}`);
     }
   }
 
   const getData = useCallback(async () => {
     try {
-      const response = await purchaseOrderServices.get(id);
-      const data = response.data;
-      setData(data);
-      // setValue("purchaseOrderItems", data.purchaseOrderItems);
+      const data = await purchaseOrderServices.get(id);
       reset(data);
     } catch (error) {
+      const { message } = getErrorMessage(error as ApiErrorResponse);
+      toast.error("Submission failed - " + message);
       navigate(ROUTES.PURCHASE_ORDERS);
-      toast.error("Submission failed - " + error?.response.data.error.message);
     }
   }, [id, navigate]);
 
@@ -102,27 +102,9 @@ export default function Create() {
     getData();
   }, [getData]);
 
-  // const columns: ColumnDef<PurchaseOrderItem>[] = [
-  //   {
-  //     accessorKey: "product.name",
-  //     header: "Product",
-  //   },
-  //   {
-  //     accessorKey: "quantity",
-  //     header: () => <div className="text-right">Quantity</div>,
-  //     meta: {
-  //       className: "text-right",
-  //     },
-  //   },
-  //   {
-  //     accessorKey: "unitPrice",
-  //     header: () => <div className="text-right">Unit Price</div>,
-  //     meta: {
-  //       className: "text-right",
-  //       type: "currency",
-  //     },
-  //   },
-  // ];
+  const data = useWatch({
+    control: form.control,
+  });
 
   return (
     <>
@@ -221,19 +203,21 @@ export default function Create() {
             </div>
           </>
         ) : (
-          <PartialForm form={form} />
+          <>
+            <PartialForm form={form} />
+            {toggle.cancelModal && (
+              <CancelModal
+                isOpen={true}
+                onClose={() => handleToggle({ cancelModal: false })}
+                onSubmit={(data) => {
+                  handleToggle({ cancelModal: false });
+                  onCancelOrder(data);
+                }}
+              />
+            )}
+          </>
         )}
       </Form>
-      {toggle.cancelModal && (
-        <CancelModal
-          isOpen={true}
-          onClose={() => handleToggle({ cancelModal: false })}
-          onSubmit={(data) => {
-            handleToggle({ cancelModal: false });
-            onCancelOrder(data);
-          }}
-        />
-      )}
     </>
   );
 }
