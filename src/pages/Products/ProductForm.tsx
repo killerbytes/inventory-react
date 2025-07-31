@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/form";
 
 import { DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { UNIT_OPTIONS } from "@/utils/definitions";
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -63,7 +64,7 @@ export default function ProductForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input
+                <Textarea
                   placeholder="Description"
                   {...field}
                   value={field.value ?? ""}
@@ -91,7 +92,7 @@ export default function ProductForm({
             </FormItem>
           )}
         /> */}
-        {state === "ADD" && (
+        {/* {state === "ADD" && (
           <FormField
             control={form.control}
             name="unit"
@@ -105,7 +106,7 @@ export default function ProductForm({
               </FormItem>
             )}
           />
-        )}
+        )} */}
 
         <DialogFooter>{children}</DialogFooter>
       </form>

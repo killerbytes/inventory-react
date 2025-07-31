@@ -42,7 +42,6 @@ function Select(props: SelectProps) {
     } as unknown as React.ChangeEvent<HTMLSelectElement>;
     onChange(e);
   };
-
   return (
     <SelectComponent
       {...props}

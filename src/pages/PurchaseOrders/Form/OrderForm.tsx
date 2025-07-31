@@ -11,9 +11,9 @@ import {
   PurchaseOrderItem,
   Supplier,
 } from "@/types";
+import { MODE_OF_PAYMENT_OPTIONS, UNIT_OPTIONS } from "@/utils/definitions";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { productServices, supplierServices } from "@/services";
-import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
 import { useProductStore, useSupplierStore } from "@/stores";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { Textarea } from "@/components/ui/textarea";
@@ -166,9 +166,18 @@ export default function PurchaseOrderForm({
       {
         accessorKey: "unit",
         header: "Unit",
+        meta: {
+          className: "w-100",
+        },
         cell: ({ row }) => {
           return (
-            <Unit index={row.index} control={control} setValue={setValue} />
+            <Controller
+              name={`purchaseOrderItems.${row.index}.unit`}
+              control={control}
+              render={({ field }) => (
+                <Select options={UNIT_OPTIONS} {...field} />
+              )}
+            />
           );
         },
       },

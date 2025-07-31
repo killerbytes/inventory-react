@@ -1,3 +1,4 @@
+import { RepackageInventory } from "@/types";
 import type { Filter, Inventory } from ".";
 import BaseService from "./base";
 import type Http from "./http";
@@ -14,6 +15,11 @@ export default class InventoryService extends BaseService<Inventory> {
   };
   updatePrice = async (id: string, data: any) => {
     const response = await this.http.patch(`${this.url}/${id}/price`, data);
+    return response;
+  };
+
+  repackage = async (data: RepackageInventory) => {
+    const response = await this.http.post(`${this.url}/repackage`, data);
     return response;
   };
 }

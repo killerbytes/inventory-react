@@ -1,7 +1,5 @@
 import { PackageOpen, Pencil } from "lucide-react";
-import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
-import UnitBadge from "@/components/UnitBadge";
 import { cx } from "class-variance-authority";
 import { Product } from "@/types";
 
@@ -33,24 +31,13 @@ export default function ProductItem({
           { "text-primary": sub },
         )}
       >
-        {product.name} {product.description && `(${product.description})`}
+        <div>{product.name}</div>
+        {product.description && (
+          <div className="text-xs text-gray-500">{product.description}</div>
+        )}
       </div>
       <div className="flex gap-2 ml-auto items-center">
-        <UnitBadge unit={product.unit as keyof typeof UNIT_COLOR} />
         <div className="w-20 justify-end flex gap-2">
-          {!sub && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8"
-              onClick={() => {
-                onSelect(product);
-                onToggle({ newPackageModal: true });
-              }}
-            >
-              <PackageOpen />
-            </Button>
-          )}
           <Button
             variant="outline"
             size="icon"

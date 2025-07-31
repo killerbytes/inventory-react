@@ -6,8 +6,8 @@ import {
 } from "@/components/ui/accordion";
 import { APIResponse, CategorizedProductList, Product } from "@/types";
 import { categoryServices, productServices } from "@/services";
+import NewPackageModal from "../Inventory/NewPackageModal";
 import { Button } from "@/components/ui/button";
-import NewPackageModal from "./NewPackageModal";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import { Plus, PlusIcon } from "lucide-react";
@@ -67,10 +67,6 @@ export default function Products() {
     }
   }, [filter]);
 
-  const handleNewPackage = async () => {
-    handleToggle({ newPackageModal: false });
-    getData();
-  };
   React.useEffect(() => {
     getData();
   }, [filter, getData]);
@@ -87,43 +83,47 @@ export default function Products() {
 
   return (
     <div>
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear mb-4">
-        <div className="flex w-full items-center px-2">
-          <h1 className="scroll-m-20 font-semibold tracking-tight">Products</h1>
-          <div className="ml-auto">
-            <Button
-              onClick={() => {
-                handleToggle({ addModal: true });
-              }}
-            >
-              <Plus /> Add Product
-            </Button>
-          </div>
-        </div>
+      <header className="mb-4 py-2 flex w-full items-center">
+        <h1 className="scroll-m-20 font-semibold tracking-tight">Products</h1>
+        {/* <div className="ml-auto">
+          <Button
+            onClick={() => {
+              handleToggle({ addModal: true });
+            }}
+          >
+            <Plus /> Add Product
+          </Button>
+        </div> */}
       </header>
-      <div className="flex gap-2 justify-between">
-        <Input
-          placeholder="Search products"
-          className="w-full mb-4"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-          }}
-        />
-        <Select
-          value={filter.categoryId}
-          options={[{ id: "ALL", name: "ALL" }, ...categories]}
-          className="w-full mb-4"
-          labelKey="name"
-          valueKey="id"
-          onChange={(e) => {
-            const categoryId = (e.target as HTMLInputElement).value;
-            setFilter({
-              ...filter,
-              categoryId,
-            });
-          }}
-        />
+      <div className="flex gap-2">
+        <div className="w-full">
+          <div className="text-sm font-semibold mb-1">Search</div>
+          <Input
+            placeholder="Search products"
+            className="w-full mb-4"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
+          />
+        </div>
+        <div className="w-full">
+          <div className="text-sm font-semibold mb-1">Category</div>
+          <Select
+            value={filter.categoryId}
+            options={[{ id: "ALL", name: "ALL" }, ...categories]}
+            className="w-full mb-4"
+            labelKey="name"
+            valueKey="id"
+            onChange={(e) => {
+              const categoryId = (e.target as HTMLInputElement).value;
+              setFilter({
+                ...filter,
+                categoryId,
+              });
+            }}
+          />
+        </div>
       </div>
       {loading ? (
         <p>Loading...</p>
@@ -206,16 +206,6 @@ export default function Products() {
             handleToggle({ editModal: false });
             getData();
           }}
-          data={selected as Product}
-        />
-      )}
-      {toggle.newPackageModal && (
-        <NewPackageModal
-          isOpen={true}
-          onClose={() => {
-            handleToggle({ newPackageModal: false });
-          }}
-          onSubmit={handleNewPackage}
           data={selected as Product}
         />
       )}

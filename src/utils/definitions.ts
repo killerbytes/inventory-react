@@ -25,13 +25,23 @@ export const ORDER_TYPE = {
 };
 
 export const INVENTORY_TRANSACTION_TYPE = {
-  PURCHASE: "PURCHASE",
-  SALE: "SALE",
+  ALL: "ALL",
+  ...ORDER_TYPE,
   PRICE_ADJUSTMENT: "PRICE_ADJUSTMENT",
   RETURN: "RETURN",
   CANCELLATION: "CANCELLATION",
   BREAK_PACK: "BREAK_PACK",
-  REPACK: "REPACK",
+  REPACKAGE: "REPACKAGE",
+};
+
+export const TRANSACTION_TYPE_COLOR = {
+  PURCHASE: "bg-green-400",
+  SALE: "bg-red-400",
+  PRICE_ADJUSTMENT: "bg-yellow-400",
+  RETURN: "bg-blue-400",
+  CANCELLATION: "bg-gray-400",
+  BREAK_PACK: "bg-purple-400",
+  REPACKAGE: "bg-indigo-400",
 };
 
 export const INVENTORY_TRANSACTION_TYPE_OPTIONS = Object.values(

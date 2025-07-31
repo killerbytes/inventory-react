@@ -80,7 +80,6 @@ export interface ProductSchemaType {
   categoryId: number;
   category: Category;
   description?: string | null;
-  unit: string;
   parentId?: number | null;
   subProducts?: ProductSchemaType[];
 }
@@ -96,7 +95,6 @@ export const productSchema: z.ZodType<ProductSchemaType> = z.lazy(() =>
     }),
     category: z.any(),
     description: z.string().nullish(),
-    unit: z.string(),
     parentId: z.number().nullish(),
     subProducts: z.array(productSchema).optional(),
   }),
@@ -261,6 +259,8 @@ export const inventorySchema = z.object({
   quantity: z.coerce.number(),
   price: z.coerce.number(),
   reorderLevel: z.coerce.number(),
+  unit: z.string(),
+  parentId: z.number().nullish(),
   updatedAt: z.string(),
 });
 
@@ -289,6 +289,23 @@ export const inventoryTransactionSchema = z.object({
   }),
 });
 
+export const repackageInventorySchema = z.object({
+  name: z.string(),
+  description: z.string().nullish(),
+  categoryId: z.number(),
+  unit: z.string(),
+  price: z.coerce.number().min(1, {
+    message: "Price must be at least 1.",
+  }),
+  pullOutQuantity: z.coerce.number().min(1, {
+    message: "Pull-out Quantity must be at least 1.",
+  }),
+  repackQuantity: z.coerce.number().min(1, {
+    message: "Repack Quantity must be at least 1.",
+  }),
+  parentId: z.number(),
+});
+
 export default {
   userSchema,
   signupSchema,
@@ -303,4 +320,5 @@ export default {
   salesOrderItemSchema,
   inventorySchema,
   inventoryTransactionSchema,
+  repackageInventorySchema,
 };

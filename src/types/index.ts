@@ -12,6 +12,7 @@ import {
   inventorySchema,
   inventoryTransactionSchema,
   cancelPurchaseOrderSchema,
+  repackageInventorySchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -21,7 +22,7 @@ export interface ApiErrorResponse {
   errors: Record<string, string[]>;
 }
 
-export type APIResponse<T extends object> = {
+export type PaginatedResponse<T extends object> = {
   data: T;
   total: number;
   totalPages: number;
@@ -47,6 +48,12 @@ export interface CategorizedProductList {
   products: Product[];
 }
 
+export interface CategorizedInventoryList {
+  categoryId: string;
+  categoryName: string;
+  inventories: Inventory[];
+}
+
 type User = z.infer<typeof userSchema>;
 type Signup = z.infer<typeof signupSchema>;
 type Login = z.infer<typeof loginSchema>;
@@ -60,6 +67,7 @@ type SalesOrder = z.infer<typeof salesOrderSchema>;
 type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
 type Inventory = z.infer<typeof inventorySchema>;
 type InventoryTransaction = z.infer<typeof inventoryTransactionSchema>;
+type RepackageInventory = z.infer<typeof repackageInventorySchema>;
 
 export type {
   User,
@@ -75,4 +83,5 @@ export type {
   SalesOrderItem,
   Inventory,
   InventoryTransaction,
+  RepackageInventory,
 };

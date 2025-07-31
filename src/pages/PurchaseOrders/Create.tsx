@@ -21,8 +21,6 @@ const purchaseOrderItemDefault = {
   productId: null,
   unitPrice: 0,
   quantity: 1,
-
-  unit: "",
   discount: null,
   discountNote: "",
 };

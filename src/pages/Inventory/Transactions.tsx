@@ -1,53 +1,59 @@
-import React from "react";
-
 import {
   INVENTORY_TRANSACTION_TYPE,
   INVENTORY_TRANSACTION_TYPE_OPTIONS,
   PAGINATION,
   ROUTES,
 } from "@/utils/definitions";
-import {
-  inventoryServices,
-  type APIResponse,
-  type Filter,
-  type InventoryTransaction,
-} from "@/services";
+import TransactionTypeBadge from "@/components/TransactionTypeBadge";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
-import { MoveLeft, PackageOpen, Pencil } from "lucide-react";
+import { InventoryTransaction, PaginatedResponse } from "@/types";
+import DateRangePicker from "@/components/DateRangePicker";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
+import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { formatLabel } from "@/lib/utils";
 import Select from "@/components/Select";
+import { MoveLeft } from "lucide-react";
 import Pager from "@/components/Pager";
+import React from "react";
 
 export default function InventoryTransactions() {
   const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
-  const [data, setData] = React.useState<APIResponse<InventoryTransaction[]>>({
+  const [data, setData] = React.useState<
+    PaginatedResponse<InventoryTransaction[]>
+  >({
     data: [],
     total: 0,
     totalPages: 0,
     currentPage: 0,
   });
-
+  const [range, setRange] = React.useState({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
   const [loading, setLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState<Filter>({
-    limit: PAGINATION.PAGE_SIZE,
+  const [filter, setFilter] = React.useState({
+    limit: 9999, //PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     // q: "",
+    transactionType: INVENTORY_TRANSACTION_TYPE.ALL,
   });
 
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await inventoryServices.transactions(filter);
-      const data = response.data;
-
+      const data = await inventoryServices.transactions({
+        ...filter,
+        transactionType:
+          filter.transactionType === "ALL" ? undefined : filter.transactionType,
+      });
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -66,6 +72,23 @@ export default function InventoryTransactions() {
       page,
     }));
   }, [page]);
+
+  React.useEffect(() => {
+    const { from, to } = range || {};
+    if (from && to) {
+      setFilter((prev) => ({
+        ...prev,
+        startDate: from.toISOString(),
+        endDate: to.toISOString(),
+      }));
+    } else {
+      setFilter((prev) => ({
+        ...prev,
+        startDate: "",
+        endDate: "",
+      }));
+    }
+  }, [range]);
 
   const columns: ColumnDef<InventoryTransaction>[] = [
     {
@@ -147,23 +170,7 @@ export default function InventoryTransactions() {
         className: "text-center",
       },
       cell: ({ row }) => {
-        return (
-          <Badge
-            className={cx("text-xs", {
-              "bg-red-500":
-                row.getValue("transactionType") ===
-                INVENTORY_TRANSACTION_TYPE.CANCELLATION,
-              "bg-green-500":
-                row.getValue("transactionType") ===
-                INVENTORY_TRANSACTION_TYPE.PURCHASE,
-              "bg-yellow-500":
-                row.getValue("transactionType") ===
-                INVENTORY_TRANSACTION_TYPE.SALE,
-            })}
-          >
-            {formatLabel(row.getValue("transactionType"))}
-          </Badge>
-        );
+        return <TransactionTypeBadge value={row.getValue("transactionType")} />;
       },
     },
 
@@ -206,17 +213,13 @@ export default function InventoryTransactions() {
         <Select
           className="mb-4"
           options={INVENTORY_TRANSACTION_TYPE_OPTIONS}
-          value={INVENTORY_TRANSACTION_TYPE.PRICE_ADJUSTMENT}
-          onChange={(selected) => {
-            console.log(selected);
-            console.log(selected);
-            if (selected === "ALL") {
-              setFilter(({ ...prev }) => ({ ...prev, transactionType: "" }));
-            } else {
-              setFilter((prev) => ({ ...prev, transactionType: selected }));
-            }
+          value={filter.transactionType}
+          onChange={(e) => {
+            const { value } = e.target;
+            setFilter((prev) => ({ ...prev, transactionType: value }));
           }}
         />
+        <DateRangePicker className="mb-4" value={range} onChange={setRange} />
       </div>
       {loading ? (
         <p>Loading...</p>

@@ -95,7 +95,6 @@ export default function ProductList({
                       className="flex justify-between"
                     >
                       {product.name}
-                      <UnitBadge unit={product.unit} />
                     </CommandItem>
                   </Fragment>
                 ))}

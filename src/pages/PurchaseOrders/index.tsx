@@ -11,8 +11,8 @@ import {
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
+import { endOfMonth, set, startOfMonth } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
-import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ export default function PurchaseOrders() {
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-
+  console.log(range);
   const [filter, setFilter] = React.useState({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -53,6 +53,12 @@ export default function PurchaseOrders() {
         ...prev,
         startDate: from.toISOString(),
         endDate: to.toISOString(),
+      }));
+    } else {
+      setFilter((prev) => ({
+        ...prev,
+        startDate: "",
+        endDate: "",
       }));
     }
   }, [range]);
