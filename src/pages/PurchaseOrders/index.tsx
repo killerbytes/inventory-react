@@ -38,7 +38,6 @@ export default function PurchaseOrders() {
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-  console.log(range);
   const [filter, setFilter] = React.useState({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,

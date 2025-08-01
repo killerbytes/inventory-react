@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import validations from "@/schemas";
 import * as z from "zod";
 
@@ -19,6 +19,7 @@ import { Inventory, SalesOrderItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
+import ProductList from "./ProductList";
 import Modal from "@/components/Modal";
 import { toast } from "sonner";
 import React from "react";
@@ -46,7 +47,7 @@ export default function ProductsModal({
   });
 
   const items: Inventory[] = exclude
-    ? inventory.filter((p) => !exclude?.includes(p.id))
+    ? inventory?.filter((p) => !exclude?.includes(p.id))
     : inventory;
 
   async function onSubmit(values: z.infer<typeof salesOrderItemSchema>) {
@@ -67,19 +68,13 @@ export default function ProductsModal({
   }
 
   const getData = async () => {
-    const { data } = await inventoryServices.list();
+    const data = await inventoryServices.list();
     setInventory(data);
   };
 
   React.useEffect(() => {
     getData();
   }, []);
-
-  React.useEffect(() => {
-    if (store?.inventory) {
-      setInventory(store.inventory as Inventory[]);
-    }
-  }, [store?.inventory]);
 
   return (
     <>
@@ -107,7 +102,7 @@ export default function ProductsModal({
               render={() => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Product</FormLabel>
-                  <Autocomplete
+                  {/* <Autocomplete
                     value={value}
                     items={items}
                     valueKey={"product.name"}
@@ -118,7 +113,21 @@ export default function ProductsModal({
                       form.setValue("unitPrice", value?.price);
                       setValue(value);
                     }}
+                  /> */}
+                  {console.log(items)}
+                  <Controller
+                    name={`inventoryId`}
+                    control={form.control}
+                    render={({ field }) => (
+                      <ProductList
+                        control={form.control}
+                        list={items}
+                        {...field}
+                        value={field.value}
+                      />
+                    )}
                   />
+
                   {value?.quantity && (
                     <FormDescription>
                       Stock:{" "}

@@ -6,21 +6,25 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { categoryServices, inventoryServices } from "@/services";
 import { CategorizedInventoryList, Inventory } from "@/types";
 import { PAGINATION, ROUTES } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import NewPackageModal from "./NewPackageModal";
-import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
+import useDebounce from "@/hooks/useDebounce";
 import InventoryItem from "./InventoryItem";
+import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
+import Select from "@/components/Select";
 import { Link } from "react-router";
 import EditModal from "./EditModal";
 
 export default function InventoryList() {
+  const { categories, setCategories } = useCategoryStore();
   const [selected, setSelected] = React.useState<Inventory | null>();
   const [data, setData] = React.useState<CategorizedInventoryList[]>([]);
-
+  const [query, setQuery] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
     // limit: PAGINATION.PAGE_SIZE,
@@ -36,8 +40,10 @@ export default function InventoryList() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const data: CategorizedInventoryList[] =
-        await inventoryServices.getAll(filter);
+      const data: CategorizedInventoryList[] = await inventoryServices.getAll({
+        ...filter,
+        ...(filter.categoryId === "ALL" && { categoryId: null }),
+      });
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -49,6 +55,24 @@ export default function InventoryList() {
   React.useEffect(() => {
     getData();
   }, [filter, getData]);
+
+  React.useEffect(() => {
+    if (categories?.length === 0) {
+      const getData = async () => {
+        const res = await categoryServices.list();
+        setCategories(res);
+      };
+      getData();
+    }
+  }, [categories, setCategories]);
+
+  const debouncedQuery = useDebounce(query, 500);
+  React.useEffect(() => {
+    setFilter((prev) => ({
+      ...prev,
+      q: debouncedQuery,
+    }));
+  }, [debouncedQuery]);
 
   const handleNewPackage = async () => {
     handleToggle({ newPackageModal: false });
@@ -157,7 +181,38 @@ export default function InventoryList() {
           <Button variant="outline">History</Button>
         </Link>
       </header>
-      <div>
+      <div className="flex gap-2">
+        <div className="w-full">
+          <div className="text-sm font-semibold mb-1">Search</div>
+          <Input
+            placeholder="Search products"
+            className="w-full mb-4"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
+          />
+        </div>
+        <div className="w-full">
+          <div className="text-sm font-semibold mb-1">Category</div>
+          <Select
+            value={filter.categoryId}
+            options={[{ id: "ALL", name: "ALL" }, ...categories]}
+            className="w-full mb-4"
+            labelKey="name"
+            valueKey="id"
+            onChange={(e) => {
+              const categoryId = (e.target as HTMLInputElement).value;
+              setFilter({
+                ...filter,
+                categoryId,
+              });
+            }}
+          />
+        </div>
+      </div>
+
+      {/* <div>
         <Input
           placeholder="Search inventory"
           className="w-full mb-4"
@@ -169,7 +224,7 @@ export default function InventoryList() {
             }));
           }}
         />
-      </div>
+      </div> */}
 
       {loading ? (
         <p>Loading...</p>

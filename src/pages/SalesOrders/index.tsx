@@ -41,8 +41,8 @@ export default function SalesOrders() {
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     status: "ALL",
-    // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
-    // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
+    ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
+    ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
 
   React.useEffect(() => {
@@ -53,14 +53,19 @@ export default function SalesOrders() {
         startDate: from.toISOString(),
         endDate: to.toISOString(),
       }));
+    } else {
+      setFilter((prev) => ({
+        ...prev,
+        startDate: "",
+        endDate: "",
+      }));
     }
   }, [range]);
 
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await salesOrderServices.getAll(filter);
-      const data = response.data;
+      const data = await salesOrderServices.getAll(filter);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -136,12 +141,8 @@ export default function SalesOrders() {
         </div>
       </header>
       <div className="flex gap-2 justify-between mb-4">
-        <DateRangePicker
-          field={{
-            value: range,
-            onChange: setRange,
-          }}
-        />
+        <DateRangePicker className="mb-4" value={range} onChange={setRange} />
+
         <div className="w-1/4">
           <Select
             options={ORDER_STATUS_OPTIONS}

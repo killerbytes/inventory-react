@@ -42,6 +42,12 @@ export interface Filter {
   order?: "asc" | "desc";
 }
 
+export interface CategorizedItemList<T> {
+  categoryId: string;
+  categoryName: string;
+  items: T[];
+}
+
 export interface CategorizedProductList {
   categoryId: string;
   categoryName: string;

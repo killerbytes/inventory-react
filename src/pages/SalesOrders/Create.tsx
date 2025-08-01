@@ -1,4 +1,11 @@
 import {
+  inventoryServices,
+  productServices,
+  salesOrderServices,
+  type SalesOrder,
+  type SalesOrderItem,
+} from "@/services";
+import {
   Form,
   FormControl,
   FormField,
@@ -7,11 +14,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  salesOrderServices,
-  type SalesOrder,
-  type SalesOrderItem,
-} from "@/services";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+  CategorizedItemList,
+  CategorizedProductList,
+  Inventory,
+  Product,
+} from "@/types";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { ColumnDef } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,12 +38,15 @@ import { ROUTES } from "@/utils/definitions";
 import ProductsModal from "./ProductsModal";
 import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
+import ProductList from "./ProductList";
 import validations from "@/schemas";
 import { toast } from "sonner";
 import React from "react";
 
 export default function Create() {
   const navigate = useNavigate();
+  const [inventories, setInventories] = React.useState<Inventory[]>([]);
+  const [products, setProducts] = React.useState<CategorizedProductList[]>([]);
   const [toggle, handleToggle] = useToggle({
     addProductsModal: false,
   });
@@ -48,6 +59,7 @@ export default function Create() {
       customer: "Azid",
       orderDate: new Date().toISOString(),
       deliveryDate: new Date().toISOString(),
+      salesOrderItems: [{}],
     },
   });
   const {
@@ -61,6 +73,36 @@ export default function Create() {
   });
 
   const formData = useWatch({ control: form.control });
+
+  // React.useEffect(() => {
+  //   const getData = async () => {
+  //     const data = await inventoryServices.list();
+  //     setInventories(data);
+  //   };
+  //   getData();
+  // }, []);
+
+  React.useEffect(() => {
+    const getData = async () => {
+      const data: CategorizedItemList<Inventory>[] =
+        await inventoryServices.list();
+      // const combined = data.map((item) => {
+      //   console.log(item);
+      //   const inventory = item.inventories.flatMap((product) => {
+      //     const { subProducts, ...rest } = product;
+      //     return [rest, ...(subProducts || [])];
+      //   });
+
+      //   return {
+      //     ...item,
+      //     inventory,
+      //   };
+      // });
+      setProducts(data);
+    };
+
+    getData();
+  }, []);
 
   // const debouncedFormData = useDebounce(formData, 500);
 
@@ -98,35 +140,24 @@ export default function Create() {
 
   const columns: ColumnDef<SalesOrderItem>[] = [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
       accessorKey: "inventory",
       header: "Product",
-      cell: ({ row }) => (
-        <div className="font-medium">
-          {row.getValue("inventory")?.product?.name}
-        </div>
-      ),
+      cell: ({ row }) => {
+        return (
+          <Controller
+            name={`salesOrderItems.${row.index}.productId`}
+            control={control}
+            render={({ field }) => (
+              <ProductList
+                control={control}
+                list={products}
+                {...field}
+                value={field.value}
+              />
+            )}
+          />
+        );
+      },
     },
     {
       header: () => <div className="text-right">Quantity</div>,
@@ -220,6 +251,27 @@ export default function Create() {
       });
     },
   };
+
+  const total = fields?.reduce(
+    (
+      acc: { amount: number; unitPrice: number; discount: number },
+      item: SalesOrderItem,
+    ) => {
+      const unitPrice = Number(item.unitPrice);
+      const discount = Number(item.discount);
+
+      return {
+        amount: acc.amount + (unitPrice || 0) * (item.quantity || 0),
+        unitPrice: acc.unitPrice + (unitPrice || 0),
+        discount: acc.discount + (discount || 0),
+      };
+    },
+    {
+      amount: 0,
+      discount: 0,
+      unitPrice: 0,
+    },
+  );
 
   return (
     <>
@@ -315,7 +367,7 @@ export default function Create() {
               render={() => (
                 <FormItem>
                   <FormControl>
-                    <DataTable
+                    {/* <DataTable
                       data={fields}
                       columns={columns}
                       defaultColumn={defaultColumn}
@@ -339,7 +391,36 @@ export default function Create() {
                           </TableRow>
                         </>
                       }
-                    ></DataTable>
+                    ></DataTable> */}
+
+                    <DataTable
+                      data={fields}
+                      columns={columns}
+                      tableClassname={cx({
+                        "border-red-500": errors.purchaseOrderItems,
+                      })}
+                      footer={
+                        <>
+                          <TableRow>
+                            <TableCell colSpan={columns.length === 8 ? 2 : 1}>
+                              Total
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {formatCurrency(total?.amount)}
+                            </TableCell>
+                            <TableCell className="text-right"></TableCell>
+                            <TableCell className="text-right"></TableCell>
+                            <TableCell className="text-right ">
+                              {formatCurrency(total?.discount)}
+                            </TableCell>
+                            <TableCell className="text-right"></TableCell>
+                            <TableCell className="text-right">
+                              {formatCurrency(total?.amount - total?.discount)}
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

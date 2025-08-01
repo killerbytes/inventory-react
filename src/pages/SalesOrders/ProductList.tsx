@@ -11,19 +11,19 @@ function ProductCommandGroup({ options, onChange, setOpen }) {
       key={item.categoryName}
       color="red"
     >
-      {item?.products?.map((item) => (
-        <Fragment key={item.name}>
+      {item?.inventories?.map(({ product }) => (
+        <Fragment key={product.name}>
           <CommandItem
-            keywords={[item.name]}
-            value={String(item.id)}
-            key={item.id}
+            keywords={[product.name]}
+            value={String(product.id)}
+            key={product.id}
             onSelect={(selected) => {
               onChange(selected);
               setOpen(false);
             }}
             className="flex justify-between"
           >
-            {item.name}
+            {product.name}
           </CommandItem>
         </Fragment>
       ))}
@@ -47,16 +47,16 @@ export default function ProductList({
   const [open, setOpen] = React.useState(false);
   const fields = useWatch({
     control,
-    name: `purchaseOrderItems`,
+    name: `salesOrderItems`,
   });
 
   React.useEffect(() => {
     const exclude = fields.map((item) => Number(item.productId));
     const items = list.map((item) => {
-      const products = item.products.filter((product) => {
+      const inventories = item.inventories.filter((product) => {
         return !exclude.includes(Number(product.id));
       });
-      return { ...item, products };
+      return { ...item, inventories };
     });
 
     setOptions(items);
@@ -64,12 +64,12 @@ export default function ProductList({
 
   const selected = list
     .map((option) => {
-      const found = option.products.find(
-        (product) => product.id === Number(value),
+      const found = option.inventories.find(
+        (inventory) => inventory.productId === Number(value),
       );
       return found ? found : null;
     })
-    .filter(Boolean)[0]?.name;
+    .filter(Boolean)[0]?.product.name;
 
   return (
     <ComboBox
@@ -79,7 +79,6 @@ export default function ProductList({
       selected={selected}
       value={value}
       placeholder="Type to search..."
-      options={options}
     >
       <ProductCommandGroup
         options={options}
