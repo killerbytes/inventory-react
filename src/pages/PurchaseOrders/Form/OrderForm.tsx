@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Amount, Table, Unit } from "../Table";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
 import React, { useMemo } from "react";
@@ -35,7 +36,7 @@ export default function PurchaseOrderForm({
   form: UseFormReturn<PurchaseOrder>;
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
-  const { products, setProducts } = useProductStore();
+  const { products, flatProducts, setProducts } = useProductStore();
 
   const {
     control,
@@ -102,7 +103,7 @@ export default function PurchaseOrderForm({
         ),
       },
       {
-        accessorKey: "productId",
+        accessorKey: "combinationId",
         header: "Product",
         meta: {
           className: "w-100",
@@ -110,14 +111,16 @@ export default function PurchaseOrderForm({
         cell: ({ row }) => {
           return (
             <Controller
-              name={`purchaseOrderItems.${row.index}.productId`}
+              name={`purchaseOrderItems.${row.index}.combinationId`}
               control={control}
               render={({ field }) => (
                 <ProductCommand
                   control={control}
                   list={products}
+                  index={row.index}
+                  setValue={setValue}
                   {...field}
-                  value={field.value}
+                  value={String(field.value)}
                 />
               )}
             />
@@ -134,10 +137,8 @@ export default function PurchaseOrderForm({
           <Controller
             name={`purchaseOrderItems.${row.index}.unitPrice`}
             control={control}
-            render={(props) => {
-              const { field } = props;
+            render={({ field }) => {
               const error = errors?.purchaseOrderItems?.[row.index]?.unitPrice;
-
               return (
                 <NumberInput
                   {...field}
@@ -167,18 +168,13 @@ export default function PurchaseOrderForm({
         accessorKey: "unit",
         header: "Unit",
         meta: {
-          className: "w-100",
+          className: "w-15",
         },
         cell: ({ row }) => {
-          return (
-            <Controller
-              name={`purchaseOrderItems.${row.index}.unit`}
-              control={control}
-              render={({ field }) => (
-                <Select options={UNIT_OPTIONS} {...field} />
-              )}
-            />
+          const product = flatProducts.find(
+            (i) => i.combinationId === Number(row.original.combinationId),
           );
+          return product && <Badge>{product?.unit}</Badge>;
         },
       },
       {
@@ -231,11 +227,12 @@ export default function PurchaseOrderForm({
           render={({ field }) => (
             <FormItem className="mb-4">
               <FormLabel>PO #</FormLabel>
-              <Input {...field} value={field.value ?? ""} />
+              <Input {...field} />
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="orderDate"

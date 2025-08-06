@@ -18,7 +18,7 @@ import React from "react";
 import * as z from "zod";
 
 const purchaseOrderItemDefault = {
-  productId: null,
+  combinationId: null,
   unitPrice: 0,
   quantity: 1,
   discount: null,
@@ -31,7 +31,6 @@ const purchaseOrderDefault = {
   modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
   orderDate: new Date().toISOString(),
   deliveryDate: new Date().toISOString(),
-  checkNumber: "",
   dueDate: addWeeks(new Date(), 1).toISOString(),
   purchaseOrderItems: Array.from({ length: 3 }, () => purchaseOrderItemDefault),
 };
@@ -65,8 +64,8 @@ export default function Create() {
       );
       navigate(ROUTES.PURCHASE_ORDERS);
     } catch (error) {
-      const { errors } = getErrorMessage(error as ApiErrorResponse);
-      errors.forEach((err: ApiError) => {
+      const { errors, message } = getErrorMessage(error as ApiErrorResponse);
+      errors?.forEach((err: ApiError) => {
         if (err.field) {
           form.setError(
             err.field as keyof z.infer<typeof purchaseOrderSchema>,
@@ -77,10 +76,8 @@ export default function Create() {
           );
         }
       });
-      if (errors.length === 1) {
-        toast.error(errors[0].message);
-      } else {
-        toast.error("Submission failed");
+      if (!errors) {
+        toast.error("Submission failed: " + message);
       }
     }
   }
@@ -130,7 +127,9 @@ export default function Create() {
             onClick={(e) => {
               e.preventDefault();
               const { purchaseOrderItems, ...rest } = form.getValues();
-              const valid = purchaseOrderItems.filter((item) => item.productId);
+              const valid = purchaseOrderItems.filter(
+                (item) => item.combinationId,
+              );
               console.log(form.formState.errors);
               form.reset({
                 ...rest,

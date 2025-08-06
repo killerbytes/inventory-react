@@ -59,7 +59,8 @@ export default function Create() {
       toast.success(`Purchase Order received`);
       navigate(ROUTES.PURCHASE_ORDERS);
     } catch (error: any) {
-      toast.error("Submission failed - " + error?.response.data.error);
+      const { message } = getErrorMessage(error);
+      toast.error("Submission failed - " + message);
     }
   }
 

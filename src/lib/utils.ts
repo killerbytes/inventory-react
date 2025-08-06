@@ -1,4 +1,8 @@
 import {
+  ProductCommandSelectedItemProps,
+  SelectedItemProps,
+} from "@/components/ProductCommand";
+import {
   ApiErrorResponse,
   CategorizedProductList,
   ProductCombinations,
@@ -28,12 +32,10 @@ export function getErrorMessage(error: ApiErrorResponse) {
     case "ERR_NETWORK":
       return "Network error occurred";
     case "NOT_FOUND":
-    case "INTERNAL_ERROR":
-      return { message, ...rest };
     case "VALIDATION_ERROR":
       return { errors, message, ...rest };
     default:
-      return "Unknown error occurred";
+      return { message };
   }
 }
 
@@ -44,12 +46,7 @@ export function getSKU(combination: ProductCombinations) {
 }
 
 export function flattenedProduct(data: CategorizedProductList[]) {
-  const flattened: {
-    combinationId?: number;
-    productName: string;
-    unit: string;
-    variants: { variantType: string | undefined; value: string }[];
-  }[] = [];
+  const flattened: ProductCommandSelectedItemProps[] = [];
 
   data.forEach((cat) =>
     cat.products.forEach((prod) => {
@@ -62,6 +59,7 @@ export function flattenedProduct(data: CategorizedProductList[]) {
           combinationId: comb.id,
           productName: prod.name,
           unit: prod.unit,
+          price: comb.price,
           variants: comb.values.map((v) => ({
             variantType:
               v.variantTypeId != null ? variantMap[v.variantTypeId] : undefined,

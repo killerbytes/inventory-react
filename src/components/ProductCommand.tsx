@@ -1,46 +1,29 @@
-import { C } from "node_modules/react-router/dist/development/lib-C1JSsICm.d.mts";
+import { Control, UseFormSetValue, useWatch } from "react-hook-form";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
-import { flattenedProduct, getCombinationName } from "@/lib/utils";
 import { CategorizedProductList, PurchaseOrder } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
-import { Control, useWatch } from "react-hook-form";
 import ComboBox from "@/components/ComboBox";
-import React, { Fragment } from "react";
+import { useProductStore } from "@/stores";
 import { CommandSeparator } from "cmdk";
 import { Badge } from "./ui/badge";
+import React from "react";
 
-function ProductCommandGroup({ options, onChange, setOpen }) {
-  return options.map((item) => (
-    <CommandGroup
-      heading={item.categoryName}
-      key={item.categoryName}
-      color="red"
-    >
-      {item?.products?.map((item) => (
-        <Fragment key={item.name}>
-          <CommandItem
-            keywords={[item.name]}
-            value={String(item.id)}
-            key={item.id}
-            onSelect={(selected) => {
-              onChange(selected);
-              setOpen(false);
-            }}
-            className="flex justify-between"
-          >
-            {item.name}
-          </CommandItem>
-        </Fragment>
-      ))}
-    </CommandGroup>
-  ));
+export interface ProductCommandSelectedItemProps {
+  combinationId?: number;
+  productName: string;
+  unit: string;
+  price: number;
+  variants: { variantType: string | undefined; value: string }[];
 }
 
-const SelectedItem = ({ selected }) => {
+const SelectedItem = ({
+  selected,
+}: {
+  selected: ProductCommandSelectedItemProps;
+}) => {
   return (
     selected && (
       <div className="flex gap-2 items-center">
-        <Badge className="text-[9px]">{selected.unit}</Badge>
         <span>{selected.productName}</span>
         {selected.variants.map((v) => v.value).join(" | ")}
       </div>
@@ -52,13 +35,18 @@ export default function ProductCommand({
   control,
   list,
   value,
+  placeholder = "Type to search...",
+  index,
   onChange,
+  setValue,
 }: {
   control: Control<PurchaseOrder>;
   list: CategorizedProductList[];
-  value: number | string | undefined | null;
-  onChange: (selected: string) => void;
+  value: string;
   placeholder?: string;
+  index: number;
+  onChange: (selected: string) => void;
+  setValue: UseFormSetValue<PurchaseOrder>;
 }) {
   const [options, setOptions] = React.useState<CategorizedProductList[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -67,11 +55,11 @@ export default function ProductCommand({
     name: `purchaseOrderItems`,
   });
 
-  const flat = flattenedProduct(list);
+  const { flatProducts } = useProductStore();
 
   React.useEffect(() => {
     const exclude = fields
-      .map((item) => Number(item.productId))
+      .map((item) => Number(item.combinationId))
       .filter(Boolean);
     const items = list.map((category) => {
       const products = category.products.map((product) => {
@@ -90,20 +78,19 @@ export default function ProductCommand({
         : null;
     });
 
-    setOptions(items);
+    setOptions(items as CategorizedProductList[]);
   }, [fields, list]);
 
-  const selected = flat.find((item) => item.combinationId === Number(value));
+  const selected: ProductCommandSelectedItemProps | undefined =
+    flatProducts.find((item) => item.combinationId === Number(value));
 
   return (
     <ComboBox
       setOpen={setOpen}
-      onChange={onChange}
       open={open}
-      selected={<SelectedItem selected={selected} />}
+      selected={selected ? <SelectedItem selected={selected} /> : null}
       value={value}
-      placeholder="Type to search..."
-      options={options}
+      placeholder="Select a product..."
     >
       {options.map((item) => (
         <>
@@ -124,8 +111,15 @@ export default function ProductCommand({
                     keywords={[combination.sku]}
                     value={String(combination.id)}
                     key={combination.id}
-                    onSelect={(selected) => {
-                      onChange(selected);
+                    onSelect={(v) => {
+                      onChange(v);
+                      const selected = flatProducts.find(
+                        (item) => item.combinationId === Number(v),
+                      );
+                      setValue(
+                        `purchaseOrderItems.${index}.unitPrice`,
+                        Number(selected?.price),
+                      );
                       setOpen(false);
                     }}
                     className="flex gap-2 items-center justify-between"

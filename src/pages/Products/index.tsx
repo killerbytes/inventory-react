@@ -126,58 +126,56 @@ export default function Products() {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <>
-          <Accordion
-            type="multiple"
-            className="w-full"
-            defaultValue={data.data?.map((item) => item.categoryId)}
-          >
-            {data.data?.map((item) => (
-              <AccordionItem value={item.categoryId} key={item.categoryId}>
-                <AccordionTrigger className="bg-accent px-2 rounded-none border py-2">
-                  {item.categoryName}
-                </AccordionTrigger>
-                <AccordionContent className="flex flex-col">
-                  {item.products.map((product) => (
-                    <Fragment key={product.id}>
-                      <ProductItem
-                        item={product}
-                        onSelect={setSelected}
-                        onToggle={handleToggle}
-                      />
-                      {product.combinations?.map((combination: Product) => {
-                        return (
-                          <Fragment key={combination.id}>
-                            <CombinationItem
-                              item={combination}
-                              sub={true}
-                              onSelect={setSelected}
-                              onToggle={handleToggle}
-                            />
-                          </Fragment>
-                        );
-                      })}
-                    </Fragment>
-                  ))}
+        <Accordion
+          type="multiple"
+          className="w-full"
+          defaultValue={data.data?.map((item) => item.categoryId)}
+        >
+          {data.data?.map((item) => (
+            <AccordionItem value={item.categoryId} key={item.categoryId}>
+              <AccordionTrigger className="bg-accent px-2 rounded-none border py-2">
+                {item.categoryName}
+              </AccordionTrigger>
+              <AccordionContent className="flex flex-col">
+                {item.products.map((product) => (
+                  <Fragment key={product.id}>
+                    <ProductItem
+                      item={product}
+                      onSelect={setSelected}
+                      onToggle={handleToggle}
+                    />
+                    {product.combinations?.map((combination: Product) => {
+                      return (
+                        <Fragment key={combination.id}>
+                          <CombinationItem
+                            item={combination}
+                            sub={true}
+                            onSelect={setSelected}
+                            onToggle={handleToggle}
+                          />
+                        </Fragment>
+                      );
+                    })}
+                  </Fragment>
+                ))}
 
-                  <div className="flex justify-start  py-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => {
-                        setCategory(Number(item.categoryId));
-                        handleToggle({ createProductModal: true });
-                      }}
-                    >
-                      <PlusIcon />
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </>
+                <div className="flex justify-start  py-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="size-8"
+                    onClick={() => {
+                      setCategory(Number(item.categoryId));
+                      handleToggle({ createProductModal: true });
+                    }}
+                  >
+                    <PlusIcon />
+                  </Button>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       )}
 
       {toggle.createProductModal && (

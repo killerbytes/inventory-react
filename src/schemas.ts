@@ -140,7 +140,7 @@ const supplierSchema = z.object({
 
 const purchaseOrderItemSchema = z.object({
   id: z.coerce.number().nullish(),
-  productId: z.coerce
+  combinationId: z.coerce
     .number()
     .min(1, {
       message: "Product must be selected.",
@@ -149,7 +149,7 @@ const purchaseOrderItemSchema = z.object({
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
-  unit: z.enum(Object.values(UNIT) as [string, ...string[]]),
+  originalPrice: z.coerce.number().nullish(),
   unitPrice: z.coerce.number().min(1, {
     message: "Unit Price must be at least 1.",
   }),
@@ -204,7 +204,7 @@ const purchaseOrderSchema = z
     modeOfPayment: z.enum(
       Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
     ),
-    checkNumber: z.string(),
+    checkNumber: z.string().nullish(),
   })
   .superRefine((data, ctx) => {
     if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {

@@ -16,22 +16,22 @@ export default function Unit({
   const { products } = useProductStore();
   const productId = useWatch({
     control,
-    name: `purchaseOrderItems.${index}.productId`,
+    name: `purchaseOrderItems.${index}.combinationId`,
   });
   const unit = useWatch({
     control,
     name: `purchaseOrderItems.${index}.unit`,
   });
   React.useEffect(() => {
-    const product = products
-      .map((item) =>
-        item.products.find((product) => product.id === Number(productId)),
-      )
-      .filter(Boolean);
-
-    if (product[0]) {
-      setValue(`purchaseOrderItems.${index}.unit`, product[0].unit);
-    }
+    console.log(productId);
+    // const product = products
+    //   .map((item) =>
+    //     item.products.find((product) => product.id === Number(productId)),
+    //   )
+    //   .filter(Boolean);
+    // if (product[0]) {
+    //   setValue(`purchaseOrderItems.${index}.unit`, product[0].unit);
+    // }
   }, [index, productId, products, setValue]);
   return unit && <UnitBadge unit={unit} />;
 }

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 interface ComboBoxProps {
   setOpen: (open: boolean) => void;
   open: boolean;
-  selected: string;
+  selected: React.ReactNode;
   value: string;
   placeholder?: string;
   children: React.ReactNode;
@@ -32,7 +32,9 @@ export default function ComboBox({
             !value && "text-muted-foreground",
           )}
         >
-          {selected}
+          {selected ?? (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>

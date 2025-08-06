@@ -27,26 +27,13 @@ export default function CombinationItem({
         <div>{item.sku}</div>
         <div>{item.price}</div>
         <div>{item.reorderLevel}</div>
+        <div>{item.Inventory?.quantity}</div>
+      </div>
+      <div className="flex gap-2 ml-auto items-center">
         <div className="flex gap-2">
           {item.values.map((value) => (
             <div key={value.variantTypeId}>{value.value}</div>
           ))}
-        </div>
-      </div>
-      <div className="flex gap-2 ml-auto items-center">
-        <div className="w-20 justify-end flex gap-2">
-          <Link
-            to={`${ROUTES.PRODUCTS}/${item.id}/edit`}
-            variant="outline"
-            size="icon"
-            className="size-8"
-            // onClick={() => {
-            //   onSelect(product);
-            //   onToggle({ editModal: true });
-            // }}
-          >
-            <Pencil />
-          </Link>
         </div>
       </div>
     </div>

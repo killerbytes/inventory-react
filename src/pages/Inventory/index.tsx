@@ -13,12 +13,15 @@ import { Button } from "@/components/ui/button";
 import NewPackageModal from "./NewPackageModal";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
+import { getErrorMessage } from "@/lib/utils";
 import InventoryItem from "./InventoryItem";
 import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import { Link } from "react-router";
 import EditModal from "./EditModal";
+import { toast } from "sonner";
+import { get } from "http";
 
 export default function InventoryList() {
   const { categories, setCategories } = useCategoryStore();
@@ -46,7 +49,8 @@ export default function InventoryList() {
       });
       setData(data);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      const { message } = getErrorMessage(error);
+      toast.error("Submission failed - " + message);
     } finally {
       setLoading(false);
     }
