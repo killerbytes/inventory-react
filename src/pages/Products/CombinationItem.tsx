@@ -1,39 +1,39 @@
+import { Product, ProductCombinations } from "@/types";
 import { PackageOpen, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/utils/definitions";
 import { Link } from "react-router";
-import { Product } from "@/types";
 
-export default function ProductItem({
+export default function CombinationItem({
   item,
-  sub = false,
-  onSelect,
-  onToggle,
 }: {
-  item: Product;
-  sub?: boolean;
-  onSelect: (product: Product) => void;
-  onToggle: (toggle: {
-    newPackageModal?: boolean;
-    editModal?: boolean;
-  }) => void;
+  item: ProductCombinations;
 }) {
   return (
-    <div className="flex items-center px-4 py-1 hover:bg-gray-100 border border-t-0">
-      <div className="flex items-center flex-row">
-        <div>
-          <div>{item.name}</div>
-          {item.description && (
-            <div className="text-xs text-gray-500">{item.description}</div>
-          )}
+    <div
+      className={cx(
+        "flex  items-center px-4 py-1 hover:bg-gray-100 border border-t-0",
+      )}
+    >
+      {<PackageOpen size="16" color="green" className="ml-1" />}
+      <div
+        className={cx(
+          "ml-1 flex items-center gap-2",
+          "font-semibold",
+          "text-primary",
+        )}
+      >
+        <div>{item.sku}</div>
+        <div>{item.price}</div>
+        <div>{item.reorderLevel}</div>
+        <div className="flex gap-2">
+          {item.values.map((value) => (
+            <div key={value.variantTypeId}>{value.value}</div>
+          ))}
         </div>
       </div>
       <div className="flex gap-2 ml-auto items-center">
-        <div className="ml-auto">
-          <Badge>{item.unit}</Badge>
-        </div>
         <div className="w-20 justify-end flex gap-2">
           <Link
             to={`${ROUTES.PRODUCTS}/${item.id}/edit`}

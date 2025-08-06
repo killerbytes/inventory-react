@@ -13,6 +13,9 @@ import {
   inventoryTransactionSchema,
   cancelPurchaseOrderSchema,
   repackageInventorySchema,
+  variantTypesSchema,
+  variantValuesSchema,
+  productCombinationsSchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -20,6 +23,7 @@ export interface ApiErrorResponse {
   message: string;
   code: string;
   errors: Record<string, string[]>;
+  statusCode: number;
 }
 
 export type PaginatedResponse<T extends object> = {
@@ -51,6 +55,7 @@ export interface CategorizedItemList<T> {
 export interface CategorizedProductList {
   categoryId: string;
   categoryName: string;
+  categoryOrder: number;
   products: Product[];
 }
 
@@ -74,6 +79,9 @@ type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
 type Inventory = z.infer<typeof inventorySchema>;
 type InventoryTransaction = z.infer<typeof inventoryTransactionSchema>;
 type RepackageInventory = z.infer<typeof repackageInventorySchema>;
+type VariantTypes = z.infer<typeof variantTypesSchema>;
+type ProductCombinations = z.infer<typeof productCombinationsSchema>;
+type VariantValues = z.infer<typeof variantValuesSchema>;
 
 export type {
   User,
@@ -90,4 +98,7 @@ export type {
   Inventory,
   InventoryTransaction,
   RepackageInventory,
+  VariantTypes,
+  ProductCombinations,
+  VariantValues,
 };

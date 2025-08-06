@@ -14,6 +14,8 @@ import Products from "./pages/Products";
 import Users from "./pages/Users";
 import Home from "./pages/Home";
 
+import ProductDetails from "./pages/Products/Details";
+import ProductEdit from "./pages/Products/Edit";
 import { ROUTES } from "./utils/definitions";
 import Login from "./pages/Login";
 import Test from "./pages/Test";
@@ -32,6 +34,7 @@ function App() {
               </Layout>
             }
           />
+
           <Route
             path={ROUTES.SUPPLIERS}
             element={
@@ -46,6 +49,22 @@ function App() {
             element={
               <Layout>
                 <Categories />
+              </Layout>
+            }
+          />
+          <Route
+            path={`${ROUTES.PRODUCTS}/:id/edit`}
+            element={
+              <Layout>
+                <ProductEdit />
+              </Layout>
+            }
+          />
+          <Route
+            path={`${ROUTES.PRODUCTS}/:id`}
+            element={
+              <Layout>
+                <ProductDetails />
               </Layout>
             }
           />

@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import validations from "@/schemas";
 import * as z from "zod";
 
 import { GlobalContext } from "@/components/GlobalContext";

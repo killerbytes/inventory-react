@@ -13,6 +13,7 @@ import {
 } from "@/types";
 import { MODE_OF_PAYMENT_OPTIONS, UNIT_OPTIONS } from "@/utils/definitions";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import ProductCommand from "../../../components/ProductCommand";
 import { productServices, supplierServices } from "@/services";
 import { useProductStore, useSupplierStore } from "@/stores";
 import { ColumnDef, Row } from "@tanstack/react-table";
@@ -21,7 +22,6 @@ import Autocomplete from "@/components/Autcomplete";
 import NumberInput from "@/components/NumberInput";
 import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
-import ProductList from "../Table/ProductList";
 import { Amount, Table, Unit } from "../Table";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
@@ -113,7 +113,7 @@ export default function PurchaseOrderForm({
               name={`purchaseOrderItems.${row.index}.productId`}
               control={control}
               render={({ field }) => (
-                <ProductList
+                <ProductCommand
                   control={control}
                   list={products}
                   {...field}

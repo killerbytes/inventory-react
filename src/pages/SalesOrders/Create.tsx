@@ -39,7 +39,6 @@ import ProductsModal from "./ProductsModal";
 import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
 import ProductList from "./ProductList";
-import validations from "@/schemas";
 import { toast } from "sonner";
 import React from "react";
 

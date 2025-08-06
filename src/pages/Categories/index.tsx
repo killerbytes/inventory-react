@@ -106,7 +106,7 @@ export default function Categories() {
   ];
   return (
     <div>
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+      <header className="flex  items-center gap-2 border-b mb-4 py-2">
         <div className="flex w-full items-center px-2">
           <h1 className="font-medium">Categories</h1>
 

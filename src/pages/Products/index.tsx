@@ -4,21 +4,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { APIResponse, CategorizedProductList, Product } from "@/types";
 import { categoryServices, productServices } from "@/services";
-import NewPackageModal from "../Inventory/NewPackageModal";
+import { CategorizedProductList, Product } from "@/types";
+import CreateProductModal from "./CreateProductModal";
 import { Button } from "@/components/ui/button";
+import CombinationItem from "./CombinationItem";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
-import { Plus, PlusIcon } from "lucide-react";
 import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
-import ProductList from "./ProductList";
 import ProductItem from "./ProductItem";
+import { PlusIcon } from "lucide-react";
 import React, { Fragment } from "react";
-import EditModal from "./EditModal";
-import AddModal from "./AddModal";
 
 export default function Products() {
   const [category, setCategory] = React.useState<number>();
@@ -39,7 +37,7 @@ export default function Products() {
     categoryId: "ALL",
   });
   const [toggle, handleToggle] = useToggle({
-    addModal: false,
+    createProductModal: false,
     editModal: false,
     newPackageModal: false,
   });
@@ -143,15 +141,15 @@ export default function Products() {
                   {item.products.map((product) => (
                     <Fragment key={product.id}>
                       <ProductItem
-                        product={product}
+                        item={product}
                         onSelect={setSelected}
                         onToggle={handleToggle}
                       />
-                      {product?.subProducts?.map((subItem: Product) => {
+                      {product.combinations?.map((combination: Product) => {
                         return (
-                          <Fragment key={subItem.id}>
-                            <ProductItem
-                              product={subItem}
+                          <Fragment key={combination.id}>
+                            <CombinationItem
+                              item={combination}
                               sub={true}
                               onSelect={setSelected}
                               onToggle={handleToggle}
@@ -169,7 +167,7 @@ export default function Products() {
                       className="size-8"
                       onClick={() => {
                         setCategory(Number(item.categoryId));
-                        handleToggle({ addModal: true });
+                        handleToggle({ createProductModal: true });
                       }}
                     >
                       <PlusIcon />
@@ -182,31 +180,13 @@ export default function Products() {
         </>
       )}
 
-      {toggle.addModal && (
-        <AddModal
-          isOpen={true}
+      {toggle.createProductModal && (
+        <CreateProductModal
           categoryId={category}
-          onClose={() => {
-            handleToggle({ addModal: false });
-          }}
-          onSubmit={() => {
-            handleToggle({ addModal: false });
-            getData();
-          }}
-        />
-      )}
-
-      {toggle.editModal && (
-        <EditModal
           isOpen={true}
           onClose={() => {
-            handleToggle({ editModal: false });
+            handleToggle({ createProductModal: false });
           }}
-          onSubmit={() => {
-            handleToggle({ editModal: false });
-            getData();
-          }}
-          data={selected as Product}
         />
       )}
     </div>

@@ -66,6 +66,9 @@ export default function UserIcon() {
         <DropdownMenuItem asChild>
           <Link to={ROUTES.CATEGORIES}> Categories</Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={ROUTES.VARIANTS}> Variants</Link>
+        </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link to={ROUTES.SUPPLIERS}> Suppliers</Link>

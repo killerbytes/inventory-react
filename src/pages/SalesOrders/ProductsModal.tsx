@@ -10,7 +10,6 @@ import {
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import validations from "@/schemas";
 import * as z from "zod";
 
 import { DialogFooter } from "@/components/ui/dialog";

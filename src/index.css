@@ -197,3 +197,12 @@ div[class*="status-"] {
 .\[\&_tr\]\:border-b {
   @apply bg-gray-200;
 }
+[cmdk-list-sizer] > [cmdk-group] > [cmdk-group-heading] {
+  @apply text-blue-500 uppercase;
+}
+[cmdk-group-heading] {
+  @apply text-orange-500;
+}
+[cmdk-separator] {
+  @apply border-b-gray-200 border-b;
+}

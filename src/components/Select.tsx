@@ -6,7 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cx } from "class-variance-authority";
-import { SyntheticEvent } from "react";
+import React, { SyntheticEvent } from "react";
 
 interface SelectOption {
   [key: string]: string | number | null;
@@ -33,14 +33,22 @@ function Select(props: SelectProps) {
     labelKey = "label",
   } = props;
 
+  const [selectOptions, setSelectOptions] = React.useState<SelectOption[]>([]);
+
+  React.useEffect(() => {
+    setSelectOptions(options);
+  }, [options]);
+
   const handleChange = (value: string) => {
-    const e = {
-      target: {
-        value: String(value),
-        name,
-      },
-    } as unknown as React.ChangeEvent<HTMLSelectElement>;
-    onChange(e);
+    if (value) {
+      const e = {
+        target: {
+          value: String(value),
+          name,
+        },
+      } as unknown as React.ChangeEvent<HTMLSelectElement>;
+      onChange(e);
+    }
   };
   return (
     <SelectComponent
@@ -52,7 +60,7 @@ function Select(props: SelectProps) {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {options.map((option) => (
+        {selectOptions?.map((option) => (
           <SelectItem key={option[valueKey]} value={String(option[valueKey])}>
             {option[labelKey]}
           </SelectItem>
