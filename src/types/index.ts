@@ -20,9 +20,10 @@ import {
 import type { z } from "zod";
 
 export interface ApiErrorResponse {
-  message: string;
   code: string;
-  errors: Record<string, string[]>;
+  details: string;
+  errors: { string: string }[];
+  message: string;
   statusCode: number;
 }
 

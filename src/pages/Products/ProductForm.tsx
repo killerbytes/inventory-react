@@ -58,6 +58,9 @@ export default function ProductForm({
               options={categories}
               labelKey="name"
               valueKey="id"
+              onChange={(e) => {
+                field.onChange(Number(e.target.value));
+              }}
             />
             <FormMessage />
           </FormItem>

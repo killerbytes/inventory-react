@@ -1,16 +1,11 @@
-import { PackageOpen, Pencil } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/utils/definitions";
+import { Pencil } from "lucide-react";
 import { Link } from "react-router";
 import { Product } from "@/types";
 
 export default function ProductItem({
   item,
-  sub = false,
-  onSelect,
-  onToggle,
 }: {
   item: Product;
   sub?: boolean;
@@ -24,28 +19,20 @@ export default function ProductItem({
     <div className="flex items-center px-4 py-1 hover:bg-gray-100 border border-t-0">
       <div className="flex items-center flex-row">
         <div>
-          <div>{item.name}</div>
+          <div className="flex gap-2 items-center">
+            <div className="font-semibold">{item.name}</div>
+            <Badge variant="outline">{item.unit}</Badge>
+          </div>
           {item.description && (
             <div className="text-xs text-gray-500">{item.description}</div>
           )}
         </div>
       </div>
       <div className="flex gap-2 ml-auto items-center">
-        <div className="ml-auto">
-          <Badge>{item.unit}</Badge>
-        </div>
+        <div className="ml-auto"></div>
         <div className="w-20 justify-end flex gap-2">
-          <Link
-            to={`${ROUTES.PRODUCTS}/${item.id}/edit`}
-            variant="outline"
-            size="icon"
-            className="size-8"
-            // onClick={() => {
-            //   onSelect(product);
-            //   onToggle({ editModal: true });
-            // }}
-          >
-            <Pencil />
+          <Link to={`${ROUTES.PRODUCTS}/${item.id}/edit`}>
+            <Pencil size="16" />
           </Link>
         </div>
       </div>

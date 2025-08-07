@@ -62,7 +62,6 @@ export default function CombinationModal({
 
   const productCombinationDefaultValue = {
     productId: product.id,
-    sku: `${product.name}-${product.id}`,
     price: Number("123.00"),
     reorderLevel: 10,
     values: variants.map((i) => ({
@@ -116,7 +115,7 @@ export default function CombinationModal({
           <Button
             onClick={() => remove(row.index)}
             variant="outline"
-            disabled={(row.original.Inventory?.quantity ?? 0) <= 0}
+            disabled={(row.original.Inventory?.quantity ?? 0) > 0}
           >
             <Trash2 />
           </Button>

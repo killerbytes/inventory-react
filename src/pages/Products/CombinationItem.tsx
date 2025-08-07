@@ -1,9 +1,8 @@
-import { Product, ProductCombinations } from "@/types";
-import { PackageOpen, Pencil } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/utils/formatters";
 import { cx } from "class-variance-authority";
-import { ROUTES } from "@/utils/definitions";
-import { Link } from "react-router";
+import { Badge } from "@/components/ui/badge";
+import { ProductCombinations } from "@/types";
+import { PackageOpen } from "lucide-react";
 
 export default function CombinationItem({
   item,
@@ -24,15 +23,27 @@ export default function CombinationItem({
           "text-primary",
         )}
       >
-        <div>{item.sku}</div>
-        <div>{item.price}</div>
-        <div>{item.reorderLevel}</div>
-        <div>{item.Inventory?.quantity}</div>
+        <div className="text-muted-foreground">
+          {item.sku} @ {item.Inventory?.quantity}
+        </div>
       </div>
-      <div className="flex gap-2 ml-auto items-center">
+      <div className="flex gap-8 ml-auto items-center">
+        <div className="flex gap-2 items-center">
+          <Badge
+            variant="outline"
+            className={cx({
+              "bg-red-100": Number(item.price) === 0,
+            })}
+          >
+            {formatCurrency(item.price)}
+          </Badge>
+          {/* <div>{item.reorderLevel}</div> */}
+        </div>
         <div className="flex gap-2">
           {item.values.map((value) => (
-            <div key={value.variantTypeId}>{value.value}</div>
+            <Badge variant="outline" key={value.variantTypeId}>
+              {value.value}
+            </Badge>
           ))}
         </div>
       </div>

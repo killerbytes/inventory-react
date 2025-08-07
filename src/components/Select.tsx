@@ -13,7 +13,7 @@ interface SelectOption {
 }
 
 interface SelectProps {
-  onChange: (e: SyntheticEvent<HTMLSelectElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: SelectOption[];
   className?: string;
   value?: string | number;

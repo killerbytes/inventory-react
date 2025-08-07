@@ -1,4 +1,11 @@
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   ApiError,
   ApiErrorResponse,
   Product,
@@ -6,23 +13,26 @@ import {
   VariantTypes,
 } from "@/types";
 import { categoryServices, productServices } from "@/services";
+import { Copy, EllipsisVertical, Pencil } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { DataTable } from "@/components/DataTable";
+import { ROUTES, UNIT } from "@/utils/definitions";
 import { ColumnDef } from "@tanstack/react-table";
 import CombinationModal from "./CombinationModal";
+import CloneToUnitModal from "./CloneToUnitModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getErrorMessage } from "@/lib/utils";
-import { ROUTES } from "@/utils/definitions";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
 import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
+import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
-import { Pencil } from "lucide-react";
+import React, { Fragment } from "react";
 import { toast } from "sonner";
-import React from "react";
 
 export default function ProductEdit() {
   const { id } = useParams();
@@ -33,6 +43,7 @@ export default function ProductEdit() {
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const navigate = useNavigate();
   const form = useForm<Product>({
+    resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
     },
@@ -40,48 +51,32 @@ export default function ProductEdit() {
   const [toggle, handleToggle] = useToggle({
     variantModal: false,
     combinationModal: false,
+    cloneModal: false,
   });
 
   async function onSubmit(values: Product) {
     try {
-      // const { variants, combinations, ...rest } = values;
-      // const payload = {
-      //   ...rest,
-      //   variants: variants.map((i) => {
-      //     return {
-      //       id: i.id,
-      //       name: i.name,
-      //       productId: i.productId,
-      //       values: i.values.map((v) => {
-      //         return v.value;
-      //       }),
-      //     };
-      //   }),
-      //   combinations: combinations.map((i) => {
-      //     return {
-      //       id: i.id,
-      //       sku: i.sku,
-      //       price: i.price,
-      //       inventory: i.inventory,
-      //       values: Object.fromEntries(
-      //         i.values.map((i) => [
-      //           variants.find((v) => v.id === i.variantTypeId)?.name,
-      //           i.value,
-      //         ]),
-      //       ),
-      //     };
-      //   }),
-      // };
       await productServices.update(String(id), values);
       getData();
     } catch (error) {
-      console.log(error);
       const { errors, message } = getErrorMessage(error as ApiErrorResponse);
       errors?.forEach((err: ApiError) => {
         if (err.field) {
           form.setError(err.field as keyof Product, err.message);
         }
       });
+
+      if (form.formState.errors["products_name_unit"]) {
+        console.log("x");
+        form.setError("name", {
+          type: "server",
+          message: "Product with the same unit already exists",
+        });
+        form.setError("unit", {
+          type: "server",
+          message: "Unit with same product already exists",
+        });
+      }
       toast.error("Submission failed: " + message);
     }
   }
@@ -150,7 +145,12 @@ export default function ProductEdit() {
         accessorKey: "price",
       },
       {
+        header: "Inventory",
         accessorKey: "Inventory.quantity",
+      },
+      {
+        header: "Re-order Level",
+        accessorKey: "reorderLevel",
       },
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
@@ -162,9 +162,34 @@ export default function ProductEdit() {
     ],
     [variants],
   );
-  console.log(combinations);
   return (
-    <>
+    <Fragment key={id}>
+      {/* <Button onClick={handleClone}>Clone</Button> */}
+      <div className="flex gap-2">
+        <div className="ml-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="icon" className="size-8">
+                <EllipsisVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    handleToggle({ cloneModal: true });
+                  }}
+                >
+                  <Copy />
+                  Clone to Unit
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
       <Form {...form}>
         <form
           className="h-full flex flex-col"
@@ -249,6 +274,15 @@ export default function ProductEdit() {
           }}
         />
       )}
-    </>
+      {toggle.cloneModal && (
+        <CloneToUnitModal
+          isOpen={true}
+          onClose={() => {
+            handleToggle({ cloneModal: false });
+          }}
+          productId={Number(id)}
+        />
+      )}
+    </Fragment>
   );
 }

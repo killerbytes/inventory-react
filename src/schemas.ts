@@ -90,7 +90,7 @@ const variantValuesSchema = z.object({
 const productCombinationsSchema = z.object({
   id: z.number().optional(),
   productId: z.number(),
-  sku: z.string(),
+  sku: z.string().nullish(),
   price: z.coerce.number(),
   reorderLevel: z.coerce.number(),
   Inventory: inventorySchema.nullish(),
@@ -114,8 +114,8 @@ const productSchema = z.object({
   description: z.string().nullish(),
   unit: z.string(),
   categoryId: z.number(),
-  variants: z.array(variantTypesSchema),
-  combinations: z.array(productCombinationsSchema),
+  variants: z.array(variantTypesSchema).nullish(),
+  combinations: z.array(productCombinationsSchema).nullish(),
 });
 
 const supplierSchema = z.object({

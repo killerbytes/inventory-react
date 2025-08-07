@@ -26,16 +26,13 @@ export function formatLabel(str: string) {
     .join(" ");
 }
 
-export function getErrorMessage(error: ApiErrorResponse) {
+export function getErrorMessage(error: ApiErrorResponse): ApiErrorResponse {
   const { errors, message, ...rest } = error;
   switch (error.code) {
-    case "ERR_NETWORK":
-      return "Network error occurred";
     case "NOT_FOUND":
     case "VALIDATION_ERROR":
-      return { errors, message, ...rest };
     default:
-      return { message };
+      return { errors, message, ...rest };
   }
 }
 

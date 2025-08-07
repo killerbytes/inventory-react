@@ -1,14 +1,26 @@
 import { categoryServices, productServices } from "@/services";
+import { ApiError, ApiErrorResponse, Product } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/utils";
 import { ROUTES } from "@/utils/definitions";
 import { Form } from "@/components/ui/form";
 import { useCategoryStore } from "@/stores";
 import { useNavigate } from "react-router";
+import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import Modal from "@/components/Modal";
-import { Product } from "@/types";
+import { toast } from "sonner";
 import React from "react";
+
+interface Exx {
+  code: string;
+  details: string;
+  errors: Record<string, string[]>;
+  message: string;
+  statusCode: number;
+}
 
 export default function CreateProductModal({
   categoryId,
@@ -20,7 +32,10 @@ export default function CreateProductModal({
   onClose: () => void;
 }) {
   const { categories, setCategories } = useCategoryStore();
+
   const form = useForm<Product>({
+    resolver: zodResolver(productSchema),
+
     defaultValues: {
       categoryId,
     },
@@ -28,34 +43,34 @@ export default function CreateProductModal({
   const navigate = useNavigate();
 
   async function onSubmit(values: Product) {
-    // const payload = {
-    //   ...values,
-    //   combinations: values.combinations.map((i) => {
-    //     return {
-    //       id: i.id,
-    //       sku: i.sku,
-    //       price: i.price,
-    //       inventory: i.inventory,
-    //       values: i.values.map((v) => {
-    //         return v.value;
-    //       }),
-    //     };
-    //   }),
-    //   variants: values.variants.map((i) => {
-    //     return {
-    //       id: i.id,
-    //       name: i.name,
-    //       productId: i.productId,
-    //       values: i.values.map((v) => {
-    //         return v.value;
-    //       }),
-    //     };
-    //   }),
-    // };
-
-    const product = await productServices.create(values);
-    console.log(product);
-    navigate(`${ROUTES.PRODUCTS}/${product.id}/edit`);
+    try {
+      const product = await productServices.create(values);
+      console.log(product);
+      navigate(`${ROUTES.PRODUCTS}/${product.id}/edit`);
+    } catch (error: unknown) {
+      const { errors }: ApiErrorResponse = getErrorMessage(
+        error as ApiErrorResponse,
+      );
+      errors?.forEach((err: ApiError) => {
+        if (err.field) {
+          form.setError(err.field as keyof Product, {
+            type: "server",
+            message: err.message,
+          });
+        }
+      });
+      const serverError = form.formState.errors["products_name_unit"];
+      if (serverError) {
+        form.setError("name", {
+          type: "server",
+          message: "Product with the same unit already exists",
+        });
+        form.setError("unit", {
+          type: "server",
+          message: "Unit with same product already exists",
+        });
+      }
+    }
   }
   const data = useWatch({ control: form.control });
 
@@ -80,7 +95,7 @@ export default function CreateProductModal({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            console.log(form.formState.errors);
+            console.log(form.getValues(), form.formState.errors);
             form
               .handleSubmit(onSubmit)(e)
               .catch((error) => {
