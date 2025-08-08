@@ -3,12 +3,15 @@ import { useApiData, type ApiDataType } from "@/hooks/useApiData";
 import { Toaster } from "@/components/ui/sonner";
 import AppSidebar from "./AppSidebar";
 
+import VariantTemplateModal from "./VariantTemplateModal";
+import { useGlobalStore } from "@/stores/global.store";
 import { UserContext } from "./UserContext";
 import User from "./User";
 import React from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const props: ApiDataType = useApiData();
+  const { variantTemplateModal, setVariantTemplateModal } = useGlobalStore();
 
   return (
     <SidebarProvider>
@@ -24,6 +27,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </UserContext.Provider>
         </div>
         <div className="px-4 flex flex-col h-full ">{children}</div>
+        {variantTemplateModal && (
+          <VariantTemplateModal
+            isOpen={true}
+            onClose={() => setVariantTemplateModal(false)}
+          />
+        )}
       </main>
       <Toaster position="bottom-left" richColors />
     </SidebarProvider>

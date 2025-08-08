@@ -5,7 +5,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ROUTES, UNIT_OPTIONS } from "@/utils/definitions";
+import { ERROR, ROUTES, UNIT_OPTIONS } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -47,10 +47,14 @@ export default function CloneToUnitModal({
       onClose();
       navigate(`${ROUTES.PRODUCTS}/${product.id}/edit`);
     } catch (error) {
-      const { errors, message } = getErrorMessage(error as ApiErrorResponse);
-      console.log(errors, message);
-      if (error.errors.find((e) => e.field === "products_name_unit")) {
-        toast.error("Product with the same unit already exists");
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        form.setError("unit", {
+          type: "server",
+          message: "Product with the same unit already exists",
+        });
+      } else {
+        toast.error("Submission failed: " + apiError.message);
       }
     }
   };

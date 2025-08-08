@@ -11,10 +11,10 @@ import {
   PurchaseOrderItem,
   Supplier,
 } from "@/types";
-import { MODE_OF_PAYMENT_OPTIONS, UNIT_OPTIONS } from "@/utils/definitions";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import ProductCommand from "../../../components/ProductCommand";
 import { productServices, supplierServices } from "@/services";
+import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
 import { useProductStore, useSupplierStore } from "@/stores";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { Amount, Table, Unit } from "../Table";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
 import React, { useMemo } from "react";
@@ -36,7 +35,7 @@ export default function PurchaseOrderForm({
   form: UseFormReturn<PurchaseOrder>;
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
-  const { products, flatProducts, setProducts } = useProductStore();
+  const { products, setProducts } = useProductStore();
 
   const {
     control,
@@ -67,8 +66,8 @@ export default function PurchaseOrderForm({
           products,
         };
       });
-
-      setProducts(combined);
+      console.log(data, combined);
+      setProducts(data);
     };
 
     getData();
@@ -171,10 +170,13 @@ export default function PurchaseOrderForm({
           className: "w-15",
         },
         cell: ({ row }) => {
-          const product = flatProducts.find(
-            (i) => i.combinationId === Number(row.original.combinationId),
+          return (
+            <Unit index={row.index} control={control} setValue={setValue} />
           );
-          return product && <Badge>{product?.unit}</Badge>;
+          // const product = flatProducts.find(
+          //   (i) => i.combinationId === Number(row.original.combinationId),
+          // );
+          // return product && <UnitBadge>{product?.unit}</UnitBadge>;
         },
       },
       {
@@ -366,30 +368,11 @@ export default function PurchaseOrderForm({
       />
 
       <div className="mb-10">
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-8 mb-4">
-          <Button
-            type="button"
-            onClick={() =>
-              append({
-                productId: null,
-                quantity: 1,
-                unit: "",
-                unitPrice: 0,
-                discount: null,
-                discountNote: "",
-              })
-            }
-            variant="default"
-          >
-            <Plus />
-            Append
-          </Button>
-        </div>
         <FormField
           control={form.control}
           name="purchaseOrderItems"
           render={() => (
-            <FormItem className="w-full">
+            <FormItem className="w-full mb-4">
               <FormControl>
                 <Table
                   control={form.control}
@@ -402,6 +385,23 @@ export default function PurchaseOrderForm({
             </FormItem>
           )}
         />
+        <div>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() =>
+              append({
+                combinationId: null,
+                quantity: 1,
+                unitPrice: 0,
+                discount: null,
+                discountNote: "",
+              })
+            }
+          >
+            <Plus />
+          </Button>
+        </div>
       </div>
     </>
   );

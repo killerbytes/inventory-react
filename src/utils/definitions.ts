@@ -100,12 +100,12 @@ export const UNIT = {
 };
 
 export const UNIT_COLOR = {
-  BOX: "bg-indigo-400",
-  BAG: "bg-yellow-400",
-  GAL: "bg-green-400",
-  PACK: "bg-blue-400",
-  SET: "bg-purple-400",
-  PCS: "bg-red-400",
+  BOX: "bg-indigo-400 ",
+  BAG: "bg-yellow-400 text-black",
+  GAL: "bg-green-400 text-black",
+  PACK: "bg-blue-500",
+  SET: "bg-purple-400 text-black",
+  PCS: "bg-red-500",
   KGS: "bg-orange-400",
 };
 
@@ -113,3 +113,7 @@ export const UNIT_OPTIONS = Object.values(UNIT).map((value) => ({
   value,
   label: titleCase(value.toLowerCase()),
 }));
+
+export const ERROR = {
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+};

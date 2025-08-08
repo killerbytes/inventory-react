@@ -5,6 +5,7 @@ import { formatCurrency } from "@/utils/formatters";
 import ComboBox from "@/components/ComboBox";
 import { useProductStore } from "@/stores";
 import { CommandSeparator } from "cmdk";
+import UnitBadge from "./UnitBadge";
 import { Badge } from "./ui/badge";
 import React from "react";
 
@@ -35,7 +36,6 @@ export default function ProductCommand({
   control,
   list,
   value,
-  placeholder = "Type to search...",
   index,
   onChange,
   setValue,
@@ -93,51 +93,54 @@ export default function ProductCommand({
       placeholder="Select a product..."
     >
       {options.map((item) => (
-        <>
-          <CommandGroup
-            heading={item.categoryName}
-            key={item.categoryName}
-            color="red"
-          >
-            <CommandSeparator />
-            {item?.products?.map((item) => (
-              <CommandGroup
-                heading={item.name}
-                value={String(item.id)}
-                key={item.id}
-              >
-                {item.combinations.map((combination) => (
-                  <CommandItem
-                    keywords={[combination.sku]}
-                    value={String(combination.id)}
-                    key={combination.id}
-                    onSelect={(v) => {
-                      onChange(v);
-                      const selected = flatProducts.find(
-                        (item) => item.combinationId === Number(v),
-                      );
-                      setValue(
-                        `purchaseOrderItems.${index}.unitPrice`,
-                        Number(selected?.price),
-                      );
-                      setOpen(false);
-                    }}
-                    className="flex gap-2 items-center justify-between"
-                  >
-                    <div className="flex gap-2">
-                      {combination.values.map((value) => {
-                        return <span key={value.id}>{value.value}</span>;
-                      })}
-                    </div>
-                    <span className="text-muted-foreground">
-                      {formatCurrency(combination.price)}
-                    </span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ))}
-          </CommandGroup>
-        </>
+        <CommandGroup
+          heading={item.categoryName}
+          key={item.categoryName}
+          color="red"
+        >
+          <CommandSeparator />
+          {item?.products?.map((product) => (
+            <CommandGroup
+              heading={
+                <div className="flex gap-2 items-center">
+                  {product.name}{" "}
+                  <UnitBadge className="ml-auto">{product.unit}</UnitBadge>
+                </div>
+              }
+              value={String(product.id)}
+              key={product.id}
+            >
+              {product.combinations?.map((combination) => (
+                <CommandItem
+                  keywords={[combination.sku ?? ""]}
+                  value={String(combination.id)}
+                  key={combination.id}
+                  onSelect={(v) => {
+                    onChange(v);
+                    const selected = flatProducts.find(
+                      (item) => item.combinationId === Number(v),
+                    );
+                    setValue(
+                      `purchaseOrderItems.${index}.unitPrice`,
+                      Number(selected?.price),
+                    );
+                    setOpen(false);
+                  }}
+                  className="flex gap-2 items-center justify-between"
+                >
+                  <div className="flex gap-2">
+                    {combination.values.map((value) => {
+                      return <span key={value.id}>{value.value}</span>;
+                    })}
+                  </div>
+                  <span className="text-muted-foreground">
+                    {formatCurrency(combination.price)}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ))}
+        </CommandGroup>
       ))}
       <CommandSeparator />
 

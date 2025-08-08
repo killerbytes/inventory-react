@@ -19,10 +19,15 @@ import {
 } from "../schemas";
 import type { z } from "zod";
 
+type ValidationError = {
+  field: string;
+  message: string;
+};
+
 export interface ApiErrorResponse {
   code: string;
   details: string;
-  errors: { string: string }[];
+  errors: ValidationError[];
   message: string;
   statusCode: number;
 }

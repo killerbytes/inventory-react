@@ -101,6 +101,7 @@ const variantTypesSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(1, { message: "Name is required." }),
   productId: z.number().nullish(),
+  isTemplate: z.boolean().nullish(),
   values: z
     .array(variantValuesSchema)
     .min(1, { message: "At least one value" }),
@@ -116,6 +117,7 @@ const productSchema = z.object({
   categoryId: z.number(),
   variants: z.array(variantTypesSchema).nullish(),
   combinations: z.array(productCombinationsSchema).nullish(),
+  products_name_unit: z.string().nullish(),
 });
 
 const supplierSchema = z.object({

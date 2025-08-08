@@ -1,3 +1,10 @@
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ApiErrorResponse, APIResponse, Category } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
@@ -106,11 +113,10 @@ export default function Categories() {
   ];
   return (
     <div>
-      <header className="flex  items-center gap-2 border-b mb-4 py-2">
-        <div className="flex w-full items-center px-2">
-          <h1 className="font-medium">Categories</h1>
-
-          <div className="ml-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Categories</CardTitle>
+          <CardAction>
             <Button
               onClick={() => {
                 handleToggle({ addModal: true });
@@ -118,36 +124,38 @@ export default function Categories() {
             >
               <Plus /> Add Category
             </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <Input
+              placeholder="Search products"
+              className="w-full mb-4"
+              value={filter.q}
+              onChange={(e) => {
+                setFilter((prev) => ({
+                  ...prev,
+                  q: e.target.value,
+                  page: 1,
+                }));
+              }}
+            />
           </div>
-        </div>
-      </header>
-      <div>
-        <Input
-          placeholder="Search products"
-          className="w-full mb-4"
-          value={filter.q}
-          onChange={(e) => {
-            setFilter((prev) => ({
-              ...prev,
-              q: e.target.value,
-              page: 1,
-            }));
-          }}
-        />
-      </div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <DnDTable
-            columns={columns}
-            data={data?.data || []}
-            onSubmit={onSubmit}
-          />
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <DnDTable
+                columns={columns}
+                data={data?.data || []}
+                onSubmit={onSubmit}
+              />
 
-          <Pager data={data} page={page} setPage={setPage} />
-        </>
-      )}
+              <Pager data={data} page={page} setPage={setPage} />
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {toggle.addModal && (
         <AddModal

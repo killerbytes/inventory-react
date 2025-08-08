@@ -45,7 +45,6 @@ export default function CreateProductModal({
   async function onSubmit(values: Product) {
     try {
       const product = await productServices.create(values);
-      console.log(product);
       navigate(`${ROUTES.PRODUCTS}/${product.id}/edit`);
     } catch (error: unknown) {
       const { errors }: ApiErrorResponse = getErrorMessage(

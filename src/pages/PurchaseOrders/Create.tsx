@@ -2,6 +2,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { purchaseOrderServices } from "@/services";
 
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
 import { ApiError, ApiErrorResponse, PurchaseOrder } from "@/types";
 import { getErrorMessage, randomInt } from "@/lib/utils";
@@ -108,46 +115,53 @@ export default function Create() {
   return (
     <>
       <div>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => navigate(ROUTES.PURCHASE_ORDERS)}
-          className="mb-4"
-        >
-          <MoveLeft /> Back
-        </Button>
-      </div>
-      <h2 className="mb-4">Create Purchase Order</h2>
-      <Form {...form}>
-        <OrderForm form={form} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Create Purchase Order</CardTitle>
+            <CardAction></CardAction>
+          </CardHeader>
+          <CardContent>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => navigate(ROUTES.PURCHASE_ORDERS)}
+              className="mb-4"
+            >
+              <MoveLeft /> Back
+            </Button>
+            <Form {...form}>
+              <OrderForm form={form} />
 
-        <div className="flex justify-end mt-auto mb-10">
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              const { purchaseOrderItems, ...rest } = form.getValues();
-              const valid = purchaseOrderItems.filter(
-                (item) => item.combinationId,
-              );
-              console.log(form.formState.errors);
-              form.reset({
-                ...rest,
-                purchaseOrderItems: valid.length
-                  ? valid
-                  : [purchaseOrderItemDefault],
-              });
-              form
-                .handleSubmit(onSubmit)(e)
-                .catch((error) => {
-                  console.error("Form submission error:", error);
-                });
-            }}
-          >
-            Create Order
-          </Button>
-        </div>
-      </Form>
+              <div className="flex justify-end mt-auto">
+                <Button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const { purchaseOrderItems, ...rest } = form.getValues();
+                    const valid = purchaseOrderItems.filter(
+                      (item) => item.combinationId,
+                    );
+                    console.log(form.formState.errors);
+                    form.reset({
+                      ...rest,
+                      purchaseOrderItems: valid.length
+                        ? valid
+                        : [purchaseOrderItemDefault],
+                    });
+                    form
+                      .handleSubmit(onSubmit)(e)
+                      .catch((error) => {
+                        console.error("Form submission error:", error);
+                      });
+                  }}
+                >
+                  Create Order
+                </Button>
+              </div>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
       {JSON.stringify(data)}
     </>
   );

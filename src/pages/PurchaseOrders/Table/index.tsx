@@ -1,12 +1,12 @@
-import { PurchaseOrder, type PurchaseOrderItem } from "@/services";
 import { Control, FieldErrors, useWatch } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { PurchaseOrder, PurchaseOrderItem } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { cx } from "class-variance-authority";
+import Unit from "./UnitColumn";
 import Amount from "./Amount";
-import Unit from "./Unit";
 
 type TableProps = {
   control: Control<PurchaseOrder>;

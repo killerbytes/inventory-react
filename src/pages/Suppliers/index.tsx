@@ -8,6 +8,13 @@ import {
 } from "@/components/ui/table";
 import React from "react";
 
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { supplierServices, type APIResponse, type Supplier } from "@/services";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
@@ -93,11 +100,10 @@ export default function Suppliers() {
 
   return (
     <div>
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
-        <div className="flex w-full items-center px-2">
-          <h1 className="font-medium">Suppliers</h1>
-
-          <div className="ml-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Suppliers</CardTitle>
+          <CardAction>
             <Button
               onClick={() => {
                 handleToggle({ addModal: true });
@@ -105,81 +111,83 @@ export default function Suppliers() {
             >
               <Plus /> Add Supplier
             </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <Input
+              placeholder="Search products"
+              className="w-full mb-4"
+              value={filter.q}
+              onChange={(e) => {
+                setFilter((prev) => ({
+                  ...prev,
+                  q: e.target.value,
+                  page: 1,
+                }));
+              }}
+            />
           </div>
-        </div>
-      </header>
-      <div>
-        <Input
-          placeholder="Search products"
-          className="w-full mb-4"
-          value={filter.q}
-          onChange={(e) => {
-            setFilter((prev) => ({
-              ...prev,
-              q: e.target.value,
-              page: 1,
-            }));
-          }}
-        />
-      </div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    onClick={() => requestSort(column.key)}
-                    style={{ cursor: "pointer" }}
-                    title={column.title}
-                    className={column.className}
-                  >
-                    {column.title}
-                    {filter.sort === column.key && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {filter.order === "asc" ? "↑" : "↓"}
-                      </span>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.data?.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">
-                    {item.name}
-                    <p className="text-xs text-muted-foreground">
-                      {item.address}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    {item.contact}
-                    <p className="text-xs text-muted-foreground">
-                      {item.phone}
-                    </p>
-                  </TableCell>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setSelected(item);
-                        handleToggle({ editModal: true });
-                      }}
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                  </TableHead>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Pager data={data} page={page} setPage={setPage} />
-        </>
-      )}
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableHead
+                        onClick={() => requestSort(column.key)}
+                        style={{ cursor: "pointer" }}
+                        title={column.title}
+                        className={column.className}
+                      >
+                        {column.title}
+                        {filter.sort === column.key && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {filter.order === "asc" ? "↑" : "↓"}
+                          </span>
+                        )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data?.data?.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">
+                        {item.name}
+                        <p className="text-xs text-muted-foreground">
+                          {item.address}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        {item.contact}
+                        <p className="text-xs text-muted-foreground">
+                          {item.phone}
+                        </p>
+                      </TableCell>
+                      <TableHead className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelected(item);
+                            handleToggle({ editModal: true });
+                          }}
+                        >
+                          <Pencil size={16} />
+                        </Button>
+                      </TableHead>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <Pager data={data} page={page} setPage={setPage} />
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {toggle.addModal && (
         <AddModal

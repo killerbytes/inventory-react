@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productCombinationsSchema } from "@/schemas";
@@ -25,8 +25,8 @@ import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/utils";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
-import Modal from "@/components/Modal";
 import React, { useMemo } from "react";
+import Modal from "@/components/Modal";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -58,6 +58,11 @@ export default function CombinationModal({
     control: form.control,
     name: "combinations",
     keyName: "fieldId",
+  });
+
+  const x = useWatch({
+    control: form.control,
+    name: "combinations",
   });
 
   const productCombinationDefaultValue = {
@@ -180,12 +185,12 @@ export default function CombinationModal({
             index: number;
           };
         }) => {
-          const variantIndex = values.findIndex(
-            (i) => i.variantTypeId === variants[idx].id,
-          );
+          // const variantIndex = values.findIndex(
+          //   (i) => i.variantTypeId === variants[idx].id,
+          // );
           return (
             <Controller
-              name={`combinations.${index}.values.${variantIndex}`}
+              name={`combinations.${index}.values.${idx}`}
               control={form.control}
               render={({ field }) => {
                 return (
@@ -197,7 +202,7 @@ export default function CombinationModal({
                       labelKey="value"
                       valueKey="value"
                       onChange={(e) => {
-                        const value = (e.target as HTMLInputElement).value;
+                        const value = e.target.value;
                         field.onChange(
                           variant.values.find((v) => v.value === value),
                         );
@@ -263,6 +268,7 @@ export default function CombinationModal({
           </div>
         </form>
       </Form>
+      {JSON.stringify(x)}
     </Modal>
   );
 }

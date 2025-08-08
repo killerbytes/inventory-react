@@ -1,3 +1,4 @@
+import UnitBadge from "@/components/UnitBadge";
 import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/utils/definitions";
 import { Pencil } from "lucide-react";
@@ -21,7 +22,7 @@ export default function ProductItem({
         <div>
           <div className="flex gap-2 items-center">
             <div className="font-semibold">{item.name}</div>
-            <Badge variant="outline">{item.unit}</Badge>
+            <UnitBadge>{item.unit}</UnitBadge>
           </div>
           {item.description && (
             <div className="text-xs text-gray-500">{item.description}</div>

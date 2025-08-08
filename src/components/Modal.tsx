@@ -14,7 +14,8 @@ export default function Modal({
   title,
   description,
   children,
-  className = "!max-w-[500px]",
+  className,
+  size = "md",
 }: {
   isOpen: boolean;
   onOpenChange: () => void;
@@ -22,9 +23,10 @@ export default function Modal({
   description?: string;
   children: React.ReactNode;
   className?: string;
+  size?: "sm" | "md" | "lg" | "xl";
 }) {
   const [open, setOpen] = React.useState(isOpen);
-
+  console.log(`!${Modal.sizes[size]}`);
   return (
     <Dialog
       open={open}
@@ -35,7 +37,9 @@ export default function Modal({
         }, 500);
       }}
     >
-      <DialogContent className={cx("w-full ", className)}>
+      <DialogContent
+        className={cx("w-full ", `${Modal.sizes[size]}`, className)}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -45,3 +49,10 @@ export default function Modal({
     </Dialog>
   );
 }
+
+Modal.sizes = {
+  sm: "sm:max-w-[350px]",
+  md: "sm:max-w-[500px]",
+  lg: "sm:max-w-[800px]",
+  xl: "sm:max-w-[90%]",
+};
