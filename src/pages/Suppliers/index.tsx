@@ -51,8 +51,7 @@ export default function Suppliers() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await supplierServices.getAll(filter);
-      const data = response.data;
+      const data = await supplierServices.getAll(filter);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -105,6 +104,7 @@ export default function Suppliers() {
           <CardTitle>Suppliers</CardTitle>
           <CardAction>
             <Button
+              className="shadow-sm"
               onClick={() => {
                 handleToggle({ addModal: true });
               }}
@@ -116,7 +116,7 @@ export default function Suppliers() {
         <CardContent>
           <div>
             <Input
-              placeholder="Search products"
+              placeholder="Search supplier"
               className="w-full mb-4"
               value={filter.q}
               onChange={(e) => {

@@ -157,7 +157,7 @@ export default function Products() {
                       <Button
                         variant="outline"
                         size="icon"
-                        className="size-8"
+                        className="size-8 shadow-sm"
                         onClick={() => {
                           setCategory(Number(item.categoryId));
                           handleToggle({ createProductModal: true });

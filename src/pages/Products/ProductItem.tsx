@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import UnitBadge from "@/components/UnitBadge";
 import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/utils/definitions";
@@ -32,9 +33,16 @@ export default function ProductItem({
       <div className="flex gap-2 ml-auto items-center">
         <div className="ml-auto"></div>
         <div className="w-20 justify-end flex gap-2">
-          <Link to={`${ROUTES.PRODUCTS}/${item.id}/edit`}>
-            <Pencil size="16" />
-          </Link>
+          <Button
+            asChild
+            variant="outline"
+            size="icon"
+            className="size-8 shadow-sm"
+          >
+            <Link to={`${ROUTES.PRODUCTS}/${item.id}/edit`}>
+              <Pencil />
+            </Link>
+          </Button>
         </div>
       </div>
     </div>

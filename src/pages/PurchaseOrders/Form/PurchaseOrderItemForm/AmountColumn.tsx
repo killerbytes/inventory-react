@@ -1,9 +1,9 @@
 import { formatCurrency } from "@/utils/formatters";
 import { Control, useWatch } from "react-hook-form";
-import { PurchaseOrder } from "@/services";
+import { PurchaseOrder } from "@/types";
 import React from "react";
 
-export default function Amount({
+export default function AmountColumn({
   index,
   control,
 }: {
@@ -17,7 +17,7 @@ export default function Amount({
   });
   const price = useWatch({
     control,
-    name: `purchaseOrderItems.${index}.unitPrice`,
+    name: `purchaseOrderItems.${index}.purchasePrice`,
   });
 
   React.useEffect(() => {

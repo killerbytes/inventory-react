@@ -113,7 +113,7 @@ export default function CreateProductModal({
         </form>
       </Form>
 
-      {JSON.stringify(data)}
+      {/* {JSON.stringify(data)} */}
     </Modal>
   );
 }

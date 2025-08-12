@@ -115,7 +115,7 @@ export default function VariantTemplateModal({
         onDelete={handleDelete}
         selected={selected}
       />
-      {JSON.stringify(x)}
+      {/* {JSON.stringify(x)} */}
     </Modal>
   );
 }

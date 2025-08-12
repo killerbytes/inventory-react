@@ -6,65 +6,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cx } from "class-variance-authority";
-import React, { SyntheticEvent } from "react";
+import React from "react";
 
 interface SelectOption {
   [key: string]: string | number | null;
 }
 
 interface SelectProps {
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (value: string) => void;
   options: SelectOption[];
   className?: string;
-  value?: string | number;
-  name?: string;
+  value?: string;
   valueKey?: string;
   labelKey?: string;
+  renderOption?: (option: SelectOption) => React.ReactNode;
 }
 
+function defaultRenderOption(option: SelectOption) {
+  return (
+    <SelectItem key={option.value} value={String(option.value)}>
+      {option.label}
+    </SelectItem>
+  );
+}
 function Select(props: SelectProps) {
   const {
     onChange,
     options,
     className,
-    name,
     value,
-    valueKey = "value",
-    labelKey = "label",
+    renderOption = defaultRenderOption,
   } = props;
 
   const [selectOptions, setSelectOptions] = React.useState<SelectOption[]>([]);
-
   React.useEffect(() => {
     setSelectOptions(options);
   }, [options]);
 
   const handleChange = (value: string) => {
     if (value) {
-      const e = {
-        target: {
-          value: String(value),
-          name,
-        },
-      } as unknown as React.ChangeEvent<HTMLSelectElement>;
-      onChange(e);
+      onChange(value);
     }
   };
   return (
     <SelectComponent
       {...props}
-      value={String(value)}
+      value={value || ""}
       onValueChange={handleChange}
     >
       <SelectTrigger className={cx("w-full", className)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {selectOptions?.map((option) => (
-          <SelectItem key={option[valueKey]} value={String(option[valueKey])}>
-            {option[labelKey]}
-          </SelectItem>
-        ))}
+        {selectOptions?.map((option) => renderOption(option))}
       </SelectContent>
     </SelectComponent>
   );

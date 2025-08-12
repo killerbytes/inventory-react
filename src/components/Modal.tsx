@@ -26,7 +26,6 @@ export default function Modal({
   size?: "sm" | "md" | "lg" | "xl";
 }) {
   const [open, setOpen] = React.useState(isOpen);
-  console.log(`!${Modal.sizes[size]}`);
   return (
     <Dialog
       open={open}

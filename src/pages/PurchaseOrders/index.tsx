@@ -5,20 +5,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PaginatedResponse, PurchaseOrder, StatusHistory } from "@/types";
 import { ORDER_STATUS_OPTIONS, PAGINATION } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
-import { PaginatedResponse, PurchaseOrder } from "@/types";
 import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
+import StatusBadge from "@/components/StatusBadge";
 import { DataTable } from "@/components/DataTable";
 import { purchaseOrderServices } from "@/services";
 import { ColumnDef } from "@tanstack/react-table";
+import { mappedStatusHistory } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
-import Badge from "@/components/Badge";
 import { Plus } from "lucide-react";
 import React from "react";
 
@@ -95,21 +97,32 @@ export default function PurchaseOrders() {
       header: "Supplier",
     },
     {
-      accessorKey: "orderByUser.name",
-      header: "Order By",
-    },
-    {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.original.status?.toLowerCase();
-        return <Badge type={status} />;
+        const status = row.original.status;
+        return <StatusBadge>{String(status)}</StatusBadge>;
+      },
+    },
+    {
+      accessorKey: "statusHistory",
+      header: "Date",
+      cell: ({ row }) => {
+        const statusHistoryMap = mappedStatusHistory(
+          row.original.statusHistory ?? [],
+        );
+        return formatDate(statusHistoryMap[row.original.status]?.changedAt);
       },
     },
     {
       accessorKey: "orderDate",
-      header: "Order Date",
-      cell: ({ row }) => formatDate(row.getValue("orderDate")),
+      header: "User",
+      cell: ({ row }) => {
+        const statusHistoryMap = mappedStatusHistory(
+          row.original.statusHistory ?? [],
+        );
+        return statusHistoryMap[row.original.status]?.user.name;
+      },
     },
     {
       accessorKey: "deliveryDate",
@@ -119,14 +132,19 @@ export default function PurchaseOrders() {
     {
       accessorKey: "modeOfPayment",
       header: "Payment Mode",
+      meta: {
+        headerClassName: "text-center",
+        className: "text-center",
+      },
       cell: ({ row }) => {
-        return <Badge type={row.original.modeOfPayment} />;
+        return <StatusBadge>{String(row.original.modeOfPayment)}</StatusBadge>;
       },
     },
     {
       accessorKey: "totalAmount",
-      header: () => <div className="text-right">Total Amount</div>,
+      header: () => "Total Amount",
       meta: {
+        headerClassName: "text-right",
         className: "text-right",
       },
       cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
@@ -140,7 +158,7 @@ export default function PurchaseOrders() {
           <CardTitle>Purchase Orders</CardTitle>
           <CardAction>
             <Link to="/purchases/new">
-              <Button>
+              <Button className="shadow-md">
                 <Plus /> Create Order
               </Button>
             </Link>
@@ -179,21 +197,23 @@ export default function PurchaseOrders() {
                 onRowClick={(item: PurchaseOrder) =>
                   navigate(`/purchases/${item.id}`)
                 }
-                footer={
-                  <TableRow>
-                    <TableCell colSpan={7}>Total Amount</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(
-                        data.data.reduce(
-                          (acc, item) =>
-                            acc + parseFloat(item.totalAmount ?? "0"),
-                          0,
-                        ),
-                      )}
-                    </TableCell>
-                  </TableRow>
-                }
-              ></DataTable>
+                renderFooter={(data: PurchaseOrder[]) => {
+                  return (
+                    <TableRow>
+                      <TableCell colSpan={7}>Total Amount</TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(
+                          data.reduce(
+                            (acc: number, item: PurchaseOrder) =>
+                              acc + parseFloat(item.totalAmount ?? "0"),
+                            0,
+                          ),
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }}
+              />
               {data.totalPages > 1 && (
                 <Pager data={data} page={page} setPage={setPage} />
               )}

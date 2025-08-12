@@ -24,7 +24,7 @@ export default function CombinationItem({
         )}
       >
         <div className="text-muted-foreground">
-          {item.sku} @ {item.Inventory?.quantity}
+          x {item.inventory?.quantity}
         </div>
       </div>
       <div className="flex gap-8 ml-auto items-center">

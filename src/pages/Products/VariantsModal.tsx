@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { VariantTypes } from "@/types";
+import { toast } from "sonner";
 import React from "react";
 
 const defaultValues: VariantTypes = {
@@ -41,8 +42,10 @@ export default function VariantsModal({
     };
     if (form.id) {
       await variantTypesServices.update(String(form.id), payload);
+      toast.success("Variant updated successfully");
     } else {
       await variantTypesServices.create(payload);
+      toast.success("Variant created successfully");
     }
     getData();
   };
@@ -81,8 +84,8 @@ export default function VariantsModal({
       <div className="flex gap-2 flex-wrap justify-start">
         {variantTypes.map((v, index) => (
           <Badge
-            variant="outline"
-            className={cx("cursor-pointer ", {
+            variant="secondary"
+            className={cx("cursor-pointer outline", {
               "bg-orange-500 text-white": selected?.id === v.id,
             })}
             key={index}
@@ -95,8 +98,9 @@ export default function VariantsModal({
         ))}
         <Button
           type="button"
+          variant="outline"
           size="sm"
-          className={cx({ "bg-orange-500 text-white": !selected })}
+          className={cx("shadow-sm", { "bg-orange-500 text-white": !selected })}
           onClick={() => {
             form.reset(defaultValues);
             setSelected(undefined);

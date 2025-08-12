@@ -1,4 +1,5 @@
 import ProductCombinationService from "./productCombination";
+import InventoryMovementService from "./inventoryMovement";
 import PurchaseOrderService from "./purchaseOrder";
 import VariantTypesService from "./variantTypes";
 import SalesOrderService from "./salesOrder";
@@ -21,6 +22,7 @@ export const productServices = new ProductService({ http });
 export const supplierServices = new SupplierService({ http });
 export const inventoryServices = new InventoryService({ http });
 export const variantTypesServices = new VariantTypesService({ http });
+export const inventoryMovementServices = new InventoryMovementService({ http });
 export const productCombinationServices = new ProductCombinationService({
   http,
 });

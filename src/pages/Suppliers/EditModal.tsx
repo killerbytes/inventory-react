@@ -187,15 +187,17 @@ export default function EditModal({
               <Button
                 type="button"
                 size="icon"
-                variant="destructive"
-                className="mr-auto"
+                variant="outline"
+                className="mr-auto text-red-500 shadow-sm"
                 onClick={() => {
                   setConfirm(true);
                 }}
               >
                 <Trash2 />
               </Button>
-              <Button type="submit">Save changes</Button>
+              <Button className="shadow-sm" type="submit">
+                Save changes
+              </Button>
             </DialogFooter>
           </form>
         </Form>

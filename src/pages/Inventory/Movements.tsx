@@ -1,0 +1,138 @@
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { InventoryMovement, PaginatedResponse } from "@/types";
+import { inventoryMovementServices } from "@/services";
+import { getMappedVariantValues } from "@/lib/utils";
+import { formatDateTime } from "@/utils/formatters";
+import StatusBadge from "@/components/StatusBadge";
+import { DataTable } from "@/components/DataTable";
+import { ColumnDef } from "@tanstack/react-table";
+import { ROUTES } from "@/utils/definitions";
+import { Link } from "react-router";
+import React from "react";
+
+export default function Movements() {
+  const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
+    data: [],
+    total: 0,
+    totalPages: 0,
+    currentPage: 0,
+  });
+  const getData = async () => {
+    const data = await inventoryMovementServices.getAll();
+    setData(data);
+  };
+
+  React.useEffect(() => {
+    getData();
+  }, []);
+
+  const columns = React.useMemo<ColumnDef<InventoryMovement>[]>(
+    () => [
+      {
+        header: "Product",
+        accessorKey: "combination.product.name",
+        cell: ({ row }) => {
+          const mapped = getMappedVariantValues(
+            row.original.combination.product.variants,
+            row.original.combination.values,
+          );
+
+          return (
+            <Link
+              to={`${ROUTES.PRODUCTS}/${row.original.combination.productId}`}
+            >
+              {`${row.original.combination.product.name} - ${Object.keys(mapped)
+                .map((key) => `${key}: ${mapped[key]}`)
+                .join(" | ")}`}
+            </Link>
+          );
+        },
+      },
+      {
+        accessorKey: "type",
+        header: "Type",
+        cell: ({ row }) => {
+          return (
+            <Link to={`${ROUTES.PURCHASE_ORDERS}/${row.original.reference}`}>
+              <StatusBadge>{String(row.original.type)}</StatusBadge>
+            </Link>
+          );
+        },
+      },
+      {
+        accessorKey: "quantity",
+        header: "Quantity",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right w-0",
+        },
+      },
+      {
+        accessorKey: "previous",
+        header: "Previous",
+        meta: {
+          headerClassName: "text-right",
+          className: "w-0 text-right",
+        },
+      },
+
+      {
+        accessorKey: "new", // "inventory.quantity",
+        header: "New",
+        meta: {
+          headerClassName: "text-right",
+          className: "w-0 text-right",
+        },
+      },
+      {
+        accessorKey: "reason",
+        header: "Reason",
+        meta: {
+          className: "w",
+        },
+      },
+      {
+        accessorKey: "updatedAt",
+        header: "Updated At",
+        meta: {
+          className: "w-0",
+        },
+        cell: ({ row }) => {
+          return formatDateTime(String(row.original.updatedAt));
+        },
+      },
+      {
+        accessorKey: "reference",
+        header: "Reference",
+        meta: {
+          headerClassName: "text-center",
+          className: "w-0 text-center",
+        },
+      },
+      {
+        header: "User",
+        accessorKey: "user.username",
+      },
+    ],
+    [],
+  );
+
+  console.log(data);
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Inventory Movements</CardTitle>
+        <CardAction></CardAction>
+      </CardHeader>
+      <CardContent>
+        <DataTable data={data.data} columns={columns} showFooter={false} />
+      </CardContent>
+    </Card>
+  );
+}

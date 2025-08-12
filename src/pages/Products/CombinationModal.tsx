@@ -18,15 +18,17 @@ import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productCombinationsSchema } from "@/schemas";
+import { SelectItem } from "@/components/ui/select";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/utils";
+import { ERROR } from "@/utils/definitions";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
-import React, { useMemo } from "react";
 import Modal from "@/components/Modal";
+import React, { useMemo } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -76,9 +78,8 @@ export default function CombinationModal({
 
   const getData = React.useCallback(async () => {
     if (product.id) {
-      const { combinations, variants } = await productCombinationServices.get(
-        String(product.id),
-      );
+      const { combinations, variants } =
+        await productCombinationServices.getByProductId(product.id);
       form.reset({
         combinations,
       });
@@ -94,17 +95,22 @@ export default function CombinationModal({
     combinations: ProductCombinations[];
   }) => {
     try {
-      await productCombinationServices.update(String(product.id), values);
+      await productCombinationServices.updateByProductId(
+        Number(product.id),
+        values,
+      );
       toast.success("Variants saved successfully");
     } catch (error) {
-      const { errors, message } = getErrorMessage(error as ApiErrorResponse);
-      console.log(errors, message);
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(err.field as keyof ProductCombinations, err.message);
-        }
-      });
-      toast.error("Submission failed: " + message);
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field, err.message);
+          }
+        });
+      } else {
+        toast.error("Submission failed: " + apiError.message);
+      }
     }
   };
 
@@ -120,58 +126,21 @@ export default function CombinationModal({
           <Button
             onClick={() => remove(row.index)}
             variant="outline"
-            disabled={(row.original.Inventory?.quantity ?? 0) > 0}
+            disabled={(row.original.inventory?.quantity ?? 0) > 0}
           >
             <Trash2 />
           </Button>
         ),
       },
-      {
-        accessorKey: "sku",
-      },
-      {
-        accessorKey: "price",
-        header: () => <div className="text-right">Price</div>,
-        meta: {
-          className: "text-right w-30",
-        },
-        cell: ({ row }) => {
-          return (
-            <Controller
-              name={`combinations.${row.index}.price`}
-              control={form.control}
-              render={({ field }) => <NumberInput {...field} type="currency" />}
-            />
-          );
-        },
-      },
-      {
-        accessorKey: "reorderLevel",
-        header: () => <div className="text-right">Re-order Level</div>,
-        meta: {
-          className: "text-right w-30",
-        },
-        cell: ({ row }) => {
-          return (
-            <Controller
-              name={`combinations.${row.index}.reorderLevel`}
-              control={form.control}
-              render={({ field }) => <NumberInput {...field} />}
-            />
-          );
-        },
-      },
-      {
-        header: () => <div className="text-center">Qty</div>,
-        accessorKey: "Inventory.quantity",
-        meta: {
-          className: "text-center w-15",
-        },
-      },
-
+      // {
+      //   accessorKey: "sku",
+      // },
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
         header: variant.name,
+        meta: {
+          className: "w-0",
+        },
         cell: ({
           row: {
             original: { values },
@@ -194,27 +163,68 @@ export default function CombinationModal({
               control={form.control}
               render={({ field }) => {
                 return (
-                  <div>
-                    <Select
-                      {...field}
-                      value={field.value?.value}
-                      options={variant.values}
-                      labelKey="value"
-                      valueKey="value"
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(
-                          variant.values.find((v) => v.value === value),
-                        );
-                      }}
-                    />
-                  </div>
+                  <Select
+                    {...field}
+                    value={String(
+                      variant.values.find((i) => i.id === field.value.id)?.id,
+                    )}
+                    options={variant.values}
+                    onChange={(value) => {
+                      field.onChange(
+                        variant.values.find((v) => v.id === Number(value)),
+                      );
+                    }}
+                    renderOption={(option) => (
+                      <SelectItem key={option.id} value={String(option.id)}>
+                        {option.value}
+                      </SelectItem>
+                    )}
+                  />
                 );
               }}
             />
           );
         },
       })),
+      {
+        accessorKey: "price",
+        header: () => <div className="text-right">Price</div>,
+        meta: {
+          className: "text-right ",
+        },
+        cell: ({ row }) => {
+          return (
+            <Controller
+              name={`combinations.${row.index}.price`}
+              control={form.control}
+              render={({ field }) => <NumberInput {...field} type="currency" />}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "reorderLevel",
+        header: () => <div className="text-right">Re-order Level</div>,
+        meta: {
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          return (
+            <Controller
+              name={`combinations.${row.index}.reorderLevel`}
+              control={form.control}
+              render={({ field }) => <NumberInput {...field} />}
+            />
+          );
+        },
+      },
+      // {
+      //   header: () => <div className="text-center">Qty</div>,
+      //   accessorKey: "inventory.quantity",
+      //   meta: {
+      //     className: "text-center",
+      //   },
+      // },
     ],
     [form.control, remove, variants],
   );
@@ -253,8 +263,9 @@ export default function CombinationModal({
           />
           <div className="flex mb-8">
             <Button
+              className="shadow-sm"
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={() => {
                 append(productCombinationDefaultValue);
               }}
@@ -264,11 +275,13 @@ export default function CombinationModal({
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit">Save changes</Button>
+            <Button className="shadow-sm" type="submit">
+              Save changes
+            </Button>
           </div>
         </form>
       </Form>
-      {JSON.stringify(x)}
+      {/* {JSON.stringify(x)} */}
     </Modal>
   );
 }

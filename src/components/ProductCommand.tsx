@@ -38,7 +38,7 @@ export default function ProductCommand({
   value,
   index,
   onChange,
-  setValue,
+  // setValue,
 }: {
   control: Control<PurchaseOrder>;
   list: CategorizedProductList[];
@@ -46,7 +46,7 @@ export default function ProductCommand({
   placeholder?: string;
   index: number;
   onChange: (selected: string) => void;
-  setValue: UseFormSetValue<PurchaseOrder>;
+  // setValue: UseFormSetValue<PurchaseOrder>;
 }) {
   const [options, setOptions] = React.useState<CategorizedProductList[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -83,7 +83,6 @@ export default function ProductCommand({
 
   const selected: ProductCommandSelectedItemProps | undefined =
     flatProducts.find((item) => item.combinationId === Number(value));
-
   return (
     <ComboBox
       setOpen={setOpen}
@@ -112,26 +111,36 @@ export default function ProductCommand({
             >
               {product.combinations?.map((combination) => (
                 <CommandItem
+                  disabled={
+                    combination.inventory?.quantity === 0 ||
+                    combination.inventory?.quantity === undefined
+                  }
                   keywords={[combination.sku ?? ""]}
                   value={String(combination.id)}
                   key={combination.id}
                   onSelect={(v) => {
                     onChange(v);
-                    const selected = flatProducts.find(
-                      (item) => item.combinationId === Number(v),
-                    );
-                    setValue(
-                      `purchaseOrderItems.${index}.unitPrice`,
-                      Number(selected?.price),
-                    );
+                    // const selected = flatProducts.find(
+                    //   (item) => item.combinationId === Number(v),
+                    // );
+                    // setValue(
+                    //   `purchaseOrderItems.${index}.unitPrice`,
+                    //   Number(selected?.price),
+                    // );
                     setOpen(false);
                   }}
                   className="flex gap-2 items-center justify-between"
                 >
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     {combination.values.map((value) => {
                       return <span key={value.id}>{value.value}</span>;
                     })}
+                    {combination.inventory?.quantity !== undefined &&
+                      combination.inventory?.quantity > 0 && (
+                        <small className="text-muted-foreground">
+                          x{combination.inventory?.quantity}
+                        </small>
+                      )}
                   </div>
                   <span className="text-muted-foreground">
                     {formatCurrency(combination.price)}

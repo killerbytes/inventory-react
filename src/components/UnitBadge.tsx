@@ -5,12 +5,15 @@ import { Badge } from "./ui/badge";
 export default function UnitBadge({
   className,
   children,
+  ...props
 }: {
   className?: string;
   children: string;
 }) {
   const unit = children.toUpperCase() as keyof typeof UNIT_COLOR;
   return (
-    <Badge className={cx("text-xs", className, UNIT_COLOR[unit])}>{unit}</Badge>
+    <Badge className={cx("text-xs", className, UNIT_COLOR[unit])} {...props}>
+      {unit}
+    </Badge>
   );
 }

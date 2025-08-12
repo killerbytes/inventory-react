@@ -25,6 +25,43 @@ import {
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 
+type DataTableProps<T> = {
+  data: T[];
+  columns: ColumnDef<T>[];
+  defaultColumn?: ColumnDef<T>;
+  meta?: any;
+  children?: React.ReactNode;
+  emptyText?: string;
+  tableClassname?: string;
+  className?: string;
+  footer?: React.ReactNode;
+  onRowClick?: (item: T) => void;
+  onUpdate?: (data: T[]) => void;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  renderFooter?: (data: T[]) => React.ReactNode;
+};
+
+const defaultRenderFooter = (data: any[]) => {
+  return (
+    <TableRow>
+      <TableCell colSpan={3}>Total</TableCell>
+      <TableCell className="text-right">
+        {/* {formatCurrency(total?.amount)} */}
+      </TableCell>
+      <TableCell className="text-right"></TableCell>
+      <TableCell className="text-right"></TableCell>
+      <TableCell className="text-right ">
+        {/* {formatCurrency(total?.discount)} */}
+      </TableCell>
+      <TableCell className="text-right"></TableCell>
+      <TableCell className="text-right">
+        {/* {formatCurrency(total?.amount - total?.discount)} */}
+      </TableCell>
+    </TableRow>
+  );
+};
+
 function DataTable<T>(props) {
   const {
     data,
@@ -38,19 +75,11 @@ function DataTable<T>(props) {
     footer,
     onRowClick,
     onUpdate,
-  }: {
-    data: T[];
-    columns: ColumnDef<T>[];
-    defaultColumn?: ColumnDef<T>;
-    meta?: any;
-    children?: React.ReactNode;
-    emptyText?: string;
-    tableClassname?: string;
-    className?: string;
-    footer?: React.ReactNode;
-    onRowClick?: (item: T) => void;
-    onUpdate?: (data: T[]) => void;
-  } = props;
+    showHeader = true,
+    showFooter = true,
+    renderFooter = defaultRenderFooter,
+  }: DataTableProps<T> = props;
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -108,24 +137,31 @@ function DataTable<T>(props) {
         )}
       >
         <Table className="overflow">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} className={header.className}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
+          {showHeader && (
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className={
+                          header.column.columnDef?.meta?.headerClassName ?? ""
+                        }
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+          )}
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
@@ -162,7 +198,7 @@ function DataTable<T>(props) {
             )}
           </TableBody>
           {children}
-          {footer && <TableFooter>{footer}</TableFooter>}
+          {showFooter && renderFooter && renderFooter(data)}
         </Table>
       </div>
     </div>

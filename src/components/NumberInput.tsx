@@ -21,12 +21,15 @@ export default function NumberInput({
       value={value}
       onFocus={onFocus}
       onValueChange={(values) => {
+        console.log(values);
         const { floatValue } = values;
         onChange(floatValue ?? 0);
       }}
       style={{ textAlign: "inherit" }}
       customInput={Input}
-      thousandSeparator={true}
+      allowNegative={false} // optional, no negatives
+      decimalScale={0} // ✅ no decimals
+      thousandSeparator=","
       {...(type === "currency" && {
         prefix: "₱",
         decimalScale: 2,

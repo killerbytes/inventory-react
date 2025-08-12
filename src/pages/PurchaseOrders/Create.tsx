@@ -9,16 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
-import { ApiError, ApiErrorResponse, PurchaseOrder } from "@/types";
-import { getErrorMessage, randomInt } from "@/lib/utils";
+import { ERROR, MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
+import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
+import { ApiError, ApiErrorResponse, PurchaseOrderCreate } from "@/types";
+import PendingOrderForm from "./Form/PendingOrderForm";
 import { Button } from "@/components/ui/button";
-import { purchaseOrderSchema } from "@/schemas";
 import useDebounce from "@/hooks/useDebounce";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router";
-import OrderForm from "./Form/OrderForm";
-import { MoveLeft } from "lucide-react";
+import { randomInt } from "@/lib/utils";
 import { addWeeks } from "date-fns";
 import { toast } from "sonner";
 import React from "react";
@@ -55,14 +54,14 @@ export default function Create() {
       )
     : purchaseOrderDefault;
 
-  const form = useForm<PurchaseOrder>({
-    resolver: zodResolver(purchaseOrderSchema),
+  const form = useForm<PurchaseOrderCreate>({
+    resolver: zodResolver(purchaseOrderCreateSchema),
     defaultValues,
   });
 
   const data = useWatch({ control: form.control, name: "purchaseOrderItems" });
 
-  async function onSubmit(values: PurchaseOrder) {
+  async function onSubmit(values: PurchaseOrderCreate) {
     try {
       await purchaseOrderServices.create(values);
       toast.success(`Purchase Order created successfully`);
@@ -71,20 +70,21 @@ export default function Create() {
       );
       navigate(ROUTES.PURCHASE_ORDERS);
     } catch (error) {
-      const { errors, message } = getErrorMessage(error as ApiErrorResponse);
-      errors?.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(
-            err.field as keyof z.infer<typeof purchaseOrderSchema>,
-            {
-              type: "server",
-              message: err.message,
-            },
-          );
-        }
-      });
-      if (!errors) {
-        toast.error("Submission failed: " + message);
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors?.forEach((err: ApiError) => {
+          if (err.field) {
+            form.setError(
+              err.field as keyof z.infer<typeof purchaseOrderSchema>,
+              {
+                type: "server",
+                message: err.message,
+              },
+            );
+          }
+        });
+      } else {
+        toast.error("Submission failed: " + apiError.message);
       }
     }
   }
@@ -121,17 +121,8 @@ export default function Create() {
             <CardAction></CardAction>
           </CardHeader>
           <CardContent>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => navigate(ROUTES.PURCHASE_ORDERS)}
-              className="mb-4"
-            >
-              <MoveLeft /> Back
-            </Button>
             <Form {...form}>
-              <OrderForm form={form} />
-
+              <PendingOrderForm form={form} />
               <div className="flex justify-end mt-auto">
                 <Button
                   type="button"
@@ -141,7 +132,7 @@ export default function Create() {
                     const valid = purchaseOrderItems.filter(
                       (item) => item.combinationId,
                     );
-                    console.log(form.formState.errors);
+                    console.log(form.getValues(), form.formState.errors);
                     form.reset({
                       ...rest,
                       purchaseOrderItems: valid.length

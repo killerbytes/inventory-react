@@ -7,7 +7,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar";
-import { BanknoteArrowDown, BanknoteArrowUp, Home, Target } from "lucide-react";
+import {
+  BanknoteArrowDown,
+  BanknoteArrowUp,
+  Home,
+  Target,
+  ClipboardList,
+} from "lucide-react";
 import { formatDateTime } from "@/utils/formatters";
 import { ROUTES } from "@/utils/definitions";
 import { Link } from "react-router";
@@ -32,9 +38,9 @@ const items = [
     icon: BanknoteArrowDown,
   },
   {
-    title: "Inventory",
-    url: ROUTES.INVENTORY,
-    icon: Target,
+    title: "Inventory Movements",
+    url: ROUTES.INVENTORY_MOVEMENTS,
+    icon: ClipboardList,
   },
 ];
 

@@ -1,7 +1,7 @@
-import { MODE_OF_PAYMENT, ORDER_TYPE, UNIT } from "./utils/definitions";
+import { MODE_OF_PAYMENT, ORDER_STATUS, ORDER_TYPE } from "./utils/definitions";
 import * as z from "zod";
 
-const userSchema = z.object({
+export const userSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -30,7 +30,7 @@ const userSchema = z.object({
   // }),
 });
 
-const signupSchema = userSchema
+export const signupSchema = userSchema
   .extend({
     password: z.string(),
     confirmPassword: z.string(),
@@ -43,12 +43,12 @@ const signupSchema = userSchema
     message: "Passwords must match.",
   });
 
-const loginSchema = z.object({
+export const loginSchema = z.object({
   username: z.string(),
   password: z.string(),
 });
 
-//  const loginSchema = z
+//  export const loginSchema = z
 //   .object({
 //     password: z.string().min(1, "Password is required"),
 //     confirmPassword: z.string().nullish(),
@@ -63,7 +63,7 @@ const loginSchema = z.object({
 //     }
 //   });
 
-const categorySchema = z.object({
+export const categorySchema = z.object({
   id: z.number().nullish(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -73,7 +73,7 @@ const categorySchema = z.object({
   }),
 });
 
-const inventorySchema = z.object({
+export const inventorySchema = z.object({
   id: z.number(),
   product: z.any(),
   quantity: z.coerce.number(),
@@ -81,23 +81,23 @@ const inventorySchema = z.object({
   updatedAt: z.string().nullish(),
 });
 
-const variantValuesSchema = z.object({
+export const variantValuesSchema = z.object({
   id: z.number().nullish(),
   value: z.string().min(1, { message: "Value is required." }),
   variantTypeId: z.number().nullish(),
 });
 
-const productCombinationsSchema = z.object({
+export const productCombinationsSchema = z.object({
   id: z.number().optional(),
   productId: z.number(),
   sku: z.string().nullish(),
   price: z.coerce.number(),
   reorderLevel: z.coerce.number(),
-  Inventory: inventorySchema.nullish(),
   values: z.array(variantValuesSchema),
+  inventory: inventorySchema.nullish(),
 });
 
-const variantTypesSchema = z.object({
+export const variantTypesSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(1, { message: "Name is required." }),
   productId: z.number().nullish(),
@@ -107,7 +107,7 @@ const variantTypesSchema = z.object({
     .min(1, { message: "At least one value" }),
 });
 
-const productSchema = z.object({
+export const productSchema = z.object({
   id: z.number().nullish(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -120,7 +120,7 @@ const productSchema = z.object({
   products_name_unit: z.string().nullish(),
 });
 
-const supplierSchema = z.object({
+export const supplierSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -140,7 +140,7 @@ const supplierSchema = z.object({
     .optional(),
 });
 
-const purchaseOrderItemSchema = z.object({
+export const purchaseOrderItemSchema = z.object({
   id: z.coerce.number().nullish(),
   combinationId: z.coerce
     .number()
@@ -152,63 +152,69 @@ const purchaseOrderItemSchema = z.object({
     message: "Quantity must be at least 1.",
   }),
   originalPrice: z.coerce.number().nullish(),
-  unitPrice: z.coerce.number().min(1, {
+  purchasePrice: z.coerce.number().min(1, {
     message: "Unit Price must be at least 1.",
   }),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),
-  amount: z.coerce.number().nullish(),
+  totalAmount: z.coerce.number().nullish(),
+  variantSnapshot: z.any().nullish(),
+  skuSnapshot: z.string().nullish(),
+  nameSnapshot: z.string().nullish(),
+  unit: z.string().nullish(),
 });
 
-const cancelPurchaseOrderSchema = z.object({
-  cancellationReason: z.string().min(2, {
+export const cancelPurchaseOrderSchema = z.object({
+  reason: z.string().min(2, {
     message: "Reason must be at least 2 characters.",
   }),
 });
 
-const purchaseOrderSchema = z
-  .object({
-    id: z.number().optional(),
-    purchaseOrderNumber: z
-      .string({
-        required_error: "PO number is required",
-      })
-      .min(2, { message: "PO number is required" }),
-    supplierId: z.coerce
-      .number({
-        required_error: "Supplier is required",
-        invalid_type_error: "Supplier is required",
-      })
-      .min(1, { message: "Supplier is required." }),
-    internalNotes: z.string().nullish(),
-    notes: z.string().nullish(),
-    purchaseOrderItems: z.array(purchaseOrderItemSchema).min(1, {
-      message: "At least one product is required.",
-    }),
-    status: z.string().optional(),
-    orderBy: z.number().optional(),
-    orderDate: z.string(),
-    deliveryDate: z.string(),
-    receivedBy: z.number().nullish(),
-    receivedDate: z.string().nullish(),
-    completedBy: z.number().nullish(),
-    cancelledBy: z.number().nullish(),
-    completedDate: z.string().nullish(),
-    cancelledDate: z.string().nullish(),
-    totalAmount: z.string().optional(),
-    supplier: z.any(),
-    orderByUser: z.any(),
-    receivedByUser: z.any(),
-    completedByUser: z.any(),
-    cancelledByUser: z.any(),
-    dueDate: z.string().nullish(),
-    cancellationReason: z.string().nullish(),
-    modeOfPayment: z.enum(
-      Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
-    ),
-    checkNumber: z.string().nullish(),
-  })
-  .superRefine((data, ctx) => {
+export const statusHistorySchema = z.object({
+  id: z.number().optional(),
+  status: z.string(),
+  changedBy: z.string(),
+  changedAt: z.string(),
+  user: z.any(),
+});
+
+const purchaseOrderBaseSchema = z.object({
+  id: z.number().optional(),
+  purchaseOrderNumber: z
+    .string({
+      required_error: "PO number is required",
+    })
+    .min(2, { message: "PO number is required" }),
+  supplierId: z.coerce
+    .number({
+      required_error: "Supplier is required",
+      invalid_type_error: "Supplier is required",
+    })
+    .min(1, { message: "Supplier is required." }),
+  internalNotes: z.string().nullish(),
+  notes: z.string().nullish(),
+  purchaseOrderItems: z.array(purchaseOrderItemSchema).min(1, {
+    message: "At least one product is required.",
+  }),
+  deliveryDate: z.string(),
+  dueDate: z.string().nullish(),
+  modeOfPayment: z.enum(
+    Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
+  ),
+  checkNumber: z.string().nullish(),
+});
+export const purchaseOrderCreateSchema = purchaseOrderBaseSchema.superRefine(
+  (data, ctx) => {
+    // if (
+    //   data.status === ORDER_STATUS.PENDING &&
+    //   data.purchaseOrderItems?.length === 0
+    // ) {
+    //   ctx.addIssue({
+    //     path: ["purchaseOrderItems"],
+    //     code: z.ZodIssueCode.custom,
+    //     message: "Purchase Order Items are required",
+    //   });
+    // }
     if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
       ctx.addIssue({
         path: ["checkNumber"],
@@ -221,9 +227,69 @@ const purchaseOrderSchema = z
         message: "Due date is required when payment is by check",
       });
     }
+  },
+);
+
+export const purchaseOrderSchema = purchaseOrderBaseSchema
+  .extend({
+    // id: z.number().optional(),
+    // purchaseOrderNumber: z
+    //   .string({
+    //     required_error: "PO number is required",
+    //   })
+    //   .min(2, { message: "PO number is required" }),
+    // supplierId: z.coerce
+    //   .number({
+    //     required_error: "Supplier is required",
+    //     invalid_type_error: "Supplier is required",
+    //   })
+    //   .min(1, { message: "Supplier is required." }),
+    // internalNotes: z.string().nullish(),
+    // notes: z.string().nullish(),
+    // purchaseOrderItems: z
+    //   .array(purchaseOrderItemSchema)
+    //   .min(1, {
+    //     message: "At least one product is required.",
+    //   })
+    //   .nullish(),
+    status: z.string(),
+    statusHistory: z.array(statusHistorySchema).nullish(),
+    totalAmount: z.string().optional(),
+    supplier: z.any(),
+    // deliveryDate: z.string(),
+    // dueDate: z.string().nullish(),
+    cancellationReason: z.string().nullish(),
+    // modeOfPayment: z.enum(
+    //   Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
+    // ),
+    // checkNumber: z.string().nullish(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.status === ORDER_STATUS.PENDING &&
+      data.purchaseOrderItems?.length === 0
+    ) {
+      ctx.addIssue({
+        path: ["purchaseOrderItems"],
+        code: z.ZodIssueCode.custom,
+        message: "Purchase Order Items are required",
+      });
+    }
+    if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
+      ctx.addIssue({
+        path: ["checkNumber"],
+        code: z.ZodIssueCode.custom,
+        message: "Check number is required when payment is by check",
+      });
+      // ctx.addIssue({
+      //   path: ["dueDate"],
+      //   code: z.ZodIssueCode.custom,
+      //   message: "Due date is required when payment is by check",
+      // });
+    }
   });
 
-const salesOrderItemSchema = z
+export const salesOrderItemSchema = z
   .object({
     inventoryId: z.number().min(1, {
       message: "Product must be selected.",
@@ -247,7 +313,7 @@ const salesOrderItemSchema = z
     },
   );
 
-const salesOrderSchema = z.object({
+export const salesOrderSchema = z.object({
   id: z.number().nullish(),
   customer: z.string().min(2, {
     message: "Customer must be at least 2 characters.",
@@ -272,7 +338,7 @@ const salesOrderSchema = z.object({
   receivedByUser: z.any(),
 });
 
-const inventoryTransactionSchema = z.object({
+export const inventoryTransactionSchema = z.object({
   id: z.number().nullish(),
   inventoryId: z.number().min(1, {
     message: "Inventory must be selected.",
@@ -297,7 +363,7 @@ const inventoryTransactionSchema = z.object({
   }),
 });
 
-const repackageInventorySchema = z.object({
+export const repackageInventorySchema = z.object({
   name: z.string(),
   description: z.string().nullish(),
   categoryId: z.number(),
@@ -314,22 +380,27 @@ const repackageInventorySchema = z.object({
   parentId: z.number(),
 });
 
-export {
-  userSchema,
-  signupSchema,
-  loginSchema,
-  cancelPurchaseOrderSchema,
-  categorySchema,
-  productSchema,
-  supplierSchema,
-  purchaseOrderSchema,
-  purchaseOrderItemSchema,
-  salesOrderSchema,
-  salesOrderItemSchema,
-  inventorySchema,
-  inventoryTransactionSchema,
-  repackageInventorySchema,
-  productCombinationsSchema,
-  variantTypesSchema,
-  variantValuesSchema,
-};
+export const breakPackSchema = z.object({
+  fromComboId: z.number(),
+  toComboId: z.number(),
+  packsCount: z.number().refine((val) => !isNaN(val), {
+    message: "Number must not be NaN",
+  }),
+  unitsPerPack: z.number().min(1, {
+    message: "Units per Pack must be at least 1.",
+  }),
+  reason: z.string(),
+});
+
+export const inventoryMovementSchema = z.object({
+  id: z.number().optional(),
+  // inventoryId: z.number(),
+  // inventory: z.any(),
+  quantity: z.number(),
+  previous: z.number(),
+  new: z.coerce.number(),
+  type: z.string(),
+  reason: z.string(),
+  updatedAt: z.date(),
+  reference: z.number(),
+});

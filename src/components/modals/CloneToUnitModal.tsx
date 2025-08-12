@@ -8,27 +8,30 @@ import {
 import { ERROR, ROUTES, UNIT_OPTIONS } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { ApiErrorResponse, Product } from "@/types";
 import { Button } from "@/components/ui/button";
-import { getErrorMessage } from "@/lib/utils";
 import { productServices } from "@/services";
 import { useNavigate } from "react-router";
-import { ApiErrorResponse } from "@/types";
 import { useForm } from "react-hook-form";
+import { SelectItem } from "../ui/select";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
+import UnitBadge from "../UnitBadge";
 import { toast } from "sonner";
 import { z } from "zod";
 
 export default function CloneToUnitModal({
   isOpen,
+  onSubmit,
   onClose,
   productId,
 }: {
   isOpen: boolean;
+  onSubmit: (product: Product) => Promise<void>;
   onClose: () => void;
   productId: number;
+  redirect?: boolean;
 }) {
-  const navigate = useNavigate();
   const form = useForm<{ unit: string }>({
     resolver: zodResolver(
       z.object({ unit: z.string().min(1, { message: "Unit is required." }) }),
@@ -44,8 +47,7 @@ export default function CloneToUnitModal({
         Number(productId),
         values,
       );
-      onClose();
-      navigate(`${ROUTES.PRODUCTS}/${product.id}/edit`);
+      onSubmit(product);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
@@ -65,6 +67,7 @@ export default function CloneToUnitModal({
       onOpenChange={onClose}
       title="Clone to Unit"
       description="Clone product to another unit. eg: BOX to PCS"
+      className="!max-w-[400px]"
     >
       <Form {...form}>
         <form>
@@ -74,7 +77,15 @@ export default function CloneToUnitModal({
             render={({ field }) => (
               <FormItem className="mb-4">
                 <FormLabel>Unit</FormLabel>
-                <Select {...field} options={UNIT_OPTIONS} />
+                <Select
+                  {...field}
+                  options={UNIT_OPTIONS}
+                  renderOption={(option) => (
+                    <SelectItem key={option.value} value={String(option.value)}>
+                      <UnitBadge>{String(option.label)}</UnitBadge>
+                    </SelectItem>
+                  )}
+                />
 
                 <FormMessage />
               </FormItem>

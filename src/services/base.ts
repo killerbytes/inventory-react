@@ -17,17 +17,17 @@ export default class BaseService<T extends object> {
     const response = await this.http.get(`${this.url}/`, { params });
     return response;
   };
-  get = async (id: string | undefined) => {
+  get = async (id: number) => {
     const response = await this.http.get(`${this.url}/${id}`);
     return response;
   };
 
-  update = async (id: string, data: T) => {
+  update = async (id: number, data: T) => {
     const response = await this.http.patch(`${this.url}/${id}`, data);
     return response;
   };
 
-  delete = async (id: string) => {
+  delete = async (id: number) => {
     const response = await this.http.delete(`${this.url}/${id}`);
     return response;
   };

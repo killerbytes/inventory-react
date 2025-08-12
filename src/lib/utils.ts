@@ -1,12 +1,13 @@
 import {
-  ProductCommandSelectedItemProps,
-  SelectedItemProps,
-} from "@/components/ProductCommand";
-import {
   ApiErrorResponse,
   CategorizedProductList,
   ProductCombinations,
+  StatusHistory,
 } from "@/types";
+import {
+  ProductCommandSelectedItemProps,
+  SelectedItemProps,
+} from "@/components/ProductCommand";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -68,3 +69,24 @@ export function flattenedProduct(data: CategorizedProductList[]) {
   );
   return flattened;
 }
+
+export const mappedStatusHistory = (
+  statusHistory: StatusHistory[],
+): Record<string, StatusHistory> => {
+  const map: Record<string, StatusHistory> = {};
+
+  statusHistory.forEach((item) => {
+    map[item.status] = item;
+  });
+  return map;
+};
+
+export const getMappedVariantValues = (variants, values) => {
+  const mappedVariantValues = {};
+  variants.forEach((val) => {
+    mappedVariantValues[val.name] = values.find(
+      (v) => v.variantTypeId === val.id,
+    ).value;
+  });
+  return mappedVariantValues;
+};

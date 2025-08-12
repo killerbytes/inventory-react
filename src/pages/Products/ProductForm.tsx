@@ -6,8 +6,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { SelectItem } from "@/components/ui/select";
 import { UNIT_OPTIONS } from "@/utils/definitions";
 import { UseFormReturn } from "react-hook-form";
+import UnitBadge from "@/components/UnitBadge";
 import { Input } from "@/components/ui/input";
 import { Category, Product } from "@/types";
 import Select from "@/components/Select";
@@ -65,11 +67,15 @@ export default function ProductForm({
             <Select
               {...field}
               options={categories}
-              labelKey="name"
-              valueKey="id"
-              onChange={(e) => {
-                field.onChange(Number(e.target.value));
+              onChange={(value) => {
+                field.onChange(value);
               }}
+              value={String(field.value)}
+              renderOption={({ id, name }) => (
+                <SelectItem key={id} value={String(id)}>
+                  {name}
+                </SelectItem>
+              )}
             />
             <FormMessage />
           </FormItem>
@@ -81,7 +87,15 @@ export default function ProductForm({
         render={({ field }) => (
           <FormItem className="mb-4">
             <FormLabel>Unit</FormLabel>
-            <Select {...field} options={UNIT_OPTIONS} />
+            <Select
+              {...field}
+              options={UNIT_OPTIONS}
+              renderOption={(unit) => (
+                <SelectItem key={unit.value} value={String(unit.value)}>
+                  <UnitBadge>{String(unit.label)}</UnitBadge>
+                </SelectItem>
+              )}
+            />
             <FormMessage />
           </FormItem>
         )}

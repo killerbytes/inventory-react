@@ -9,7 +9,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -19,18 +18,24 @@ import {
   ProductCombinations,
   VariantTypes,
 } from "@/types";
+import {
+  Copy,
+  EllipsisVertical,
+  PackageOpen,
+  Pencil,
+  Save,
+} from "lucide-react";
+import CloneToUnitModal from "../../components/modals/CloneToUnitModal";
+import { BREAK_PACK_UNITS, ERROR, ROUTES } from "@/utils/definitions";
+import BreakPackModal from "@/components/modals/BreakPackModal";
 import { categoryServices, productServices } from "@/services";
-import { Copy, EllipsisVertical, Pencil } from "lucide-react";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
-import { ERROR, ROUTES } from "@/utils/definitions";
 import { DataTable } from "@/components/DataTable";
-import { ColumnDef } from "@tanstack/react-table";
 import CombinationModal from "./CombinationModal";
-import CloneToUnitModal from "./CloneToUnitModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getErrorMessage } from "@/lib/utils";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
 import { useCategoryStore } from "@/stores";
@@ -39,13 +44,17 @@ import { useForm } from "react-hook-form";
 import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
+import { toast } from "sonner";
 
 export default function ProductEdit() {
   const { id } = useParams();
+  const [product, setProduct] = React.useState<Product>();
   const { categories, setCategories } = useCategoryStore();
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
     [],
   );
+  const [breakPackSelected, setBreakPackSelected] =
+    React.useState<ProductCombinations | null>(null);
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const navigate = useNavigate();
   const form = useForm<Product>({
@@ -58,6 +67,7 @@ export default function ProductEdit() {
     variantModal: false,
     combinationModal: false,
     cloneModal: false,
+    breakPackModal: false,
   });
 
   async function onSubmit(values: Product) {
@@ -90,13 +100,13 @@ export default function ProductEdit() {
       }
     }
   }
-  console.log(form.formState.errors);
   const getData = React.useCallback(async () => {
     try {
-      const { combinations, variants, ...rest }: Product =
-        await productServices.get(String(id));
-      setCombinations(combinations);
-      setVariants(variants);
+      const product: Product = await productServices.get(String(id));
+      setProduct(product);
+      const { combinations, variants, ...rest }: Product = product;
+      setCombinations(combinations ?? []);
+      setVariants(variants ?? []);
       // const updateCombo = (data: VariantValues[]) => {
       //   const combo = [];
       //   for (const entry of variants) {
@@ -121,12 +131,13 @@ export default function ProductEdit() {
         // }),
       });
     } catch (error: unknown) {
-      const x = getErrorMessage(error as ApiErrorResponse);
-      if (x.statusCode === 404) {
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.NOT_FOUND) {
         navigate(`${ROUTES.PRODUCTS}`);
       }
+      toast.error(apiError.message);
     }
-  }, [form, id]);
+  }, [form, id, navigate]);
 
   React.useEffect(() => {
     getData();
@@ -142,35 +153,65 @@ export default function ProductEdit() {
     }
   }, [categories.length, setCategories]);
 
-  const columns = React.useMemo<ColumnDef<Product>[]>(
+  const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
-      {
-        accessorKey: "sku",
-        header: "SKU",
-        meta: {
-          className: "w-50",
+      // {
+      //   accessorKey: "sku",
+      //   header: "SKU",
+      //   meta: {
+      //     className: "w-50",
+      //   },
+      // },
+      ...variants.map((variant, idx) => ({
+        accessorKey: "values.values." + variant.name,
+        header: variant.name,
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return row.original.values[idx]?.value;
         },
-      },
+      })),
       {
         accessorKey: "price",
+        header: "Price",
       },
       {
-        header: "Inventory",
-        accessorKey: "Inventory.quantity",
+        header: "Quantity",
+        accessorKey: "inventory.quantity",
       },
       {
         header: "Re-order Level",
         accessorKey: "reorderLevel",
       },
-      ...variants.map((variant, idx) => ({
-        accessorKey: "values.values." + variant.name,
-        header: variant.name,
-        cell: ({ row }) => {
-          return row.original.values[idx]?.value;
-        },
-      })),
+      ...(BREAK_PACK_UNITS.includes(product?.unit)
+        ? [
+            {
+              accessorKey: "id",
+              header: "Break",
+              meta: {
+                className: "w-0",
+              },
+              cell: ({ row }) => (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shadow-sm"
+                  disabled={
+                    row.original?.inventory?.quantity === 0 ||
+                    row.original?.inventory?.quantity === undefined
+                  }
+                  onClick={() => {
+                    setBreakPackSelected(row.original);
+                    handleToggle({ breakPackModal: true });
+                  }}
+                >
+                  <PackageOpen />
+                </Button>
+              ),
+            },
+          ]
+        : []),
     ],
-    [variants],
+    [handleToggle, variants],
   );
   return (
     <Fragment key={id}>
@@ -198,9 +239,9 @@ export default function ProductEdit() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
-                          variant="secondary"
+                          variant="outline"
                           size="icon"
-                          className="size-8"
+                          className="size-8 shadow-sm"
                         >
                           <EllipsisVertical />
                         </Button>
@@ -230,7 +271,8 @@ export default function ProductEdit() {
                 categories={categories}
               />
               <div className="flex justify-end">
-                <Button variant="secondary" className="shadow-lg" type="submit">
+                <Button className="shadow-sm" type="submit">
+                  <Save />
                   Save changes
                 </Button>
               </div>
@@ -243,7 +285,8 @@ export default function ProductEdit() {
                 <Button
                   onClick={() => handleToggle({ variantModal: true })}
                   type="button"
-                  variant="secondary"
+                  variant="outline"
+                  className="shadow-sm"
                 >
                   <Pencil />
                   Edit Variants
@@ -254,7 +297,7 @@ export default function ProductEdit() {
               <div className="flex flex-wrap gap-2">
                 {variants.map((variant, idx) => {
                   return (
-                    <Badge variant="outline" key={idx}>
+                    <Badge variant="secondary" key={idx} className="outline">
                       {variant.name}
                     </Badge>
                   );
@@ -269,7 +312,8 @@ export default function ProductEdit() {
                 <Button
                   onClick={() => handleToggle({ combinationModal: true })}
                   type="button"
-                  variant="secondary"
+                  variant="outline"
+                  className="shadow-sm"
                 >
                   <Pencil />
                   Edit Combinations
@@ -312,10 +356,27 @@ export default function ProductEdit() {
       {toggle.cloneModal && (
         <CloneToUnitModal
           isOpen={true}
+          onSubmit={async (product) => {
+            navigate(`${ROUTES.PRODUCTS}/${product.id}/edit`);
+            handleToggle({ cloneModal: false });
+          }}
           onClose={() => {
             handleToggle({ cloneModal: false });
           }}
           productId={Number(id)}
+        />
+      )}
+      {toggle.breakPackModal && ( // && breakPackSelected
+        <BreakPackModal
+          isOpen={true}
+          onClose={() => {
+            handleToggle({ breakPackModal: false });
+          }}
+          combinationId={Number(breakPackSelected?.id)}
+          onSubmit={async (productId) => {
+            handleToggle({ breakPackModal: false });
+            navigate(`${ROUTES.PRODUCTS}/${productId}/edit`);
+          }}
         />
       )}
     </Fragment>

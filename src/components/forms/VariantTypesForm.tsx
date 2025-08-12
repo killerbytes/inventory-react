@@ -16,8 +16,8 @@ import { DataTable } from "../DataTable";
 import { VariantTypes } from "@/types";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
 import Modal from "../Modal";
-import Badge from "../Badge";
 import React from "react";
 
 export default function VariantTypesForm({
@@ -45,28 +45,9 @@ export default function VariantTypesForm({
   const columns = React.useMemo<ColumnDef<VariantTypes>[]>(
     () => [
       {
-        accessorKey: "value",
-        header: "",
-        cell: ({ row }) => (
-          <FormField
-            control={form.control}
-            name={`values.${row.index}.value`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} placeholder="Value e.g. Red" />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-        ),
-      },
-      {
         accessorKey: "id",
-        header: "#",
         meta: {
-          className: "w-0",
+          className: "w-[50px]",
         },
         cell: ({ row }) => (
           <Button
@@ -79,17 +60,41 @@ export default function VariantTypesForm({
           </Button>
         ),
       },
+      {
+        accessorKey: "value",
+        meta: {
+          className: "w-full",
+        },
+        cell: ({ row }) => (
+          <FormField
+            control={form.control}
+            name={`values.${row.index}.value`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Value e.g. Red"
+                    className="w-full"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+        ),
+      },
     ],
     [form.control, remove],
   );
   return (
     <>
       <Form {...form}>
-        <form>
+        <form className="flex flex-col gap-4">
           <FormField
             name="name"
             render={({ field }) => (
-              <FormItem className="mb-4">
+              <FormItem>
                 <FormLabel>Name</FormLabel>
 
                 <FormControl>
@@ -97,8 +102,9 @@ export default function VariantTypesForm({
                     <div className="flex items-center gap-1 w-full">
                       {onOpenVariantTemplatePicker && (
                         <Button
-                          variant="secondary"
+                          variant="outline"
                           type="button"
+                          className="shadow-sm"
                           onClick={() => {
                             onOpenVariantTemplatePicker();
                           }}
@@ -123,7 +129,10 @@ export default function VariantTypesForm({
                             await onDelete();
                           }}
                         >
-                          <Button variant="secondary" className="text-red-500">
+                          <Button
+                            variant="outline"
+                            className="text-red-500 shadow-sm"
+                          >
                             <Trash2 />
                           </Button>
                         </ConfirmDialog>
@@ -138,23 +147,25 @@ export default function VariantTypesForm({
           <FormField
             name="values"
             render={() => (
-              <FormItem className="mb-2">
+              <FormItem>
                 <FormLabel>Values</FormLabel>
                 <FormControl>
                   <DataTable
                     data={fields}
                     columns={columns}
                     emptyText="Add values..."
+                    showHeader={false}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex mb-8 gap-2 justify-between">
+          <div className="flex  gap-2 justify-between">
             {selected?.id && (
               <Button
-                variant="secondary"
+                variant="outline"
+                className="shadow-sm"
                 onClick={() =>
                   handleToggle({
                     saveTemplateModal: true,
@@ -167,6 +178,7 @@ export default function VariantTypesForm({
             )}
             <Button
               variant="outline"
+              size="sm"
               className="shadow-sm"
               onClick={() => append({ value: "", variantTypeId: undefined })}
               type="button"
@@ -178,6 +190,7 @@ export default function VariantTypesForm({
           <DialogFooter>
             <Button
               type="button"
+              className="shadow-sm"
               onClick={(e) => {
                 e.preventDefault();
                 console.log(form.getValues(), form.formState.errors);
@@ -208,6 +221,7 @@ export default function VariantTypesForm({
           <DialogFooter>
             <Button
               type="button"
+              className="shadow-sm"
               onClick={(e) => {
                 e.preventDefault();
                 console.log(form.getValues(), form.formState.errors);

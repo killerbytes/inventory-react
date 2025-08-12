@@ -41,7 +41,7 @@ export const CancelModal = ({
       <Form {...form}>
         <FormField
           control={form.control}
-          name="cancellationReason"
+          name="reason"
           render={({ field }) => (
             <FormItem className="mb-4">
               <FormLabel>Notes</FormLabel>
