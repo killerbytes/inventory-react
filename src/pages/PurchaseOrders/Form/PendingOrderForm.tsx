@@ -15,8 +15,10 @@ import { useProductStore, useSupplierStore } from "@/stores";
 import UnitColumn from "./PurchaseOrderItemForm/UnitColumn";
 import PurchaseOrderItemForm from "./PurchaseOrderItemForm";
 import ProductCommand from "@/components/ProductCommand";
+import { CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
+import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
@@ -71,7 +73,11 @@ export default function PendingOrderForm({
           className: "w-0",
         },
         cell: ({ row }) => (
-          <Button onClick={() => remove(row.index)} variant="outline">
+          <Button
+            onClick={() => remove(row.index)}
+            variant="outline"
+            type="button"
+          >
             <Trash2 />
           </Button>
         ),
@@ -96,22 +102,41 @@ export default function PendingOrderForm({
                   value={String(field.value)}
                   onChange={(value) => {
                     field.onChange(value);
-
                     const selected = flatProducts.find(
                       (item) => item.combinationId === Number(value),
                     );
-
                     if (selected) {
-                      console.log(selected);
-                      // form.setValue(`purchaseOrderItems.${row.index}.variants`, {
-                      //   combination: ,
-                      //   variants: selected.variants,
-                      // });
                       form.setValue(
                         `purchaseOrderItems.${row.index}.purchasePrice`,
                         selected.price,
                       );
                     }
+                  }}
+                  renderOption={(combination, onChange) => {
+                    return (
+                      <CommandItem
+                        keywords={[combination.sku ?? ""]}
+                        value={String(combination.id)}
+                        key={combination.id}
+                        onSelect={onChange}
+                        className="flex gap-2 items-center justify-between"
+                      >
+                        <div className="flex gap-2 items-center">
+                          {combination.values.map((value) => {
+                            return <span key={value.id}>{value.value}</span>;
+                          })}
+                          {combination.inventory?.quantity !== undefined &&
+                            combination.inventory?.quantity > 0 && (
+                              <small className="text-muted-foreground">
+                                x{combination.inventory?.quantity}
+                              </small>
+                            )}
+                        </div>
+                        <span className="text-muted-foreground">
+                          {formatCurrency(combination.price)}
+                        </span>
+                      </CommandItem>
+                    );
                   }}
                 />
               )}
@@ -212,175 +237,173 @@ export default function PendingOrderForm({
   );
 
   return (
-    <>
-      <Form {...form}>
-        <form>
-          <div className="flex gap-4 items-start ">
-            <FormField
-              control={form.control}
-              name="purchaseOrderNumber"
-              render={({ field }) => (
-                <FormItem className="mb-4">
-                  <FormLabel>PO #</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="deliveryDate"
-              render={({ field }) => (
-                <FormItem className="mb-4">
-                  <FormLabel>Delivery Date</FormLabel>
-                  <DatePicker {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+    <Form {...form}>
+      <form>
+        <div className="flex gap-4 items-start ">
           <FormField
             control={form.control}
-            name="supplierId"
+            name="purchaseOrderNumber"
             render={({ field }) => (
               <FormItem className="mb-4">
-                <FormLabel>Supplier</FormLabel>
-                <Autocomplete
-                  value={
-                    suppliers.find((supplier) => supplier.id === field.value)
-                      ?.name
-                  }
-                  options={suppliers}
-                  placeholder="Supplier"
-                  onChange={(e) => {
-                    const value = (e.target as HTMLInputElement).value;
-                    form.setValue("supplierId", parseInt(value), {
-                      shouldValidate: true,
-                    });
-                  }}
-                />
+                <FormLabel>PO #</FormLabel>
+                <Input {...field} />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="deliveryDate"
+            render={({ field }) => (
+              <FormItem className="mb-4">
+                <FormLabel>Delivery Date</FormLabel>
+                <DatePicker {...field} />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <FormField
+          control={form.control}
+          name="supplierId"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <FormLabel>Supplier</FormLabel>
+              <Autocomplete
+                value={
+                  suppliers.find((supplier) => supplier.id === field.value)
+                    ?.name
+                }
+                options={suppliers}
+                placeholder="Supplier"
+                onChange={(e) => {
+                  const value = (e.target as HTMLInputElement).value;
+                  form.setValue("supplierId", parseInt(value), {
+                    shouldValidate: true,
+                  });
+                }}
+              />
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex gap-4 items-start">
+          <FormField
+            control={form.control}
+            name="modeOfPayment"
+            render={({ field }) => (
+              <FormItem className="mb-4 w-50">
+                <FormLabel>Mode of Payment</FormLabel>
+                <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
 
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex gap-4 items-start">
-            <FormField
-              control={form.control}
-              name="modeOfPayment"
-              render={({ field }) => (
-                <FormItem className="mb-4 w-50">
-                  <FormLabel>Mode of Payment</FormLabel>
-                  <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="checkNumber"
-              render={({ field }) => {
-                return (
-                  <FormItem
-                    className={cx(
-                      "mb-4",
-                      modeOfPayment !== "CHECK" && "opacity-50",
-                    )}
-                  >
-                    <FormLabel>Check Number</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={modeOfPayment !== "CHECK"} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-            <FormField
-              control={form.control}
-              name="dueDate"
-              render={({ field }) => (
+          <FormField
+            control={form.control}
+            name="checkNumber"
+            render={({ field }) => {
+              return (
                 <FormItem
                   className={cx(
                     "mb-4",
                     modeOfPayment !== "CHECK" && "opacity-50",
                   )}
                 >
-                  <FormLabel>Due Date</FormLabel>
-                  <DatePicker {...field} disabled={modeOfPayment !== "CHECK"} />
+                  <FormLabel>Check Number</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={modeOfPayment !== "CHECK"} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
-              )}
-            />
-          </div>
-
+              );
+            }}
+          />
           <FormField
             control={form.control}
-            name="internalNotes"
+            name="dueDate"
             render={({ field }) => (
-              <FormItem className="mb-4">
-                <FormLabel>Internal Notes</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter some internal notes..."
-                    className="resize-none"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
+              <FormItem
+                className={cx(
+                  "mb-4",
+                  modeOfPayment !== "CHECK" && "opacity-50",
+                )}
+              >
+                <FormLabel>Due Date</FormLabel>
+                <DatePicker {...field} disabled={modeOfPayment !== "CHECK"} />
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem className="mb-4">
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter some notes..."
-                    className="resize-none"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        </div>
 
-          {/* <PendingOrderForm form={form} /> */}
-          <FormField
-            control={form.control}
-            name="purchaseOrderItems"
-            render={() => (
-              <FormItem className="w-full mb-4">
-                <FormControl>
-                  <PurchaseOrderItemForm
-                    data={fields}
-                    columns={columns}
-                    errors={form.formState.errors}
-                    append={() =>
-                      append({
-                        combinationId: null,
-                        quantity: 1,
-                        purchasePrice: 0,
-                        discount: null,
-                        discountNote: "",
-                      })
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
-    </>
+        <FormField
+          control={form.control}
+          name="internalNotes"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <FormLabel>Internal Notes</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Enter some internal notes..."
+                  className="resize-none"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem className="mb-4">
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Enter some notes..."
+                  className="resize-none"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* <PendingOrderForm form={form} /> */}
+        <FormField
+          control={form.control}
+          name="purchaseOrderItems"
+          render={() => (
+            <FormItem className="w-full mb-4">
+              <FormControl>
+                <PurchaseOrderItemForm
+                  data={fields}
+                  columns={columns}
+                  errors={form.formState.errors}
+                  append={() =>
+                    append({
+                      combinationId: null,
+                      quantity: 1,
+                      purchasePrice: 0,
+                      discount: null,
+                      discountNote: "",
+                    })
+                  }
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   );
 }

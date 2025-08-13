@@ -86,17 +86,6 @@ export const variantValuesSchema = z.object({
   value: z.string().min(1, { message: "Value is required." }),
   variantTypeId: z.number().nullish(),
 });
-
-export const productCombinationsSchema = z.object({
-  id: z.number().optional(),
-  productId: z.number(),
-  sku: z.string().nullish(),
-  price: z.coerce.number(),
-  reorderLevel: z.coerce.number(),
-  values: z.array(variantValuesSchema),
-  inventory: inventorySchema.nullish(),
-});
-
 export const variantTypesSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(1, { message: "Name is required." }),
@@ -107,7 +96,31 @@ export const variantTypesSchema = z.object({
     .min(1, { message: "At least one value" }),
 });
 
-export const productSchema = z.object({
+export const productBaseSchema = z.object({
+  id: z.number().nullish(),
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  description: z.string().nullish(),
+  sku: z.string().nullish(),
+  unit: z.string(),
+  categoryId: z.number(),
+  variants: z.array(variantTypesSchema).nullish(),
+  products_name_unit: z.string().nullish(),
+});
+
+export const productCombinationsSchema = z.object({
+  id: z.number().optional(),
+  productId: z.number(),
+  sku: z.string().nullish(),
+  price: z.coerce.number(),
+  reorderLevel: z.coerce.number(),
+  values: z.array(variantValuesSchema),
+  inventory: inventorySchema.nullish(),
+  product: productBaseSchema.nullish(),
+});
+
+export const productSchema = productBaseSchema.extend({
   id: z.number().nullish(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -396,6 +409,7 @@ export const inventoryMovementSchema = z.object({
   id: z.number().optional(),
   // inventoryId: z.number(),
   // inventory: z.any(),
+  combination: productCombinationsSchema,
   quantity: z.number(),
   previous: z.number(),
   new: z.coerce.number(),

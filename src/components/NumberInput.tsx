@@ -21,7 +21,6 @@ export default function NumberInput({
       value={value}
       onFocus={onFocus}
       onValueChange={(values) => {
-        console.log(values);
         const { floatValue } = values;
         onChange(floatValue ?? 0);
       }}

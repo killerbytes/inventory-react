@@ -15,7 +15,6 @@ import { ApiError, ApiErrorResponse, PurchaseOrderCreate } from "@/types";
 import PendingOrderForm from "./Form/PendingOrderForm";
 import { Button } from "@/components/ui/button";
 import useDebounce from "@/hooks/useDebounce";
-import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router";
 import { randomInt } from "@/lib/utils";
 import { addWeeks } from "date-fns";
@@ -121,35 +120,33 @@ export default function Create() {
             <CardAction></CardAction>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <PendingOrderForm form={form} />
-              <div className="flex justify-end mt-auto">
-                <Button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const { purchaseOrderItems, ...rest } = form.getValues();
-                    const valid = purchaseOrderItems.filter(
-                      (item) => item.combinationId,
-                    );
-                    console.log(form.getValues(), form.formState.errors);
-                    form.reset({
-                      ...rest,
-                      purchaseOrderItems: valid.length
-                        ? valid
-                        : [purchaseOrderItemDefault],
+            <PendingOrderForm form={form} />
+            <div className="flex justify-end mt-auto">
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const { purchaseOrderItems, ...rest } = form.getValues();
+                  const valid = purchaseOrderItems.filter(
+                    (item) => item.combinationId,
+                  );
+                  console.log(form.getValues(), form.formState.errors);
+                  form.reset({
+                    ...rest,
+                    purchaseOrderItems: valid.length
+                      ? valid
+                      : [purchaseOrderItemDefault],
+                  });
+                  form
+                    .handleSubmit(onSubmit)(e)
+                    .catch((error) => {
+                      console.error("Form submission error:", error);
                     });
-                    form
-                      .handleSubmit(onSubmit)(e)
-                      .catch((error) => {
-                        console.error("Form submission error:", error);
-                      });
-                  }}
-                >
-                  Create Order
-                </Button>
-              </div>
-            </Form>
+                }}
+              >
+                Create Order
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

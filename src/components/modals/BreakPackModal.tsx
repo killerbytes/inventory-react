@@ -17,10 +17,10 @@ import { productCombinationServices, productServices } from "@/services";
 import CloneToUnitModal from "@/components/modals/CloneToUnitModal";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useWatch } from "react-hook-form";
 import { DialogFooter } from "../ui/dialog";
 import { breakPackSchema } from "@/schemas";
 import useToggle from "@/hooks/useToggle";
-import { useForm } from "react-hook-form";
 import { SelectItem } from "../ui/select";
 import NumberInput from "../NumberInput";
 import React, { useMemo } from "react";
@@ -31,7 +31,6 @@ import { Badge } from "../ui/badge";
 import Select from "../Select";
 import { toast } from "sonner";
 import Modal from "../Modal";
-import { z } from "zod";
 
 export default function BreakPackModal({
   combinationId,
@@ -51,14 +50,25 @@ export default function BreakPackModal({
   const [toggle, handleToggle] = useToggle({
     cloneModal: false,
   });
+  const [key, setKey] = React.useState(0);
 
-  const form = useForm<z.infer<typeof breakPackSchema>>({
+  const form = useForm<BreakPack>({
     resolver: zodResolver(breakPackSchema),
     defaultValues: {
       fromComboId: combinationId,
       reason: "",
     },
   });
+
+  const packsCount = useWatch({ control: form.control, name: "packsCount" });
+  const unitsPerPack = useWatch({
+    control: form.control,
+    name: "unitsPerPack",
+  });
+
+  const resultCount = useMemo(() => {
+    return packsCount * unitsPerPack;
+  }, [packsCount, unitsPerPack]);
 
   const product = useMemo(() => {
     return combination?.product;
@@ -70,30 +80,28 @@ export default function BreakPackModal({
 
   React.useEffect(() => {
     const getProductCombination = async () => {
-      const combination = await productCombinationServices.get(
-        String(combinationId),
-      );
+      const combination = await productCombinationServices.get(combinationId);
       setCombination(combination);
     };
     getProductCombination();
   }, [combinationId]);
 
+  const getProducts = React.useCallback(async () => {
+    const products = await productServices.getBySku(String(product?.sku));
+    setProducts(products);
+  }, [product?.sku]);
   React.useEffect(() => {
-    const getProducts = async () => {
-      const products = await productServices.getBySku(product.sku);
-      setProducts(products);
-    };
     if (product?.sku) {
       getProducts();
     }
-  }, [product?.sku]);
+  }, [getProducts, product?.sku]);
 
   React.useEffect(() => {
     const getData = async () => {
       const map = combination?.values.map((i) => i.value).join(":");
       const options: ProductCombinations[] = [];
       products
-        .filter((p) => p.unit !== product.unit)
+        .filter((p) => p.unit !== product?.unit)
         .forEach((p) => {
           p.combinations?.forEach((combo) => {
             if (combo.values.map((i) => i.value).join(":") === map) {
@@ -106,7 +114,7 @@ export default function BreakPackModal({
     if (product?.sku) {
       getData();
     }
-  }, [combination?.values, products]);
+  }, [combination?.values, product?.sku, product?.unit, products]);
 
   const handleBreakPack = async (values: BreakPack) => {
     try {
@@ -136,6 +144,7 @@ export default function BreakPackModal({
   return (
     <>
       <Modal
+        key={key}
         isOpen={isOpen}
         onOpenChange={onClose}
         title="Break Pack"
@@ -240,6 +249,7 @@ export default function BreakPackModal({
               <div className="flex gap-2 justify-between">
                 <div>
                   <div className="flex gap-2 justify-center">
+                    <Badge variant="outline">{packsCount}</Badge>
                     {combination?.product?.unit && (
                       <UnitBadge>{combination?.product?.unit}</UnitBadge>
                     )}
@@ -257,6 +267,9 @@ export default function BreakPackModal({
                     </div>
                     <div>
                       <div className="flex gap-2 justify-center">
+                        <Badge variant="outline">
+                          {resultCount > 0 ? resultCount : 0}
+                        </Badge>
                         <UnitBadge>{selectedUnit}</UnitBadge>
 
                         {selected?.values?.map((i) => (
@@ -309,7 +322,7 @@ export default function BreakPackModal({
           redirect={false}
           isOpen={true}
           onSubmit={async () => {
-            getData();
+            getProducts();
             handleToggle({ cloneModal: false });
           }}
           onClose={() => {

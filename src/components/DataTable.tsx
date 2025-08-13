@@ -44,21 +44,23 @@ type DataTableProps<T> = {
 
 const defaultRenderFooter = (data: any[]) => {
   return (
-    <TableRow>
-      <TableCell colSpan={3}>Total</TableCell>
-      <TableCell className="text-right">
-        {/* {formatCurrency(total?.amount)} */}
-      </TableCell>
-      <TableCell className="text-right"></TableCell>
-      <TableCell className="text-right"></TableCell>
-      <TableCell className="text-right ">
-        {/* {formatCurrency(total?.discount)} */}
-      </TableCell>
-      <TableCell className="text-right"></TableCell>
-      <TableCell className="text-right">
-        {/* {formatCurrency(total?.amount - total?.discount)} */}
-      </TableCell>
-    </TableRow>
+    <TableFooter>
+      <TableRow>
+        <TableCell colSpan={3}>Total</TableCell>
+        <TableCell className="text-right">
+          {/* {formatCurrency(total?.amount)} */}
+        </TableCell>
+        <TableCell className="text-right"></TableCell>
+        <TableCell className="text-right"></TableCell>
+        <TableCell className="text-right ">
+          {/* {formatCurrency(total?.discount)} */}
+        </TableCell>
+        <TableCell className="text-right"></TableCell>
+        <TableCell className="text-right">
+          {/* {formatCurrency(total?.amount - total?.discount)} */}
+        </TableCell>
+      </TableRow>
+    </TableFooter>
   );
 };
 
@@ -197,8 +199,8 @@ function DataTable<T>(props) {
               </TableRow>
             )}
           </TableBody>
-          {children}
-          {showFooter && renderFooter && renderFooter(data)}
+
+          {showFooter && renderFooter(data)}
         </Table>
       </div>
     </div>

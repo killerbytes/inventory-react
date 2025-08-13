@@ -1,4 +1,4 @@
-import { TableCell, TableRow } from "@/components/ui/table";
+import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
 import { PurchaseOrder, PurchaseOrderItem } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -37,11 +37,16 @@ function defaultRenderFooter(data: PurchaseOrderItem[], append: () => void) {
     },
   );
   return (
-    <>
+    <TableFooter>
       {append && (
         <TableRow>
-          <TableCell>
-            <Button type="button" variant="outline" onClick={append}>
+          <TableCell colSpan={8}>
+            <Button
+              type="button"
+              variant="outline"
+              className="shadow-sm"
+              onClick={append}
+            >
               <Plus />
             </Button>
           </TableCell>
@@ -62,7 +67,7 @@ function defaultRenderFooter(data: PurchaseOrderItem[], append: () => void) {
           {formatCurrency(total?.amount - total?.discount)}
         </TableCell>
       </TableRow>
-    </>
+    </TableFooter>
   );
 }
 

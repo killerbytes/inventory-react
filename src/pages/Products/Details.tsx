@@ -14,7 +14,6 @@ export default function ProductDetails() {
     getData();
   }, [id]);
 
-  console.log(product);
   return (
     <div>
       <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">

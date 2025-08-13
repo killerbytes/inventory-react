@@ -1,10 +1,11 @@
 import {
-  inventoryServices,
-  productServices,
-  salesOrderServices,
-  type SalesOrder,
-  type SalesOrderItem,
-} from "@/services";
+  ApiErrorResponse,
+  CategorizedItemList,
+  CategorizedProductList,
+  Inventory,
+  SalesOrder,
+  SalesOrderItem,
+} from "@/types";
 import {
   Form,
   FormControl,
@@ -14,17 +15,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  CategorizedItemList,
-  CategorizedProductList,
-  Inventory,
-  Product,
-} from "@/types";
+  AmountColumn,
+  UnitColumn,
+} from "../PurchaseOrders/Form/PurchaseOrderItemForm";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { inventoryServices, salesOrderServices } from "@/services";
 import { TableCell, TableRow } from "@/components/ui/table";
+import ProductCommand from "@/components/ProductCommand";
 import type { ColumnDef } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CommandItem } from "@/components/ui/command";
+import { MoveLeft, Plus, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
@@ -32,11 +34,11 @@ import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-// import useDebounce from "@/hooks/useDebounce";
-import { MoveLeft, Plus } from "lucide-react";
 import { ROUTES } from "@/utils/definitions";
+import { salesOrderSchema } from "@/schemas";
 import ProductsModal from "./ProductsModal";
 import { useNavigate } from "react-router";
+import { useProductStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import ProductList from "./ProductList";
 import { toast } from "sonner";
@@ -44,12 +46,10 @@ import React from "react";
 
 export default function Create() {
   const navigate = useNavigate();
-  const [inventories, setInventories] = React.useState<Inventory[]>([]);
-  const [products, setProducts] = React.useState<CategorizedProductList[]>([]);
   const [toggle, handleToggle] = useToggle({
     addProductsModal: false,
   });
-  const { salesOrderSchema } = validations;
+  const { products, setProducts, flatProducts } = useProductStore();
 
   const form = useForm<SalesOrder>({
     resolver: zodResolver(salesOrderSchema),
@@ -66,44 +66,12 @@ export default function Create() {
     formState: { errors },
   } = form;
 
-  const { fields, append, update } = useFieldArray({
+  const { fields, append, update, remove } = useFieldArray({
     control,
     name: "salesOrderItems",
   });
 
   const formData = useWatch({ control: form.control });
-
-  // React.useEffect(() => {
-  //   const getData = async () => {
-  //     const data = await inventoryServices.list();
-  //     setInventories(data);
-  //   };
-  //   getData();
-  // }, []);
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const data: CategorizedItemList<Inventory>[] =
-        await inventoryServices.list();
-      // const combined = data.map((item) => {
-      //   console.log(item);
-      //   const inventory = item.inventories.flatMap((product) => {
-      //     const { subProducts, ...rest } = product;
-      //     return [rest, ...(subProducts || [])];
-      //   });
-
-      //   return {
-      //     ...item,
-      //     inventory,
-      //   };
-      // });
-      setProducts(data);
-    };
-
-    getData();
-  }, []);
-
-  // const debouncedFormData = useDebounce(formData, 500);
 
   async function onSubmit(values: SalesOrder) {
     try {
@@ -111,165 +79,191 @@ export default function Create() {
       toast.success(`Sales Order created successfully`);
       navigate(ROUTES.SALES_ORDERS);
     } catch (error) {
-      toast.error(`Submission failed, ${error.response.data.message}`);
+      const apiError = error as ApiErrorResponse;
+      toast.error(`Submission failed, ${apiError.message}`);
     }
   }
 
-  // const saveDraft = React.useCallback(() => {
-  //   const draft =
-  //     JSON.parse(
-  //       localStorage.getItem(
-  //         `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
-  //       ) as string,
-  //     ) || {};
-  //   const newDraft = { ...form.getValues(), supplier, items };
-
-  //   if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
-  //     console.log("saving...", draft, newDraft);
-  //     localStorage.setItem(
-  //       `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
-  //       JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v)),
-  //     );
-  //   }
-  // }, [form, items, supplier]);
-
-  // React.useEffect(() => {
-  //   saveDraft();
-  // }, [debouncedFormData, items, supplier, saveDraft]);
-
-  const columns: ColumnDef<SalesOrderItem>[] = [
-    {
-      accessorKey: "inventory",
-      header: "Product",
-      cell: ({ row }) => {
-        return (
-          <Controller
-            name={`salesOrderItems.${row.index}.productId`}
-            control={control}
+  console.log(products);
+  const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
+    () => [
+      {
+        accessorKey: "index",
+        header: "",
+        meta: {
+          className: "w-0",
+        },
+        cell: ({ row }) => (
+          <Button
+            onClick={() => remove(row.index)}
+            variant="outline"
+            type="button"
+          >
+            <Trash2 />
+          </Button>
+        ),
+      },
+      {
+        accessorKey: "combinationId",
+        header: "Product",
+        meta: {
+          className: "w-100",
+        },
+        cell: ({ row }) => {
+          return (
+            <Controller
+              name={`purchaseOrderItems.${row.index}.combinationId`}
+              control={form.control}
+              render={({ field }) => (
+                <ProductCommand
+                  {...field}
+                  control={form.control}
+                  list={products}
+                  index={row.index}
+                  value={String(field.value)}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    const selected = flatProducts.find(
+                      (item) => item.combinationId === Number(value),
+                    );
+                    if (selected) {
+                      form.setValue(
+                        `purchaseOrderItems.${row.index}.purchasePrice`,
+                        selected.price,
+                      );
+                    }
+                  }}
+                  renderOption={(combination, onChange) => {
+                    return (
+                      <CommandItem
+                        keywords={[combination.sku ?? ""]}
+                        value={String(combination.id)}
+                        key={combination.id}
+                        onSelect={(v) => {
+                          onChange(v);
+                          // const selected = flatProducts.find(
+                          //   (item) => item.combinationId === Number(v),
+                          // );
+                          // setValue(
+                          //   `purchaseOrderItems.${index}.unitPrice`,
+                          //   Number(selected?.price),
+                          // );
+                        }}
+                        className="flex gap-2 items-center justify-between"
+                      >
+                        <div className="flex gap-2 items-center">
+                          {combination.values.map((value) => {
+                            return <span key={value.id}>{value.value}</span>;
+                          })}
+                          {combination.inventory?.quantity !== undefined &&
+                            combination.inventory?.quantity > 0 && (
+                              <small className="text-muted-foreground">
+                                x{combination.inventory?.quantity}
+                              </small>
+                            )}
+                        </div>
+                        <span className="text-muted-foreground">
+                          {formatCurrency(combination.price)}
+                        </span>
+                      </CommandItem>
+                    );
+                  }}
+                />
+              )}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "purchasePrice",
+        header: "Price",
+        meta: {
+          className: "text-right min-w-[100px] w-[110px]",
+        },
+        cell: ({ row }) => (
+          <FormField
+            control={form.control}
+            name={`purchaseOrderItems.${row.index}.purchasePrice`}
             render={({ field }) => (
-              <ProductList
-                control={control}
-                list={products}
-                {...field}
-                value={field.value}
-              />
+              <FormItem>
+                <FormControl>
+                  <NumberInput
+                    {...field}
+                    value={Number(field.value)}
+                    type="currency"
+                  />
+                </FormControl>
+              </FormItem>
             )}
           />
-        );
+        ),
       },
-    },
-    {
-      header: () => <div className="text-right">Quantity</div>,
-      accessorKey: "quantity",
-      accessorFn: (row) => row.quantity,
-      id: "quantity",
-      size: 10,
-      meta: {
-        className: "text-right",
+      {
+        accessorKey: "quantity",
+        header: "Quantity",
+        meta: {
+          className: "text-right min-w-[90px] w-[90px]",
+        },
+        cell: ({ row }) => (
+          <Controller
+            name={`purchaseOrderItems.${row.index}.quantity`}
+            control={form.control}
+            render={({ field }) => <NumberInput {...field} />}
+          />
+        ),
       },
-    },
-    {
-      header: () => <div className="text-right">Unit Price</div>,
-      accessorKey: "unitPrice",
-      accessorFn: (row) => row.unitPrice,
-      id: "unitPrice",
-
-      meta: {
-        className: "text-right",
-        type: "currency",
+      {
+        accessorKey: "unit",
+        header: "Unit",
+        meta: {
+          className: "w-15",
+        },
+        cell: ({ row }) => {
+          return <UnitColumn index={row.index} form={form} />;
+        },
       },
-    },
+      {
+        accessorKey: "discount",
+        header: "Discount",
+        meta: {
+          className: "text-right w-32",
+          type: "currency",
+        },
+        cell: ({ row }) => (
+          <Controller
+            name={`purchaseOrderItems.${row.index}.discount`}
+            control={form.control}
+            render={({ field }) => <NumberInput {...field} type="currency" />}
+          />
+        ),
+      },
+      {
+        accessorKey: "discountNote",
+        header: "Discount Note",
+        meta: {
+          className: "w-50",
+        },
+        cell: ({ row }) => (
+          <Controller
+            name={`purchaseOrderItems.${row.index}.discountNote`}
+            control={form.control}
+            render={({ field }) => <Input {...field} />}
+          />
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: () => <div className="text-right">Amount</div>,
+        meta: {
+          className: "text-right w-20",
+        },
 
-    // {
-    //   accessorKey: "quantity",
-    //   header: () => <div className="text-right">Quantity</div>,
-    //   cell: ({ row }) => (
-    //     <div className="text-right ">{row.getValue("quantity")}</div>
-    //   ),
-    // },
-    // {
-    //   accessorKey: "discount",
-    //   header: () => <div className="text-right">Discount</div>,
-    //   cell: ({ row }) => (
-    //     <div className="text-right ">{row.getValue("discount")}</div>
-    //   ),
-    // },
-
-    // {
-    //   accessorKey: "unitPrice",
-    //   header: () => <div className="text-right">Unit Price</div>,
-    //   cell: ({ row }) => (
-    //     <div className="text-right ">
-    //       {formatCurrency(row.getValue("unitPrice"))}
-    //     </div>
-    //   ),
-    // },
-  ];
-
-  function EditableCell({
-    getValue,
-    cell,
-    row: { index },
-    column: { id },
-    table,
-  }) {
-    const initialValue = getValue();
-    const type = cell.column.columnDef.meta?.type;
-    const [value, setValue] = React.useState(initialValue);
-
-    const onUpdate = () => {
-      table.options.meta?.updateData(index, id, value);
-    };
-
-    React.useEffect(() => {
-      setValue(initialValue);
-    }, [initialValue]);
-
-    return (
-      <NumberInput
-        value={value}
-        type={type}
-        onUpdate={onUpdate}
-        onChange={(e) => {
-          setValue(e.value);
-        }}
-      />
-    );
-  }
-
-  const defaultColumn = {
-    cell: EditableCell,
-  };
-
-  const meta = {
-    updateData: (rowIndex, columnId, value) => {
-      // Skip page index reset until after next rerender
-      update(rowIndex, {
-        ...formData.salesOrderItems[rowIndex],
-        [columnId]: value,
-      });
-    },
-  };
-
-  const total = fields?.reduce(
-    (
-      acc: { amount: number; unitPrice: number; discount: number },
-      item: SalesOrderItem,
-    ) => {
-      const unitPrice = Number(item.unitPrice);
-      const discount = Number(item.discount);
-
-      return {
-        amount: acc.amount + (unitPrice || 0) * (item.quantity || 0),
-        unitPrice: acc.unitPrice + (unitPrice || 0),
-        discount: acc.discount + (discount || 0),
-      };
-    },
-    {
-      amount: 0,
-      discount: 0,
-      unitPrice: 0,
-    },
+        cell: ({ row }) => (
+          <AmountColumn index={row.index} control={form.control} />
+        ),
+      },
+    ],
+    [flatProducts, form, products, remove],
   );
 
   return (
@@ -398,27 +392,6 @@ export default function Create() {
                       tableClassname={cx({
                         "border-red-500": errors.purchaseOrderItems,
                       })}
-                      footer={
-                        <>
-                          <TableRow>
-                            <TableCell colSpan={columns.length === 8 ? 2 : 1}>
-                              Total
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {formatCurrency(total?.amount)}
-                            </TableCell>
-                            <TableCell className="text-right"></TableCell>
-                            <TableCell className="text-right"></TableCell>
-                            <TableCell className="text-right ">
-                              {formatCurrency(total?.discount)}
-                            </TableCell>
-                            <TableCell className="text-right"></TableCell>
-                            <TableCell className="text-right">
-                              {formatCurrency(total?.amount - total?.discount)}
-                            </TableCell>
-                          </TableRow>
-                        </>
-                      }
                     />
                   </FormControl>
                   <FormMessage />

@@ -39,7 +39,7 @@ export default function Movements() {
         accessorKey: "combination.product.name",
         cell: ({ row }) => {
           const mapped = getMappedVariantValues(
-            row.original.combination.product.variants,
+            row.original.combination.product?.variants,
             row.original.combination.values,
           );
 
@@ -47,7 +47,9 @@ export default function Movements() {
             <Link
               to={`${ROUTES.PRODUCTS}/${row.original.combination.productId}`}
             >
-              {`${row.original.combination.product.name} - ${Object.keys(mapped)
+              {`${row.original.combination.product?.name} - ${Object.keys(
+                mapped,
+              )
                 .map((key) => `${key}: ${mapped[key]}`)
                 .join(" | ")}`}
             </Link>
@@ -57,12 +59,24 @@ export default function Movements() {
       {
         accessorKey: "type",
         header: "Type",
+        meta: {
+          headerClassName: "text-center",
+          className: "text-center",
+        },
         cell: ({ row }) => {
           return (
             <Link to={`${ROUTES.PURCHASE_ORDERS}/${row.original.reference}`}>
               <StatusBadge>{String(row.original.type)}</StatusBadge>
             </Link>
           );
+        },
+      },
+      {
+        accessorKey: "previous",
+        header: "Initial",
+        meta: {
+          headerClassName: "text-right",
+          className: "w-0 text-right",
         },
       },
       {
@@ -73,18 +87,10 @@ export default function Movements() {
           className: "text-right w-0",
         },
       },
-      {
-        accessorKey: "previous",
-        header: "Previous",
-        meta: {
-          headerClassName: "text-right",
-          className: "w-0 text-right",
-        },
-      },
 
       {
         accessorKey: "new", // "inventory.quantity",
-        header: "New",
+        header: "Current",
         meta: {
           headerClassName: "text-right",
           className: "w-0 text-right",
@@ -105,14 +111,6 @@ export default function Movements() {
         },
         cell: ({ row }) => {
           return formatDateTime(String(row.original.updatedAt));
-        },
-      },
-      {
-        accessorKey: "reference",
-        header: "Reference",
-        meta: {
-          headerClassName: "text-center",
-          className: "w-0 text-center",
         },
       },
       {

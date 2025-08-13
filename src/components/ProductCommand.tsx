@@ -1,13 +1,52 @@
-import { Control, UseFormSetValue, useWatch } from "react-hook-form";
+import {
+  CategorizedProductList,
+  ProductCombinations,
+  PurchaseOrder,
+} from "@/types";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
-import { CategorizedProductList, PurchaseOrder } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
+import { Control, useWatch } from "react-hook-form";
 import ComboBox from "@/components/ComboBox";
 import { useProductStore } from "@/stores";
 import { CommandSeparator } from "cmdk";
 import UnitBadge from "./UnitBadge";
-import { Badge } from "./ui/badge";
 import React from "react";
+
+const defaultRenderOption = (
+  combination: ProductCombinations,
+  onChange: (value: string) => void,
+) => {
+  return (
+    <CommandItem
+      disabled={
+        combination.inventory?.quantity === 0 ||
+        combination.inventory?.quantity === undefined
+      }
+      keywords={[combination.sku ?? ""]}
+      value={String(combination.id)}
+      key={combination.id}
+      onSelect={(v) => {
+        onChange(v);
+      }}
+      className="flex gap-2 items-center justify-between"
+    >
+      <div className="flex gap-2 items-center">
+        {combination.values.map((value) => {
+          return <span key={value.id}>{value.value}</span>;
+        })}
+        {combination.inventory?.quantity !== undefined &&
+          combination.inventory?.quantity > 0 && (
+            <small className="text-muted-foreground">
+              x{combination.inventory?.quantity}
+            </small>
+          )}
+      </div>
+      <span className="text-muted-foreground">
+        {formatCurrency(combination.price)}
+      </span>
+    </CommandItem>
+  );
+};
 
 export interface ProductCommandSelectedItemProps {
   combinationId?: number;
@@ -36,9 +75,8 @@ export default function ProductCommand({
   control,
   list,
   value,
-  index,
   onChange,
-  // setValue,
+  renderOption = defaultRenderOption,
 }: {
   control: Control<PurchaseOrder>;
   list: CategorizedProductList[];
@@ -46,7 +84,10 @@ export default function ProductCommand({
   placeholder?: string;
   index: number;
   onChange: (selected: string) => void;
-  // setValue: UseFormSetValue<PurchaseOrder>;
+  renderOption?: (
+    combination: ProductCombinations,
+    onChange: (value: string) => void,
+  ) => React.ReactNode;
 }) {
   const [options, setOptions] = React.useState<CategorizedProductList[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -58,10 +99,10 @@ export default function ProductCommand({
   const { flatProducts } = useProductStore();
 
   React.useEffect(() => {
-    const exclude = fields
-      .map((item) => Number(item.combinationId))
-      .filter(Boolean);
-    const items = list.map((category) => {
+    const exclude =
+      fields &&
+      fields.map((item) => Number(item.combinationId)).filter(Boolean);
+    const items = list?.map((category) => {
       const products = category.products.map((product) => {
         return {
           ...product,
@@ -81,6 +122,10 @@ export default function ProductCommand({
     setOptions(items as CategorizedProductList[]);
   }, [fields, list]);
 
+  const handleOnChange = (value: string) => {
+    onChange(value);
+    setOpen(false);
+  };
   const selected: ProductCommandSelectedItemProps | undefined =
     flatProducts.find((item) => item.combinationId === Number(value));
   return (
@@ -109,55 +154,14 @@ export default function ProductCommand({
               value={String(product.id)}
               key={product.id}
             >
-              {product.combinations?.map((combination) => (
-                <CommandItem
-                  disabled={
-                    combination.inventory?.quantity === 0 ||
-                    combination.inventory?.quantity === undefined
-                  }
-                  keywords={[combination.sku ?? ""]}
-                  value={String(combination.id)}
-                  key={combination.id}
-                  onSelect={(v) => {
-                    onChange(v);
-                    // const selected = flatProducts.find(
-                    //   (item) => item.combinationId === Number(v),
-                    // );
-                    // setValue(
-                    //   `purchaseOrderItems.${index}.unitPrice`,
-                    //   Number(selected?.price),
-                    // );
-                    setOpen(false);
-                  }}
-                  className="flex gap-2 items-center justify-between"
-                >
-                  <div className="flex gap-2 items-center">
-                    {combination.values.map((value) => {
-                      return <span key={value.id}>{value.value}</span>;
-                    })}
-                    {combination.inventory?.quantity !== undefined &&
-                      combination.inventory?.quantity > 0 && (
-                        <small className="text-muted-foreground">
-                          x{combination.inventory?.quantity}
-                        </small>
-                      )}
-                  </div>
-                  <span className="text-muted-foreground">
-                    {formatCurrency(combination.price)}
-                  </span>
-                </CommandItem>
-              ))}
+              {product.combinations?.map((combination) =>
+                renderOption(combination, handleOnChange),
+              )}
             </CommandGroup>
           ))}
         </CommandGroup>
       ))}
       <CommandSeparator />
-
-      {/* <ProductCommandGroup
-        options={options}
-        onChange={onChange}
-        setOpen={setOpen}
-      /> */}
     </ComboBox>
   );
 }

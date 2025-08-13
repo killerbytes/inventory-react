@@ -1,3 +1,4 @@
+import { InventoryMovement } from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 
