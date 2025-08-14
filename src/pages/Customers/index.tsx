@@ -6,6 +6,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import React from "react";
+
 import {
   Card,
   CardAction,
@@ -13,27 +15,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PaginatedResponse, Supplier } from "@/types";
+import { Customer, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supplierServices } from "@/services";
+import { customerServices } from "@/services";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import Pager from "@/components/Pager";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
-import React from "react";
 
-export default function Suppliers() {
+export default function Customers() {
   const [page, setPage] = React.useState(1);
-  const [data, setData] = React.useState<PaginatedResponse<Supplier[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
     data: [],
     total: 0,
     totalPages: 0,
     currentPage: 0,
   });
 
-  const [selected, setSelected] = React.useState<Supplier | null>();
+  const [selected, setSelected] = React.useState<Customer | null>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
     limit: 10,
@@ -50,7 +51,7 @@ export default function Suppliers() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const data = await supplierServices.getAll(filter);
+      const data = await customerServices.getAll(filter);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -100,7 +101,7 @@ export default function Suppliers() {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Suppliers</CardTitle>
+          <CardTitle>Customers</CardTitle>
           <CardAction>
             <Button
               className="shadow-sm"
@@ -108,14 +109,14 @@ export default function Suppliers() {
                 handleToggle({ addModal: true });
               }}
             >
-              <Plus /> Add Supplier
+              <Plus /> Add Customer
             </Button>
           </CardAction>
         </CardHeader>
         <CardContent>
           <div>
             <Input
-              placeholder="Search supplier"
+              placeholder="Search customer"
               className="w-full mb-4"
               value={filter.q}
               onChange={(e) => {
@@ -205,7 +206,7 @@ export default function Suppliers() {
             handleToggle({ editModal: false });
           }}
           cb={getData}
-          data={selected as Supplier}
+          data={selected as Customer}
         />
       )}
     </div>

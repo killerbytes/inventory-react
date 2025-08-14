@@ -1,29 +1,35 @@
-import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
-import { PurchaseOrder, PurchaseOrderItem } from "@/types";
+import { Control, FieldValues, Path, useWatch } from "react-hook-form";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { cx } from "class-variance-authority";
-import { FieldErrors } from "react-hook-form";
 import AmountColumn from "./AmountColumn";
 import UnitColumn from "./UnitColumn";
 import { Plus } from "lucide-react";
 
-type TableProps = {
-  data: PurchaseOrderItem[];
-  columns: ColumnDef<PurchaseOrderItem, unknown>[];
+type FooterValuesProps = {
+  purchasePrice: number;
+  quantity: number;
+  discount: number;
+};
+
+type TableProps<T extends FieldValues> = {
+  name: Path<T>;
+  control: Control<T>;
+  fields: T[];
+  columns: ColumnDef<T, unknown>[];
   renderFooter?: (
-    data: PurchaseOrderItem[],
+    data: FooterValuesProps[],
     append: () => void,
   ) => React.ReactNode;
-  errors: FieldErrors<PurchaseOrder>;
   append?: () => void;
 };
 
-function defaultRenderFooter(data: PurchaseOrderItem[], append: () => void) {
-  const total = data.reduce(
+function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
+  const total = data?.reduce(
     (acc, item) => {
+      console.log(acc, item);
       return {
         amount: acc.amount + (item.purchasePrice || 0) * (item.quantity || 0),
         purchasePrice: acc.purchasePrice + (Number(item.purchasePrice) || 0),
@@ -37,7 +43,7 @@ function defaultRenderFooter(data: PurchaseOrderItem[], append: () => void) {
     },
   );
   return (
-    <TableFooter>
+    <>
       {append && (
         <TableRow>
           <TableCell colSpan={8}>
@@ -54,12 +60,12 @@ function defaultRenderFooter(data: PurchaseOrderItem[], append: () => void) {
       )}
       <TableRow>
         <TableCell colSpan={2}>Total</TableCell>
-        <TableCell className="text-right">
+        <TableCell className="text-right px-5">
           {formatCurrency(total?.purchasePrice)}
         </TableCell>
         <TableCell className="text-right"></TableCell>
         <TableCell className="text-right"></TableCell>
-        <TableCell className="text-right ">
+        <TableCell className="text-right px-5 ">
           {total?.discount ? formatCurrency(total?.discount) : "-"}
         </TableCell>
         <TableCell className="text-right"></TableCell>
@@ -67,26 +73,29 @@ function defaultRenderFooter(data: PurchaseOrderItem[], append: () => void) {
           {formatCurrency(total?.amount - total?.discount)}
         </TableCell>
       </TableRow>
-    </TableFooter>
+    </>
   );
 }
 
-export default function PurchaseOrderItemForm({
-  data,
+export default function PurchaseOrderItemForm<T extends FieldValues>({
+  name,
+  control,
+  fields,
   columns,
   renderFooter = defaultRenderFooter,
-  errors,
   append,
-}: TableProps) {
+}: TableProps<T>) {
+  const footerValues = useWatch({ control, name });
+
   return (
     <>
       <DataTable
-        data={data}
+        data={fields}
         columns={columns}
-        tableClassname={cx({
-          "border-red-500": errors.purchaseOrderItems,
-        })}
-        renderFooter={() => renderFooter(data, append)}
+        // tableClassname={cx({
+        //   "border-red-500": errors.purchaseOrderItems,
+        // })}
+        renderFooter={() => renderFooter(footerValues, append ?? (() => {}))}
       />
     </>
   );

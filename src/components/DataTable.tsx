@@ -44,23 +44,21 @@ type DataTableProps<T> = {
 
 const defaultRenderFooter = (data: any[]) => {
   return (
-    <TableFooter>
-      <TableRow>
-        <TableCell colSpan={3}>Total</TableCell>
-        <TableCell className="text-right">
-          {/* {formatCurrency(total?.amount)} */}
-        </TableCell>
-        <TableCell className="text-right"></TableCell>
-        <TableCell className="text-right"></TableCell>
-        <TableCell className="text-right ">
-          {/* {formatCurrency(total?.discount)} */}
-        </TableCell>
-        <TableCell className="text-right"></TableCell>
-        <TableCell className="text-right">
-          {/* {formatCurrency(total?.amount - total?.discount)} */}
-        </TableCell>
-      </TableRow>
-    </TableFooter>
+    <TableRow>
+      <TableCell colSpan={3}>Total</TableCell>
+      <TableCell className="text-right">
+        {/* {formatCurrency(total?.amount)} */}
+      </TableCell>
+      <TableCell className="text-right"></TableCell>
+      <TableCell className="text-right"></TableCell>
+      <TableCell className="text-right ">
+        {/* {formatCurrency(total?.discount)} */}
+      </TableCell>
+      <TableCell className="text-right"></TableCell>
+      <TableCell className="text-right">
+        {/* {formatCurrency(total?.amount - total?.discount)} */}
+      </TableCell>
+    </TableRow>
   );
 };
 
@@ -175,6 +173,7 @@ function DataTable<T>(props) {
                     onRowClick && onRowClick(row.original);
                   }}
                 >
+                  {console.log(row.original)}
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
@@ -199,8 +198,7 @@ function DataTable<T>(props) {
               </TableRow>
             )}
           </TableBody>
-
-          {showFooter && renderFooter(data)}
+          {showFooter && <TableFooter>{renderFooter(data)}</TableFooter>}
         </Table>
       </div>
     </div>

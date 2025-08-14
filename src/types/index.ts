@@ -1,17 +1,17 @@
 import {
   breakPackSchema,
-  cancelPurchaseOrderSchema,
+  cancelOrderSchema,
   categorySchema,
+  customerSchema,
   inventoryMovementSchema,
   inventorySchema,
-  inventoryTransactionSchema,
   loginSchema,
   productCombinationsSchema,
   productSchema,
   purchaseOrderCreateSchema,
   purchaseOrderItemSchema,
   purchaseOrderSchema,
-  repackageInventorySchema,
+  salesOrderCreateSchema,
   salesOrderItemSchema,
   salesOrderSchema,
   signupSchema,
@@ -81,15 +81,15 @@ type Login = z.infer<typeof loginSchema>;
 type Category = z.infer<typeof categorySchema>;
 type Product = z.infer<typeof productSchema>;
 type Supplier = z.infer<typeof supplierSchema>;
+type Customer = z.infer<typeof customerSchema>;
 type PurchaseOrder = z.infer<typeof purchaseOrderSchema>;
 type PurchaseOrderCreate = z.infer<typeof purchaseOrderCreateSchema>;
 type PurchaseOrderItem = z.infer<typeof purchaseOrderItemSchema>;
-type CancelPurchaseOrder = z.infer<typeof cancelPurchaseOrderSchema>;
+type CancelOrder = z.infer<typeof cancelOrderSchema>;
 type SalesOrder = z.infer<typeof salesOrderSchema>;
+type SalesOrderCreate = z.infer<typeof salesOrderCreateSchema>;
 type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
 type Inventory = z.infer<typeof inventorySchema>;
-type InventoryTransaction = z.infer<typeof inventoryTransactionSchema>;
-type RepackageInventory = z.infer<typeof repackageInventorySchema>;
 type VariantTypes = z.infer<typeof variantTypesSchema>;
 type ProductCombinations = z.infer<typeof productCombinationsSchema>;
 type VariantValues = z.infer<typeof variantValuesSchema>;
@@ -104,15 +104,15 @@ export type {
   Category,
   Product,
   Supplier,
+  Customer,
   PurchaseOrder,
   PurchaseOrderCreate,
   PurchaseOrderItem,
-  CancelPurchaseOrder,
+  CancelOrder,
   SalesOrder,
+  SalesOrderCreate,
   SalesOrderItem,
   Inventory,
-  InventoryTransaction,
-  RepackageInventory,
   VariantTypes,
   ProductCombinations,
   VariantValues,

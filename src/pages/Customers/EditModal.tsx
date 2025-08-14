@@ -18,12 +18,12 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
-import { ApiErrorResponse, Supplier } from "@/types";
+import { ApiErrorResponse, Customer } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supplierServices } from "@/services";
+import { customerServices } from "@/services";
 import { ERROR } from "@/utils/definitions";
-import { supplierSchema } from "@/schemas";
+import { customerSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
@@ -39,17 +39,17 @@ export default function EditModal({
   isOpen: boolean;
   onClose: () => void;
   cb: () => void;
-  data: Supplier;
+  data: Customer;
 }) {
   const [confirm, setConfirm] = React.useState(false);
-  const form = useForm<Supplier>({
-    resolver: zodResolver(supplierSchema),
+  const form = useForm<Customer>({
+    resolver: zodResolver(customerSchema),
     defaultValues: { ...data },
   });
 
-  async function onSubmit(values: Supplier) {
+  async function onSubmit(values: Customer) {
     try {
-      await supplierServices.update(Number(data.id), values);
+      await customerServices.update(Number(data.id), values);
       toast.success(`Submitted: ${values.name}`);
       form.reset();
       onClose();
@@ -58,7 +58,7 @@ export default function EditModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof Supplier, {
+            form.setError(err.field as keyof Customer, {
               type: "server",
               message: err.message,
             });
@@ -73,7 +73,7 @@ export default function EditModal({
 
   const handleDelete = async () => {
     try {
-      await supplierServices.delete(Number(data.id));
+      await customerServices.delete(Number(data.id));
       toast.success(`Deleted: ${data.name}`);
       onClose();
     } catch (error) {
@@ -81,13 +81,14 @@ export default function EditModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof Supplier, {
+            form.setError(err.field as keyof Customer, {
               type: "server",
               message: err.message,
             });
           }
         });
       }
+
       toast.error("Deletion failed");
     } finally {
       cb();
@@ -99,8 +100,8 @@ export default function EditModal({
       <Modal
         isOpen={isOpen}
         onOpenChange={onClose}
-        title="Edit Supplier"
-        description="Update the supplier details"
+        title="Edit Customer"
+        description="Update the customer details"
       >
         <Form {...form}>
           <form

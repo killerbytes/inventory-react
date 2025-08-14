@@ -6,11 +6,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Controller,
+  useFieldArray,
+  UseFormReturn,
+  useWatch,
+} from "react-hook-form";
 import { CategorizedProductList, PurchaseOrderCreate, Supplier } from "@/types";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import AmountColumn from "./PurchaseOrderItemForm/AmountColumn";
 import { productServices, supplierServices } from "@/services";
 import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
+import useExcludeExistToList from "@/hooks/useExcludeExists";
 import { useProductStore, useSupplierStore } from "@/stores";
 import UnitColumn from "./PurchaseOrderItemForm/UnitColumn";
 import PurchaseOrderItemForm from "./PurchaseOrderItemForm";
@@ -28,7 +34,7 @@ import { Input } from "@/components/ui/input";
 import { PurchaseOrderItem } from "@/types";
 import Select from "@/components/Select";
 import { Trash2 } from "lucide-react";
-import React from "react";
+import React, { use } from "react";
 
 export default function PendingOrderForm({
   form,
@@ -93,53 +99,56 @@ export default function PendingOrderForm({
             <Controller
               name={`purchaseOrderItems.${row.index}.combinationId`}
               control={form.control}
-              render={({ field }) => (
-                <ProductCommand
-                  {...field}
-                  control={form.control}
-                  list={products}
-                  index={row.index}
-                  value={String(field.value)}
-                  onChange={(value) => {
-                    field.onChange(value);
-                    const selected = flatProducts.find(
-                      (item) => item.combinationId === Number(value),
-                    );
-                    if (selected) {
-                      form.setValue(
-                        `purchaseOrderItems.${row.index}.purchasePrice`,
-                        selected.price,
+              render={({ field }) => {
+                return (
+                  <ProductCommand
+                    {...field}
+                    control={form.control}
+                    list={products}
+                    index={row.index}
+                    value={String(field.value)}
+                    field="purchaseOrderItems"
+                    onChange={(value) => {
+                      field.onChange(value);
+                      const selected = flatProducts.find(
+                        (item) => item.combinationId === Number(value),
                       );
-                    }
-                  }}
-                  renderOption={(combination, onChange) => {
-                    return (
-                      <CommandItem
-                        keywords={[combination.sku ?? ""]}
-                        value={String(combination.id)}
-                        key={combination.id}
-                        onSelect={onChange}
-                        className="flex gap-2 items-center justify-between"
-                      >
-                        <div className="flex gap-2 items-center">
-                          {combination.values.map((value) => {
-                            return <span key={value.id}>{value.value}</span>;
-                          })}
-                          {combination.inventory?.quantity !== undefined &&
-                            combination.inventory?.quantity > 0 && (
-                              <small className="text-muted-foreground">
-                                x{combination.inventory?.quantity}
-                              </small>
-                            )}
-                        </div>
-                        <span className="text-muted-foreground">
-                          {formatCurrency(combination.price)}
-                        </span>
-                      </CommandItem>
-                    );
-                  }}
-                />
-              )}
+                      if (selected) {
+                        form.setValue(
+                          `purchaseOrderItems.${row.index}.purchasePrice`,
+                          selected.price,
+                        );
+                      }
+                    }}
+                    renderOption={(combination, onChange) => {
+                      return (
+                        <CommandItem
+                          keywords={[combination.sku ?? ""]}
+                          value={String(combination.id)}
+                          key={combination.id}
+                          onSelect={onChange}
+                          className="flex gap-2 items-center justify-between"
+                        >
+                          <div className="flex gap-2 items-center">
+                            {combination.values.map((value) => {
+                              return <span key={value.id}>{value.value}</span>;
+                            })}
+                            {combination.inventory?.quantity !== undefined &&
+                              combination.inventory?.quantity > 0 && (
+                                <small className="text-muted-foreground">
+                                  x{combination.inventory?.quantity}
+                                </small>
+                              )}
+                          </div>
+                          <span className="text-muted-foreground">
+                            {formatCurrency(combination.price)}
+                          </span>
+                        </CommandItem>
+                      );
+                    }}
+                  />
+                );
+              }}
             />
           );
         },
@@ -229,7 +238,11 @@ export default function PendingOrderForm({
         },
 
         cell: ({ row }) => (
-          <AmountColumn index={row.index} control={form.control} />
+          <AmountColumn
+            index={row.index}
+            control={form.control}
+            name="purchaseOrderItems"
+          />
         ),
       },
     ],

@@ -4,8 +4,9 @@ import {
   PurchaseOrder,
 } from "@/types";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
+import useExcludeExistToList from "@/hooks/useExcludeExists";
+import { Control, FieldValues } from "react-hook-form";
 import { formatCurrency } from "@/utils/formatters";
-import { Control, useWatch } from "react-hook-form";
 import ComboBox from "@/components/ComboBox";
 import { useProductStore } from "@/stores";
 import { CommandSeparator } from "cmdk";
@@ -71,56 +72,56 @@ const SelectedItem = ({
   );
 };
 
-export default function ProductCommand({
+export default function ProductCommand<T extends FieldValues>({
   control,
   list,
   value,
+  field,
   onChange,
   renderOption = defaultRenderOption,
 }: {
-  control: Control<PurchaseOrder>;
+  control: Control<T>;
   list: CategorizedProductList[];
   value: string;
-  placeholder?: string;
-  index: number;
+  field: string;
   onChange: (selected: string) => void;
   renderOption?: (
     combination: ProductCombinations,
     onChange: (value: string) => void,
   ) => React.ReactNode;
 }) {
-  const [options, setOptions] = React.useState<CategorizedProductList[]>([]);
+  // const [options, setOptions] = React.useState<CategorizedProductList[]>([]);
   const [open, setOpen] = React.useState(false);
-  const fields = useWatch({
-    control,
-    name: `purchaseOrderItems`,
-  });
-
+  // const fields = useWatch({
+  //   control,
+  //   name: `purchaseOrderItems`,
+  // });
   const { flatProducts } = useProductStore();
 
-  React.useEffect(() => {
-    const exclude =
-      fields &&
-      fields.map((item) => Number(item.combinationId)).filter(Boolean);
-    const items = list?.map((category) => {
-      const products = category.products.map((product) => {
-        return {
-          ...product,
-          combinations: product.combinations.filter((combination) => {
-            return !exclude.includes(Number(combination.id));
-          }),
-        };
-      });
-      const productsWithCombo = products.filter(
-        (p) => p.combinations.length > 0,
-      );
-      return products.length > 0
-        ? { ...category, products: productsWithCombo }
-        : null;
-    });
+  // React.useEffect(() => {
+  //   const exclude =
+  //     fields &&
+  //     fields.map((item) => Number(item.combinationId)).filter(Boolean);
+  //   const items = list?.map((category) => {
+  //     const products = category.products.map((product) => {
+  //       return {
+  //         ...product,
+  //         combinations: product.combinations.filter((combination) => {
+  //           return !exclude.includes(Number(combination.id));
+  //         }),
+  //       };
+  //     });
+  //     const productsWithCombo = products.filter(
+  //       (p) => p.combinations.length > 0,
+  //     );
+  //     return products.length > 0
+  //       ? { ...category, products: productsWithCombo }
+  //       : null;
+  //   });
 
-    setOptions(items as CategorizedProductList[]);
-  }, [fields, list]);
+  //   setOptions(items as CategorizedProductList[]);
+  // }, [fields, list]);
+  const options = useExcludeExistToList(list, control, field);
 
   const handleOnChange = (value: string) => {
     onChange(value);

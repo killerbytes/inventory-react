@@ -86,6 +86,9 @@ export default function UserIcon() {
               Variants Templates
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to={ROUTES.CUSTOMERS}> Customers</Link>
+          </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
             <Link to={ROUTES.SUPPLIERS}> Suppliers</Link>

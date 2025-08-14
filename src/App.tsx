@@ -13,6 +13,7 @@ import { ROUTES } from "./utils/definitions";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
 import Inventory from "./pages/Inventory";
+import Customers from "./pages/Customers";
 import Layout from "./components/Layout";
 import Products from "./pages/Products";
 import Users from "./pages/Users";
@@ -40,6 +41,14 @@ function App() {
             element={
               <Layout>
                 <Suppliers />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.CUSTOMERS}
+            element={
+              <Layout>
+                <Customers />
               </Layout>
             }
           />

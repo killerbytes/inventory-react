@@ -177,7 +177,7 @@ export default function PartialForm({
             </FormItem>
           )}
         />
-        <div className="mb-4">
+        <div>
           <PurchaseOrderItemForm
             data={fields}
             columns={columns}

@@ -9,6 +9,7 @@ export const ROUTES = {
   VARIANTS: "/variants",
   CATEGORIES: "/categories",
   SUPPLIERS: "/suppliers",
+  CUSTOMERS: "/customers",
   PURCHASE_ORDERS: "/purchases",
   PURCHASE_ORDERS_CREATE: "/purchases/new",
   PURCHASE_ORDERS_DETAILS: "/purchases/:id",

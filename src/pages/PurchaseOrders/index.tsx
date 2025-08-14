@@ -109,7 +109,7 @@ export default function PurchaseOrders() {
       header: "Date",
       cell: ({ row }) => {
         const statusHistoryMap = mappedStatusHistory(
-          row.original.statusHistory ?? [],
+          row.original.orderStatusHistory ?? [],
         );
         return formatDate(statusHistoryMap[row.original.status]?.changedAt);
       },
@@ -119,7 +119,7 @@ export default function PurchaseOrders() {
       header: "User",
       cell: ({ row }) => {
         const statusHistoryMap = mappedStatusHistory(
-          row.original.statusHistory ?? [],
+          row.original.orderStatusHistory ?? [],
         );
         return statusHistoryMap[row.original.status]?.user.name;
       },

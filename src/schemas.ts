@@ -1,4 +1,4 @@
-import { MODE_OF_PAYMENT, ORDER_STATUS, ORDER_TYPE } from "./utils/definitions";
+import { MODE_OF_PAYMENT, ORDER_STATUS } from "./utils/definitions";
 import * as z from "zod";
 
 export const userSchema = z.object({
@@ -153,6 +153,8 @@ export const supplierSchema = z.object({
     .optional(),
 });
 
+export const customerSchema = supplierSchema;
+
 export const purchaseOrderItemSchema = z.object({
   id: z.coerce.number().nullish(),
   combinationId: z.coerce
@@ -177,7 +179,7 @@ export const purchaseOrderItemSchema = z.object({
   unit: z.string().nullish(),
 });
 
-export const cancelPurchaseOrderSchema = z.object({
+export const cancelOrderSchema = z.object({
   reason: z.string().min(2, {
     message: "Reason must be at least 2 characters.",
   }),
@@ -266,7 +268,7 @@ export const purchaseOrderSchema = purchaseOrderBaseSchema
     //   })
     //   .nullish(),
     status: z.string(),
-    statusHistory: z.array(statusHistorySchema).nullish(),
+    purchaseOrderStatusHistory: z.array(statusHistorySchema).nullish(),
     totalAmount: z.string().optional(),
     supplier: z.any(),
     // deliveryDate: z.string(),
@@ -302,96 +304,76 @@ export const purchaseOrderSchema = purchaseOrderBaseSchema
     }
   });
 
-export const salesOrderItemSchema = z
-  .object({
-    inventoryId: z.number().min(1, {
+export const salesOrderItemSchema = z.object({
+  id: z.coerce.number().nullish(),
+  combinationId: z.coerce
+    .number()
+    .min(1, {
       message: "Product must be selected.",
-    }),
-    quantity: z.coerce.number().min(1, {
-      message: "Quantity must be at least 1.",
-    }),
-    unitPrice: z.coerce.number().min(1, {
-      message: "Unit Price must be at least 1.",
-    }),
-    discount: z.coerce.number().nullish(),
-    inventory: z.any(),
-  })
-  .refine(
-    (data) => {
-      return data.quantity <= data.inventory.quantity;
-    },
-    {
-      message: "Stock quantity is less than the requested quantity.",
-      path: ["quantity"],
-    },
-  );
-
-export const salesOrderSchema = z.object({
-  id: z.number().nullish(),
-  customer: z.string().min(2, {
-    message: "Customer must be at least 2 characters.",
-  }),
-  orderDate: z.date({
-    required_error: "Order Date is required",
-  }),
-  deliveryDate: z.date({
-    required_error: "Delivery Date is required",
-  }),
-  notes: z.string().nullish(),
-  salesOrderItems: z.array(salesOrderItemSchema).min(1, {
-    message: "At least one item must be added.",
-  }),
-  status: z.string().nullish(),
-  receivedDate: z.date().optional(),
-  totalAmount: z.coerce.number().nullish(),
-  orderBy: z.number().nullish(),
-  receivedBy: z.number().nullish(),
-  supplier: z.any(),
-  orderByUser: z.any(),
-  receivedByUser: z.any(),
-});
-
-export const inventoryTransactionSchema = z.object({
-  id: z.number().nullish(),
-  inventoryId: z.number().min(1, {
-    message: "Inventory must be selected.",
-  }),
-  inventory: z.any(),
+    })
+    .nullable(),
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
-  previousQuantity: z.coerce.number().min(1, {
-    message: "Previous Quantity must be at least 1.",
+  originalPrice: z.coerce.number().nullish(),
+  purchasePrice: z.coerce.number().min(1, {
+    message: "Unit Price must be at least 1.",
   }),
-  newQuantity: z.coerce.number().min(1, {
-    message: "New Quantity must be at least 1.",
-  }),
-  orderType: z.enum(Object.values(ORDER_TYPE) as [string, ...string[]]),
-  transactionType: z.string().min(2, {
-    message: "Transaction Type must be at least 2 characters.",
-  }),
-  updatedAt: z.date(),
-  orderId: z.number().min(1, {
-    message: "Order must be selected.",
-  }),
+  discount: z.coerce.number().nullish(),
+  discountNote: z.string().nullish(),
+  totalAmount: z.coerce.number().nullish(),
+  variantSnapshot: z.any().nullish(),
+  skuSnapshot: z.string().nullish(),
+  nameSnapshot: z.string().nullish(),
+  unit: z.string().nullish(),
 });
 
-export const repackageInventorySchema = z.object({
-  name: z.string(),
-  description: z.string().nullish(),
-  categoryId: z.number(),
-  unit: z.string(),
-  price: z.coerce.number().min(1, {
-    message: "Price must be at least 1.",
+const salesOrderBaseSchema = z.object({
+  id: z.number().optional(),
+  salesOrderNumber: z
+    .string({
+      required_error: "SO number is required",
+    })
+    .min(2, { message: "SO number is required" }),
+  customerId: z.coerce.number().min(1, {
+    message: "Customer is required.",
   }),
-  pullOutQuantity: z.coerce.number().min(1, {
-    message: "Pull-out Quantity must be at least 1.",
+  deliveryDate: z.string(),
+  internalNotes: z.string().nullish(),
+  notes: z.string().nullish(),
+  salesOrderItems: z.array(salesOrderItemSchema).min(1, {
+    message: "At least one product is required.",
   }),
-  repackQuantity: z.coerce.number().min(1, {
-    message: "Repack Quantity must be at least 1.",
-  }),
-  parentId: z.number(),
 });
+export const salesOrderCreateSchema = salesOrderBaseSchema;
+
+export const salesOrderSchema = salesOrderBaseSchema
+  .extend({
+    status: z.string(),
+    salesOrderStatusHistory: z.array(statusHistorySchema),
+    totalAmount: z.string().optional(),
+    customer: z.any(),
+    cancellationReason: z.string().nullish(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.status === ORDER_STATUS.PENDING &&
+      data.salesOrderItems?.length === 0
+    ) {
+      ctx.addIssue({
+        path: ["salesOrderItems"],
+        code: z.ZodIssueCode.custom,
+        message: "Sales Order Items are required",
+      });
+    }
+    if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
+      ctx.addIssue({
+        path: ["checkNumber"],
+        code: z.ZodIssueCode.custom,
+        message: "Check number is required when payment is by check",
+      });
+    }
+  });
 
 export const breakPackSchema = z.object({
   fromComboId: z.number(),

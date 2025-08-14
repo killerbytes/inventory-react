@@ -1,13 +1,4 @@
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -15,9 +6,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   ApiErrorResponse,
-  CancelPurchaseOrder,
+  CancelOrder,
   PurchaseOrder,
   PurchaseOrderCreate,
+  SalesOrder,
 } from "@/types";
 import {
   Card,
@@ -34,11 +26,12 @@ import {
 } from "@/utils/definitions";
 import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
 import { Ban, EllipsisVertical, Save, Trash2 } from "lucide-react";
+import { CancelModal } from "../../components/modals/CancelModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import PendingOrderForm from "./Form/PendingOrderForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
-import { formatDateTime } from "@/utils/formatters";
+import OrderHistory from "@/components/OrderHistory";
 import { useForm, useWatch } from "react-hook-form";
 import StatusBadge from "@/components/StatusBadge";
 import { purchaseOrderServices } from "@/services";
@@ -46,7 +39,6 @@ import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
-import { CancelModal } from "./CancelModal";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
 import { toast } from "sonner";
@@ -67,7 +59,10 @@ export default function Create() {
 
   async function onSaveOrder(form: PurchaseOrder) {
     try {
-      await purchaseOrderServices.update(Number(id), form);
+      await purchaseOrderServices.update(Number(id), {
+        ...form,
+        status: data.status,
+      });
       toast.success(`Purchase Order saved successfully`);
     } catch (error) {
       const { message } = getErrorMessage(error as ApiErrorResponse);
@@ -100,7 +95,7 @@ export default function Create() {
     }
   }
 
-  async function onCancelOrder(form: CancelPurchaseOrder) {
+  async function onCancelOrder(form: CancelOrder) {
     try {
       await purchaseOrderServices.cancelOrder(Number(id), {
         ...form,
@@ -144,9 +139,9 @@ export default function Create() {
     getData();
   }, [getData]);
 
-  const data = useWatch<PurchaseOrder>({
+  const data = useWatch<SalesOrder>({
     control: form.control,
-  }) as PurchaseOrder;
+  }) as SalesOrder;
 
   return (
     <div className="flex flex-col gap-4">
@@ -278,35 +273,7 @@ export default function Create() {
           )}
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Purchase Order History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Status</TableHead>
-                <TableHead>Changed By</TableHead>
-                <TableHead>Changed Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.statusHistory?.map((statusHistory) => (
-                <TableRow key={statusHistory.id}>
-                  <TableCell>
-                    <StatusBadge>{String(statusHistory.status)}</StatusBadge>
-                  </TableCell>
-                  <TableCell>{statusHistory.user.name}</TableCell>
-                  <TableCell>
-                    {formatDateTime(statusHistory.changedAt)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <OrderHistory data={data?.purchaseOrderStatusHistory} />
     </div>
   );
 }
