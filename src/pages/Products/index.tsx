@@ -7,6 +7,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { categoryServices, productServices } from "@/services";
 import { CategorizedProductList, Product } from "@/types";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import CreateProductModal from "./CreateProductModal";
 import { Button } from "@/components/ui/button";
 import CombinationItem from "./CombinationItem";
@@ -84,7 +85,11 @@ export default function Products() {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Products</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Products
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">

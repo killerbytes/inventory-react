@@ -10,6 +10,7 @@ import { ORDER_STATUS_OPTIONS, PAGINATION } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import StatusBadge from "@/components/StatusBadge";
@@ -155,7 +156,11 @@ export default function PurchaseOrders() {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Purchase Orders</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Purchase Orders
+          </CardTitle>
           <CardAction>
             <Link to="/purchases/new">
               <Button className="shadow-md">

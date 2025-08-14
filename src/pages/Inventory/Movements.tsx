@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { InventoryMovement, PaginatedResponse } from "@/types";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { inventoryMovementServices } from "@/services";
 import { getMappedVariantValues } from "@/lib/utils";
 import { formatDateTime } from "@/utils/formatters";
@@ -121,11 +122,14 @@ export default function Movements() {
     [],
   );
 
-  console.log(data);
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Inventory Movements</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <SidebarTrigger />
+          <div className="bg-border h-5 w-[1px]"></div>
+          Inventory Movements
+        </CardTitle>
         <CardAction></CardAction>
       </CardHeader>
       <CardContent>

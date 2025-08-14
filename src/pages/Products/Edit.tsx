@@ -29,6 +29,7 @@ import CloneToUnitModal from "../../components/modals/CloneToUnitModal";
 import { BREAK_PACK_UNITS, ERROR, ROUTES } from "@/utils/definitions";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { categoryServices, productServices } from "@/services";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
@@ -232,7 +233,11 @@ export default function ProductEdit() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Product Details</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <SidebarTrigger />
+                <div className="bg-border h-5 w-[1px]"></div>
+                Product Details
+              </CardTitle>
               <CardAction>
                 <div className="flex gap-2">
                   <div className="ml-auto">

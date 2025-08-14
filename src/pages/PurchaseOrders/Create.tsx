@@ -12,6 +12,7 @@ import {
 import { ERROR, MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
 import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
 import { ApiError, ApiErrorResponse, PurchaseOrderCreate } from "@/types";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import PendingOrderForm from "./Form/PendingOrderForm";
 import { Button } from "@/components/ui/button";
 import useDebounce from "@/hooks/useDebounce";
@@ -116,7 +117,11 @@ export default function Create() {
       <div>
         <Card>
           <CardHeader>
-            <CardTitle>Create Purchase Order</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <SidebarTrigger />
+              <div className="bg-border h-5 w-[1px]"></div>
+              Create Purchase Order
+            </CardTitle>
             <CardAction></CardAction>
           </CardHeader>
           <CardContent>

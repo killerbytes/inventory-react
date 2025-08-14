@@ -173,7 +173,6 @@ function DataTable<T>(props) {
                     onRowClick && onRowClick(row.original);
                   }}
                 >
-                  {console.log(row.original)}
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}

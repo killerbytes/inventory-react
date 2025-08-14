@@ -6,17 +6,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Controller,
-  useFieldArray,
-  UseFormReturn,
-  useWatch,
-} from "react-hook-form";
 import { CategorizedProductList, PurchaseOrderCreate, Supplier } from "@/types";
+import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import AmountColumn from "./PurchaseOrderItemForm/AmountColumn";
 import { productServices, supplierServices } from "@/services";
 import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
-import useExcludeExistToList from "@/hooks/useExcludeExists";
 import { useProductStore, useSupplierStore } from "@/stores";
 import UnitColumn from "./PurchaseOrderItemForm/UnitColumn";
 import PurchaseOrderItemForm from "./PurchaseOrderItemForm";
@@ -34,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { PurchaseOrderItem } from "@/types";
 import Select from "@/components/Select";
 import { Trash2 } from "lucide-react";
-import React, { use } from "react";
+import React from "react";
 
 export default function PendingOrderForm({
   form,
@@ -398,8 +392,10 @@ export default function PendingOrderForm({
             <FormItem className="w-full mb-4">
               <FormControl>
                 <PurchaseOrderItemForm
-                  data={fields}
+                  fields={fields}
+                  control={form.control}
                   columns={columns}
+                  name="purchaseOrderItems"
                   errors={form.formState.errors}
                   append={() =>
                     append({

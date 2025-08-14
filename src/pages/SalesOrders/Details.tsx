@@ -28,6 +28,7 @@ import { BUTTON_COLOR, ERROR, ORDER_STATUS, ROUTES } from "@/utils/definitions";
 import { Ban, EllipsisVertical, Save, Trash2 } from "lucide-react";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { useCustomerStore } from "@/stores/customer.store";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
@@ -322,7 +323,11 @@ export default function SalesOrderDetails() {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>Sales Order</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Sales Order
+          </CardTitle>
           <CardAction className="flex gap-2">
             <StatusBadge>{String(data?.status)}</StatusBadge>
             {data?.status !== ORDER_STATUS.CANCELLED && (

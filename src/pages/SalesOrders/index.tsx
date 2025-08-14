@@ -10,6 +10,7 @@ import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
 import { PaginatedResponse, SalesOrder, StatusHistory } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import StatusBadge from "@/components/StatusBadge";
@@ -155,7 +156,11 @@ export default function SalesOrders() {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Sales Orders</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Sales Orders
+          </CardTitle>
           <CardAction>
             <Link to={`${ROUTES.SALES_ORDERS}/new`}>
               <Button className="shadow-md">

@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Customer, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,7 +102,11 @@ export default function Customers() {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Customers</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Customers
+          </CardTitle>
           <CardAction>
             <Button
               className="shadow-sm"
@@ -137,6 +142,7 @@ export default function Customers() {
                   <TableRow>
                     {columns.map((column) => (
                       <TableHead
+                        key={column.key}
                         onClick={() => requestSort(column.key)}
                         style={{ cursor: "pointer" }}
                         title={column.title}

@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ApiErrorResponse, APIResponse, Category } from "@/types";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,7 +116,11 @@ export default function Categories() {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Categories</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Categories
+          </CardTitle>
           <CardAction>
             <Button
               onClick={() => {

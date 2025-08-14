@@ -27,6 +27,7 @@ import {
 import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
 import { Ban, EllipsisVertical, Save, Trash2 } from "lucide-react";
 import { CancelModal } from "../../components/modals/CancelModal";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import PendingOrderForm from "./Form/PendingOrderForm";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -147,7 +148,11 @@ export default function Create() {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>Purchase Order #{data?.purchaseOrderNumber}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Purchase Order #{data?.purchaseOrderNumber}
+          </CardTitle>
           <CardAction className="flex gap-2">
             {data?.modeOfPayment === MODE_OF_PAYMENT.CHECK && (
               <>

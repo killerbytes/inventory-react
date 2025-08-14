@@ -3,20 +3,7 @@ import {
   CategorizedProductList,
   Customer,
   SalesOrderCreate,
-  SalesOrderItem,
 } from "@/types";
-import PurchaseOrderItemForm, {
-  AmountColumn,
-  UnitColumn,
-} from "../PurchaseOrders/Form/PurchaseOrderItemForm";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import {
   Card,
   CardAction,
@@ -29,30 +16,22 @@ import {
   productServices,
   salesOrderServices,
 } from "@/services";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { useCustomerStore } from "@/stores/customer.store";
-import ProductCommand from "@/components/ProductCommand";
-import type { ColumnDef } from "@tanstack/react-table";
+import { useCustomerStore, useProductStore } from "@/stores";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Textarea } from "@/components/ui/textarea";
-import Autocomplete from "@/components/Autcomplete";
-import NumberInput from "@/components/NumberInput";
+import { useForm, useWatch } from "react-hook-form";
 import { salesOrderCreateSchema } from "@/schemas";
-import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/utils/definitions";
 import { useNavigate } from "react-router";
-import { useProductStore } from "@/stores";
 import { randomInt } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
 import FullForm from "./FullForm";
 import { toast } from "sonner";
 import React from "react";
 
 export default function Create() {
   const navigate = useNavigate();
-  const { products, setProducts, flatProducts } = useProductStore();
+  const { setProducts } = useProductStore();
   const { customers, setCustomers } = useCustomerStore();
 
   const form = useForm<SalesOrderCreate>({
@@ -108,7 +87,11 @@ export default function Create() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Create Sales Order</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Create Sales Order
+          </CardTitle>
           <CardAction></CardAction>
         </CardHeader>
         <CardContent>

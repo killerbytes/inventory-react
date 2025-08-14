@@ -179,9 +179,11 @@ export default function PartialForm({
         />
         <div>
           <PurchaseOrderItemForm
-            data={fields}
+            fields={fields}
             columns={columns}
             errors={errors}
+            control={form.control}
+            name="purchaseOrderItems"
           />
         </div>
 

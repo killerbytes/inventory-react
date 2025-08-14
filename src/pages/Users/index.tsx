@@ -1,11 +1,3 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import React from "react";
 
 import {
@@ -15,9 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { userServices, type APIResponse, type User } from "@/services";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import { PaginatedResponse, User } from "@/types";
 import { Toaster } from "@/components/ui/sonner";
 import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
@@ -25,13 +18,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
+import { userServices } from "@/services";
 import Pager from "@/components/Pager";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 
 export default function Users() {
   const [page, setPage] = React.useState(1);
-  const [data, setData] = React.useState<APIResponse<User[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<User[]>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -142,7 +136,11 @@ export default function Users() {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Users</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Users
+          </CardTitle>
           <CardAction>
             <Button
               onClick={() => {
