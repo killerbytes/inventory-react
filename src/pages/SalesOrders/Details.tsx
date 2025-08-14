@@ -13,6 +13,13 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
+  BUTTON_COLOR,
+  ERROR,
+  ORDER_STATUS,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
@@ -20,23 +27,31 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Ban,
+  Car,
+  ClipboardList,
+  EllipsisVertical,
+  Save,
+  Trash2,
+} from "lucide-react";
+import {
   customerServices,
   productServices,
   salesOrderServices,
 } from "@/services";
-import { BUTTON_COLOR, ERROR, ORDER_STATUS, ROUTES } from "@/utils/definitions";
-import { Ban, EllipsisVertical, Save, Trash2 } from "lucide-react";
+import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
+import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { useCustomerStore } from "@/stores/customer.store";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
-import OrderHistory from "@/components/OrderHistory";
 import { useForm, useWatch } from "react-hook-form";
-import StatusBadge from "@/components/StatusBadge";
 import { salesOrderCreateSchema } from "@/schemas";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import StaticDataTable from "./StaticDataTable";
 import { cx } from "class-variance-authority";
 import { useProductStore } from "@/stores";
 import React, { useCallback } from "react";
@@ -46,7 +61,11 @@ import { toast } from "sonner";
 import Static from "./Static";
 
 export default function SalesOrderDetails() {
-  const [toggle, handleToggle] = useToggle({ confirmModal: false });
+  const [toggle, handleToggle] = useToggle({
+    confirmModal: false,
+    deliveryDetailsModal: false,
+    orderHistoryModal: false,
+  });
   const navigate = useNavigate();
   const { id } = useParams();
   const { setProducts } = useProductStore();
@@ -125,7 +144,7 @@ export default function SalesOrderDetails() {
         ...form,
       });
       toast.success(`Purchase Order cancelled successfully`);
-      navigate(ROUTES.PURCHASE_ORDERS);
+      navigate(ROUTES.SALES_ORDERS);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       toast.error(`Submission failed, ${apiError.message}`);
@@ -329,57 +348,77 @@ export default function SalesOrderDetails() {
             Sales Order
           </CardTitle>
           <CardAction className="flex gap-2">
-            <StatusBadge>{String(data?.status)}</StatusBadge>
-            {data?.status !== ORDER_STATUS.CANCELLED && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="size-8">
-                    <EllipsisVertical />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {(data?.status === ORDER_STATUS.RECEIVED ||
-                    data?.status === ORDER_STATUS.COMPLETED) && (
+            <ColorBadge colorMap={STATUS_COLOR}>
+              {String(data?.status)}
+            </ColorBadge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="size-8">
+                  <EllipsisVertical />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    handleToggle({ orderHistoryModal: true });
+                  }}
+                >
+                  <ClipboardList />
+                  Order History
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    handleToggle({ deliveryDetailsModal: true });
+                  }}
+                >
+                  <Car />
+                  Delivery Details
+                </DropdownMenuItem>
+
+                {(data?.status === ORDER_STATUS.RECEIVED ||
+                  data?.status === ORDER_STATUS.COMPLETED) && (
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      handleToggle({ cancelModal: true });
+                    }}
+                  >
+                    <Ban color="red" />
+                    Cancel Order
+                  </DropdownMenuItem>
+                )}
+                {data?.status === ORDER_STATUS.PENDING && (
+                  <>
                     <DropdownMenuItem
-                      onSelect={(e) => {
+                      onClick={(e) => {
                         e.preventDefault();
-                        handleToggle({ cancelModal: true });
+                        console.log(form.formState.errors);
+                        form
+                          .handleSubmit(onSaveOrder)(e)
+                          .catch((error) => {
+                            console.error("Form submission error:", error);
+                          });
                       }}
                     >
-                      <Ban color="red" />
-                      Cancel Order
+                      <Save color="green" />
+                      Save
                     </DropdownMenuItem>
-                  )}
-                  {data?.status === ORDER_STATUS.PENDING && (
-                    <>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.preventDefault();
-                          console.log(form.formState.errors);
-                          form
-                            .handleSubmit(onSaveOrder)(e)
-                            .catch((error) => {
-                              console.error("Form submission error:", error);
-                            });
-                        }}
-                      >
-                        <Save color="green" />
-                        Save
+                    <ConfirmDialog
+                      title={`Void order`}
+                      onConfirm={onDeleteOrder}
+                    >
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Trash2 color="red" />
+                        Void
                       </DropdownMenuItem>
-                      <ConfirmDialog
-                        title={`Void order`}
-                        onConfirm={onDeleteOrder}
-                      >
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <Trash2 color="red" />
-                          Void
-                        </DropdownMenuItem>
-                      </ConfirmDialog>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                    </ConfirmDialog>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </CardAction>
         </CardHeader>
 
@@ -414,11 +453,52 @@ export default function SalesOrderDetails() {
           )}
         </CardContent>
       </Card>
-      <OrderHistory
-        data={
-          "salesOrderStatusHistory" in data ? data?.salesOrderStatusHistory : []
-        }
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Items</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StaticDataTable data={data} />
+        </CardContent>
+      </Card>
+
+      {/* <Card>
+        <CardHeader>
+          <CardTitle>Sales Order Items</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StaticDataTable data={data} />
+        </CardContent>
+      </Card> */}
+      {/* <Card>
+        <CardHeader>
+          <CardTitle>Delivery Details</CardTitle>
+          <CardAction>
+            <Label htmlFor="terms">Delivery Date</Label>
+            <div className="font-semibold text-sm">
+              {formatDate(data?.deliveryDate)}
+            </div>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <Label htmlFor="terms">Delivery Address</Label>
+          <div className="font-semibold text-sm">{data?.deliveryAddress}</div>
+          <Label htmlFor="terms">Delivery Notes</Label>
+          <div className="font-semibold text-sm">
+            {data?.deliveryInstructions}
+          </div>
+        </CardContent>
+      </Card> */}
+      {toggle.orderHistoryModal && (
+        <OrderHistoryModal
+          data={
+            "salesOrderStatusHistory" in data
+              ? data?.salesOrderStatusHistory
+              : []
+          }
+          onClose={() => handleToggle({ orderHistoryModal: false })}
+        />
+      )}
       {toggle.cancelModal && (
         <CancelModal
           isOpen={true}
@@ -427,6 +507,13 @@ export default function SalesOrderDetails() {
             handleToggle({ cancelModal: false });
             onCancelOrder(data);
           }}
+        />
+      )}
+      {toggle.deliveryDetailsModal && (
+        <DeliveryDetailsModal
+          data={data}
+          isOpen={toggle.deliveryDetailsModal}
+          onClose={() => handleToggle({ deliveryDetailsModal: false })}
         />
       )}
     </div>

@@ -1,4 +1,12 @@
 import {
+  BUTTON_COLOR,
+  MODE_OF_PAYMENT,
+  MODE_OF_PAYMENT_COLOR,
+  ORDER_STATUS,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -18,24 +26,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  BUTTON_COLOR,
-  MODE_OF_PAYMENT,
-  ORDER_STATUS,
-  ROUTES,
-} from "@/utils/definitions";
 import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
 import { Ban, EllipsisVertical, Save, Trash2 } from "lucide-react";
 import { CancelModal } from "../../components/modals/CancelModal";
+import OrderHistory from "@/components/modals/OrderHistoryModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import PendingOrderForm from "./Form/PendingOrderForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
-import OrderHistory from "@/components/OrderHistory";
 import { useForm, useWatch } from "react-hook-form";
-import StatusBadge from "@/components/StatusBadge";
 import { purchaseOrderServices } from "@/services";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { getErrorMessage } from "@/lib/utils";
@@ -156,10 +158,14 @@ export default function Create() {
           <CardAction className="flex gap-2">
             {data?.modeOfPayment === MODE_OF_PAYMENT.CHECK && (
               <>
-                <StatusBadge>{String(data?.modeOfPayment)}</StatusBadge>
+                <ColorBadge colorMap={MODE_OF_PAYMENT_COLOR}>
+                  {String(data?.modeOfPayment)}
+                </ColorBadge>
               </>
             )}
-            <StatusBadge>{String(data?.status)}</StatusBadge>
+            <ColorBadge colorMap={STATUS_COLOR}>
+              {String(data?.status)}
+            </ColorBadge>
             {data?.status !== ORDER_STATUS.CANCELLED && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -251,7 +257,7 @@ export default function Create() {
                   }}
                 />
               )}
-              <div className="flex justify-end">
+              <div className="flex justify-end mt-4">
                 {data?.status === ORDER_STATUS.RECEIVED && (
                   <ConfirmDialog
                     title="Complete Order"

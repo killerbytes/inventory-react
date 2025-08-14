@@ -1,16 +1,12 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { useApiData, type ApiDataType } from "@/hooks/useApiData";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import AppSidebar from "./AppSidebar";
 
-import VariantTemplateModal from "./VariantTemplateModal";
+import VariantTemplateModal from "./modals/VariantTemplateModal";
 import { useGlobalStore } from "@/stores/global.store";
-import { UserContext } from "./UserContext";
-import User from "./User";
 import React from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const props: ApiDataType = useApiData();
   const { variantTemplateModal, setVariantTemplateModal } = useGlobalStore();
 
   return (

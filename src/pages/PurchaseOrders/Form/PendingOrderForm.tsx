@@ -6,14 +6,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import AmountColumn from "../../../components/forms/OrderItemForm/AmountColumn";
 import { CategorizedProductList, PurchaseOrderCreate, Supplier } from "@/types";
+import UnitColumn from "../../../components/forms/OrderItemForm/UnitColumn";
+import PurchaseOrderItemForm from "../../../components/forms/OrderItemForm";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
-import AmountColumn from "./PurchaseOrderItemForm/AmountColumn";
 import { productServices, supplierServices } from "@/services";
 import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
 import { useProductStore, useSupplierStore } from "@/stores";
-import UnitColumn from "./PurchaseOrderItemForm/UnitColumn";
-import PurchaseOrderItemForm from "./PurchaseOrderItemForm";
 import ProductCommand from "@/components/ProductCommand";
 import { CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
@@ -99,20 +99,19 @@ export default function PendingOrderForm({
                     {...field}
                     control={form.control}
                     list={products}
-                    index={row.index}
                     value={String(field.value)}
                     field="purchaseOrderItems"
                     onChange={(value) => {
                       field.onChange(value);
-                      const selected = flatProducts.find(
-                        (item) => item.combinationId === Number(value),
-                      );
-                      if (selected) {
-                        form.setValue(
-                          `purchaseOrderItems.${row.index}.purchasePrice`,
-                          selected.price,
-                        );
-                      }
+                      // const selected = flatProducts.find(
+                      //   (item) => item.combinationId === Number(value),
+                      // );
+                      // if (selected) {
+                      //   form.setValue(
+                      //     `purchaseOrderItems.${row.index}.purchasePrice`,
+                      //     selected.price,
+                      //   );
+                      // }
                     }}
                     renderOption={(combination, onChange) => {
                       return (

@@ -1,4 +1,5 @@
 import {
+  ApiError,
   ApiErrorResponse,
   CategorizedProductList,
   Customer,
@@ -19,10 +20,10 @@ import {
 import { useCustomerStore, useProductStore } from "@/stores";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ERROR, ROUTES } from "@/utils/definitions";
 import { useForm, useWatch } from "react-hook-form";
 import { salesOrderCreateSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/utils/definitions";
 import { useNavigate } from "react-router";
 import { randomInt } from "@/lib/utils";
 import FullForm from "./FullForm";
@@ -38,9 +39,10 @@ export default function Create() {
     resolver: zodResolver(salesOrderCreateSchema),
     defaultValues: {
       salesOrderNumber: randomInt(1000000, 9999999).toString(),
-      // orderDate: new Date().toISOString(),
-      deliveryDate: new Date().toISOString(),
+      orderDate: new Date(),
+      // deliveryDate: new Date().toISOString(),
       customerId: 1,
+      // isDelivery: true,
       salesOrderItems: [
         {
           // combinationId: 1,
@@ -72,12 +74,24 @@ export default function Create() {
 
   async function onSubmit(values: SalesOrderCreate) {
     try {
+      console.log(values);
       await salesOrderServices.create(values);
       toast.success(`Sales Order created successfully`);
       navigate(ROUTES.SALES_ORDERS);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
-      toast.error(`Submission failed, ${apiError.message}`);
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors?.forEach((err: ApiError) => {
+          if (err.field) {
+            form.setError(err.field as keyof SalesOrderCreate, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      } else {
+        toast.error("Submission failed: " + apiError.message);
+      }
     }
   }
 
@@ -94,7 +108,7 @@ export default function Create() {
           </CardTitle>
           <CardAction></CardAction>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-4">
           <FullForm form={form} />
           <div className="flex justify-end">
             <Button

@@ -29,7 +29,6 @@ type TableProps<T extends FieldValues> = {
 function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
   const total = data?.reduce(
     (acc, item) => {
-      console.log(acc, item);
       return {
         amount: acc.amount + (item.purchasePrice || 0) * (item.quantity || 0),
         purchasePrice: acc.purchasePrice + (Number(item.purchasePrice) || 0),

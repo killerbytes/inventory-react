@@ -8,8 +8,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { SelectItem } from "@/components/ui/select";
 import { UNIT_OPTIONS } from "@/utils/definitions";
+import UnitBadge from "@/components/ColorBadge";
 import { UseFormReturn } from "react-hook-form";
-import UnitBadge from "@/components/UnitBadge";
 import { Input } from "@/components/ui/input";
 import { Category, Product } from "@/types";
 import Select from "@/components/Select";

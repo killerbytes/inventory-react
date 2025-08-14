@@ -5,15 +5,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { INVENTORY_MOVEMENT_TYPE_COLOR, ROUTES } from "@/utils/definitions";
 import { InventoryMovement, PaginatedResponse } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { inventoryMovementServices } from "@/services";
 import { getMappedVariantValues } from "@/lib/utils";
 import { formatDateTime } from "@/utils/formatters";
-import StatusBadge from "@/components/StatusBadge";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { ROUTES } from "@/utils/definitions";
+import ColorBadge from "@/components/ColorBadge";
 import { Link } from "react-router";
 import React from "react";
 
@@ -67,7 +67,9 @@ export default function Movements() {
         cell: ({ row }) => {
           return (
             <Link to={`${ROUTES.PURCHASE_ORDERS}/${row.original.reference}`}>
-              <StatusBadge>{String(row.original.type)}</StatusBadge>
+              <ColorBadge colorMap={INVENTORY_MOVEMENT_TYPE_COLOR}>
+                {String(row.original.type)}
+              </ColorBadge>
             </Link>
           );
         },

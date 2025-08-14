@@ -1,15 +1,15 @@
+import VariantTypesForm from "../forms/VariantTypesForm";
 import { ApiErrorResponse, VariantTypes } from "@/types";
-import VariantTypesForm from "./forms/VariantTypesForm";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
 import { variantTypesServices } from "@/services";
 import { variantTypesSchema } from "@/schemas";
 import { cx } from "class-variance-authority";
+import { useForm } from "react-hook-form";
 import { PlusIcon } from "lucide-react";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import { toast } from "sonner";
-import Modal from "./Modal";
+import Modal from "../Modal";
 import React from "react";
 
 const defaultValues: VariantTypes = {
@@ -30,10 +30,10 @@ export default function VariantTemplateModal({
     resolver: zodResolver(variantTypesSchema),
   });
 
-  const x = useWatch({
-    control: form.control,
-    name: "values",
-  });
+  // const x = useWatch({
+  //   control: form.control,
+  //   name: "values",
+  // });
 
   const getData = React.useCallback(async () => {
     try {
@@ -60,7 +60,7 @@ export default function VariantTemplateModal({
       isTemplate: true,
     };
     if (values.id) {
-      await variantTypesServices.update(String(values.id), payload);
+      await variantTypesServices.update(values.id, payload);
     } else {
       await variantTypesServices.create(payload);
     }
@@ -68,7 +68,7 @@ export default function VariantTemplateModal({
   };
 
   const handleDelete = async () => {
-    await variantTypesServices.delete(String(selected?.id));
+    await variantTypesServices.delete(Number(selected?.id));
     form.reset(defaultValues);
     getData();
   };
@@ -109,7 +109,6 @@ export default function VariantTemplateModal({
         </Button>
       </div>
       <VariantTypesForm
-        key={selected?.id}
         form={form}
         onSubmit={handleSubmit}
         onDelete={handleDelete}

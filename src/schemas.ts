@@ -338,14 +338,38 @@ const salesOrderBaseSchema = z.object({
   customerId: z.coerce.number().min(1, {
     message: "Customer is required.",
   }),
-  deliveryDate: z.string(),
+  orderDate: z.coerce.date(),
+  deliveryDate: z.coerce.date().nullish(),
+  isDelivery: z.boolean().optional(),
+  isDeliveryCompleted: z.boolean().nullish(),
+  deliveryAddress: z.string().nullish(),
+  deliveryInstructions: z.string().nullish(),
+  // deliveryDate: z.string(),
   internalNotes: z.string().nullish(),
   notes: z.string().nullish(),
   salesOrderItems: z.array(salesOrderItemSchema).min(1, {
     message: "At least one product is required.",
   }),
 });
-export const salesOrderCreateSchema = salesOrderBaseSchema;
+
+export const salesOrderCreateSchema = salesOrderBaseSchema.superRefine(
+  (data, ctx) => {
+    if (data.isDelivery && !data.deliveryDate) {
+      ctx.addIssue({
+        path: ["deliveryDate"],
+        code: z.ZodIssueCode.custom,
+        message: "Delivery date is required when delivery is selected",
+      });
+    }
+    if (data.isDelivery && !data.deliveryAddress) {
+      ctx.addIssue({
+        path: ["deliveryAddress"],
+        code: z.ZodIssueCode.custom,
+        message: "Delivery address is required when delivery is selected",
+      });
+    }
+  },
+);
 
 export const salesOrderSchema = salesOrderBaseSchema
   .extend({

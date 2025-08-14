@@ -31,7 +31,7 @@ export default function VariantTypesForm({
   onSubmit: (e: VariantTypes) => Promise<void>;
   selected?: VariantTypes;
   onDelete: () => Promise<void>;
-  onOpenVariantTemplatePicker: () => void;
+  onOpenVariantTemplatePicker?: () => void;
 }) {
   const { toggle, handleToggle } = useToggle({
     saveTemplateModal: false,

@@ -1,25 +1,30 @@
 import {
+  MODE_OF_PAYMENT_COLOR,
+  ORDER_STATUS_OPTIONS,
+  PAGINATION,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ORDER_STATUS_OPTIONS, PAGINATION, ROUTES } from "@/utils/definitions";
-import { TableCell, TableFooter, TableRow } from "@/components/ui/table";
-import { PaginatedResponse, SalesOrder, StatusHistory } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
+import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { PaginatedResponse, SalesOrder } from "@/types";
 import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
-import StatusBadge from "@/components/StatusBadge";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { salesOrderServices } from "@/services";
-import { Badge } from "@/components/ui/badge";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
 import { Plus } from "lucide-react";
@@ -102,7 +107,9 @@ export default function SalesOrders() {
       header: "Status",
       cell: ({ row }) => {
         const status = row.original.status;
-        return <StatusBadge>{String(status)}</StatusBadge>;
+        return (
+          <ColorBadge colorMap={STATUS_COLOR}>{String(status)}</ColorBadge>
+        );
       },
     },
     {
@@ -138,7 +145,11 @@ export default function SalesOrders() {
         className: "text-center",
       },
       cell: ({ row }) => {
-        return <StatusBadge>{String(row.original.modeOfPayment)}</StatusBadge>;
+        return (
+          <ColorBadge colorMap={MODE_OF_PAYMENT_COLOR}>
+            {String(row.original.modeOfPayment)}
+          </ColorBadge>
+        );
       },
     },
     {

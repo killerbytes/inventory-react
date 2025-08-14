@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { SelectItem } from "../ui/select";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
-import UnitBadge from "../UnitBadge";
+import UnitBadge from "../ColorBadge";
 import { toast } from "sonner";
 import { z } from "zod";
 

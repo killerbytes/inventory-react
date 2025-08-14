@@ -327,11 +327,7 @@ export default function ProductEdit() {
             </CardHeader>
 
             <CardContent>
-              <DataTable
-                data={combinations || []}
-                columns={columns}
-                className="mb-4"
-              />
+              <DataTable data={combinations || []} columns={columns} />
             </CardContent>
           </Card>
         </form>

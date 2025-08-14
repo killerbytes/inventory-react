@@ -9,8 +9,10 @@ import { categoryServices, productServices } from "@/services";
 import { CategorizedProductList, Product } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import CreateProductModal from "./CreateProductModal";
+import { GLOBAL_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import CombinationItem from "./CombinationItem";
+import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import { useCategoryStore } from "@/stores";
@@ -132,7 +134,9 @@ export default function Products() {
             >
               {data.data?.map((item) => (
                 <AccordionItem value={item.categoryId} key={item.categoryId}>
-                  <AccordionTrigger className="bg-accent px-2 rounded-none border py-2">
+                  <AccordionTrigger
+                    className={cx("uppercase", GLOBAL_COLOR.CATEGORY)}
+                  >
                     {item.categoryName}
                   </AccordionTrigger>
                   <AccordionContent className="flex flex-col">
@@ -143,18 +147,20 @@ export default function Products() {
                           onSelect={setSelected}
                           onToggle={handleToggle}
                         />
+                        {/* 
                         {product.combinations?.map((combination: Product) => {
                           return (
                             <Fragment key={combination.id}>
                               <CombinationItem
                                 item={combination}
+                                product={product}
                                 sub={true}
                                 onSelect={setSelected}
                                 onToggle={handleToggle}
                               />
                             </Fragment>
                           );
-                        })}
+                        })} */}
                       </Fragment>
                     ))}
 

@@ -24,8 +24,8 @@ import useToggle from "@/hooks/useToggle";
 import { SelectItem } from "../ui/select";
 import NumberInput from "../NumberInput";
 import React, { useMemo } from "react";
+import UnitBadge from "../ColorBadge";
 import { Button } from "../ui/button";
-import UnitBadge from "../UnitBadge";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import Select from "../Select";
@@ -56,6 +56,7 @@ export default function BreakPackModal({
     resolver: zodResolver(breakPackSchema),
     defaultValues: {
       fromComboId: combinationId,
+      packsCount: 1,
       reason: "",
     },
   });
@@ -104,18 +105,23 @@ export default function BreakPackModal({
         .filter((p) => p.unit !== product?.unit)
         .forEach((p) => {
           p.combinations?.forEach((combo) => {
+            console.log(combo.values.map((i) => i.value).join(":"), "x", map);
             if (combo.values.map((i) => i.value).join(":") === map) {
               options.push(combo);
             }
           });
         });
+
+      // console.log(
+      //   product.unit,
+      //   products.filter((p) => p.unit !== product?.unit),
+      // );
       setOptions(options);
     };
     if (product?.sku) {
       getData();
     }
   }, [combination?.values, product?.sku, product?.unit, products]);
-
   const handleBreakPack = async (values: BreakPack) => {
     try {
       if ((combination?.inventory?.quantity ?? 0) < values.packsCount) {

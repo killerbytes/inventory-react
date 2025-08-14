@@ -6,15 +6,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { MODE_OF_PAYMENT, ORDER_STATUS } from "@/utils/definitions";
+import {
+  GLOBAL_COLOR,
+  MODE_OF_PAYMENT,
+  ORDER_STATUS,
+  UNIT_COLOR,
+} from "@/utils/definitions";
+import PurchaseOrderItemForm from "../../../components/forms/OrderItemForm";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import PurchaseOrderItemForm from "./PurchaseOrderItemForm";
 import { PurchaseOrder, PurchaseOrderItem } from "@/types";
 import SupplierPanel from "@/components/SupplierPanel";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
-import UnitBadge from "@/components/UnitBadge";
+import ColorBadge from "@/components/ColorBadge";
 import { cx } from "class-variance-authority";
 import { useMemo } from "react";
 export default function PartialForm({
@@ -38,6 +43,9 @@ export default function PartialForm({
       {
         accessorKey: "nameSnapshot",
         header: "Product",
+        meta: {
+          className: GLOBAL_COLOR.PRODUCT,
+        },
       },
       {
         accessorKey: "variantSnapshot",
@@ -83,7 +91,11 @@ export default function PartialForm({
         header: "Unit",
         accessorKey: "unit",
         cell: ({ row }) => {
-          return <UnitBadge>{String(row.original.unit)}</UnitBadge>;
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>
+              {String(row.original.unit)}
+            </ColorBadge>
+          );
         },
       },
       {

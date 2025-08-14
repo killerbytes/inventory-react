@@ -24,42 +24,38 @@ export const ORDER_TYPE = {
   PURCHASE: "PURCHASE",
 };
 
-export const INVENTORY_TRANSACTION_TYPE = {
-  ALL: "ALL",
-  ...ORDER_TYPE,
-  PRICE_ADJUSTMENT: "PRICE_ADJUSTMENT",
+export const GLOBAL_COLOR = {
+  PRODUCT: "text-orange-900",
+  CATEGORY: "text-blue-900",
+};
+
+export const INVENTORY_MOVEMENT_TYPE = {
+  IN: "IN",
+  OUT: "OUT",
+  ADJUST: "ADJUST",
   RETURN: "RETURN",
-  CANCELLATION: "CANCELLATION",
+  CANCEL_PURCHASE: "CANCEL_PURCHASE",
   BREAK_PACK: "BREAK_PACK",
-  REPACKAGE: "REPACKAGE",
+  RE_PACK: "RE_PACK",
 };
 
-export const TRANSACTION_TYPE_COLOR = {
-  PURCHASE: "bg-green-400",
-  SALE: "bg-orange-400",
-  PRICE_ADJUSTMENT: "bg-yellow-400",
-  RETURN: "bg-blue-400",
-  CANCELLATION: "bg-red-400",
-  BREAK_PACK: "bg-purple-400",
-  REPACKAGE: "bg-indigo-400",
+export const INVENTORY_MOVEMENT_TYPE_COLOR = {
+  IN: "bg-orange-500 text-white",
+  OUT: "bg-green-500 text-white",
+  ADJUST: "ADJUST",
+  RETURN: "RETURN",
+  CANCEL_PURCHASE: "text-red-500 border-red-500 bg-red-100",
+  BREAK_PACK: "text-gray-500 border-gray-500 bg-gray-100",
+  RE_PACK: "text-gray-100 border-gray-100 bg-gray-500",
 };
 
-export const INVENTORY_TRANSACTION_TYPE_OPTIONS = Object.values(
-  INVENTORY_TRANSACTION_TYPE,
-).map((value) => ({
-  value,
-  label: formatLabel(value),
-}));
-
-export const BADGE_COLOR = {
+export const STATUS_COLOR = {
   PENDING: "text-gray-600 border-gray-600 bg-gray-100",
   RECEIVED: "text-orange-600 border-orange-600 bg-orange-100",
   COMPLETED: "text-green-600 border-green-600 bg-green-100",
   CANCELLED: "text-red-600 border-red-600 bg-red-100",
   CASH: "text-green-400 border-green-400",
   CHECK: "text-yellow-500 border-yellow-500",
-  IN: "text-green-400 border-green-400",
-  CANCEL_PURCHASE: "text-red-500 border-red-500",
 };
 
 export const BUTTON_COLOR = {
@@ -95,6 +91,11 @@ export const MODE_OF_PAYMENT = {
   CASH: "CASH",
   CHECK: "CHECK",
 } as const;
+
+export const MODE_OF_PAYMENT_COLOR = {
+  CASH: "bg-green-400 text-black",
+  CHECK: "bg-yellow-400 text-black",
+};
 
 export const MODE_OF_PAYMENT_OPTIONS = Object.values(MODE_OF_PAYMENT).map(
   (value) => ({

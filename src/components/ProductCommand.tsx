@@ -10,7 +10,7 @@ import { formatCurrency } from "@/utils/formatters";
 import ComboBox from "@/components/ComboBox";
 import { useProductStore } from "@/stores";
 import { CommandSeparator } from "cmdk";
-import UnitBadge from "./UnitBadge";
+import UnitBadge from "./ColorBadge";
 import React from "react";
 
 const defaultRenderOption = (

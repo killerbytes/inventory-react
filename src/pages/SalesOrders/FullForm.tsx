@@ -1,7 +1,3 @@
-import PurchaseOrderItemForm, {
-  AmountColumn,
-  UnitColumn,
-} from "../PurchaseOrders/Form/PurchaseOrderItemForm";
 import {
   Form,
   FormControl,
@@ -10,10 +6,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Controller, useFieldArray } from "react-hook-form";
+import PurchaseOrderItemForm, {
+  AmountColumn,
+  UnitColumn,
+} from "../../components/forms/OrderItemForm";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Controller, useFieldArray, useWatch } from "react-hook-form";
 import { useCustomerStore } from "@/stores/customer.store";
 import ProductCommand from "@/components/ProductCommand";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
@@ -26,8 +34,8 @@ import { Trash2 } from "lucide-react";
 import React from "react";
 
 export default function FullForm({ form }) {
-  const { customers, setCustomers } = useCustomerStore();
-  const { products, setProducts, flatProducts } = useProductStore();
+  const { customers } = useCustomerStore();
+  const { products, flatProducts } = useProductStore();
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "salesOrderItems",
@@ -134,7 +142,13 @@ export default function FullForm({ form }) {
           className: "w-15",
         },
         cell: ({ row }) => {
-          return <UnitColumn index={row.index} form={form} />;
+          return (
+            <UnitColumn
+              index={row.index}
+              control={form.control}
+              name="salesOrderItems"
+            />
+          );
         },
       },
       {
@@ -185,6 +199,7 @@ export default function FullForm({ form }) {
     [flatProducts, form, products, remove],
   );
 
+  const isDelivery = useWatch({ control: form.control, name: "isDelivery" });
   return (
     <>
       <Form {...form}>
@@ -204,7 +219,7 @@ export default function FullForm({ form }) {
             control={form.control}
             name="customerId"
             render={({ field }) => (
-              <FormItem className="mb-4">
+              <FormItem>
                 <FormLabel>Customer</FormLabel>
                 <Autocomplete
                   value={
@@ -233,23 +248,13 @@ export default function FullForm({ form }) {
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Order Date</FormLabel>
-                  <DatePicker field={field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="deliveryDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Delivery Date</FormLabel>
-                  <DatePicker field={field} />
+                  <DatePicker {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+
           <FormField
             control={form.control}
             name="notes"
@@ -290,7 +295,7 @@ export default function FullForm({ form }) {
           <FormField
             control={form.control}
             name="salesOrderItems"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="w-full mb-4">
                 <FormControl>
                   <PurchaseOrderItemForm
@@ -310,6 +315,86 @@ export default function FullForm({ form }) {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="isDelivery"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center gap-2">
+                <FormControl>
+                  <Checkbox
+                    {...field}
+                    checked={field.value}
+                    onCheckedChange={(value) => {
+                      field.onChange(value);
+                    }}
+                  />
+                </FormControl>
+                <FormLabel>For Delivery</FormLabel>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {isDelivery && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Delivery Details</CardTitle>
+                <CardAction>
+                  <FormField
+                    control={form.control}
+                    name="deliveryDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col w-[200px]">
+                        <FormLabel>Delivery Date</FormLabel>
+                        <DatePicker {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardAction>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-4">
+                  <FormField
+                    control={form.control}
+                    name="deliveryAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Delivery Address</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Enter some notes..."
+                            className="resize-none"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="deliveryInstructions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Delivery Notes</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Enter some notes..."
+                            className="resize-none"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </form>
       </Form>
     </>
