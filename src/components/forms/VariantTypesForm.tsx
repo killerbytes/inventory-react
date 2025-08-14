@@ -1,0 +1,242 @@
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { PlusIcon, Save, Search, Trash2, X } from "lucide-react";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { ColumnDef } from "@tanstack/react-table";
+import ConfirmDialog from "../ConfirmDialog";
+import { DialogFooter } from "../ui/dialog";
+import useToggle from "@/hooks/useToggle";
+import { DataTable } from "../DataTable";
+import { VariantTypes } from "@/types";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import Modal from "../Modal";
+import React from "react";
+
+export default function VariantTypesForm({
+  form,
+  onSubmit,
+  selected,
+  onDelete,
+  onOpenVariantTemplatePicker,
+}: {
+  form: UseFormReturn<VariantTypes>;
+  onSubmit: (e: VariantTypes) => Promise<void>;
+  selected?: VariantTypes;
+  onDelete: () => Promise<void>;
+  onOpenVariantTemplatePicker?: () => void;
+}) {
+  const { toggle, handleToggle } = useToggle({
+    saveTemplateModal: false,
+  });
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "values",
+    keyName: "id",
+  });
+
+  const columns = React.useMemo<ColumnDef<VariantTypes>[]>(
+    () => [
+      {
+        accessorKey: "id",
+        meta: {
+          className: "w-[50px]",
+        },
+        cell: ({ row }) => (
+          <Button
+            onClick={() => remove(row.index)}
+            variant="ghost"
+            className="text-red-500"
+            size="sm"
+          >
+            <X />
+          </Button>
+        ),
+      },
+      {
+        accessorKey: "value",
+        meta: {
+          className: "w-full",
+        },
+        cell: ({ row }) => (
+          <FormField
+            control={form.control}
+            name={`values.${row.index}.value`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Value e.g. Red"
+                    className="w-full"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+        ),
+      },
+    ],
+    [form.control, remove],
+  );
+  return (
+    <>
+      <Form {...form}>
+        <form className="flex flex-col gap-4">
+          <FormField
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+
+                <FormControl>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 w-full">
+                      {onOpenVariantTemplatePicker && (
+                        <Button
+                          variant="outline"
+                          type="button"
+                          className="shadow-sm"
+                          onClick={() => {
+                            onOpenVariantTemplatePicker();
+                          }}
+                        >
+                          <Search />
+                        </Button>
+                      )}
+
+                      <Input
+                        placeholder="Variant Type, e.g. Color"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </div>
+
+                    {selected && (
+                      <>
+                        <ConfirmDialog
+                          title={`Delete Variant`}
+                          onConfirm={async (e) => {
+                            e.preventDefault();
+                            await onDelete();
+                          }}
+                        >
+                          <Button
+                            variant="outline"
+                            className="text-red-500 shadow-sm"
+                          >
+                            <Trash2 />
+                          </Button>
+                        </ConfirmDialog>
+                      </>
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="values"
+            render={() => (
+              <FormItem>
+                <FormLabel>Values</FormLabel>
+                <FormControl>
+                  <DataTable
+                    data={fields}
+                    columns={columns}
+                    emptyText="Add values..."
+                    showHeader={false}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex  gap-2 justify-between">
+            {selected?.id && (
+              <Button
+                variant="outline"
+                className="shadow-sm"
+                onClick={() =>
+                  handleToggle({
+                    saveTemplateModal: true,
+                  })
+                }
+                type="button"
+              >
+                <Save />
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="shadow-sm"
+              onClick={() => append({ value: "", variantTypeId: undefined })}
+              type="button"
+            >
+              <PlusIcon />
+            </Button>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              className="shadow-sm"
+              onClick={(e) => {
+                e.preventDefault();
+                console.log(form.getValues(), form.formState.errors);
+                form
+                  .handleSubmit(onSubmit)(e)
+                  .catch((error) => {
+                    console.error("Form submission error:", error);
+                  });
+              }}
+            >
+              {selected?.id ? "Update Variant" : "Add Variant"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+      {toggle.saveTemplateModal && (
+        <Modal
+          isOpen={toggle.saveTemplateModal}
+          onOpenChange={() => handleToggle({ saveTemplateModal: false })}
+          title="Save to Variant Template"
+          description="Save as new Variant Template"
+          size="sm"
+        >
+          <div className="flex items-center gap-2">
+            {selected?.values.map((i) => <Badge>{i.value}</Badge>)}
+          </div>
+          <Input placeholder="New Template Name" />
+          <DialogFooter>
+            <Button
+              type="button"
+              className="shadow-sm"
+              onClick={(e) => {
+                e.preventDefault();
+                console.log(form.getValues(), form.formState.errors);
+                form
+                  .handleSubmit(onSubmit)(e)
+                  .catch((error) => {
+                    console.error("Form submission error:", error);
+                  });
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </Modal>
+      )}
+    </>
+  );
+}

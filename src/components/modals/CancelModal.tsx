@@ -7,12 +7,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cancelPurchaseOrderSchema } from "@/schemas";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { CancelPurchaseOrder } from "@/types";
+import { cancelOrderSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
+import { CancelOrder } from "@/types";
 
 export const CancelModal = ({
   onClose,
@@ -20,14 +20,14 @@ export const CancelModal = ({
   isOpen,
 }: {
   onClose: () => void;
-  onSubmit: (form: CancelPurchaseOrder) => void;
+  onSubmit: (form: CancelOrder) => void;
   isOpen: boolean;
 }) => {
-  const form = useForm<CancelPurchaseOrder>({
-    resolver: zodResolver(cancelPurchaseOrderSchema),
+  const form = useForm<CancelOrder>({
+    resolver: zodResolver(cancelOrderSchema),
   });
 
-  const formSubmit = (form: CancelPurchaseOrder) => {
+  const formSubmit = (form: CancelOrder) => {
     onSubmit(form);
   };
 
@@ -41,7 +41,7 @@ export const CancelModal = ({
       <Form {...form}>
         <FormField
           control={form.control}
-          name="cancellationReason"
+          name="reason"
           render={({ field }) => (
             <FormItem className="mb-4">
               <FormLabel>Notes</FormLabel>

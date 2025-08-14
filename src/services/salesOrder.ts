@@ -1,4 +1,4 @@
-import type { SalesOrder } from ".";
+import { CancelOrder, SalesOrder } from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 
@@ -6,8 +6,8 @@ export default class SalesOrderService extends BaseService<SalesOrder> {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/sales" });
   }
-  updateStatus = async (id: number, data: SalesOrder) => {
-    const response = await this.http.patch(`${this.url}/${id}/status`, data);
+  cancelOrder = async (id: number, payload: CancelOrder) => {
+    const response = await this.http.patch(`${this.url}/${id}/cancel`, payload);
     return response;
   };
 }

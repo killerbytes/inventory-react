@@ -6,21 +6,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import React from "react";
-
-import { supplierServices, type APIResponse, type Supplier } from "@/services";
-import { Toaster } from "@/components/ui/sonner";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { PaginatedResponse, Supplier } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supplierServices } from "@/services";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import Pager from "@/components/Pager";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
+import React from "react";
 
 export default function Suppliers() {
   const [page, setPage] = React.useState(1);
-  const [data, setData] = React.useState<APIResponse<Supplier[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<Supplier[]>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -44,8 +51,7 @@ export default function Suppliers() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await supplierServices.getAll(filter);
-      const data = response.data;
+      const data = await supplierServices.getAll(filter);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -93,93 +99,100 @@ export default function Suppliers() {
 
   return (
     <div>
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
-        <div className="flex w-full items-center px-2">
-          <h1 className="font-medium">Suppliers</h1>
-
-          <div className="ml-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Suppliers
+          </CardTitle>
+          <CardAction>
             <Button
+              className="shadow-sm"
               onClick={() => {
                 handleToggle({ addModal: true });
               }}
             >
               <Plus /> Add Supplier
             </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <Input
+              placeholder="Search supplier"
+              className="w-full mb-4"
+              value={filter.q}
+              onChange={(e) => {
+                setFilter((prev) => ({
+                  ...prev,
+                  q: e.target.value,
+                  page: 1,
+                }));
+              }}
+            />
           </div>
-        </div>
-      </header>
-      <div>
-        <Input
-          placeholder="Search products"
-          className="w-full mb-4"
-          value={filter.q}
-          onChange={(e) => {
-            setFilter((prev) => ({
-              ...prev,
-              q: e.target.value,
-              page: 1,
-            }));
-          }}
-        />
-      </div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    onClick={() => requestSort(column.key)}
-                    style={{ cursor: "pointer" }}
-                    title={column.title}
-                    className={column.className}
-                  >
-                    {column.title}
-                    {filter.sort === column.key && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {filter.order === "asc" ? "↑" : "↓"}
-                      </span>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.data?.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">
-                    {item.name}
-                    <p className="text-xs text-muted-foreground">
-                      {item.address}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    {item.contact}
-                    <p className="text-xs text-muted-foreground">
-                      {item.phone}
-                    </p>
-                  </TableCell>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setSelected(item);
-                        handleToggle({ editModal: true });
-                      }}
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                  </TableHead>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Pager data={data} page={page} setPage={setPage} />
-        </>
-      )}
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableHead
+                        key={column.key}
+                        onClick={() => requestSort(column.key)}
+                        style={{ cursor: "pointer" }}
+                        title={column.title}
+                        className={column.className}
+                      >
+                        {column.title}
+                        {filter.sort === column.key && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {filter.order === "asc" ? "↑" : "↓"}
+                          </span>
+                        )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data?.data?.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">
+                        {item.name}
+                        <p className="text-xs text-muted-foreground">
+                          {item.address}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        {item.contact}
+                        <p className="text-xs text-muted-foreground">
+                          {item.phone}
+                        </p>
+                      </TableCell>
+                      <TableHead className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelected(item);
+                            handleToggle({ editModal: true });
+                          }}
+                        >
+                          <Pencil size={16} />
+                        </Button>
+                      </TableHead>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <Pager data={data} page={page} setPage={setPage} />
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {toggle.addModal && (
         <AddModal
@@ -201,7 +214,6 @@ export default function Suppliers() {
           data={selected as Supplier}
         />
       )}
-      <Toaster position="bottom-right" richColors />
     </div>
   );
 }

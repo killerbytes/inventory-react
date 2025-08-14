@@ -4,21 +4,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { APIResponse, CategorizedProductList, Product } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { categoryServices, productServices } from "@/services";
-import NewPackageModal from "../Inventory/NewPackageModal";
+import { CategorizedProductList, Product } from "@/types";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import CreateProductModal from "./CreateProductModal";
+import { GLOBAL_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
+import CombinationItem from "./CombinationItem";
+import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
-import { Plus, PlusIcon } from "lucide-react";
 import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
-import ProductList from "./ProductList";
 import ProductItem from "./ProductItem";
+import { PlusIcon } from "lucide-react";
 import React, { Fragment } from "react";
-import EditModal from "./EditModal";
-import AddModal from "./AddModal";
 
 export default function Products() {
   const [category, setCategory] = React.useState<number>();
@@ -39,7 +41,7 @@ export default function Products() {
     categoryId: "ALL",
   });
   const [toggle, handleToggle] = useToggle({
-    addModal: false,
+    createProductModal: false,
     editModal: false,
     newPackageModal: false,
   });
@@ -83,130 +85,113 @@ export default function Products() {
 
   return (
     <div>
-      <header className="mb-4 py-2 flex w-full items-center">
-        <h1 className="scroll-m-20 font-semibold tracking-tight">Products</h1>
-        {/* <div className="ml-auto">
-          <Button
-            onClick={() => {
-              handleToggle({ addModal: true });
-            }}
-          >
-            <Plus /> Add Product
-          </Button>
-        </div> */}
-      </header>
-      <div className="flex gap-2">
-        <div className="w-full">
-          <div className="text-sm font-semibold mb-1">Search</div>
-          <Input
-            placeholder="Search products"
-            className="w-full mb-4"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-            }}
-          />
-        </div>
-        <div className="w-full">
-          <div className="text-sm font-semibold mb-1">Category</div>
-          <Select
-            value={filter.categoryId}
-            options={[{ id: "ALL", name: "ALL" }, ...categories]}
-            className="w-full mb-4"
-            labelKey="name"
-            valueKey="id"
-            onChange={(e) => {
-              const categoryId = (e.target as HTMLInputElement).value;
-              setFilter({
-                ...filter,
-                categoryId,
-              });
-            }}
-          />
-        </div>
-      </div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <Accordion
-            type="multiple"
-            className="w-full"
-            defaultValue={data.data?.map((item) => item.categoryId)}
-          >
-            {data.data?.map((item) => (
-              <AccordionItem value={item.categoryId} key={item.categoryId}>
-                <AccordionTrigger className="bg-accent px-2 rounded-none border py-2">
-                  {item.categoryName}
-                </AccordionTrigger>
-                <AccordionContent className="flex flex-col">
-                  {item.products.map((product) => (
-                    <Fragment key={product.id}>
-                      <ProductItem
-                        product={product}
-                        onSelect={setSelected}
-                        onToggle={handleToggle}
-                      />
-                      {product?.subProducts?.map((subItem: Product) => {
-                        return (
-                          <Fragment key={subItem.id}>
-                            <ProductItem
-                              product={subItem}
-                              sub={true}
-                              onSelect={setSelected}
-                              onToggle={handleToggle}
-                            />
-                          </Fragment>
-                        );
-                      })}
-                    </Fragment>
-                  ))}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Products
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <div className="w-full">
+              <div className="text-sm font-semibold mb-1">Search</div>
+              <Input
+                placeholder="Search products"
+                className="w-full mb-4"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                }}
+              />
+            </div>
+            <div className="w-full">
+              <div className="text-sm font-semibold mb-1">Category</div>
+              <Select
+                value={filter.categoryId}
+                options={[{ id: "ALL", name: "ALL" }, ...categories]}
+                className="w-full mb-4"
+                labelKey="name"
+                valueKey="id"
+                onChange={(e) => {
+                  const categoryId = (e.target as HTMLInputElement).value;
+                  setFilter({
+                    ...filter,
+                    categoryId,
+                  });
+                }}
+              />
+            </div>
+          </div>
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <Accordion
+              type="multiple"
+              className="w-full"
+              defaultValue={data.data?.map((item) => item.categoryId)}
+            >
+              {data.data?.map((item) => (
+                <AccordionItem value={item.categoryId} key={item.categoryId}>
+                  <AccordionTrigger
+                    className={cx("uppercase", GLOBAL_COLOR.CATEGORY)}
+                  >
+                    {item.categoryName}
+                  </AccordionTrigger>
+                  <AccordionContent className="flex flex-col">
+                    {item.products.map((product) => (
+                      <Fragment key={product.id}>
+                        <ProductItem
+                          item={product}
+                          onSelect={setSelected}
+                          onToggle={handleToggle}
+                        />
+                        {/* 
+                        {product.combinations?.map((combination: Product) => {
+                          return (
+                            <Fragment key={combination.id}>
+                              <CombinationItem
+                                item={combination}
+                                product={product}
+                                sub={true}
+                                onSelect={setSelected}
+                                onToggle={handleToggle}
+                              />
+                            </Fragment>
+                          );
+                        })} */}
+                      </Fragment>
+                    ))}
 
-                  <div className="flex justify-start  py-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => {
-                        setCategory(Number(item.categoryId));
-                        handleToggle({ addModal: true });
-                      }}
-                    >
-                      <PlusIcon />
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </>
-      )}
+                    <div className="flex justify-start  py-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-8 shadow-sm"
+                        onClick={() => {
+                          setCategory(Number(item.categoryId));
+                          handleToggle({ createProductModal: true });
+                        }}
+                      >
+                        <PlusIcon />
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+        </CardContent>
+      </Card>
 
-      {toggle.addModal && (
-        <AddModal
-          isOpen={true}
+      {toggle.createProductModal && (
+        <CreateProductModal
           categoryId={category}
-          onClose={() => {
-            handleToggle({ addModal: false });
-          }}
-          onSubmit={() => {
-            handleToggle({ addModal: false });
-            getData();
-          }}
-        />
-      )}
-
-      {toggle.editModal && (
-        <EditModal
           isOpen={true}
           onClose={() => {
-            handleToggle({ editModal: false });
+            handleToggle({ createProductModal: false });
           }}
-          onSubmit={() => {
-            handleToggle({ editModal: false });
-            getData();
-          }}
-          data={selected as Product}
         />
       )}
     </div>

@@ -1,22 +1,25 @@
 import InventoryTransactions from "./pages/Inventory/Transactions";
-import PurchaseDetails from "./pages/PurchaseOrders/Details";
+import PurchaseOrderDetails from "./pages/PurchaseOrders/Details";
 import { BrowserRouter, Routes, Route } from "react-router";
 import PurchaseCreate from "./pages/PurchaseOrders/Create";
 import SalesDetails from "./pages/SalesOrders/Details";
+import ProductDetails from "./pages/Products/Details";
 import SalesCreate from "./pages/SalesOrders/Create";
+import Movements from "./pages/Inventory/Movements";
 import PurchaseOrders from "./pages/PurchaseOrders";
+import ProductEdit from "./pages/Products/Edit";
 import SalesOrders from "./pages/SalesOrders";
+import { ROUTES } from "./utils/definitions";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
 import Inventory from "./pages/Inventory";
+import Customers from "./pages/Customers";
 import Layout from "./components/Layout";
 import Products from "./pages/Products";
 import Users from "./pages/Users";
-import Home from "./pages/Home";
-
-import { ROUTES } from "./utils/definitions";
 import Login from "./pages/Login";
 import Test from "./pages/Test";
+import Home from "./pages/Home";
 
 function App() {
   return (
@@ -32,11 +35,20 @@ function App() {
               </Layout>
             }
           />
+
           <Route
             path={ROUTES.SUPPLIERS}
             element={
               <Layout>
                 <Suppliers />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.CUSTOMERS}
+            element={
+              <Layout>
+                <Customers />
               </Layout>
             }
           />
@@ -46,6 +58,22 @@ function App() {
             element={
               <Layout>
                 <Categories />
+              </Layout>
+            }
+          />
+          <Route
+            path={`${ROUTES.PRODUCTS}/:id/edit`}
+            element={
+              <Layout>
+                <ProductEdit />
+              </Layout>
+            }
+          />
+          <Route
+            path={`${ROUTES.PRODUCTS}/:id`}
+            element={
+              <Layout>
+                <ProductDetails />
               </Layout>
             }
           />
@@ -77,7 +105,7 @@ function App() {
             path={`${ROUTES.PURCHASE_ORDERS}/:id`}
             element={
               <Layout>
-                <PurchaseDetails />
+                <PurchaseOrderDetails />
               </Layout>
             }
           />
@@ -91,18 +119,10 @@ function App() {
             }
           />
           <Route
-            path={ROUTES.INVENTORY}
+            path={ROUTES.INVENTORY_MOVEMENTS}
             element={
               <Layout>
-                <Inventory />
-              </Layout>
-            }
-          />
-          <Route
-            path={ROUTES.INVENTORY_TRANSACTIONS}
-            element={
-              <Layout>
-                <InventoryTransactions />
+                <Movements />
               </Layout>
             }
           />

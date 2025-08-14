@@ -1,32 +1,38 @@
 import {
-  purchaseOrderServices,
-  type APIResponse,
-  type PurchaseOrder,
-} from "@/services";
-import {
-  MODE_OF_PAYMENT,
+  MODE_OF_PAYMENT_COLOR,
   ORDER_STATUS_OPTIONS,
   PAGINATION,
+  STATUS_COLOR,
 } from "@/utils/definitions";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
-import { endOfMonth, set, startOfMonth } from "date-fns";
+import { PaginatedResponse, PurchaseOrder } from "@/types";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router-dom";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
+import { purchaseOrderServices } from "@/services";
 import { ColumnDef } from "@tanstack/react-table";
+import { mappedStatusHistory } from "@/lib/utils";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { cx } from "class-variance-authority";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
-import Badge from "@/components/Badge";
 import { Plus } from "lucide-react";
 import React from "react";
 
 export default function PurchaseOrders() {
   const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
-  const [data, setData] = React.useState<APIResponse<PurchaseOrder[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<PurchaseOrder[]>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -65,7 +71,7 @@ export default function PurchaseOrders() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const data: APIResponse<PurchaseOrder[]> =
+      const data: PaginatedResponse<PurchaseOrder[]> =
         await purchaseOrderServices.getAll(filter);
       setData(data);
     } catch (error) {
@@ -96,21 +102,34 @@ export default function PurchaseOrders() {
       header: "Supplier",
     },
     {
-      accessorKey: "orderByUser.name",
-      header: "Order By",
-    },
-    {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.original.status?.toLowerCase();
-        return <Badge type={status} />;
+        const status = row.original.status;
+        return (
+          <ColorBadge colorMap={STATUS_COLOR}>{String(status)}</ColorBadge>
+        );
+      },
+    },
+    {
+      accessorKey: "statusHistory",
+      header: "Date",
+      cell: ({ row }) => {
+        const statusHistoryMap = mappedStatusHistory(
+          row.original.orderStatusHistory ?? [],
+        );
+        return formatDate(statusHistoryMap[row.original.status]?.changedAt);
       },
     },
     {
       accessorKey: "orderDate",
-      header: "Order Date",
-      cell: ({ row }) => formatDate(row.getValue("orderDate")),
+      header: "User",
+      cell: ({ row }) => {
+        const statusHistoryMap = mappedStatusHistory(
+          row.original.orderStatusHistory ?? [],
+        );
+        return statusHistoryMap[row.original.status]?.user.name;
+      },
     },
     {
       accessorKey: "deliveryDate",
@@ -120,14 +139,23 @@ export default function PurchaseOrders() {
     {
       accessorKey: "modeOfPayment",
       header: "Payment Mode",
+      meta: {
+        headerClassName: "text-center",
+        className: "text-center",
+      },
       cell: ({ row }) => {
-        return <Badge type={row.original.modeOfPayment} />;
+        return (
+          <ColorBadge colorMap={MODE_OF_PAYMENT_COLOR}>
+            {String(row.original.modeOfPayment)}
+          </ColorBadge>
+        );
       },
     },
     {
       accessorKey: "totalAmount",
-      header: () => <div className="text-right">Total Amount</div>,
+      header: () => "Total Amount",
       meta: {
+        headerClassName: "text-right",
         className: "text-right",
       },
       cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
@@ -136,66 +164,78 @@ export default function PurchaseOrders() {
 
   return (
     <div>
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear mb-4">
-        <div className="flex w-full items-center">
-          <h1 className="font-medium">Purchase Orders</h1>
-
-          <div className="ml-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Purchase Orders
+          </CardTitle>
+          <CardAction>
             <Link to="/purchases/new">
-              <Button>
+              <Button className="shadow-md">
                 <Plus /> Create Order
               </Button>
             </Link>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2 justify-between">
+            <div>
+              <DateRangePicker
+                className="mb-4"
+                value={range}
+                onChange={setRange}
+              />
+            </div>
+            <div className="w-1/4">
+              <Select
+                options={ORDER_STATUS_OPTIONS}
+                value={ORDER_STATUS_OPTIONS[0].value}
+                onChange={(selected) => {
+                  if (selected === "ALL") {
+                    setFilter(({ ...prev }) => ({ ...prev, status: "" }));
+                  } else {
+                    setFilter((prev) => ({ ...prev, status: selected }));
+                  }
+                }}
+              />
+            </div>
           </div>
-        </div>
-      </header>
-      <div className="flex gap-2 justify-between">
-        <div>
-          <DateRangePicker className="mb-4" value={range} onChange={setRange} />
-        </div>
-        <div className="w-1/4">
-          <Select
-            options={ORDER_STATUS_OPTIONS}
-            value={ORDER_STATUS_OPTIONS[0].value}
-            onChange={(selected) => {
-              if (selected === "ALL") {
-                setFilter(({ ...prev }) => ({ ...prev, status: "" }));
-              } else {
-                setFilter((prev) => ({ ...prev, status: selected }));
-              }
-            }}
-          />
-        </div>
-      </div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <DataTable
-            data={data.data || []}
-            columns={columns}
-            onRowClick={(item: PurchaseOrder) =>
-              navigate(`/purchases/${item.id}`)
-            }
-            footer={
-              <TableRow>
-                <TableCell colSpan={7}>Total Amount</TableCell>
-                <TableCell className="text-right">
-                  {formatCurrency(
-                    data.data.reduce(
-                      (acc, item) => acc + parseFloat(item.totalAmount ?? "0"),
-                      0,
-                    ),
-                  )}
-                </TableCell>
-              </TableRow>
-            }
-          ></DataTable>
-          {data.totalPages > 1 && (
-            <Pager data={data} page={page} setPage={setPage} />
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <DataTable
+                data={data.data || []}
+                columns={columns}
+                onRowClick={(item: PurchaseOrder) =>
+                  navigate(`/purchases/${item.id}`)
+                }
+                renderFooter={(data: PurchaseOrder[]) => {
+                  return (
+                    <TableRow>
+                      <TableCell colSpan={7}>Total Amount</TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(
+                          data.reduce(
+                            (acc: number, item: PurchaseOrder) =>
+                              acc + parseFloat(item.totalAmount ?? "0"),
+                            0,
+                          ),
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }}
+              />
+              {data.totalPages > 1 && (
+                <Pager data={data} page={page} setPage={setPage} />
+              )}
+            </>
           )}
-        </>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

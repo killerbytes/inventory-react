@@ -1,23 +1,26 @@
+import { Control, Path, useWatch } from "react-hook-form";
 import { formatCurrency } from "@/utils/formatters";
-import { Control, useWatch } from "react-hook-form";
-import { PurchaseOrder } from "@/services";
 import React from "react";
 
-export default function Amount({
+import { FieldValues } from "react-hook-form";
+
+export default function AmountColumn<T extends FieldValues>({
   index,
+  name,
   control,
 }: {
   index: number;
-  control: Control<PurchaseOrder>;
+  control: Control<T>;
+  name: Path<T>;
 }) {
   const [value, setValue] = React.useState(0);
   const quantity = useWatch({
     control,
-    name: `purchaseOrderItems.${index}.quantity`,
+    name: `${name}.${index}.quantity` as Path<T>,
   });
   const price = useWatch({
     control,
-    name: `purchaseOrderItems.${index}.unitPrice`,
+    name: `${name}.${index}.purchasePrice` as Path<T>,
   });
 
   React.useEffect(() => {

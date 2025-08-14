@@ -1,28 +1,31 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import React from "react";
 
-import { userServices, type APIResponse, type User } from "@/services";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { DataTable } from "@/components/DataTable";
+import { ColumnDef } from "@tanstack/react-table";
+import { PaginatedResponse, User } from "@/types";
 import { Toaster } from "@/components/ui/sonner";
 import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
+import { userServices } from "@/services";
 import Pager from "@/components/Pager";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 
 export default function Users() {
   const [page, setPage] = React.useState(1);
-  const [data, setData] = React.useState<APIResponse<User[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<User[]>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -45,8 +48,7 @@ export default function Users() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const response = await userServices.getAll(filter);
-      const data = response.data;
+      const data = await userServices.getAll(filter);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -74,128 +76,107 @@ export default function Users() {
     }));
   };
 
-  const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      className: "w-[50%]",
-    },
-    {
-      title: "Username",
-      dataIndex: "username",
-      key: "username",
-      className: "w-[50%]",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      className: "w-[50%]",
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "isActive",
-      className: "text-right",
-    },
-    {
-      dataIndex: "actions",
-      key: "actions",
-    },
-  ];
+  const columns = React.useMemo<ColumnDef<User>[]>(
+    () => [
+      {
+        accessorKey: "id",
+        header: "ID",
+        meta: {
+          className: "w-0",
+        },
+        cell: ({ row }) => (
+          <Button
+            onClick={() => setSelectedUser(row.original)}
+            variant="outline"
+          >
+            <Pencil size={16} />
+          </Button>
+        ),
+      },
+      {
+        accessorKey: "name",
+        header: "Name",
+        meta: {
+          className: "w-50",
+        },
+      },
+      {
+        accessorKey: "username",
+        header: "Username",
+        meta: {
+          className: "w-50",
+        },
+      },
+      {
+        accessorKey: "email",
+        header: "Email",
+        meta: {
+          className: "w-50",
+        },
+      },
+      {
+        accessorKey: "isActive",
+        header: "Active",
+        meta: {
+          className: "w-50",
+        },
+        cell: ({ row }) => {
+          return (
+            <Badge variant={row.original.isActive ? "default" : "secondary"}>
+              {row.original.isActive ? "Active" : "Inactive"}
+            </Badge>
+          );
+        },
+      },
+    ],
+    [],
+  );
 
   return (
     <div>
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
-        <div className="flex w-full items-center px-2">
-          <h1 className="text-base font-medium">Users</h1>
-
-          <div className="ml-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Users
+          </CardTitle>
+          <CardAction>
             <Button
               onClick={() => {
                 handleToggle({ addModal: true });
               }}
             >
-              <Plus /> Add User
+              <Plus /> New User
             </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <Input
+              placeholder="Search products"
+              className="w-full mb-4"
+              value={filter.q}
+              onChange={(e) => {
+                setFilter((prev) => ({
+                  ...prev,
+                  q: e.target.value,
+                  page: 1,
+                }));
+              }}
+            />
           </div>
-        </div>
-      </header>
-      <div>
-        <Input
-          placeholder="Search products"
-          className="w-full mb-4"
-          value={filter.q}
-          onChange={(e) => {
-            setFilter((prev) => ({
-              ...prev,
-              q: e.target.value,
-              page: 1,
-            }));
-          }}
-        />
-      </div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    onClick={() => requestSort(column.key)}
-                    style={{ cursor: "pointer" }}
-                    title={column.title}
-                    className={column.className}
-                  >
-                    {column.title}
-                    {filter.sort === column.key && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {filter.order === "asc" ? "↑" : "↓"}
-                      </span>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.data.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.id}</TableCell>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={user.isActive ? "default" : "secondary"}>
-                      {user.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableHead className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        handleToggle({ editModal: true });
-                      }}
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                  </TableHead>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Pager data={data} page={page} setPage={setPage} />
-        </>
-      )}
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <DataTable data={data?.data || []} columns={columns} />
+
+              <Pager data={data} page={page} setPage={setPage} />
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {toggle.addModal && (
         <AddModal

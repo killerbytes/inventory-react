@@ -2,23 +2,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { purchaseOrderServices } from "@/services";
 
-import { MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
-import { ApiError, ApiErrorResponse, PurchaseOrder } from "@/types";
-import { getErrorMessage, randomInt } from "@/lib/utils";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ERROR, MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
+import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
+import { ApiError, ApiErrorResponse, PurchaseOrderCreate } from "@/types";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import PendingOrderForm from "./Form/PendingOrderForm";
 import { Button } from "@/components/ui/button";
-import { purchaseOrderSchema } from "@/schemas";
 import useDebounce from "@/hooks/useDebounce";
-import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router";
-import OrderForm from "./Form/OrderForm";
-import { MoveLeft } from "lucide-react";
+import { randomInt } from "@/lib/utils";
 import { addWeeks } from "date-fns";
 import { toast } from "sonner";
 import React from "react";
 import * as z from "zod";
 
 const purchaseOrderItemDefault = {
-  productId: null,
+  combinationId: null,
   unitPrice: 0,
   quantity: 1,
   discount: null,
@@ -31,7 +37,6 @@ const purchaseOrderDefault = {
   modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
   orderDate: new Date().toISOString(),
   deliveryDate: new Date().toISOString(),
-  checkNumber: "",
   dueDate: addWeeks(new Date(), 1).toISOString(),
   purchaseOrderItems: Array.from({ length: 3 }, () => purchaseOrderItemDefault),
 };
@@ -49,14 +54,14 @@ export default function Create() {
       )
     : purchaseOrderDefault;
 
-  const form = useForm<PurchaseOrder>({
-    resolver: zodResolver(purchaseOrderSchema),
+  const form = useForm<PurchaseOrderCreate>({
+    resolver: zodResolver(purchaseOrderCreateSchema),
     defaultValues,
   });
 
   const data = useWatch({ control: form.control, name: "purchaseOrderItems" });
 
-  async function onSubmit(values: PurchaseOrder) {
+  async function onSubmit(values: PurchaseOrderCreate) {
     try {
       await purchaseOrderServices.create(values);
       toast.success(`Purchase Order created successfully`);
@@ -65,22 +70,21 @@ export default function Create() {
       );
       navigate(ROUTES.PURCHASE_ORDERS);
     } catch (error) {
-      const { errors } = getErrorMessage(error as ApiErrorResponse);
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(
-            err.field as keyof z.infer<typeof purchaseOrderSchema>,
-            {
-              type: "server",
-              message: err.message,
-            },
-          );
-        }
-      });
-      if (errors.length === 1) {
-        toast.error(errors[0].message);
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors?.forEach((err: ApiError) => {
+          if (err.field) {
+            form.setError(
+              err.field as keyof z.infer<typeof purchaseOrderSchema>,
+              {
+                type: "server",
+                message: err.message,
+              },
+            );
+          }
+        });
       } else {
-        toast.error("Submission failed");
+        toast.error("Submission failed: " + apiError.message);
       }
     }
   }
@@ -111,44 +115,46 @@ export default function Create() {
   return (
     <>
       <div>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => navigate(ROUTES.PURCHASE_ORDERS)}
-          className="mb-4"
-        >
-          <MoveLeft /> Back
-        </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <SidebarTrigger />
+              <div className="bg-border h-5 w-[1px]"></div>
+              Create Purchase Order
+            </CardTitle>
+            <CardAction></CardAction>
+          </CardHeader>
+          <CardContent>
+            <PendingOrderForm form={form} />
+            <div className="flex justify-end mt-auto">
+              <Button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const { purchaseOrderItems, ...rest } = form.getValues();
+                  const valid = purchaseOrderItems.filter(
+                    (item) => item.combinationId,
+                  );
+                  console.log(form.getValues(), form.formState.errors);
+                  form.reset({
+                    ...rest,
+                    purchaseOrderItems: valid.length
+                      ? valid
+                      : [purchaseOrderItemDefault],
+                  });
+                  form
+                    .handleSubmit(onSubmit)(e)
+                    .catch((error) => {
+                      console.error("Form submission error:", error);
+                    });
+                }}
+              >
+                Create Order
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      <h2 className="mb-4">Create Purchase Order</h2>
-      <Form {...form}>
-        <OrderForm form={form} />
-
-        <div className="flex justify-end mt-auto mb-10">
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              const { purchaseOrderItems, ...rest } = form.getValues();
-              const valid = purchaseOrderItems.filter((item) => item.productId);
-              console.log(form.formState.errors);
-              form.reset({
-                ...rest,
-                purchaseOrderItems: valid.length
-                  ? valid
-                  : [purchaseOrderItemDefault],
-              });
-              form
-                .handleSubmit(onSubmit)(e)
-                .catch((error) => {
-                  console.error("Form submission error:", error);
-                });
-            }}
-          >
-            Create Order
-          </Button>
-        </div>
-      </Form>
       {JSON.stringify(data)}
     </>
   );

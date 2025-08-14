@@ -1,9 +1,11 @@
+import { Store } from "lucide-react";
+
 export default function Header() {
   return (
-    <header className="bg-foreground text-background ">
-      <div className="container mx-auto flex justify-between items-center p-4 h-16">
-        <h1 className="text-xl">My Hardware</h1>
-      </div>
+    <header>
+      <h1 className="container mx-auto flex items-center p-4 gap-2 font-semibold text-2xl">
+        <Store /> My Hardware
+      </h1>
     </header>
   );
 }

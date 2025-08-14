@@ -15,7 +15,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Toaster } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
-import validations from "@/schemas";
 import { toast } from "sonner";
 import qs from "query-string";
 import * as z from "zod";
@@ -25,12 +24,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router";
 import { authServices } from "@/services";
+import { loginSchema } from "@/schemas";
 import { cn } from "@/lib/utils";
 
 export default function Login() {
   const navigate = useNavigate();
   const { callbackUrl } = qs.parse(window.location.search);
-  const { loginSchema } = validations;
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -41,7 +40,7 @@ export default function Login() {
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
-      const { data } = await authServices.login(values);
+      const data = await authServices.login(values);
       const { token } = data;
 
       await localStorage.setItem(

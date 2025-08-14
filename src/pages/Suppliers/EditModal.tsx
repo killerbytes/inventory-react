@@ -18,14 +18,15 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { ApiErrorResponse, Supplier } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supplierServices } from "@/services";
+import { ERROR } from "@/utils/definitions";
 import { supplierSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
-import { Supplier } from "@/types";
 import { toast } from "sonner";
 import React from "react";
 
@@ -48,22 +49,22 @@ export default function EditModal({
 
   async function onSubmit(values: Supplier) {
     try {
-      await supplierServices.update(data.id, values);
+      await supplierServices.update(Number(data.id), values);
       toast.success(`Submitted: ${values.name}`);
       form.reset();
       onClose();
     } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(err.field as keyof Supplier, {
-            type: "server",
-            message: err.message,
-          });
-        }
-      });
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors?.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field as keyof Supplier, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      }
       toast.error("Submission failed");
     } finally {
       cb();
@@ -72,21 +73,21 @@ export default function EditModal({
 
   const handleDelete = async () => {
     try {
-      await supplierServices.delete(data.id);
+      await supplierServices.delete(Number(data.id));
       toast.success(`Deleted: ${data.name}`);
       onClose();
     } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(err.field as keyof Supplier, {
-            type: "server",
-            message: err.message,
-          });
-        }
-      });
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors?.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field as keyof Supplier, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      }
       toast.error("Deletion failed");
     } finally {
       cb();
@@ -98,8 +99,8 @@ export default function EditModal({
       <Modal
         isOpen={isOpen}
         onOpenChange={onClose}
-        title="Edit Category"
-        description="Update the category details"
+        title="Edit Supplier"
+        description="Update the supplier details"
       >
         <Form {...form}>
           <form
@@ -187,15 +188,17 @@ export default function EditModal({
               <Button
                 type="button"
                 size="icon"
-                variant="destructive"
-                className="mr-auto"
+                variant="outline"
+                className="mr-auto text-red-500 shadow-sm"
                 onClick={() => {
                   setConfirm(true);
                 }}
               >
                 <Trash2 />
               </Button>
-              <Button type="submit">Save changes</Button>
+              <Button className="shadow-sm" type="submit">
+                Save changes
+              </Button>
             </DialogFooter>
           </form>
         </Form>

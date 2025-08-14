@@ -1,5 +1,4 @@
-import { RepackageInventory } from "@/types";
-import type { Filter, Inventory } from ".";
+import { Inventory, RepackageInventory } from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 

@@ -5,6 +5,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useGlobalStore } from "@/stores/global.store";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useUserStore } from "@/stores/user.store";
 import { ROUTES } from "@/utils/definitions";
@@ -14,6 +15,9 @@ import { User } from "@/types";
 import React from "react";
 
 export default function UserIcon() {
+  const { setVariantTemplateModal } = useGlobalStore();
+  const { user, setUser } = useUserStore();
+
   const getInitials = (name: string) => {
     const names = name.split(" ");
     let initials = names[0].substring(0, 1).toUpperCase();
@@ -22,8 +26,6 @@ export default function UserIcon() {
     }
     return initials;
   };
-
-  const { user, setUser } = useUserStore();
 
   React.useEffect(() => {
     const getData = async () => {
@@ -41,42 +43,19 @@ export default function UserIcon() {
     localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
     window.location.href = "/login";
   };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {user?.name && (
+    <>
+      {user?.name && (
+        <>
           <Avatar className="cursor-pointer ">
-            <AvatarFallback className="text-primary bg-gray-500">
+            <AvatarFallback className="bg-foreground text-background">
               {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
-        )}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem>Profile</DropdownMenuItem>
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem asChild>
-          <Link to={ROUTES.USERS}> Users</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to={ROUTES.PRODUCTS}>Products</Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <Link to={ROUTES.CATEGORIES}> Categories</Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <Link to={ROUTES.SUPPLIERS}> Suppliers</Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Link to={ROUTES.LOGIN} onClick={handleLogout}>
-            Logout
-          </Link>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {user?.name}
+        </>
+      )}
+    </>
   );
 }

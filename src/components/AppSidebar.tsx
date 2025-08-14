@@ -1,17 +1,42 @@
 import {
+  BanknoteArrowDown,
+  BanknoteArrowUp,
+  Home,
+  ClipboardList,
+  User2,
+  ChevronUp,
+  User,
+  Users,
+  ShoppingCart,
+  Boxes,
+  BookUser,
+  Container,
+  BookType,
+} from "lucide-react";
+import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar";
-import { BanknoteArrowDown, BanknoteArrowUp, Home, Target } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { useGlobalStore, useUserStore } from "@/stores";
 import { formatDateTime } from "@/utils/formatters";
 import { ROUTES } from "@/utils/definitions";
+import { Button } from "./ui/button";
 import { Link } from "react-router";
 import Header from "./Header";
+import UserIcon from "./User";
 import React from "react";
 import axios from "axios";
 
@@ -24,22 +49,52 @@ const items = [
   {
     title: "Purchases",
     url: ROUTES.PURCHASE_ORDERS,
-    icon: BanknoteArrowUp,
+    icon: BanknoteArrowDown,
   },
   {
     title: "Sales",
     url: ROUTES.SALES_ORDERS,
-    icon: BanknoteArrowDown,
+    icon: BanknoteArrowUp,
   },
   {
-    title: "Inventory",
-    url: ROUTES.INVENTORY,
-    icon: Target,
+    title: "Inventory Movements",
+    url: ROUTES.INVENTORY_MOVEMENTS,
+    icon: ClipboardList,
+  },
+];
+
+const menu = [
+  {
+    title: "Users",
+    url: ROUTES.USERS,
+    icon: Users,
+  },
+  {
+    title: "Products",
+    url: ROUTES.PRODUCTS,
+    icon: ShoppingCart,
+  },
+  {
+    title: "Categories",
+    url: ROUTES.CATEGORIES,
+    icon: Boxes,
+  },
+  {
+    title: "Customers",
+    url: ROUTES.CUSTOMERS,
+    icon: BookUser,
+  },
+  {
+    title: "Suppliers",
+    url: ROUTES.SUPPLIERS,
+    icon: Container,
   },
 ];
 
 export default function AppSidebar() {
   const [build, setBuild] = React.useState("");
+  const { logout } = useUserStore();
+  const { setVariantTemplateModal } = useGlobalStore();
 
   React.useEffect(() => {
     const getData = async () => {
@@ -54,7 +109,7 @@ export default function AppSidebar() {
       <SidebarContent>
         <Header />
         <SidebarGroup>
-          {/* <SidebarGroupLabel>Application</SidebarGroupLabel> */}
+          <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -63,11 +118,9 @@ export default function AppSidebar() {
                     asChild
                     isActive={item.url === location.pathname}
                   >
-                    <Link to={item.url} className="hover:text-gray-400 ">
-                      <div className="text-md w-full flex ">
-                        <item.icon />
-                        <span className="ml-2">{item.title}</span>
-                      </div>
+                    <Link to={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -75,11 +128,64 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <footer className="bg-foreground text-background py-4 text-center mt-auto">
+        <SidebarGroup>
+          <SidebarGroupLabel>Manage</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menu.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={item.url === location.pathname}
+                  >
+                    <Link to={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              <SidebarMenuItem key="Variant Templates">
+                <SidebarMenuButton
+                  asChild
+                  // isActive={item.url === location.pathname}
+                >
+                  <Link to="" onClick={() => setVariantTemplateModal(true)}>
+                    <BookType />
+                    <span>Variant Templates</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <UserIcon />
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                className="w-[--radix-popper-anchor-width]"
+              >
+                <DropdownMenuItem onClick={logout}>
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <footer className="text-center mt-auto border-t  py-2">
           &copy; {new Date().getFullYear()} My Hardware.{" "}
           <div className="text-xs">{formatDateTime(build)}</div>
         </footer>
-      </SidebarContent>
+      </SidebarFooter>
     </Sidebar>
   );
 }

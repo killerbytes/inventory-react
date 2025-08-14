@@ -31,7 +31,6 @@ export default function DatePicker({
   align = "start",
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>

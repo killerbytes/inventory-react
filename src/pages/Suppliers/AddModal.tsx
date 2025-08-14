@@ -155,7 +155,9 @@ export default function AddModal({
           />
 
           <DialogFooter>
-            <Button type="submit">Save changes</Button>
+            <Button className="shadow-sm" type="submit">
+              Save changes
+            </Button>
           </DialogFooter>
         </form>
       </Form>

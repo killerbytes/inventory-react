@@ -1,35 +1,39 @@
-import { TableCell, TableRow } from "@/components/ui/table";
-import React from "react";
-
 import {
-  SalesOrderItem,
-  salesOrderServices,
-  type APIResponse,
-  type SalesOrder,
-} from "@/services";
-import { ROUTES, ORDER_STATUS_OPTIONS, PAGINATION } from "@/utils/definitions";
+  MODE_OF_PAYMENT_COLOR,
+  ORDER_STATUS_OPTIONS,
+  PAGINATION,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/utils/formatters";
+import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { PaginatedResponse, SalesOrder } from "@/types";
 import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { Toaster } from "@/components/ui/sonner";
+import { mappedStatusHistory } from "@/lib/utils";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
+import { salesOrderServices } from "@/services";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
 import { Plus } from "lucide-react";
+import React from "react";
 
 export default function SalesOrders() {
   const navigate = useNavigate();
-  const [range, setRange] = React.useState({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
-  });
-
-  const [data, setData] = React.useState<APIResponse<SalesOrder[]>>({
+  const [page, setPage] = React.useState(1);
+  const [data, setData] = React.useState<PaginatedResponse<SalesOrder[]>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -37,10 +41,13 @@ export default function SalesOrders() {
   });
 
   const [loading, setLoading] = React.useState(true);
+  const [range, setRange] = React.useState({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
   const [filter, setFilter] = React.useState({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    status: "ALL",
     ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
     ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
@@ -65,7 +72,8 @@ export default function SalesOrders() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const data = await salesOrderServices.getAll(filter);
+      const data: PaginatedResponse<SalesOrder[]> =
+        await salesOrderServices.getAll(filter);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -78,47 +86,77 @@ export default function SalesOrders() {
     getData();
   }, [filter, getData]);
 
-  // const totalCompletedAmount = React.useMemo(() => {
-  //   return data.data?.reduce((acc, item) => {
-  //     return item.status === ORDER_STATUS.COMPLETED
-  //       ? acc + (parseFloat(item.totalAmount.toString()) || 0)
-  //       : acc;
-  //   }, 0);
-  // }, [data]);
+  React.useEffect(() => {
+    setFilter((prev) => ({
+      ...prev,
+      page,
+    }));
+  }, [page]);
 
-  const columns: ColumnDef<SalesOrderItem>[] = [
+  const columns: ColumnDef<SalesOrder>[] = [
     {
-      accessorKey: "customer",
-      header: "Customer",
+      accessorKey: "salesOrderNumber",
+      header: "PO #",
     },
     {
-      accessorKey: "receivedByUser.name",
-      header: "Received By",
+      accessorKey: "customer.name",
+      header: "Customer",
     },
     {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
+        const status = row.original.status;
         return (
-          <Badge
-            className={cx(
-              `capitalize status-${row.getValue("status").toLowerCase()}`,
-            )}
-          >
-            {row.getValue("status").toLowerCase()}
-          </Badge>
+          <ColorBadge colorMap={STATUS_COLOR}>{String(status)}</ColorBadge>
         );
       },
     },
     {
+      accessorKey: "statusHistory",
+      header: "Date",
+      cell: ({ row }) => {
+        const statusHistoryMap = mappedStatusHistory(
+          row.original.salesOrderStatusHistory ?? [],
+        );
+        return formatDate(statusHistoryMap[row.original.status]?.changedAt);
+      },
+    },
+    {
       accessorKey: "orderDate",
-      header: "Order Date",
-      cell: ({ row }) => formatDate(row.getValue("orderDate")),
+      header: "User",
+      cell: ({ row }) => {
+        const statusHistoryMap = mappedStatusHistory(
+          row.original.salesOrderStatusHistory ?? [],
+        );
+        return statusHistoryMap[row.original.status]?.user.name;
+      },
+    },
+    {
+      accessorKey: "deliveryDate",
+      header: "Delivery Date",
+      cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
+    },
+    {
+      accessorKey: "modeOfPayment",
+      header: "Payment Mode",
+      meta: {
+        headerClassName: "text-center",
+        className: "text-center",
+      },
+      cell: ({ row }) => {
+        return (
+          <ColorBadge colorMap={MODE_OF_PAYMENT_COLOR}>
+            {String(row.original.modeOfPayment)}
+          </ColorBadge>
+        );
+      },
     },
     {
       accessorKey: "totalAmount",
-      header: () => <div className="text-right">Total Amount</div>,
+      header: () => "Total Amount",
       meta: {
+        headerClassName: "text-right",
         className: "text-right",
       },
       cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
@@ -127,117 +165,78 @@ export default function SalesOrders() {
 
   return (
     <div>
-      <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear mb-4">
-        <div className="flex w-full items-center ">
-          <h1 className="font-medium">Sales Orders</h1>
-
-          <div className="ml-auto">
-            <Link to={ROUTES.SALES_ORDERS_CREATE}>
-              <Button>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Sales Orders
+          </CardTitle>
+          <CardAction>
+            <Link to={`${ROUTES.SALES_ORDERS}/new`}>
+              <Button className="shadow-md">
                 <Plus /> Create Order
               </Button>
             </Link>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2 justify-between">
+            <div>
+              <DateRangePicker
+                className="mb-4"
+                value={range}
+                onChange={setRange}
+              />
+            </div>
+            <div className="w-1/4">
+              <Select
+                options={ORDER_STATUS_OPTIONS}
+                value={ORDER_STATUS_OPTIONS[0].value}
+                onChange={(selected) => {
+                  if (selected === "ALL") {
+                    setFilter(({ ...prev }) => ({ ...prev, status: "" }));
+                  } else {
+                    setFilter((prev) => ({ ...prev, status: selected }));
+                  }
+                }}
+              />
+            </div>
           </div>
-        </div>
-      </header>
-      <div className="flex gap-2 justify-between mb-4">
-        <DateRangePicker className="mb-4" value={range} onChange={setRange} />
-
-        <div className="w-1/4">
-          <Select
-            options={ORDER_STATUS_OPTIONS}
-            value={filter.status}
-            onChange={(selected) => {
-              if (selected === "ALL") {
-                setFilter(({ status, ...prev }) => ({ ...prev }));
-              } else {
-                setFilter((prev) => ({ ...prev, status: selected }));
-              }
-            }}
-          />
-        </div>
-      </div>
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <DataTable
-            data={data.data || []}
-            columns={columns}
-            onRowClick={(item) => navigate(`${ROUTES.SALES_ORDERS}/${item.id}`)}
-            footer={
-              <TableRow>
-                <TableCell colSpan={4}>Total Amount</TableCell>
-                <TableCell className="text-right">
-                  {formatCurrency(
-                    data.data.reduce(
-                      (acc, item) => acc + parseFloat(item.totalAmount),
-                      0,
-                    ),
-                  )}
-                </TableCell>
-              </TableRow>
-            }
-          />
-          {data.totalPages > 1 && (
-            <Pager data={data} page={page} setPage={setPage} />
-          )}
-
-          {/* <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Name</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Received By</TableHead>
-                <TableHead>Total Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Order Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.data?.map((item) => (
-                <TableRow
-                  className="cursor-pointer"
-                  key={item.id}
-                  onClick={() => {
-                    navigate(`/sales/${item.id}`);
-                  }}
-                >
-                  <TableCell className="font-medium">{item.id}</TableCell>
-                  <TableCell>{item.customer}</TableCell>
-                  <TableCell>{item.receivedByUser.name}</TableCell>
-                  <TableCell>{formatCurrency(item.totalAmount)}</TableCell>
-                  <TableCell>
-                    {item.status && (
-                      <Badge
-                        className={cx(
-                          `capitalize status-${item.status.toLowerCase()}`,
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <DataTable
+                data={data.data || []}
+                columns={columns}
+                onRowClick={(item: SalesOrder) =>
+                  navigate(`${ROUTES.SALES_ORDERS}/${item.id}`)
+                }
+                renderFooter={(data: SalesOrder[]) => {
+                  return (
+                    <TableRow>
+                      <TableCell colSpan={7}>Total Amount</TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(
+                          data.reduce(
+                            (acc: number, item: SalesOrder) =>
+                              acc + parseFloat(item.totalAmount ?? "0"),
+                            0,
+                          ),
                         )}
-                      >
-                        {item.status.toLowerCase()}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>{formatDateTime(item.orderDate)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Pager
-            data={data}
-            page={filter.page}
-            setPage={(page) => {
-              setFilter((prev) => ({
-                ...prev,
-                page,
-              }));
-            }}
-          /> */}
-        </>
-      )}
-
-      <Toaster position="bottom-right" richColors />
+                      </TableCell>
+                    </TableRow>
+                  );
+                }}
+              />
+              {data.totalPages > 1 && (
+                <Pager data={data} page={page} setPage={setPage} />
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -26,7 +26,9 @@ export default function NumberInput({
       }}
       style={{ textAlign: "inherit" }}
       customInput={Input}
-      thousandSeparator={true}
+      allowNegative={false} // optional, no negatives
+      decimalScale={0} // ✅ no decimals
+      thousandSeparator=","
       {...(type === "currency" && {
         prefix: "₱",
         decimalScale: 2,

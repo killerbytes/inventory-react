@@ -1,7 +1,7 @@
 import { PackageOpen, Pencil } from "lucide-react";
 import { UNIT_COLOR } from "@/utils/definitions";
+import UnitBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import UnitBadge from "@/components/UnitBadge";
 import { cx } from "class-variance-authority";
 import { Inventory } from "@/types";
 
