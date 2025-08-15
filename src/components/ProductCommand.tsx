@@ -1,16 +1,13 @@
-import {
-  CategorizedProductList,
-  ProductCombinations,
-  PurchaseOrder,
-} from "@/types";
+import { CategorizedProductList, ProductCombinations } from "@/types";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import useExcludeExistToList from "@/hooks/useExcludeExists";
 import { Control, FieldValues } from "react-hook-form";
 import { formatCurrency } from "@/utils/formatters";
+import { UNIT_COLOR } from "@/utils/definitions";
 import ComboBox from "@/components/ComboBox";
 import { useProductStore } from "@/stores";
 import { CommandSeparator } from "cmdk";
-import UnitBadge from "./ColorBadge";
+import ColorBadge from "./ColorBadge";
 import React from "react";
 
 const defaultRenderOption = (
@@ -149,7 +146,9 @@ export default function ProductCommand<T extends FieldValues>({
               heading={
                 <div className="flex gap-2 items-center">
                   {product.name}{" "}
-                  <UnitBadge className="ml-auto">{product.unit}</UnitBadge>
+                  <ColorBadge className="ml-auto" colorMap={UNIT_COLOR}>
+                    {product.unit}
+                  </ColorBadge>
                 </div>
               }
               value={String(product.id)}

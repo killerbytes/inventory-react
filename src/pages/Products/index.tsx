@@ -5,13 +5,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CategorizedProductList, PaginatedResponse, Product } from "@/types";
 import { categoryServices, productServices } from "@/services";
-import { CategorizedProductList, Product } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import CreateProductModal from "./CreateProductModal";
+import { SelectItem } from "@/components/ui/select";
 import { GLOBAL_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
-import CombinationItem from "./CombinationItem";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
@@ -26,14 +26,14 @@ export default function Products() {
   const [category, setCategory] = React.useState<number>();
   const { categories, setCategories } = useCategoryStore();
   const [query, setQuery] = React.useState("");
-  const [data, setData] = React.useState<APIResponse<CategorizedProductList[]>>(
-    {
-      data: [],
-      total: 0,
-      totalPages: 0,
-      currentPage: 0,
-    },
-  );
+  const [data, setData] = React.useState<
+    PaginatedResponse<CategorizedProductList[]>
+  >({
+    data: [],
+    total: 0,
+    totalPages: 0,
+    currentPage: 0,
+  });
   const [selected, setSelected] = React.useState<Product | null>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
@@ -57,11 +57,11 @@ export default function Products() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await productServices.getAll({
+      const data = await productServices.getAll({
         ...filter,
         ...(filter.categoryId === "ALL" && { categoryId: null }),
       });
-      setData(res);
+      setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -71,7 +71,7 @@ export default function Products() {
 
   React.useEffect(() => {
     getData();
-  }, [filter, getData]);
+  }, [getData]);
 
   React.useEffect(() => {
     if (categories?.length === 0) {
@@ -112,8 +112,6 @@ export default function Products() {
                 value={filter.categoryId}
                 options={[{ id: "ALL", name: "ALL" }, ...categories]}
                 className="w-full mb-4"
-                labelKey="name"
-                valueKey="id"
                 onChange={(e) => {
                   const categoryId = (e.target as HTMLInputElement).value;
                   setFilter({
@@ -121,6 +119,11 @@ export default function Products() {
                     categoryId,
                   });
                 }}
+                renderOption={(option) => (
+                  <SelectItem key={option.id} value={String(option.id)}>
+                    {option.name}
+                  </SelectItem>
+                )}
               />
             </div>
           </div>
@@ -130,12 +133,16 @@ export default function Products() {
             <Accordion
               type="multiple"
               className="w-full"
-              defaultValue={data.data?.map((item) => item.categoryId)}
+              // defaultValue={data.data?.map((item) => item.categoryId)}
+              defaultValue={[1]}
             >
               {data.data?.map((item) => (
                 <AccordionItem value={item.categoryId} key={item.categoryId}>
                   <AccordionTrigger
-                    className={cx("uppercase", GLOBAL_COLOR.CATEGORY)}
+                    className={cx(
+                      "uppercase text-right",
+                      GLOBAL_COLOR.CATEGORY,
+                    )}
                   >
                     {item.categoryName}
                   </AccordionTrigger>

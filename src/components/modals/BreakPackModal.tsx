@@ -18,13 +18,14 @@ import CloneToUnitModal from "@/components/modals/CloneToUnitModal";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
+import { UNIT_COLOR } from "@/utils/definitions";
 import { DialogFooter } from "../ui/dialog";
 import { breakPackSchema } from "@/schemas";
 import useToggle from "@/hooks/useToggle";
 import { SelectItem } from "../ui/select";
 import NumberInput from "../NumberInput";
+import ColorBadge from "../ColorBadge";
 import React, { useMemo } from "react";
-import UnitBadge from "../ColorBadge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
@@ -50,7 +51,6 @@ export default function BreakPackModal({
   const [toggle, handleToggle] = useToggle({
     cloneModal: false,
   });
-  const [key, setKey] = React.useState(0);
 
   const form = useForm<BreakPack>({
     resolver: zodResolver(breakPackSchema),
@@ -150,7 +150,6 @@ export default function BreakPackModal({
   return (
     <>
       <Modal
-        key={key}
         isOpen={isOpen}
         onOpenChange={onClose}
         title="Break Pack"
@@ -172,12 +171,12 @@ export default function BreakPackModal({
                 }}
                 renderOption={(option) => (
                   <SelectItem key={option.id} value={String(option.id)}>
-                    <UnitBadge>
+                    <ColorBadge colorMap={UNIT_COLOR}>
                       {String(
                         products.find((p) => p.id === option.productId)?.unit ??
                           "",
                       )}
-                    </UnitBadge>
+                    </ColorBadge>
                   </SelectItem>
                 )}
               />
@@ -241,9 +240,12 @@ export default function BreakPackModal({
                           />
                           <FormDescription className="flex gap-1">
                             Unit per
-                            <UnitBadge className="text-[10px] py-0.5">
-                              {combination?.product?.unit}
-                            </UnitBadge>
+                            <ColorBadge
+                              className="text-[10px] py-0.5"
+                              colorMap={UNIT_COLOR}
+                            >
+                              {String(combination?.product?.unit)}
+                            </ColorBadge>
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -257,7 +259,9 @@ export default function BreakPackModal({
                   <div className="flex gap-2 justify-center">
                     <Badge variant="outline">{packsCount}</Badge>
                     {combination?.product?.unit && (
-                      <UnitBadge>{combination?.product?.unit}</UnitBadge>
+                      <ColorBadge colorMap={UNIT_COLOR}>
+                        {combination?.product?.unit}
+                      </ColorBadge>
                     )}
                     {combination?.values.map((i) => (
                       <Badge key={i.id} variant="outline">
@@ -276,7 +280,9 @@ export default function BreakPackModal({
                         <Badge variant="outline">
                           {resultCount > 0 ? resultCount : 0}
                         </Badge>
-                        <UnitBadge>{selectedUnit}</UnitBadge>
+                        <ColorBadge colorMap={UNIT_COLOR}>
+                          {selectedUnit}
+                        </ColorBadge>
 
                         {selected?.values?.map((i) => (
                           <Badge key={i.value} variant="outline">

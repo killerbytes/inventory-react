@@ -14,6 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ERROR } from "@/utils/definitions";
+import { ApiErrorResponse } from "@/types";
 import { signupSchema } from "@/schemas";
 import Modal from "@/components/Modal";
 
@@ -45,17 +47,17 @@ export default function AddModal({
       onClose();
       cb();
     } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(err.field as keyof Signup, {
-            type: "server",
-            message: err.message,
-          });
-        }
-      });
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors?.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field as keyof Signup, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      }
       toast.error("Submission failed");
     }
   }

@@ -14,20 +14,29 @@ export default function AmountColumn<T extends FieldValues>({
   name: Path<T>;
 }) {
   const [value, setValue] = React.useState(0);
-  const quantity = useWatch({
-    control,
-    name: `${name}.${index}.quantity` as Path<T>,
-  });
-  const price = useWatch({
-    control,
-    name: `${name}.${index}.purchasePrice` as Path<T>,
-  });
+  const quantity =
+    useWatch({
+      control,
+      name: `${name}.${index}.quantity` as Path<T>,
+    }) || 0;
+
+  const discount =
+    useWatch({
+      control,
+      name: `${name}.${index}.discount` as Path<T>,
+    }) || 0;
+
+  const price =
+    useWatch({
+      control,
+      name: `${name}.${index}.purchasePrice` as Path<T>,
+    }) || 0;
 
   React.useEffect(() => {
     const q = Number(quantity) || 0;
     const p = Number(price) || 0;
-    setValue(q * p);
-  }, [quantity, price, index, setValue]);
+    setValue(q * p - discount);
+  }, [discount, price, quantity]);
 
   return formatCurrency(value);
 }

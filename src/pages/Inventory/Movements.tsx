@@ -6,9 +6,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { INVENTORY_MOVEMENT_TYPE_COLOR, ROUTES } from "@/utils/definitions";
+import { inventoryMovementServices, inventoryServices } from "@/services";
 import { InventoryMovement, PaginatedResponse } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { inventoryMovementServices } from "@/services";
 import { getMappedVariantValues } from "@/lib/utils";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -25,7 +25,7 @@ export default function Movements() {
     currentPage: 0,
   });
   const getData = async () => {
-    const data = await inventoryMovementServices.getAll();
+    const data = await inventoryServices.movements();
     setData(data);
   };
 

@@ -11,7 +11,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { PaginatedResponse, User } from "@/types";
-import { Toaster } from "@/components/ui/sonner";
 import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,14 +66,6 @@ export default function Users() {
       page,
     }));
   }, [page]);
-
-  const requestSort = (sort: string) => {
-    setFilter((prev) => ({
-      ...prev,
-      sort,
-      order: prev.sort === sort && prev.order === "asc" ? "desc" : "asc",
-    }));
-  };
 
   const columns = React.useMemo<ColumnDef<User>[]>(
     () => [
@@ -198,8 +189,6 @@ export default function Users() {
           data={selectedUser as User}
         />
       )}
-
-      <Toaster position="bottom-right" richColors />
     </div>
   );
 }

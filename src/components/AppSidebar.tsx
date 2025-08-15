@@ -12,6 +12,7 @@ import {
   BookUser,
   Container,
   BookType,
+  PackageOpen,
 } from "lucide-react";
 import {
   Sidebar,
@@ -56,10 +57,18 @@ const items = [
     url: ROUTES.SALES_ORDERS,
     icon: BanknoteArrowUp,
   },
+];
+
+const reports = [
   {
     title: "Inventory Movements",
     url: ROUTES.INVENTORY_MOVEMENTS,
     icon: ClipboardList,
+  },
+  {
+    title: "Break Packs",
+    url: ROUTES.BREAK_PACKS,
+    icon: PackageOpen,
   },
 ];
 
@@ -128,6 +137,27 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Reports</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {reports.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={item.url === location.pathname}
+                  >
+                    <Link to={item.url}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         <SidebarGroup>
           <SidebarGroupLabel>Manage</SidebarGroupLabel>
           <SidebarGroupContent>

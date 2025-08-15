@@ -5,18 +5,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ERROR, ROUTES, UNIT_OPTIONS } from "@/utils/definitions";
+import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { ApiErrorResponse, Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { productServices } from "@/services";
-import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { SelectItem } from "../ui/select";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
-import UnitBadge from "../ColorBadge";
+import ColorBadge from "../ColorBadge";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -82,7 +81,9 @@ export default function CloneToUnitModal({
                   options={UNIT_OPTIONS}
                   renderOption={(option) => (
                     <SelectItem key={option.value} value={String(option.value)}>
-                      <UnitBadge>{String(option.label)}</UnitBadge>
+                      <ColorBadge colorMap={UNIT_COLOR}>
+                        {String(option.label)}
+                      </ColorBadge>
                     </SelectItem>
                   )}
                 />

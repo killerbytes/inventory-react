@@ -3,7 +3,6 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import { Product, ProductCombinations } from "@/types";
 import { DataTable } from "@/components/DataTable";
 import ColorBadge from "@/components/ColorBadge";
-import UnitBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Pencil } from "lucide-react";

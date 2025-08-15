@@ -123,7 +123,7 @@ export default function SalesOrders() {
       },
     },
     {
-      accessorKey: "orderDate",
+      accessorKey: "user.name",
       header: "User",
       cell: ({ row }) => {
         const statusHistoryMap = mappedStatusHistory(
@@ -134,7 +134,7 @@ export default function SalesOrders() {
     },
     {
       accessorKey: "deliveryDate",
-      header: "Delivery Date",
+      header: "For Delivery",
       cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
     },
     {

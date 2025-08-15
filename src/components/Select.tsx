@@ -24,7 +24,7 @@ interface SelectProps {
 
 function defaultRenderOption(option: SelectOption) {
   return (
-    <SelectItem key={option.value} value={String(option.value)}>
+    <SelectItem key={option.id} value={String(option.value)}>
       {option.label}
     </SelectItem>
   );
@@ -37,7 +37,7 @@ function Select(props: SelectProps) {
     value,
     renderOption = defaultRenderOption,
   } = props;
-
+  console.log(options);
   const [selectOptions, setSelectOptions] = React.useState<SelectOption[]>([]);
   React.useEffect(() => {
     setSelectOptions(options);

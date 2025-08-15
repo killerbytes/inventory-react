@@ -17,6 +17,7 @@ export const ROUTES = {
   SALES_ORDERS_CREATE: "/sales/new",
   SALES_ORDERS_DETAILS: "/sales/:id",
   INVENTORY_MOVEMENTS: "/inventory/movements",
+  BREAK_PACKS: "/break-packs",
 };
 
 export const ORDER_TYPE = {

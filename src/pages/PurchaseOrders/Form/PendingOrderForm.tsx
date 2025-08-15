@@ -191,7 +191,13 @@ export default function PendingOrderForm({
           className: "w-15",
         },
         cell: ({ row }) => {
-          return <UnitColumn index={row.index} form={form} />;
+          return (
+            <UnitColumn
+              index={row.index}
+              control={form.control}
+              name="purchaseOrderItems"
+            />
+          );
         },
       },
       {

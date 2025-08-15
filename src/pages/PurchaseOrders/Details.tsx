@@ -26,10 +26,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Ban,
+  ClipboardList,
+  EllipsisVertical,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
-import { Ban, EllipsisVertical, Save, Trash2 } from "lucide-react";
+import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
 import { CancelModal } from "../../components/modals/CancelModal";
-import OrderHistory from "@/components/modals/OrderHistoryModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import PendingOrderForm from "./Form/PendingOrderForm";
@@ -133,7 +139,7 @@ export default function Create() {
       form.reset(data);
     } catch (error) {
       const { message } = getErrorMessage(error as ApiErrorResponse);
-      toast.error("Submission failed - " + message);
+      toast.error(message);
       navigate(ROUTES.PURCHASE_ORDERS);
     }
   }, [form, id, navigate]);
@@ -166,56 +172,64 @@ export default function Create() {
             <ColorBadge colorMap={STATUS_COLOR}>
               {String(data?.status)}
             </ColorBadge>
-            {data?.status !== ORDER_STATUS.CANCELLED && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="size-8">
-                    <EllipsisVertical />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {(data?.status === ORDER_STATUS.RECEIVED ||
-                    data?.status === ORDER_STATUS.COMPLETED) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="size-8">
+                  <EllipsisVertical />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    handleToggle({ orderHistoryModal: true });
+                  }}
+                >
+                  <ClipboardList />
+                  Order History
+                </DropdownMenuItem>
+
+                {(data?.status === ORDER_STATUS.RECEIVED ||
+                  data?.status === ORDER_STATUS.COMPLETED) && (
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      handleToggle({ cancelModal: true });
+                    }}
+                  >
+                    <Ban color="red" />
+                    Cancel Order
+                  </DropdownMenuItem>
+                )}
+                {data?.status === ORDER_STATUS.PENDING && (
+                  <>
                     <DropdownMenuItem
-                      onSelect={(e) => {
+                      onClick={(e) => {
                         e.preventDefault();
-                        handleToggle({ cancelModal: true });
+                        console.log(form.formState.errors);
+                        form
+                          .handleSubmit(onSaveOrder)(e)
+                          .catch((error) => {
+                            console.error("Form submission error:", error);
+                          });
                       }}
                     >
-                      <Ban color="red" />
-                      Cancel Order
+                      <Save color="green" />
+                      Save
                     </DropdownMenuItem>
-                  )}
-                  {data?.status === ORDER_STATUS.PENDING && (
-                    <>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.preventDefault();
-                          console.log(form.formState.errors);
-                          form
-                            .handleSubmit(onSaveOrder)(e)
-                            .catch((error) => {
-                              console.error("Form submission error:", error);
-                            });
-                        }}
-                      >
-                        <Save color="green" />
-                        Save
+                    <ConfirmDialog
+                      title={`Void order`}
+                      onConfirm={onDeleteOrder}
+                    >
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Trash2 color="red" />
+                        Void
                       </DropdownMenuItem>
-                      <ConfirmDialog
-                        title={`Void order`}
-                        onConfirm={onDeleteOrder}
-                      >
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <Trash2 color="red" />
-                          Void
-                        </DropdownMenuItem>
-                      </ConfirmDialog>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                    </ConfirmDialog>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -284,7 +298,12 @@ export default function Create() {
           )}
         </CardContent>
       </Card>
-      <OrderHistory data={data?.purchaseOrderStatusHistory} />
+      {toggle.orderHistoryModal && (
+        <OrderHistoryModal
+          data={data?.purchaseOrderStatusHistory}
+          onClose={() => handleToggle({ orderHistoryModal: false })}
+        />
+      )}
     </div>
   );
 }

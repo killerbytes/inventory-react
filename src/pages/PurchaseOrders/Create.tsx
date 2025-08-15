@@ -24,11 +24,7 @@ import React from "react";
 import * as z from "zod";
 
 const purchaseOrderItemDefault = {
-  combinationId: null,
-  unitPrice: 0,
   quantity: 1,
-  discount: null,
-  discountNote: "",
 };
 
 const purchaseOrderDefault = {

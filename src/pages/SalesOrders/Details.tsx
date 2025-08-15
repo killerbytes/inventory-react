@@ -453,14 +453,16 @@ export default function SalesOrderDetails() {
           )}
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Order Items</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <StaticDataTable data={data} />
-        </CardContent>
-      </Card>
+      {"status" in data && data.status === ORDER_STATUS.RECEIVED && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Order Items</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StaticDataTable data={data} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* <Card>
         <CardHeader>
