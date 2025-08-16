@@ -25,7 +25,7 @@ export default function Movements() {
     currentPage: 0,
   });
   const getData = async () => {
-    const data = await inventoryServices.movements();
+    const data = await inventoryServices.getMovements();
     setData(data);
   };
 

@@ -64,19 +64,21 @@ export default function ProductForm({
         render={({ field }) => (
           <FormItem className="mb-4">
             <FormLabel>Category</FormLabel>
-            <Select
-              {...field}
-              options={categories}
-              onChange={(value) => {
-                field.onChange(value);
-              }}
-              value={String(field.value)}
-              renderOption={({ id, name }) => (
-                <SelectItem key={id} value={String(id)}>
-                  {name}
-                </SelectItem>
-              )}
-            />
+            <FormControl>
+              <Select
+                {...field}
+                options={categories}
+                onChange={(value) => {
+                  field.onChange(value);
+                }}
+                value={String(field.value)}
+                renderOption={({ id, name }) => (
+                  <SelectItem key={id} value={String(id)}>
+                    {name}
+                  </SelectItem>
+                )}
+              />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}
@@ -87,17 +89,36 @@ export default function ProductForm({
         render={({ field }) => (
           <FormItem className="mb-4">
             <FormLabel>Unit</FormLabel>
-            <Select
-              {...field}
-              options={UNIT_OPTIONS}
-              renderOption={(unit) => (
-                <SelectItem key={unit.value} value={String(unit.value)}>
-                  <ColorBadge colorMap={UNIT_COLOR}>
-                    {String(unit.label)}
-                  </ColorBadge>
-                </SelectItem>
-              )}
-            />
+            <FormControl>
+              <Select
+                {...field}
+                options={UNIT_OPTIONS}
+                renderOption={(unit) => (
+                  <SelectItem key={unit.value} value={String(unit.value)}>
+                    <ColorBadge colorMap={UNIT_COLOR}>
+                      {String(unit.label)}
+                    </ColorBadge>
+                  </SelectItem>
+                )}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="conversionFactor"
+        render={({ field }) => (
+          <FormItem className="mb-4">
+            <FormLabel>Conversion Factor</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                value={Number(field.value)}
+                placeholder="eg: How many pieces of this product are in a unit?"
+              />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}

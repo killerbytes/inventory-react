@@ -167,7 +167,11 @@ export default function ProductEdit() {
         accessorKey: "values.values." + variant.name,
         header: variant.name,
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return row.original.values[idx]?.value;
+          const x = row.original.values.findIndex(
+            (i) => i.variantTypeId === variants[idx].id,
+          );
+
+          return row.original.values[x]?.value;
         },
       })),
       {

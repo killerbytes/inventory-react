@@ -3,6 +3,7 @@ import PurchaseOrderDetails from "./pages/PurchaseOrders/Details";
 import { BrowserRouter, Routes, Route } from "react-router";
 import PurchaseCreate from "./pages/PurchaseOrders/Create";
 import SalesDetails from "./pages/SalesOrders/Details";
+import BreakPacks from "./pages/Inventory/BreakPacks";
 import ProductDetails from "./pages/Products/Details";
 import SalesCreate from "./pages/SalesOrders/Create";
 import Movements from "./pages/Inventory/Movements";
@@ -12,7 +13,6 @@ import SalesOrders from "./pages/SalesOrders";
 import { ROUTES } from "./utils/definitions";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
-import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
 import Layout from "./components/Layout";
 import Products from "./pages/Products";
@@ -118,6 +118,15 @@ function App() {
               </Layout>
             }
           />
+          <Route
+            path={ROUTES.BREAK_PACKS}
+            element={
+              <Layout>
+                <BreakPacks />
+              </Layout>
+            }
+          />
+
           <Route
             path={ROUTES.INVENTORY_MOVEMENTS}
             element={

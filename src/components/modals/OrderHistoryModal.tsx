@@ -37,7 +37,7 @@ export default function OrderHistoryModal({
                   {String(statusHistory.status)}
                 </ColorBadge>
               </TableCell>
-              <TableCell>{statusHistory.user.name}</TableCell>
+              <TableCell>{statusHistory.user.username}</TableCell>
               <TableCell>{formatDateTime(statusHistory.changedAt)}</TableCell>
             </TableRow>
           ))}

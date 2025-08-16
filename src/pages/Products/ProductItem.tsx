@@ -1,4 +1,5 @@
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import { getMappedProductComboName } from "@/lib/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { Product, ProductCombinations } from "@/types";
 import { DataTable } from "@/components/DataTable";
@@ -9,19 +10,16 @@ import { Pencil } from "lucide-react";
 import { Link } from "react-router";
 import React from "react";
 
-export default function ProductItem({
-  item,
-}: {
-  item: Product;
-  sub?: boolean;
-  onSelect: (product: Product) => void;
-  onToggle: (toggle: {
-    newPackageModal?: boolean;
-    editModal?: boolean;
-  }) => void;
-}) {
+export default function ProductItem({ item }: { item: Product }) {
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
+      {
+        header: "Product",
+        cell: ({ row }) => {
+          return getMappedProductComboName(item, row.original.values);
+        },
+      },
+
       {
         accessorKey: "price",
         header: "Price",
