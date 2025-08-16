@@ -132,9 +132,6 @@ export default function CombinationModal({
           </Button>
         ),
       },
-      // {
-      //   accessorKey: "sku",
-      // },
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
         header: variant.name,
@@ -154,12 +151,12 @@ export default function CombinationModal({
             index: number;
           };
         }) => {
-          // const variantIndex = values.findIndex(
-          //   (i) => i.variantTypeId === variants[idx].id,
-          // );
+          const x = values.findIndex(
+            (i) => i.variantTypeId === variants[idx].id,
+          );
           return (
             <Controller
-              name={`combinations.${index}.values.${idx}`}
+              name={`combinations.${index}.values.${x}`}
               control={form.control}
               render={({ field }) => {
                 return (
@@ -190,7 +187,7 @@ export default function CombinationModal({
         accessorKey: "price",
         header: () => <div className="text-right">Price</div>,
         meta: {
-          className: "text-right ",
+          className: "text-right w-0",
         },
         cell: ({ row }) => {
           return (
@@ -206,7 +203,7 @@ export default function CombinationModal({
         accessorKey: "reorderLevel",
         header: () => <div className="text-right">Re-order Level</div>,
         meta: {
-          className: "text-right",
+          className: "text-right w-0",
         },
         cell: ({ row }) => {
           return (

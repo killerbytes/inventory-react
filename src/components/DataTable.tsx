@@ -30,11 +30,9 @@ type DataTableProps<T> = {
   columns: ColumnDef<T>[];
   defaultColumn?: ColumnDef<T>;
   meta?: any;
-  children?: React.ReactNode;
   emptyText?: string;
   tableClassname?: string;
   className?: string;
-  footer?: React.ReactNode;
   onRowClick?: (item: T) => void;
   onUpdate?: (data: T[]) => void;
   showHeader?: boolean;
@@ -68,15 +66,13 @@ function DataTable<T>(props) {
     columns,
     defaultColumn,
     meta,
-    children,
     emptyText = "No results found",
     tableClassname,
     className,
-    footer,
     onRowClick,
     onUpdate,
     showHeader = true,
-    showFooter = true,
+    showFooter = false,
     renderFooter = defaultRenderFooter,
   }: DataTableProps<T> = props;
 

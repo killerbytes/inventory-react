@@ -123,13 +123,13 @@ export default function SalesOrders() {
       },
     },
     {
-      accessorKey: "user.name",
+      accessorKey: "user.username",
       header: "User",
       cell: ({ row }) => {
         const statusHistoryMap = mappedStatusHistory(
           row.original.salesOrderStatusHistory ?? [],
         );
-        return statusHistoryMap[row.original.status]?.user.name;
+        return statusHistoryMap[row.original.status]?.user.username;
       },
     },
     {

@@ -128,7 +128,7 @@ export default function PurchaseOrders() {
         const statusHistoryMap = mappedStatusHistory(
           row.original.orderStatusHistory ?? [],
         );
-        return statusHistoryMap[row.original.status]?.user.name;
+        return statusHistoryMap[row.original.status]?.user.username;
       },
     },
     {

@@ -1,4 +1,5 @@
 import { MODE_OF_PAYMENT, ORDER_STATUS } from "./utils/definitions";
+import { create } from "domain";
 import * as z from "zod";
 
 export const userSchema = z.object({
@@ -105,6 +106,7 @@ export const productBaseSchema = z.object({
   sku: z.string().nullish(),
   unit: z.string(),
   categoryId: z.number(),
+  conversionFactor: z.coerce.number().nullish(),
   variants: z.array(variantTypesSchema).nullish(),
   products_name_unit: z.string().nullish(),
 });
@@ -400,15 +402,18 @@ export const salesOrderSchema = salesOrderBaseSchema
   });
 
 export const breakPackSchema = z.object({
-  fromComboId: z.number(),
-  toComboId: z.number(),
-  packsCount: z.number().refine((val) => !isNaN(val), {
+  fromCombinationId: z.number(),
+  fromCombination: productCombinationsSchema.nullish(),
+  toCombinationId: z.number(),
+  toCombination: productCombinationsSchema.nullish(),
+  quantity: z.number().refine((val) => !isNaN(val), {
     message: "Number must not be NaN",
   }),
-  unitsPerPack: z.number().min(1, {
+  conversionFactor: z.number().min(1, {
     message: "Units per Pack must be at least 1.",
   }),
-  reason: z.string(),
+  user: z.any(),
+  createdAt: z.string().nullish(),
 });
 
 export const inventoryMovementSchema = z.object({

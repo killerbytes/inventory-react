@@ -7,15 +7,22 @@ import {
   FormMessage,
 } from "../ui/form";
 import {
+  AlertCircleIcon,
+  Copy,
+  MoveDown,
+  MoveRight,
+  PackageOpen,
+} from "lucide-react";
+import {
   ApiErrorResponse,
   BreakPack,
   Product,
   ProductCombinations,
 } from "@/types";
-import { AlertCircleIcon, Copy, MoveRight, PackageOpen, X } from "lucide-react";
 import { productCombinationServices, productServices } from "@/services";
 import CloneToUnitModal from "@/components/modals/CloneToUnitModal";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { getMappedProductComboName } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { UNIT_COLOR } from "@/utils/definitions";
@@ -27,7 +34,6 @@ import NumberInput from "../NumberInput";
 import ColorBadge from "../ColorBadge";
 import React, { useMemo } from "react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import Select from "../Select";
 import { toast } from "sonner";
@@ -55,21 +61,21 @@ export default function BreakPackModal({
   const form = useForm<BreakPack>({
     resolver: zodResolver(breakPackSchema),
     defaultValues: {
-      fromComboId: combinationId,
-      packsCount: 1,
-      reason: "",
+      fromCombinationId: combinationId,
+      quantity: 1,
     },
   });
 
-  const packsCount = useWatch({ control: form.control, name: "packsCount" });
-  const unitsPerPack = useWatch({
+  const quantity = useWatch({ control: form.control, name: "quantity" });
+  const conversionFactor = useWatch({
     control: form.control,
-    name: "unitsPerPack",
+    name: "conversionFactor",
   });
 
   const resultCount = useMemo(() => {
-    return packsCount * unitsPerPack;
-  }, [packsCount, unitsPerPack]);
+    console.log(quantity, conversionFactor);
+    return quantity * conversionFactor;
+  }, [quantity, conversionFactor]);
 
   const product = useMemo(() => {
     return combination?.product;
@@ -82,6 +88,7 @@ export default function BreakPackModal({
   React.useEffect(() => {
     const getProductCombination = async () => {
       const combination = await productCombinationServices.get(combinationId);
+      form.setValue("conversionFactor", combination.product.conversionFactor);
       setCombination(combination);
     };
     getProductCombination();
@@ -91,6 +98,7 @@ export default function BreakPackModal({
     const products = await productServices.getBySku(String(product?.sku));
     setProducts(products);
   }, [product?.sku]);
+
   React.useEffect(() => {
     if (product?.sku) {
       getProducts();
@@ -99,33 +107,39 @@ export default function BreakPackModal({
 
   React.useEffect(() => {
     const getData = async () => {
-      const map = combination?.values.map((i) => i.value).join(":");
+      const map = getMappedProductComboName(
+        combination?.product,
+        combination?.values,
+      );
+
       const options: ProductCombinations[] = [];
       products
         .filter((p) => p.unit !== product?.unit)
         .forEach((p) => {
+          console.log(p);
           p.combinations?.forEach((combo) => {
-            console.log(combo.values.map((i) => i.value).join(":"), "x", map);
-            if (combo.values.map((i) => i.value).join(":") === map) {
-              options.push(combo);
+            if (getMappedProductComboName(p, combo.values) === map) {
+              options.push({ ...combo, product: p });
             }
           });
         });
-
-      // console.log(
-      //   product.unit,
-      //   products.filter((p) => p.unit !== product?.unit),
-      // );
       setOptions(options);
     };
     if (product?.sku) {
       getData();
     }
-  }, [combination?.values, product?.sku, product?.unit, products]);
+  }, [
+    combination?.product,
+    combination?.values,
+    product?.sku,
+    product?.unit,
+    products,
+  ]);
+
   const handleBreakPack = async (values: BreakPack) => {
     try {
-      if ((combination?.inventory?.quantity ?? 0) < values.packsCount) {
-        form.setError("packsCount", {
+      if ((combination?.inventory?.quantity ?? 0) < values.quantity) {
+        form.setError("quantity", {
           type: "manual",
           message: "Not enough stock",
         });
@@ -147,6 +161,7 @@ export default function BreakPackModal({
       toast.error("Break Pack failed: " + apiError.message);
     }
   };
+
   return (
     <>
       <Modal
@@ -163,11 +178,7 @@ export default function BreakPackModal({
                 options={options}
                 onChange={(value) => {
                   setSelected(options.find((o) => o.id === Number(value)));
-                  form.setValue("toComboId", Number(value));
-                  console.log(
-                    value,
-                    options.find((o) => o.id === Number(value)),
-                  );
+                  form.setValue("toCombinationId", Number(value));
                 }}
                 renderOption={(option) => (
                   <SelectItem key={option.id} value={String(option.id)}>
@@ -210,7 +221,7 @@ export default function BreakPackModal({
               <div className="flex gap-2 justify-between items-start">
                 <FormField
                   control={form.control}
-                  name="packsCount"
+                  name="quantity"
                   render={({ field }) => (
                     <FormItem className="mb-4">
                       <FormLabel>Quantity</FormLabel>
@@ -222,91 +233,42 @@ export default function BreakPackModal({
                     </FormItem>
                   )}
                 />
-                {selected && (
-                  <>
-                    <div className="pt-8">
-                      <X size={20} />
-                    </div>
-                    <FormField
-                      control={form.control}
-                      name="unitsPerPack"
-                      render={({ field }) => (
-                        <FormItem className="mb-4">
-                          <FormLabel>Unit</FormLabel>
-                          <NumberInput
-                            {...field}
-                            type="number"
-                            placeholder={`eg: 1 ${combination?.product?.unit} = 12${selectedUnit}`}
-                          />
-                          <FormDescription className="flex gap-1">
-                            Unit per
-                            <ColorBadge
-                              className="text-[10px] py-0.5"
-                              colorMap={UNIT_COLOR}
-                            >
-                              {String(combination?.product?.unit)}
-                            </ColorBadge>
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
               </div>
-              <div className="flex gap-2 justify-between">
-                <div>
-                  <div className="flex gap-2 justify-center">
-                    <Badge variant="outline">{packsCount}</Badge>
-                    {combination?.product?.unit && (
-                      <ColorBadge colorMap={UNIT_COLOR}>
-                        {combination?.product?.unit}
-                      </ColorBadge>
-                    )}
-                    {combination?.values.map((i) => (
-                      <Badge key={i.id} variant="outline">
-                        {i.value}
-                      </Badge>
-                    ))}
-                  </div>
+              <div className="flex flex-col gap-2  ">
+                <div className="flex gap-2 justify-center">
+                  <Badge variant="outline">{quantity}</Badge>
+                  {combination?.product?.unit && (
+                    <ColorBadge colorMap={UNIT_COLOR}>
+                      {combination?.product?.unit}
+                    </ColorBadge>
+                  )}
+                  {getMappedProductComboName(
+                    combination?.product,
+                    combination?.values,
+                  )}
                 </div>
+
                 {selected && (
                   <>
-                    <div className="text-green-500 ">
-                      <MoveRight />
+                    <div className="text-green-500 flex justify-center">
+                      <MoveDown />
                     </div>
-                    <div>
-                      <div className="flex gap-2 justify-center">
-                        <Badge variant="outline">
-                          {resultCount > 0 ? resultCount : 0}
-                        </Badge>
-                        <ColorBadge colorMap={UNIT_COLOR}>
-                          {selectedUnit}
-                        </ColorBadge>
-
-                        {selected?.values?.map((i) => (
-                          <Badge key={i.value} variant="outline">
-                            {i.value}
-                          </Badge>
-                        ))}
-                      </div>
+                    <div className="flex gap-2 justify-center">
+                      <Badge variant="outline">
+                        {resultCount > 0 ? resultCount : 0}
+                      </Badge>
+                      <ColorBadge colorMap={UNIT_COLOR}>
+                        {selectedUnit}
+                      </ColorBadge>
+                      {getMappedProductComboName(
+                        selected?.product,
+                        selected?.values,
+                      )}
                     </div>
                   </>
                 )}
               </div>
             </div>
-
-            <FormField
-              control={form.control}
-              name="reason"
-              render={({ field }) => (
-                <FormItem className="mb-4">
-                  <FormLabel>Reason</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <DialogFooter>
               <Button

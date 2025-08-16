@@ -34,7 +34,6 @@ import {
 import { useGlobalStore, useUserStore } from "@/stores";
 import { formatDateTime } from "@/utils/formatters";
 import { ROUTES } from "@/utils/definitions";
-import { Button } from "./ui/button";
 import { Link } from "react-router";
 import Header from "./Header";
 import UserIcon from "./User";
@@ -74,14 +73,14 @@ const reports = [
 
 const menu = [
   {
-    title: "Users",
-    url: ROUTES.USERS,
-    icon: Users,
-  },
-  {
     title: "Products",
     url: ROUTES.PRODUCTS,
     icon: ShoppingCart,
+  },
+  {
+    title: "Users",
+    url: ROUTES.USERS,
+    icon: Users,
   },
   {
     title: "Categories",

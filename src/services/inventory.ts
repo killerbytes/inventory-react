@@ -7,8 +7,11 @@ export default class InventoryService extends BaseService<Inventory> {
     super({ ...props, url: "/inventory" });
   }
 
-  movements = async (data?: InventoryMovement) => {
-    const response = await this.http.post(`${this.url}/movements`, data);
-    return response;
+  getMovements = async (data?: InventoryMovement) => {
+    return await this.http.post(`${this.url}/movements`, data);
+  };
+
+  getBreakPacks = async (data) => {
+    return await this.http.post(`${this.url}/breakPacks`, data);
   };
 }
