@@ -1,13 +1,17 @@
 import {
+  INVENTORY_MOVEMENT_TYPE_COLOR,
+  ROUTES,
+  STOCK_ADJUSTMENT_TYPE_COLOR,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { INVENTORY_MOVEMENT_TYPE_COLOR, ROUTES } from "@/utils/definitions";
+import { InventoryMovement, PaginatedResponse, StockAdjustment } from "@/types";
 import { inventoryMovementServices, inventoryServices } from "@/services";
-import { InventoryMovement, PaginatedResponse } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getMappedVariantValues } from "@/lib/utils";
 import { formatDateTime } from "@/utils/formatters";
@@ -17,7 +21,7 @@ import ColorBadge from "@/components/ColorBadge";
 import { Link } from "react-router";
 import React from "react";
 
-export default function Movements() {
+export default function StockAdjustments() {
   const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
     data: [],
     total: 0,
@@ -25,7 +29,7 @@ export default function Movements() {
     currentPage: 0,
   });
   const getData = async () => {
-    const data = await inventoryServices.getMovements();
+    const data = await inventoryServices.getStockAdjustments({});
     setData(data);
   };
 
@@ -33,7 +37,7 @@ export default function Movements() {
     getData();
   }, []);
 
-  const columns = React.useMemo<ColumnDef<InventoryMovement>[]>(
+  const columns = React.useMemo<ColumnDef<StockAdjustment>[]>(
     () => [
       {
         header: "Product",
@@ -58,7 +62,7 @@ export default function Movements() {
         },
       },
       {
-        accessorKey: "type",
+        accessorKey: "reason",
         header: "Type",
         meta: {
           headerClassName: "text-center",
@@ -67,24 +71,24 @@ export default function Movements() {
         cell: ({ row }) => {
           return (
             <Link to={`${ROUTES.PURCHASE_ORDERS}/${row.original.reference}`}>
-              <ColorBadge colorMap={INVENTORY_MOVEMENT_TYPE_COLOR}>
-                {String(row.original.type)}
+              <ColorBadge colorMap={STOCK_ADJUSTMENT_TYPE_COLOR}>
+                {String(row.original.reason)}
               </ColorBadge>
             </Link>
           );
         },
       },
       {
-        accessorKey: "previous",
-        header: "Initial",
+        accessorKey: "systemQuantity",
+        header: "Original Inventory",
         meta: {
           headerClassName: "text-right",
           className: "w-0 text-right",
         },
       },
       {
-        accessorKey: "quantity",
-        header: "Quantity",
+        accessorKey: "newQuantity",
+        header: "New Inventory",
         meta: {
           headerClassName: "text-right",
           className: "text-right w-0",
@@ -92,28 +96,20 @@ export default function Movements() {
       },
 
       {
-        accessorKey: "new", // "inventory.quantity",
-        header: "Result",
-        meta: {
-          headerClassName: "text-right",
-          className: "w-0 text-right",
-        },
-      },
-      {
-        accessorKey: "reason",
-        header: "Reason",
+        accessorKey: "notes",
+        header: "Notes",
         meta: {
           className: "w",
         },
       },
       {
-        accessorKey: "updatedAt",
+        accessorKey: "createdAt",
         header: "Updated At",
         meta: {
           className: "w-0",
         },
         cell: ({ row }) => {
-          return formatDateTime(String(row.original.updatedAt));
+          return formatDateTime(String(row.original.createdAt));
         },
       },
       {
@@ -130,7 +126,7 @@ export default function Movements() {
         <CardTitle className="flex items-center gap-2">
           <SidebarTrigger />
           <div className="bg-border h-5 w-[1px]"></div>
-          Inventory Movements
+          Stock Adjustments
         </CardTitle>
         <CardAction></CardAction>
       </CardHeader>

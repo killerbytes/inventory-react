@@ -1,4 +1,4 @@
-import { BreakPack, ProductCombinations } from "@/types";
+import { BreakPack, ProductCombinations, StockAdjustment } from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 
@@ -19,6 +19,14 @@ export default class ProductCombinationService extends BaseService<ProductCombin
 
   breakPack = async (payload: BreakPack) => {
     const response = await this.http.post(`${this.url}/breakPack`, payload);
+    return response;
+  };
+
+  stockAdjustment = async (payload: StockAdjustment) => {
+    const response = await this.http.post(
+      `${this.url}/stockAdjustment`,
+      payload,
+    );
     return response;
   };
 }

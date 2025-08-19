@@ -11,16 +11,7 @@ import { useNavigate } from "react-router";
 import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import Modal from "@/components/Modal";
-import { toast } from "sonner";
 import React from "react";
-
-interface Exx {
-  code: string;
-  details: string;
-  errors: Record<string, string[]>;
-  message: string;
-  statusCode: number;
-}
 
 export default function CreateProductModal({
   categoryId,
@@ -45,7 +36,7 @@ export default function CreateProductModal({
   async function onSubmit(values: Product) {
     try {
       const product = await productServices.create(values);
-      navigate(`${ROUTES.PRODUCTS}/${product.id}/edit`);
+      navigate(`${ROUTES.PRODUCTS}/${product.id}`);
     } catch (error: unknown) {
       const { errors }: ApiErrorResponse = getErrorMessage(
         error as ApiErrorResponse,

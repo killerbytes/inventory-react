@@ -17,6 +17,7 @@ export const ROUTES = {
   SALES_ORDERS_CREATE: "/sales/new",
   SALES_ORDERS_DETAILS: "/sales/:id",
   INVENTORY_MOVEMENTS: "/inventory/movements",
+  STOCK_ADJUSTMENTS: "/stock-adjustments",
   BREAK_PACKS: "/break-packs",
 };
 
@@ -135,4 +136,35 @@ export const UNIT_OPTIONS = Object.values(UNIT).map((value) => ({
 export const ERROR = {
   VALIDATION_ERROR: "VALIDATION_ERROR",
   NOT_FOUND: "NOT_FOUND",
+};
+
+export const STOCK_ADJUSTMENT_TYPE = {
+  DAMAGED: "DAMAGED",
+  LOST: "LOST",
+  EXPIRED: "EXPIRED",
+  SAMPLE: "SAMPLE",
+  FOUND: "FOUND",
+  ERROR_CORRECTION: "ERROR_CORRECTION",
+  SUPPLIER_BONUS: "SUPPLIER_BONUS",
+  RETURN_TO_STOCK: "RETURN_TO_STOCK",
+  OTHER: "OTHER",
+};
+
+export const STOCK_ADJUSTMENT_TYPE_OPTIONS = Object.values(
+  STOCK_ADJUSTMENT_TYPE,
+).map((value) => ({
+  value,
+  label: formatLabel(value),
+}));
+
+export const STOCK_ADJUSTMENT_TYPE_COLOR = {
+  DAMAGED: "bg-red-500 text-white",
+  LOST: "bg-red-500 text-white",
+  EXPIRED: "bg-red-500 text-white",
+  FOUND: "bg-green-500 text-white",
+  SAMPLE: "bg-green-500 text-white",
+  ERROR_CORRECTION: "bg-yellow-500 text-white",
+  SUPPLIER_BONUS: "bg-green-500 text-white",
+  RETURN_TO_STOCK: "bg-green-500 text-white",
+  OTHER: "bg-gray-500 text-white",
 };
