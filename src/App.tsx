@@ -1,4 +1,5 @@
 import InventoryTransactions from "./pages/Inventory/Transactions";
+import StockAdjustments from "./pages/Inventory/StockAdjustments";
 import PurchaseOrderDetails from "./pages/PurchaseOrders/Details";
 import { BrowserRouter, Routes, Route } from "react-router";
 import PurchaseCreate from "./pages/PurchaseOrders/Create";
@@ -8,7 +9,7 @@ import ProductDetails from "./pages/Products/Details";
 import SalesCreate from "./pages/SalesOrders/Create";
 import Movements from "./pages/Inventory/Movements";
 import PurchaseOrders from "./pages/PurchaseOrders";
-import ProductEdit from "./pages/Products/Edit";
+import ProductEdit from "./pages/Products/Details";
 import SalesOrders from "./pages/SalesOrders";
 import { ROUTES } from "./utils/definitions";
 import Categories from "./pages/Categories";
@@ -58,14 +59,6 @@ function App() {
             element={
               <Layout>
                 <Categories />
-              </Layout>
-            }
-          />
-          <Route
-            path={`${ROUTES.PRODUCTS}/:id/edit`}
-            element={
-              <Layout>
-                <ProductEdit />
               </Layout>
             }
           />
@@ -127,6 +120,14 @@ function App() {
             }
           />
 
+          <Route
+            path={ROUTES.STOCK_ADJUSTMENTS}
+            element={
+              <Layout>
+                <StockAdjustments />
+              </Layout>
+            }
+          />
           <Route
             path={ROUTES.INVENTORY_MOVEMENTS}
             element={

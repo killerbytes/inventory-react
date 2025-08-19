@@ -429,3 +429,15 @@ export const inventoryMovementSchema = z.object({
   updatedAt: z.date(),
   reference: z.number(),
 });
+
+export const stockAdjustmentSchema = z.object({
+  referenceNo: z.string().nullish(),
+  combinationId: z.number(),
+  systemQuantity: z.number().nullish(),
+  newQuantity: z.number(),
+  difference: z.number().nullish(),
+  reason: z.string(),
+  notes: z.string().nullish(),
+  createdAt: z.string().nullish(),
+  createdBy: z.number().nullish(),
+});

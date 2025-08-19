@@ -76,7 +76,7 @@ export default function ProductItem({ item }: { item: Product }) {
             size="icon"
             className="size-8 shadow-sm"
           >
-            <Link to={`${ROUTES.PRODUCTS}/${item.id}/edit`}>
+            <Link to={`${ROUTES.PRODUCTS}/${item.id}`}>
               <Pencil />
             </Link>
           </Button>

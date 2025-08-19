@@ -13,6 +13,8 @@ import {
   Container,
   BookType,
   PackageOpen,
+  Pen,
+  Diff,
 } from "lucide-react";
 import {
   Sidebar,
@@ -68,6 +70,11 @@ const reports = [
     title: "Break Packs",
     url: ROUTES.BREAK_PACKS,
     icon: PackageOpen,
+  },
+  {
+    title: "Stock Adjustments",
+    url: ROUTES.STOCK_ADJUSTMENTS,
+    icon: Diff,
   },
 ];
 

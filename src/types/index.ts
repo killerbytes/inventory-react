@@ -16,6 +16,7 @@ import {
   salesOrderSchema,
   signupSchema,
   statusHistorySchema,
+  stockAdjustmentSchema,
   supplierSchema,
   userSchema,
   variantTypesSchema,
@@ -96,6 +97,7 @@ type VariantValues = z.infer<typeof variantValuesSchema>;
 type BreakPack = z.infer<typeof breakPackSchema>;
 type StatusHistory = z.infer<typeof statusHistorySchema>;
 type InventoryMovement = z.infer<typeof inventoryMovementSchema>;
+type StockAdjustment = z.infer<typeof stockAdjustmentSchema>;
 
 export type {
   User,
@@ -119,4 +121,5 @@ export type {
   BreakPack,
   StatusHistory,
   InventoryMovement,
+  StockAdjustment,
 };
