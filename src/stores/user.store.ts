@@ -13,6 +13,14 @@ export const useUserStore = create<UserStore>((set) => ({
   logout: () => {
     localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
     window.location.href = "/login";
-    set({ user: {} });
+    set({
+      user: {
+        id: 0,
+        name: "",
+        email: "",
+        username: "",
+        isActive: false,
+      },
+    });
   },
 }));

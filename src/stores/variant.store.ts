@@ -1,12 +1,12 @@
-import { Variant } from "@/types";
+import { VariantTypes } from "@/types";
 import { create } from "zustand";
 
 type VariantStore = {
-  variants: Variant[];
-  setVariants: (variants: Variant[]) => void;
+  variants: VariantTypes[];
+  setVariants: (variants: VariantTypes[]) => void;
 };
 
 export const useVariantStore = create<VariantStore>((set) => ({
   variants: [],
-  setVariants: (variants: Variant[]) => set({ variants }),
+  setVariants: (variants: VariantTypes[]) => set({ variants }),
 }));
