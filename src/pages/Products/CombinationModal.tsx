@@ -1,12 +1,4 @@
 import {
-  ProductCombinations,
-  Product,
-  VariantValues,
-  VariantTypes,
-  ApiErrorResponse,
-  ApiError,
-} from "@/types";
-import {
   Form,
   FormControl,
   FormField,
@@ -14,7 +6,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  ProductCombinations,
+  Product,
+  VariantValues,
+  VariantTypes,
+  ApiErrorResponse,
+} from "@/types";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productCombinationsSchema } from "@/schemas";
@@ -23,7 +23,6 @@ import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { getErrorMessage } from "@/lib/utils";
 import { ERROR } from "@/utils/definitions";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
@@ -67,20 +66,43 @@ export default function CombinationModal({
     name: "combinations",
   });
 
-  const productCombinationDefaultValue = {
-    productId: product.id,
+  const productCombinationDefaultValue: ProductCombinations = {
+    productId: Number(product.id),
     reorderLevel: 10,
+    price: 0,
     values: variants.map((i) => ({
       variantTypeId: i.id,
+      value: "",
     })),
   };
 
   const getData = React.useCallback(async () => {
     if (product.id) {
-      const { combinations, variants } =
-        await productCombinationServices.getByProductId(product.id);
-      form.reset({
+      const {
         combinations,
+        variants,
+      }: { combinations: ProductCombinations[]; variants: VariantTypes[] } =
+        await productCombinationServices.getByProductId(product.id);
+      await productCombinationServices.getByProductId(product.id);
+
+      const map = combinations.map((i) => i.values);
+      const x = combinations.map((i) => {
+        return {
+          ...i,
+          values: Array(variants.length).fill(null),
+        };
+      });
+
+      const xx = x.map((i, index) => {
+        map[index].forEach((j) => {
+          const idx = variants.findIndex((v) => v.id === j.variantTypeId);
+          i.values[idx] = j;
+        });
+        return { ...i };
+      });
+
+      form.reset({
+        combinations: xx,
       });
       setVariants(variants);
     }
@@ -140,10 +162,7 @@ export default function CombinationModal({
           className: "w-0",
         },
         cell: ({
-          row: {
-            original: { values },
-            index,
-          },
+          row: { index },
         }: {
           row: {
             original: {
@@ -152,12 +171,9 @@ export default function CombinationModal({
             index: number;
           };
         }) => {
-          const x = values
-            .filter(Boolean)
-            .findIndex((i) => i.variantTypeId === variants[idx].id);
           return (
             <Controller
-              name={`combinations.${index}.values.${x == -1 ? idx : x}`}
+              name={`combinations.${index}.values.${idx}`}
               control={form.control}
               render={({ field }) => {
                 return (
@@ -214,10 +230,16 @@ export default function CombinationModal({
         },
         cell: ({ row }) => {
           return (
-            <Controller
-              name={`combinations.${row.index}.reorderLevel`}
+            <FormField
               control={form.control}
-              render={({ field }) => <NumberInput {...field} />}
+              name={`combinations.${row.index}.reorderLevel`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
             />
           );
         },
@@ -259,24 +281,33 @@ export default function CombinationModal({
               <FormItem className="mb-2">
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
-                  <DataTable data={fields} columns={columns} />
+                  <DataTable
+                    data={fields}
+                    columns={columns}
+                    errors={form.formState.errors}
+                    showFooter={true}
+                    renderFooter={() => (
+                      <TableRow>
+                        <TableCell colSpan={8}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="shadow-sm"
+                            onClick={() =>
+                              append(productCombinationDefaultValue)
+                            }
+                          >
+                            <Plus />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex mb-8">
-            <Button
-              className="shadow-sm"
-              type="button"
-              variant="outline"
-              onClick={() => {
-                append(productCombinationDefaultValue);
-              }}
-            >
-              <Plus /> Add Variant
-            </Button>
-          </div>
 
           <div className="flex justify-end">
             <Button className="shadow-sm" type="submit">

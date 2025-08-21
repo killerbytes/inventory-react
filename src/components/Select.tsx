@@ -30,6 +30,7 @@ function defaultRenderOption(option: SelectOption) {
   );
 }
 function Select(props: SelectProps) {
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
   const {
     onChange,
     options,
@@ -38,6 +39,10 @@ function Select(props: SelectProps) {
     renderOption = defaultRenderOption,
   } = props;
   const [selectOptions, setSelectOptions] = React.useState<SelectOption[]>([]);
+  React.useEffect(() => {
+    triggerRef.current?.focus();
+  }, []);
+
   React.useEffect(() => {
     setSelectOptions(options);
   }, [options]);
@@ -53,7 +58,7 @@ function Select(props: SelectProps) {
       value={value || ""}
       onValueChange={handleChange}
     >
-      <SelectTrigger className={cx("w-full", className)}>
+      <SelectTrigger className={cx("w-full", className)} ref={triggerRef}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

@@ -15,6 +15,9 @@ export default function ProductItem({ item }: { item: Product }) {
       {
         accessorKey: "name",
         header: "Product",
+        meta: {
+          headerClassName: "h-0 py-1",
+        },
       },
 
       {
@@ -22,6 +25,7 @@ export default function ProductItem({ item }: { item: Product }) {
         header: "Price",
         meta: {
           headerClassName: "h-0",
+          className: "w-20",
         },
       },
       {
@@ -29,13 +33,15 @@ export default function ProductItem({ item }: { item: Product }) {
         accessorKey: "inventory.quantity",
         meta: {
           headerClassName: "h-0",
+          className: "w-20",
         },
       },
       {
-        header: "Re-order Level",
+        header: "Re-order",
         accessorKey: "reorderLevel",
         meta: {
           headerClassName: "h-0",
+          className: "w-20",
         },
       },
       ...(item.variants?.map((variant, idx) => ({
@@ -43,13 +49,14 @@ export default function ProductItem({ item }: { item: Product }) {
         header: variant.name,
         meta: {
           headerClassName: "h-0",
+          className: "w-20",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
           return row.original.values[idx]?.value;
         },
       })) || []),
     ],
-    [],
+    [item.variants],
   );
 
   return (

@@ -12,7 +12,10 @@ export default class ProductCombinationService extends BaseService<ProductCombin
     return response;
   };
 
-  updateByProductId = async (id: number, data: ProductCombinations[]) => {
+  updateByProductId = async (
+    id: number,
+    data: { combinations: ProductCombinations[] },
+  ) => {
     const response = await this.http.patch(`${this.url}/product/${id}`, data);
     return response;
   };

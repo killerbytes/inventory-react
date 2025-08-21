@@ -6,10 +6,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { PlusIcon, Save, Search, Trash2, X } from "lucide-react";
+import { Plus, PlusIcon, Save, Search, Trash2, X } from "lucide-react";
 import VariantCopyTemplateForm from "./VariantCopyTemplateForm";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { ColumnDef } from "@tanstack/react-table";
+import { TableCell, TableRow } from "../ui/table";
 import ConfirmDialog from "../ConfirmDialog";
 import { DialogFooter } from "../ui/dialog";
 import useToggle from "@/hooks/useToggle";
@@ -157,6 +158,23 @@ export default function VariantTypesForm({
                     columns={columns}
                     emptyText="Add values..."
                     showHeader={false}
+                    showFooter={true}
+                    renderFooter={() => (
+                      <TableRow>
+                        <TableCell colSpan={8}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="shadow-sm"
+                            onClick={() =>
+                              append({ value: "", variantTypeId: undefined })
+                            }
+                          >
+                            <Plus />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   />
                 </FormControl>
                 <FormMessage />
@@ -169,7 +187,6 @@ export default function VariantTypesForm({
                 variant="outline"
                 className="shadow-sm"
                 onClick={() => {
-                  console.log(selected);
                   handleToggle({
                     saveTemplateModal: true,
                   });
@@ -179,15 +196,6 @@ export default function VariantTypesForm({
                 <Save />
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="shadow-sm"
-              onClick={() => append({ value: "", variantTypeId: undefined })}
-              type="button"
-            >
-              <PlusIcon />
-            </Button>
           </div>
 
           <DialogFooter>

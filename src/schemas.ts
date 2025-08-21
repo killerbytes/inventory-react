@@ -116,7 +116,9 @@ export const productCombinationsSchema = z.object({
   productId: z.number(),
   name: z.string().nullish(),
   sku: z.string().nullish(),
-  price: z.coerce.number(),
+  price: z.coerce.number().min(1, {
+    message: "Price must be at least 1.",
+  }),
   reorderLevel: z.coerce.number(),
   values: z.array(variantValuesSchema),
   inventory: inventorySchema.nullish(),
