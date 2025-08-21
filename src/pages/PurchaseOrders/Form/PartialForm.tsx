@@ -13,6 +13,7 @@ import {
   UNIT_COLOR,
 } from "@/utils/definitions";
 import PurchaseOrderItemForm from "../../../components/forms/OrderItemForm";
+import OrderItemForm from "../../../components/forms/OrderItemForm";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { PurchaseOrder, PurchaseOrderItem } from "@/types";
@@ -190,7 +191,7 @@ export default function PartialForm({
           )}
         />
         <div>
-          <PurchaseOrderItemForm
+          <OrderItemForm
             fields={fields}
             columns={columns}
             errors={errors}

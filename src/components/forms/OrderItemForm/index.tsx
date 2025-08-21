@@ -76,7 +76,7 @@ function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
   );
 }
 
-export default function PurchaseOrderItemForm<T>({
+export default function OrderItemForm<T>({
   name,
   control,
   fields,
@@ -85,7 +85,6 @@ export default function PurchaseOrderItemForm<T>({
   append,
 }: TableProps<T, ColumnDef<T>>) {
   const footerValues = useWatch({ control, name });
-
   return (
     <>
       <DataTable
@@ -94,7 +93,7 @@ export default function PurchaseOrderItemForm<T>({
         // tableClassname={cx({
         //   "border-red-500": errors.purchaseOrderItems,
         // })}
-        renderFooter={() => renderFooter(footerValues, append ?? (() => {}))}
+        renderFooter={() => renderFooter(footerValues, append)}
         showFooter
       />
     </>

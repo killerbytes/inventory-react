@@ -14,7 +14,6 @@ import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
 import { productServices, supplierServices } from "@/services";
 import OrderItemForm from "@/components/forms/OrderItemForm";
 import { useProductStore, useSupplierStore } from "@/stores";
-import { F } from "@faker-js/faker/dist/airline-BUL6NtOJ";
 import ProductCommand from "@/components/ProductCommand";
 import { CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
@@ -95,6 +94,7 @@ export default function PendingOrderForm({
               name={`purchaseOrderItems.${row.index}.combinationId`}
               control={form.control}
               render={({ field }) => {
+                console.log(field.value);
                 return (
                   <ProductCommand
                     {...field}

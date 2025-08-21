@@ -266,7 +266,7 @@ export default function FullForm({
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Order Date</FormLabel>
-                  <DatePicker {...field} value={String(field.value)} />
+                  <DatePicker {...field} value={String(field.value ?? "")} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -327,7 +327,6 @@ export default function FullForm({
                         purchasePrice: 0,
                         discount: 0,
                         discountNote: "",
-                        unit: "",
                         combinationId: null,
                       })
                     }

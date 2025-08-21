@@ -4,10 +4,7 @@ import {
   ProductCombinations,
   StatusHistory,
 } from "@/types";
-import {
-  ProductCommandSelectedItemProps,
-  SelectedItemProps,
-} from "@/components/ProductCommand";
+import { ProductCommandSelectedItemProps } from "@/components/ProductCommand";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -55,7 +52,7 @@ export function flattenedProduct(data: CategorizedProductList[]) {
       prod.combinations.forEach((comb) => {
         flattened.push({
           combinationId: comb.id,
-          productName: prod.name,
+          name: comb.name,
           unit: prod.unit,
           price: comb.price,
           variants: comb.values.map((v) => ({
@@ -67,6 +64,7 @@ export function flattenedProduct(data: CategorizedProductList[]) {
       });
     }),
   );
+
   return flattened;
 }
 

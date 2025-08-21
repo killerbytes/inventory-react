@@ -464,33 +464,6 @@ export default function SalesOrderDetails() {
         </Card>
       )}
 
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Sales Order Items</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <StaticDataTable data={data} />
-        </CardContent>
-      </Card> */}
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Delivery Details</CardTitle>
-          <CardAction>
-            <Label htmlFor="terms">Delivery Date</Label>
-            <div className="font-semibold text-sm">
-              {formatDate(data?.deliveryDate)}
-            </div>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <Label htmlFor="terms">Delivery Address</Label>
-          <div className="font-semibold text-sm">{data?.deliveryAddress}</div>
-          <Label htmlFor="terms">Delivery Notes</Label>
-          <div className="font-semibold text-sm">
-            {data?.deliveryInstructions}
-          </div>
-        </CardContent>
-      </Card> */}
       {toggle.orderHistoryModal && (
         <OrderHistoryModal
           data={

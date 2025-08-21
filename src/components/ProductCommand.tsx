@@ -49,7 +49,7 @@ const defaultRenderOption = (
 
 export interface ProductCommandSelectedItemProps {
   combinationId?: number;
-  productName: string;
+  name: string;
   unit: string;
   price: number;
   variants: { variantType: string | undefined; value: string }[];
@@ -63,8 +63,7 @@ const SelectedItem = ({
   return (
     selected && (
       <div className="flex gap-2 items-center">
-        <span>{selected.productName}</span>
-        {selected.variants.map((v) => v.value).join(" | ")}
+        <span>{selected.name}</span>
       </div>
     )
   );

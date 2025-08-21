@@ -74,7 +74,6 @@ export default function Create() {
 
   async function onSubmit(values: SalesOrderCreate) {
     try {
-      console.log(values);
       await salesOrderServices.create(values);
       toast.success(`Sales Order created successfully`);
       navigate(ROUTES.SALES_ORDERS);
