@@ -6,10 +6,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import PurchaseOrderItemForm, {
-  AmountColumn,
-  UnitColumn,
-} from "../../components/forms/OrderItemForm";
 import {
   Card,
   CardAction,
@@ -17,9 +13,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Controller, useFieldArray, useWatch } from "react-hook-form";
+import OrderItemForm, {
+  AmountColumn,
+  UnitColumn,
+} from "../../components/forms/OrderItemForm";
+import {
+  Controller,
+  useFieldArray,
+  UseFormReturn,
+  useWatch,
+} from "react-hook-form";
 import { useCustomerStore } from "@/stores/customer.store";
 import ProductCommand from "@/components/ProductCommand";
+import { StaticInput } from "@/components/StaticInput";
+import { SalesOrder, SalesOrderItem } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
@@ -29,11 +36,14 @@ import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useProductStore } from "@/stores";
-import { SalesOrderItem } from "@/types";
 import { Trash2 } from "lucide-react";
 import React from "react";
 
-export default function FullForm({ form }) {
+export default function FullForm({
+  form,
+}: {
+  form: UseFormReturn<SalesOrder>;
+}) {
   const { customers } = useCustomerStore();
   const { products, flatProducts } = useProductStore();
   const { fields, append, remove } = useFieldArray({
@@ -101,7 +111,8 @@ export default function FullForm({ form }) {
         accessorKey: "purchasePrice",
         header: "Price",
         meta: {
-          className: "text-right min-w-[100px] w-[110px]",
+          headerClassName: "text-center",
+          className: "text-right",
         },
         cell: ({ row }) => (
           <FormField
@@ -110,10 +121,12 @@ export default function FullForm({ form }) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <NumberInput
-                    {...field}
+                  <StaticInput
                     value={Number(field.value)}
-                    type="currency"
+                    error={
+                      form.formState.errors.salesOrderItems?.[row.index]
+                        ?.purchasePrice?.message
+                    }
                   />
                 </FormControl>
               </FormItem>
@@ -121,10 +134,12 @@ export default function FullForm({ form }) {
           />
         ),
       },
+
       {
         accessorKey: "quantity",
         header: "Quantity",
         meta: {
+          headerClassName: "text-center",
           className: "text-right min-w-[90px] w-[90px]",
         },
         cell: ({ row }) => (
@@ -140,6 +155,7 @@ export default function FullForm({ form }) {
         header: "Unit",
         meta: {
           className: "w-15",
+          headerClassName: "text-center",
         },
         cell: ({ row }) => {
           return (
@@ -176,7 +192,9 @@ export default function FullForm({ form }) {
           <Controller
             name={`salesOrderItems.${row.index}.discountNote`}
             control={form.control}
-            render={({ field }) => <Input {...field} />}
+            render={({ field }) => (
+              <Input {...field} value={field.value ?? ""} />
+            )}
           />
         ),
       },
@@ -248,7 +266,7 @@ export default function FullForm({ form }) {
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Order Date</FormLabel>
-                  <DatePicker {...field} />
+                  <DatePicker {...field} value={String(field.value)} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -291,22 +309,26 @@ export default function FullForm({ form }) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="salesOrderItems"
             render={() => (
               <FormItem className="w-full mb-4">
                 <FormControl>
-                  <PurchaseOrderItemForm
-                    control={form.control}
+                  <OrderItemForm
                     fields={fields}
-                    name="salesOrderItems"
+                    control={form.control}
                     columns={columns}
+                    name="salesOrderItems"
                     errors={form.formState.errors}
                     append={() =>
                       append({
                         quantity: 1,
+                        purchasePrice: 0,
+                        discount: 0,
+                        discountNote: "",
+                        unit: "",
+                        combinationId: null,
                       })
                     }
                   />

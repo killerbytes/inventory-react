@@ -1,7 +1,6 @@
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -9,7 +8,6 @@ import {
 } from "../ui/form";
 import {
   ERROR,
-  STOCK_ADJUSTMENT_TYPE,
   STOCK_ADJUSTMENT_TYPE_OPTIONS,
   UNIT_COLOR,
 } from "@/utils/definitions";
@@ -18,21 +16,19 @@ import {
   ProductCombinations,
   StockAdjustment,
 } from "@/types";
-import { getMappedProductComboName } from "@/lib/utils";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { stockAdjustmentSchema } from "@/schemas";
-import { cx } from "class-variance-authority";
 import { DialogFooter } from "../ui/dialog";
 import { useForm } from "react-hook-form";
 import { Textarea } from "../ui/textarea";
 import NumberInput from "../NumberInput";
 import ColorBadge from "../ColorBadge";
 import { Button } from "../ui/button";
-import React, { use } from "react";
 import Select from "../Select";
 import { toast } from "sonner";
 import Modal from "../Modal";
+import React from "react";
 
 export default function StockAdjustmentModal({
   isOpen,
@@ -89,7 +85,7 @@ export default function StockAdjustmentModal({
     <Modal isOpen={isOpen} onOpenChange={onClose} title="Stock Adjustment">
       <div className="flex flex-col gap-2">
         <div className="flex gap-2 font-semibold">
-          {data && getMappedProductComboName(data.product, data.values)}{" "}
+          {data?.name}
           <span className="text-primary">
             {data && data.inventory?.quantity}
           </span>

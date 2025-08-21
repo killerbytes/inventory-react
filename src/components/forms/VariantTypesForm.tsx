@@ -7,6 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { PlusIcon, Save, Search, Trash2, X } from "lucide-react";
+import VariantCopyTemplateForm from "./VariantCopyTemplateForm";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { ColumnDef } from "@tanstack/react-table";
 import ConfirmDialog from "../ConfirmDialog";
@@ -16,7 +17,6 @@ import { DataTable } from "../DataTable";
 import { VariantTypes } from "@/types";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
 import Modal from "../Modal";
 import React from "react";
 
@@ -55,6 +55,8 @@ export default function VariantTypesForm({
             variant="ghost"
             className="text-red-500"
             size="sm"
+            type="button"
+            tabIndex={-1}
           >
             <X />
           </Button>
@@ -166,11 +168,12 @@ export default function VariantTypesForm({
               <Button
                 variant="outline"
                 className="shadow-sm"
-                onClick={() =>
+                onClick={() => {
+                  console.log(selected);
                   handleToggle({
                     saveTemplateModal: true,
-                  })
-                }
+                  });
+                }}
                 type="button"
               >
                 <Save />
@@ -206,7 +209,7 @@ export default function VariantTypesForm({
           </DialogFooter>
         </form>
       </Form>
-      {toggle.saveTemplateModal && (
+      {toggle.saveTemplateModal && selected && (
         <Modal
           isOpen={toggle.saveTemplateModal}
           onOpenChange={() => handleToggle({ saveTemplateModal: false })}
@@ -214,27 +217,7 @@ export default function VariantTypesForm({
           description="Save as new Variant Template"
           size="sm"
         >
-          <div className="flex items-center gap-2">
-            {selected?.values.map((i) => <Badge>{i.value}</Badge>)}
-          </div>
-          <Input placeholder="New Template Name" />
-          <DialogFooter>
-            <Button
-              type="button"
-              className="shadow-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                console.log(form.getValues(), form.formState.errors);
-                form
-                  .handleSubmit(onSubmit)(e)
-                  .catch((error) => {
-                    console.error("Form submission error:", error);
-                  });
-              }}
-            >
-              Save
-            </Button>
-          </DialogFooter>
+          <VariantCopyTemplateForm selected={selected} />
         </Modal>
       )}
     </>

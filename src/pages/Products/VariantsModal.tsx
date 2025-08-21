@@ -1,14 +1,13 @@
 import VariantTemplatePickerDialog from "@/components/VariantTemplatePickerDialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import VariantTypesForm from "@/components/forms/VariantTypesForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { variantTypesServices } from "@/services";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, Search } from "lucide-react";
 import { variantTypesSchema } from "@/schemas";
 import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
+import { PlusIcon } from "lucide-react";
 import Modal from "@/components/Modal";
 import { VariantTypes } from "@/types";
 import { toast } from "sonner";

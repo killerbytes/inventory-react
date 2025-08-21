@@ -159,13 +159,10 @@ export default function ProductEdit() {
 
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
-      // {
-      //   accessorKey: "sku",
-      //   header: "SKU",
-      //   meta: {
-      //     className: "w-50",
-      //   },
-      // },
+      {
+        accessorKey: "name",
+        header: "Name",
+      },
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
         header: variant.name,

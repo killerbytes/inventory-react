@@ -92,6 +92,8 @@ export const ORDER_STATUS_OPTIONS = Object.values(ORDER_STATUS).map(
 export const MODE_OF_PAYMENT = {
   CASH: "CASH",
   CHECK: "CHECK",
+  EWALLET: "EWALLET",
+  BANK: "BANK",
 } as const;
 
 export const MODE_OF_PAYMENT_COLOR = {
@@ -114,6 +116,8 @@ export const UNIT = {
   SET: "SET",
   PCS: "PCS",
   KGS: "KGS",
+  MTRS: "MTRS",
+  ROLLS: "ROLLS",
 };
 
 export const BREAK_PACK_UNITS = [UNIT.BOX, UNIT.BAG, UNIT.GAL, UNIT.PACK];

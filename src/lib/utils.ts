@@ -81,19 +81,19 @@ export const mappedStatusHistory = (
   return map;
 };
 
-export const getMappedVariantValues = (variants, values) => {
-  const mappedVariantValues = {};
-  variants?.forEach((val) => {
-    mappedVariantValues[val.name] = values.find(
-      (v) => v.variantTypeId === val.id,
-    ).value;
-  });
-  return mappedVariantValues;
-};
+// export const getMappedVariantValues = (variants, values) => {
+//   const mappedVariantValues = {};
+//   variants?.forEach((val) => {
+//     mappedVariantValues[val.name] = values.find(
+//       (v) => v.variantTypeId === val.id,
+//     )?.value;
+//   });
+//   return mappedVariantValues;
+// };
 
-export const getMappedProductComboName = (product, values) => {
-  const mapped = getMappedVariantValues(product?.variants, values);
-  return `${product?.name} - ${Object.keys(mapped)
-    .map((key) => `${key}: ${mapped[key]}`)
-    .join(" | ")}`;
-};
+// export const getMappedProductComboName = (product, values) => {
+//   const mapped = getMappedVariantValues(product?.variants, values);
+//   return `${product?.name} - ${Object.keys(mapped)
+//     .map((key) => `${key}: ${mapped[key]}`)
+//     .join(" | ")}`;
+// };

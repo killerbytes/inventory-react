@@ -29,9 +29,7 @@ const defaultRenderOption = (
       className="flex gap-2 items-center justify-between"
     >
       <div className="flex gap-2 items-center">
-        {combination.values.map((value) => {
-          return <span key={value.id}>{value.value}</span>;
-        })}
+        {combination.name}
         {combination.inventory?.quantity !== undefined &&
           combination.inventory?.quantity > 0 && (
             <small className="text-muted-foreground">
@@ -39,6 +37,9 @@ const defaultRenderOption = (
             </small>
           )}
       </div>
+      <ColorBadge className="ml-auto" colorMap={UNIT_COLOR}>
+        {String(combination.product?.unit)}
+      </ColorBadge>
       <span className="text-muted-foreground">
         {formatCurrency(combination.price)}
       </span>
@@ -141,24 +142,24 @@ export default function ProductCommand<T extends FieldValues>({
           color="red"
         >
           <CommandSeparator />
-          {item?.products?.map((product) => (
-            <CommandGroup
-              heading={
-                <div className="flex gap-2 items-center">
-                  {product.name}{" "}
-                  <ColorBadge className="ml-auto" colorMap={UNIT_COLOR}>
-                    {product.unit}
-                  </ColorBadge>
-                </div>
-              }
-              value={String(product.id)}
-              key={product.id}
-            >
-              {product.combinations?.map((combination) =>
-                renderOption(combination, handleOnChange),
-              )}
-            </CommandGroup>
-          ))}
+          {item?.products?.map((product) =>
+            // <CommandGroup
+            //   heading={
+            //     <div className="flex gap-2 items-center">
+            //       {product.name}{" "}
+            //       <ColorBadge className="ml-auto" colorMap={UNIT_COLOR}>
+            //         {product.unit}
+            //       </ColorBadge>
+            //     </div>
+            //   }
+            //   value={String(product.id)}
+            //   key={product.id}
+            // >
+            // </CommandGroup>
+            product.combinations?.map((combination) =>
+              renderOption(combination, handleOnChange),
+            ),
+          )}
         </CommandGroup>
       ))}
       <CommandSeparator />

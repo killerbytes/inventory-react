@@ -69,7 +69,6 @@ export default function CombinationModal({
 
   const productCombinationDefaultValue = {
     productId: product.id,
-    price: Number("123.00"),
     reorderLevel: 10,
     values: variants.map((i) => ({
       variantTypeId: i.id,
@@ -127,6 +126,8 @@ export default function CombinationModal({
             onClick={() => remove(row.index)}
             variant="outline"
             disabled={(row.original.inventory?.quantity ?? 0) > 0}
+            type="button"
+            tabIndex={-1}
           >
             <Trash2 />
           </Button>
@@ -151,19 +152,19 @@ export default function CombinationModal({
             index: number;
           };
         }) => {
-          const x = values.findIndex(
-            (i) => i.variantTypeId === variants[idx].id,
-          );
+          const x = values
+            .filter(Boolean)
+            .findIndex((i) => i.variantTypeId === variants[idx].id);
           return (
             <Controller
-              name={`combinations.${index}.values.${x}`}
+              name={`combinations.${index}.values.${x == -1 ? idx : x}`}
               control={form.control}
               render={({ field }) => {
                 return (
                   <Select
                     {...field}
                     value={String(
-                      variant.values.find((i) => i.id === field.value.id)?.id,
+                      variant.values.find((i) => i.id === field.value?.id)?.id,
                     )}
                     options={variant.values}
                     onChange={(value) => {
@@ -191,10 +192,16 @@ export default function CombinationModal({
         },
         cell: ({ row }) => {
           return (
-            <Controller
-              name={`combinations.${row.index}.price`}
+            <FormField
               control={form.control}
-              render={({ field }) => <NumberInput {...field} type="currency" />}
+              name={`combinations.${row.index}.price`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput {...field} type="currency" />
+                  </FormControl>
+                </FormItem>
+              )}
             />
           );
         },

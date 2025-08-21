@@ -115,7 +115,7 @@ export default function ProductForm({
             <FormControl>
               <Input
                 {...field}
-                value={Number(field.value)}
+                value={field.value ?? ""}
                 placeholder="eg: How many pieces of this product are in a unit?"
               />
             </FormControl>

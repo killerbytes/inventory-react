@@ -7,22 +7,15 @@ import {
   FormMessage,
 } from "../ui/form";
 import {
-  AlertCircleIcon,
-  Copy,
-  MoveDown,
-  MoveRight,
-  PackageOpen,
-} from "lucide-react";
-import {
   ApiErrorResponse,
   BreakPack,
   Product,
   ProductCombinations,
 } from "@/types";
+import { AlertCircleIcon, Copy, MoveDown, PackageOpen } from "lucide-react";
 import { productCombinationServices, productServices } from "@/services";
 import CloneToUnitModal from "@/components/modals/CloneToUnitModal";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { getMappedProductComboName } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { UNIT_COLOR } from "@/utils/definitions";
@@ -73,7 +66,6 @@ export default function BreakPackModal({
   });
 
   const resultCount = useMemo(() => {
-    console.log(quantity, conversionFactor);
     return quantity * conversionFactor;
   }, [quantity, conversionFactor]);
 
@@ -92,7 +84,7 @@ export default function BreakPackModal({
       setCombination(combination);
     };
     getProductCombination();
-  }, [combinationId]);
+  }, [combinationId, form]);
 
   const getProducts = React.useCallback(async () => {
     const products = await productServices.getBySku(String(product?.sku));
@@ -107,18 +99,12 @@ export default function BreakPackModal({
 
   React.useEffect(() => {
     const getData = async () => {
-      const map = getMappedProductComboName(
-        combination?.product,
-        combination?.values,
-      );
-
       const options: ProductCombinations[] = [];
       products
         .filter((p) => p.unit !== product?.unit)
         .forEach((p) => {
-          console.log(p);
           p.combinations?.forEach((combo) => {
-            if (getMappedProductComboName(p, combo.values) === map) {
+            if (combo.name === combination?.name) {
               options.push({ ...combo, product: p });
             }
           });
@@ -128,13 +114,7 @@ export default function BreakPackModal({
     if (product?.sku) {
       getData();
     }
-  }, [
-    combination?.product,
-    combination?.values,
-    product?.sku,
-    product?.unit,
-    products,
-  ]);
+  }, [combination?.name, product?.sku, product?.unit, products]);
 
   const handleBreakPack = async (values: BreakPack) => {
     try {
@@ -242,10 +222,7 @@ export default function BreakPackModal({
                       {combination?.product?.unit}
                     </ColorBadge>
                   )}
-                  {getMappedProductComboName(
-                    combination?.product,
-                    combination?.values,
-                  )}
+                  {combination?.name}
                 </div>
 
                 {selected && (
@@ -260,10 +237,7 @@ export default function BreakPackModal({
                       <ColorBadge colorMap={UNIT_COLOR}>
                         {selectedUnit}
                       </ColorBadge>
-                      {getMappedProductComboName(
-                        selected?.product,
-                        selected?.values,
-                      )}
+                      {selected?.name}
                     </div>
                   </>
                 )}

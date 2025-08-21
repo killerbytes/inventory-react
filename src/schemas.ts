@@ -114,6 +114,7 @@ export const productBaseSchema = z.object({
 export const productCombinationsSchema = z.object({
   id: z.number().optional(),
   productId: z.number(),
+  name: z.string().nullish(),
   sku: z.string().nullish(),
   price: z.coerce.number(),
   reorderLevel: z.coerce.number(),

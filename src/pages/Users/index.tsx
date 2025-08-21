@@ -77,7 +77,10 @@ export default function Users() {
         },
         cell: ({ row }) => (
           <Button
-            onClick={() => setSelectedUser(row.original)}
+            onClick={() => {
+              setSelectedUser(row.original);
+              handleToggle({ editModal: true });
+            }}
             variant="outline"
           >
             <Pencil size={16} />

@@ -19,6 +19,8 @@ import ColorBadge from "../ColorBadge";
 import { toast } from "sonner";
 import { z } from "zod";
 
+type CloneToUnitModalProps = { unit: string; products_name_unit?: string };
+
 export default function CloneToUnitModal({
   isOpen,
   onSubmit,
@@ -31,16 +33,19 @@ export default function CloneToUnitModal({
   productId: number;
   redirect?: boolean;
 }) {
-  const form = useForm<{ unit: string }>({
+  const form = useForm<CloneToUnitModalProps>({
     resolver: zodResolver(
-      z.object({ unit: z.string().min(1, { message: "Unit is required." }) }),
+      z.object({
+        unit: z.string().min(1, { message: "Unit is required." }),
+        products_name_unit: z.string().optional(),
+      }),
     ),
     defaultValues: {
       unit: "",
     },
   });
 
-  const handleSubmit = async (values: { unit: string }) => {
+  const handleSubmit = async (values: CloneToUnitModalProps) => {
     try {
       const product = await productServices.cloneToUnit(
         Number(productId),
@@ -50,9 +55,13 @@ export default function CloneToUnitModal({
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
-        form.setError("unit", {
-          type: "server",
-          message: "Product with the same unit already exists",
+        apiError.errors.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field as keyof typeof values, {
+              type: "server",
+              message: err.message,
+            });
+          }
         });
       } else {
         toast.error("Submission failed: " + apiError.message);
@@ -91,6 +100,11 @@ export default function CloneToUnitModal({
                 <FormMessage />
               </FormItem>
             )}
+          />
+          <FormField
+            control={form.control}
+            name="products_name_unit"
+            render={() => <FormMessage />}
           />
         </form>
         <DialogFooter>

@@ -1,5 +1,4 @@
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
-import { getMappedProductComboName } from "@/lib/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { Product, ProductCombinations } from "@/types";
 import { DataTable } from "@/components/DataTable";
@@ -14,10 +13,8 @@ export default function ProductItem({ item }: { item: Product }) {
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
       {
+        accessorKey: "name",
         header: "Product",
-        cell: ({ row }) => {
-          return getMappedProductComboName(item, row.original.values);
-        },
       },
 
       {

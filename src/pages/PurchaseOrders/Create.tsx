@@ -151,7 +151,7 @@ export default function Create() {
           </CardContent>
         </Card>
       </div>
-      {JSON.stringify(data)}
+      {/* {JSON.stringify(data)} */}
     </>
   );
 }

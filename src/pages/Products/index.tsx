@@ -5,7 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CategorizedProductList, PaginatedResponse, Product } from "@/types";
+import { CategorizedProductList, PaginatedResponse } from "@/types";
 import { categoryServices, productServices } from "@/services";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import CreateProductModal from "./CreateProductModal";
@@ -34,7 +34,6 @@ export default function Products() {
     totalPages: 0,
     currentPage: 0,
   });
-  const [selected, setSelected] = React.useState<Product | null>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
     q: "",
@@ -112,8 +111,8 @@ export default function Products() {
                 value={filter.categoryId}
                 options={[{ id: "ALL", name: "ALL" }, ...categories]}
                 className="w-full mb-4"
-                onChange={(e) => {
-                  const categoryId = (e.target as HTMLInputElement).value;
+                onChange={(value) => {
+                  const categoryId = value;
                   setFilter({
                     ...filter,
                     categoryId,
@@ -134,7 +133,9 @@ export default function Products() {
               type="multiple"
               className="w-full"
               // defaultValue={data.data?.map((item) => item.categoryId)}
-              defaultValue={[1]}
+              defaultValue={data.data
+                .filter((i) => i.products.length > 0)
+                .map((i) => i.categoryId)}
             >
               {data.data?.map((item) => (
                 <AccordionItem value={item.categoryId} key={item.categoryId}>
@@ -149,11 +150,7 @@ export default function Products() {
                   <AccordionContent className="flex flex-col">
                     {item.products.map((product) => (
                       <Fragment key={product.id}>
-                        <ProductItem
-                          item={product}
-                          onSelect={setSelected}
-                          onToggle={handleToggle}
-                        />
+                        <ProductItem item={product} />
                         {/* 
                         {product.combinations?.map((combination: Product) => {
                           return (

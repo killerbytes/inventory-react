@@ -6,7 +6,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { getMappedProductComboName } from "@/lib/utils";
 import { BreakPack, PaginatedResponse } from "@/types";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -45,13 +44,10 @@ export default function BreakPacks() {
           return (
             <div className="flex gap-2 items-center">
               <ColorBadge colorMap={UNIT_COLOR}>
-                {String(fromCombination.product?.unit)}
+                {String(fromCombination?.product?.unit)}
               </ColorBadge>
 
-              {getMappedProductComboName(
-                fromCombination.product,
-                fromCombination.values,
-              )}
+              {fromCombination?.name}
             </div>
           );
         },
@@ -65,14 +61,11 @@ export default function BreakPacks() {
 
           return (
             <div className="flex gap-2 items-center">
-              {toCombination.product?.name}{" "}
+              {toCombination?.product?.name}{" "}
               <ColorBadge colorMap={UNIT_COLOR}>
-                {String(toCombination.product?.unit)}
+                {String(toCombination?.product?.unit)}
               </ColorBadge>
-              {getMappedProductComboName(
-                toCombination.product,
-                toCombination.values,
-              )}
+              {toCombination?.name}
             </div>
           );
         },
@@ -106,7 +99,7 @@ export default function BreakPacks() {
         accessorKey: "createdAt",
         header: "Created At",
         cell: ({ row }) => {
-          return formatDateTime(row.original.createdAt);
+          return formatDateTime(String(row.original.createdAt));
         },
       },
       {

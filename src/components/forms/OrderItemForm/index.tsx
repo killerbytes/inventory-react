@@ -1,4 +1,4 @@
-import { Control, FieldValues, Path, useWatch } from "react-hook-form";
+import { Control, FieldArrayWithId, Path, useWatch } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -14,11 +14,11 @@ type FooterValuesProps = {
   discount: number;
 };
 
-type TableProps<T extends FieldValues> = {
+type TableProps<T extends FieldArrayWithId, TColumns extends ColumnDef<T>> = {
   name: Path<T>;
   control: Control<T>;
   fields: T[];
-  columns: ColumnDef<T, unknown>[];
+  columns: TColumns[];
   renderFooter?: (
     data: FooterValuesProps[],
     append: () => void,
@@ -29,7 +29,6 @@ type TableProps<T extends FieldValues> = {
 function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
   const total = data?.reduce(
     (acc, item) => {
-      console.log(acc, item);
       return {
         amount: acc.amount + (item.purchasePrice || 0) * (item.quantity || 0),
         purchasePrice: acc.purchasePrice + (Number(item.purchasePrice) || 0),
@@ -77,14 +76,14 @@ function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
   );
 }
 
-export default function PurchaseOrderItemForm<T extends FieldValues>({
+export default function PurchaseOrderItemForm<T>({
   name,
   control,
   fields,
   columns,
   renderFooter = defaultRenderFooter,
   append,
-}: TableProps<T>) {
+}: TableProps<T, ColumnDef<T>>) {
   const footerValues = useWatch({ control, name });
 
   return (
@@ -96,6 +95,7 @@ export default function PurchaseOrderItemForm<T extends FieldValues>({
         //   "border-red-500": errors.purchaseOrderItems,
         // })}
         renderFooter={() => renderFooter(footerValues, append ?? (() => {}))}
+        showFooter
       />
     </>
   );

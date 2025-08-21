@@ -1,9 +1,4 @@
 import {
-  INVENTORY_MOVEMENT_TYPE_COLOR,
-  ROUTES,
-  STOCK_ADJUSTMENT_TYPE_COLOR,
-} from "@/utils/definitions";
-import {
   Card,
   CardAction,
   CardContent,
@@ -11,13 +6,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { InventoryMovement, PaginatedResponse, StockAdjustment } from "@/types";
-import { inventoryMovementServices, inventoryServices } from "@/services";
+import { ROUTES, STOCK_ADJUSTMENT_TYPE_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { getMappedVariantValues } from "@/lib/utils";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
+import { inventoryServices } from "@/services";
 import { Link } from "react-router";
 import React from "react";
 
@@ -43,20 +38,11 @@ export default function StockAdjustments() {
         header: "Product",
         accessorKey: "combination.product.name",
         cell: ({ row }) => {
-          const mapped = getMappedVariantValues(
-            row.original.combination.product?.variants,
-            row.original.combination.values,
-          );
-
           return (
             <Link
-              to={`${ROUTES.PRODUCTS}/${row.original.combination.productId}`}
+              to={`${ROUTES.PRODUCTS}/${row.original.combination?.productId}`}
             >
-              {`${row.original.combination.product?.name} - ${Object.keys(
-                mapped,
-              )
-                .map((key) => `${key}: ${mapped[key]}`)
-                .join(" | ")}`}
+              {row.original.combination?.name}
             </Link>
           );
         },

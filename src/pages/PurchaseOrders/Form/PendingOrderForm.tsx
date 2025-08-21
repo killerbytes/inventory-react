@@ -6,22 +6,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import AmountColumn from "../../../components/forms/OrderItemForm/AmountColumn";
 import { CategorizedProductList, PurchaseOrderCreate, Supplier } from "@/types";
-import UnitColumn from "../../../components/forms/OrderItemForm/UnitColumn";
-import PurchaseOrderItemForm from "../../../components/forms/OrderItemForm";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
+import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
+import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
 import { productServices, supplierServices } from "@/services";
-import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
+import OrderItemForm from "@/components/forms/OrderItemForm";
 import { useProductStore, useSupplierStore } from "@/stores";
+import { F } from "@faker-js/faker/dist/airline-BUL6NtOJ";
 import ProductCommand from "@/components/ProductCommand";
 import { CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
-import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
@@ -103,39 +104,21 @@ export default function PendingOrderForm({
                     field="purchaseOrderItems"
                     onChange={(value) => {
                       field.onChange(value);
-                      // const selected = flatProducts.find(
-                      //   (item) => item.combinationId === Number(value),
-                      // );
-                      // if (selected) {
-                      //   form.setValue(
-                      //     `purchaseOrderItems.${row.index}.purchasePrice`,
-                      //     selected.price,
-                      //   );
-                      // }
                     }}
                     renderOption={(combination, onChange) => {
                       return (
                         <CommandItem
-                          keywords={[combination.sku ?? ""]}
+                          keywords={[String(combination?.name)]}
                           value={String(combination.id)}
                           key={combination.id}
                           onSelect={onChange}
                           className="flex gap-2 items-center justify-between"
                         >
-                          <div className="flex gap-2 items-center">
-                            {combination.values.map((value) => {
-                              return <span key={value.id}>{value.value}</span>;
-                            })}
-                            {combination.inventory?.quantity !== undefined &&
-                              combination.inventory?.quantity > 0 && (
-                                <small className="text-muted-foreground">
-                                  x{combination.inventory?.quantity}
-                                </small>
-                              )}
-                          </div>
-                          <span className="text-muted-foreground">
-                            {formatCurrency(combination.price)}
-                          </span>
+                          {combination?.name}
+
+                          <ColorBadge className="ml-auto" colorMap={UNIT_COLOR}>
+                            {String(combination.product?.unit)}
+                          </ColorBadge>
                         </CommandItem>
                       );
                     }}
@@ -396,7 +379,7 @@ export default function PendingOrderForm({
           render={() => (
             <FormItem className="w-full mb-4">
               <FormControl>
-                <PurchaseOrderItemForm
+                <OrderItemForm
                   fields={fields}
                   control={form.control}
                   columns={columns}
