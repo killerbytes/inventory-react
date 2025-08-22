@@ -1,22 +1,4 @@
 import {
-  BanknoteArrowDown,
-  BanknoteArrowUp,
-  Home,
-  ClipboardList,
-  User2,
-  ChevronUp,
-  User,
-  Users,
-  ShoppingCart,
-  Boxes,
-  BookUser,
-  Container,
-  BookType,
-  PackageOpen,
-  Pen,
-  Diff,
-} from "lucide-react";
-import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -26,7 +8,23 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "./ui/sidebar";
+import {
+  BanknoteArrowDown,
+  BanknoteArrowUp,
+  Home,
+  ClipboardList,
+  ChevronUp,
+  Users,
+  ShoppingCart,
+  Boxes,
+  BookUser,
+  Container,
+  BookType,
+  PackageOpen,
+  Diff,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,8 +33,8 @@ import {
 } from "./ui/dropdown-menu";
 import { useGlobalStore, useUserStore } from "@/stores";
 import { formatDateTime } from "@/utils/formatters";
+import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
-import { Link } from "react-router";
 import Header from "./Header";
 import UserIcon from "./User";
 import React from "react";
@@ -110,6 +108,19 @@ export default function AppSidebar() {
   const [build, setBuild] = React.useState("");
   const { logout } = useUserStore();
   const { setVariantTemplateModal } = useGlobalStore();
+  const { setOpen, setOpenMobile } = useSidebar();
+  const location = useLocation();
+  const pathRef = React.useRef(location.pathname);
+
+  React.useEffect(() => {
+    console.log("Route changed to:", location.pathname, pathRef.current);
+    if (location.pathname !== pathRef.current) {
+      // setOpen(false);
+      setOpenMobile(false);
+      setVariantTemplateModal(false);
+    }
+    pathRef.current = location.pathname;
+  }, [location.pathname, setOpen, setOpenMobile, setVariantTemplateModal]);
 
   React.useEffect(() => {
     const getData = async () => {
