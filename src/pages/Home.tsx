@@ -1,5 +1,6 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import React from "react";
-import axios from "axios";
 
 export default function Home() {
   const getData = async () => {
@@ -19,8 +20,18 @@ export default function Home() {
   }, []);
   return (
     <div>
-      <h1>Home Page</h1>
-      <p>Welcome to the home page!</p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SidebarTrigger />
+            <div className="bg-border h-5 w-[1px]"></div>
+            Home
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Welcome to the home page!</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
