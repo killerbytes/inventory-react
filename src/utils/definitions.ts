@@ -108,21 +108,28 @@ export const MODE_OF_PAYMENT_OPTIONS = Object.values(MODE_OF_PAYMENT).map(
   }),
 );
 
+export const BASE_UNIT = {
+  EA: "EA",
+  PC: "PC",
+  KG: "KG",
+  BTL: "BTL",
+  RL: "RL",
+  MT: "MT",
+  FT: "FT",
+  LT: "LT",
+};
 export const UNIT = {
   BOX: "BOX",
   BAG: "BAG",
   GAL: "GAL",
   PACK: "PACK",
   SET: "SET",
-  PCS: "PCS",
-  KGS: "KGS",
-  MTRS: "MTRS",
-  ROLLS: "ROLLS",
 };
 
 export const BREAK_PACK_UNITS = [UNIT.BOX, UNIT.BAG, UNIT.GAL, UNIT.PACK];
 
 export const UNIT_COLOR = {
+  undefined: "bg-red-500",
   BOX: "bg-indigo-400 ",
   BAG: "bg-yellow-400 text-black",
   GAL: "bg-green-400 text-black",
@@ -131,6 +138,11 @@ export const UNIT_COLOR = {
   PCS: "bg-red-500",
   KGS: "bg-orange-400",
 };
+
+export const BASE_UNIT_OPTIONS = Object.values(BASE_UNIT).map((value) => ({
+  value,
+  label: titleCase(value.toLowerCase()),
+}));
 
 export const UNIT_OPTIONS = Object.values(UNIT).map((value) => ({
   value,

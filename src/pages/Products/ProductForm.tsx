@@ -5,7 +5,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
+import { BASE_UNIT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectItem } from "@/components/ui/select";
 import ColorBadge from "@/components/ColorBadge";
@@ -85,14 +85,14 @@ export default function ProductForm({
       />
       <FormField
         control={form.control}
-        name="unit"
+        name="baseUnit"
         render={({ field }) => (
           <FormItem className="mb-4">
-            <FormLabel>Unit</FormLabel>
+            <FormLabel>Base Unit</FormLabel>
             <FormControl>
               <Select
                 {...field}
-                options={UNIT_OPTIONS}
+                options={BASE_UNIT_OPTIONS}
                 renderOption={(unit) => (
                   <SelectItem key={unit.value} value={String(unit.value)}>
                     <ColorBadge colorMap={UNIT_COLOR}>
@@ -100,23 +100,6 @@ export default function ProductForm({
                     </ColorBadge>
                   </SelectItem>
                 )}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="conversionFactor"
-        render={({ field }) => (
-          <FormItem className="mb-4">
-            <FormLabel>Conversion Factor</FormLabel>
-            <FormControl>
-              <Input
-                {...field}
-                value={field.value ?? ""}
-                placeholder="eg: How many pieces of this product are in a unit?"
               />
             </FormControl>
             <FormMessage />

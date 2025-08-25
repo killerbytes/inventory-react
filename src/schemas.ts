@@ -104,9 +104,8 @@ export const productBaseSchema = z.object({
   }),
   description: z.string().nullish(),
   sku: z.string().nullish(),
-  unit: z.string(),
+  baseUnit: z.string(),
   categoryId: z.number(),
-  conversionFactor: z.coerce.number().nullish(),
   variants: z.array(variantTypesSchema).nullish(),
   products_name_unit: z.string().nullish(),
 });
@@ -116,6 +115,10 @@ export const productCombinationsSchema = z.object({
   productId: z.number(),
   name: z.string().nullish(),
   sku: z.string().nullish(),
+  unit: z.string(),
+  conversionFactor: z.number().min(1, {
+    message: "Conversion Factor must be at least 1.",
+  }),
   price: z.coerce.number().min(1, {
     message: "Price must be at least 1.",
   }),
@@ -131,7 +134,6 @@ export const productSchema = productBaseSchema.extend({
     message: "Name must be at least 2 characters.",
   }),
   description: z.string().nullish(),
-  unit: z.string(),
   categoryId: z.number(),
   variants: z.array(variantTypesSchema).nullish(),
   combinations: z.array(productCombinationsSchema).nullish(),

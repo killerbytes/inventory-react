@@ -152,11 +152,9 @@ export default function Categories() {
             <>
               <DnDTable
                 columns={columns}
-                data={data?.data || []}
+                data={data || []}
                 onSubmit={onSubmit}
               />
-
-              <Pager data={data} page={page} setPage={setPage} />
             </>
           )}
         </CardContent>

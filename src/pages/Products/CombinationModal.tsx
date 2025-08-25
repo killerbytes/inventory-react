@@ -13,6 +13,13 @@ import {
   VariantTypes,
   ApiErrorResponse,
 } from "@/types";
+import {
+  BASE_UNIT,
+  BASE_UNIT_OPTIONS,
+  ERROR,
+  UNIT_COLOR,
+  UNIT_OPTIONS,
+} from "@/utils/definitions";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { productCombinationServices } from "@/services";
@@ -22,8 +29,8 @@ import { SelectItem } from "@/components/ui/select";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { ERROR } from "@/utils/definitions";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
@@ -200,6 +207,61 @@ export default function CombinationModal({
           );
         },
       })),
+      {
+        accessorKey: "unit",
+        header: () => <div className="text-right">Unit</div>,
+        meta: {
+          className: "text-right w-0",
+        },
+        cell: ({ row }) => {
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.unit`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      {...field}
+                      value={String(field.value)}
+                      options={[...BASE_UNIT_OPTIONS, ...UNIT_OPTIONS]}
+                      renderOption={(unit) => (
+                        <SelectItem key={unit.value} value={String(unit.value)}>
+                          <ColorBadge colorMap={UNIT_COLOR}>
+                            {String(unit.label)}
+                          </ColorBadge>
+                        </SelectItem>
+                      )}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "conversionFactor",
+        header: () => <div className="text-right">Conversion Factor</div>,
+        meta: {
+          className: "text-right w-0",
+        },
+        cell: ({ row }) => {
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.conversionFactor`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
       {
         accessorKey: "price",
         header: () => <div className="text-right">Price</div>,

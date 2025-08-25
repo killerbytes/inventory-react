@@ -29,6 +29,7 @@ export default function CreateProductModal({
 
     defaultValues: {
       categoryId,
+      name: "",
     },
   });
   const navigate = useNavigate();
