@@ -90,8 +90,8 @@ export default function CombinationModal({
         variants,
       }: { combinations: ProductCombinations[]; variants: VariantTypes[] } =
         await productCombinationServices.getByProductId(product.id);
-      await productCombinationServices.getByProductId(product.id);
-
+      // await productCombinationServices.getByProductId(product.id);
+      console.log(combinations);
       const map = combinations.map((i) => i.values);
       const x = combinations.map((i) => {
         return {

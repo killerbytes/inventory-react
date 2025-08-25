@@ -37,6 +37,19 @@ export default function ProductItem({ item }: { item: Product }) {
         },
       },
       {
+        header: "Unit",
+        accessorKey: "unit",
+        meta: {
+          headerClassName: "h-0",
+          className: "w-20",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
+          );
+        },
+      },
+      {
         header: "Re-order",
         accessorKey: "reorderLevel",
         meta: {
@@ -73,7 +86,7 @@ export default function ProductItem({ item }: { item: Product }) {
           )}
         </div>
         <div className="ml-auto flex gap-2 items-center">
-          <ColorBadge colorMap={UNIT_COLOR}>{item.unit}</ColorBadge>
+          <ColorBadge colorMap={UNIT_COLOR}>{item.baseUnit}</ColorBadge>
           <Button
             asChild
             variant="outline"

@@ -1,5 +1,4 @@
 import { MODE_OF_PAYMENT, ORDER_STATUS } from "./utils/definitions";
-import { create } from "domain";
 import * as z from "zod";
 
 export const userSchema = z.object({
@@ -116,7 +115,7 @@ export const productCombinationsSchema = z.object({
   name: z.string().nullish(),
   sku: z.string().nullish(),
   unit: z.string(),
-  conversionFactor: z.number().min(1, {
+  conversionFactor: z.coerce.number().min(1, {
     message: "Conversion Factor must be at least 1.",
   }),
   price: z.coerce.number().min(1, {
