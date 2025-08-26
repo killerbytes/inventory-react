@@ -84,6 +84,7 @@ export default function ProductEdit() {
     try {
       await productServices.update(Number(id), values);
       getData();
+      toast.success("Product updated successfully");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       console.log(apiError);

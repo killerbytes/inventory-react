@@ -13,6 +13,7 @@ import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Category, Product } from "@/types";
 import Select from "@/components/Select";
+import React from "react";
 
 export default function ProductForm({
   form,
@@ -22,6 +23,10 @@ export default function ProductForm({
   onSubmit: (e: Product) => Promise<void>;
   categories: Category[];
 }) {
+  React.useEffect(() => {
+    form.setFocus("name");
+  }, [form]);
+
   return (
     <>
       <FormField
@@ -30,7 +35,7 @@ export default function ProductForm({
         render={({ field }) => (
           <FormItem className="mb-4">
             <FormLabel>Name</FormLabel>
-            <Input {...field} />
+            <Input {...field} autoFocus />
             <FormMessage />
             <FormField
               control={form.control}
