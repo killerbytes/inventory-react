@@ -38,6 +38,7 @@ import { categoryServices, productServices } from "@/services";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
+import { useForm, useWatch } from "react-hook-form";
 import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
 import PageHeader from "@/components/PageHeader";
@@ -48,7 +49,6 @@ import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
 import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
-import { useForm } from "react-hook-form";
 import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
@@ -80,6 +80,9 @@ export default function ProductEdit() {
     stockAdjustmentModal: false,
   });
 
+  const x = useWatch({
+    control: form.control,
+  });
   async function onSubmit(values: Product) {
     try {
       await productServices.update(Number(id), values);
@@ -376,7 +379,7 @@ export default function ProductEdit() {
           </Card>
         </form>
       </Form>
-      {/* {JSON.stringify(data)} */}
+      {/* {JSON.stringify(x)} */}
       {toggle.variantModal && (
         <VariantsModal
           productId={Number(id)}

@@ -74,7 +74,7 @@ export default function ProductForm({
                 {...field}
                 options={categories}
                 onChange={(value) => {
-                  field.onChange(value);
+                  field.onChange(Number(value));
                 }}
                 value={String(field.value)}
                 renderOption={({ id, name }) => (

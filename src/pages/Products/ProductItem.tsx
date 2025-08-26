@@ -65,7 +65,11 @@ export default function ProductItem({ item }: { item: Product }) {
           className: "w-20",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return row.original.values[idx]?.value;
+          const x = row.original.values.findIndex(
+            (i) => i.variantTypeId === item.variants?.[idx].id,
+          );
+
+          return row.original.values[x]?.value;
         },
       })) || []),
     ],

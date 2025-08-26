@@ -4,10 +4,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CategorizedProductList, PaginatedResponse } from "@/types";
 import { categoryServices, productServices } from "@/services";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
 import { GLOBAL_COLOR } from "@/utils/definitions";
@@ -15,7 +14,6 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import useDebounce from "@/hooks/useDebounce";
 import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
@@ -87,18 +85,13 @@ export default function Products() {
   return (
     <>
       <PageHeader title="Products" />
+
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SidebarTrigger />
-            <div className="bg-border h-5 w-[1px]"></div>
-            Products
-          </CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="flex gap-2">
             <div className="w-full">
               <div className="text-sm font-semibold mb-1">Search</div>
+
               <Input
                 placeholder="Search products"
                 className="w-full mb-4"
@@ -135,7 +128,7 @@ export default function Products() {
             <Accordion
               type="multiple"
               className="w-full"
-              xdefaultValue={data.data?.map((item) => item.categoryId)}
+              defaultValue={data.data?.map((item) => item.categoryId)}
               // defaultValue={data.data
               //   // .filter((i) => i.products.length > 0)
               //   .map((i) => i.categoryId)}
@@ -150,10 +143,7 @@ export default function Products() {
                   >
                     {item.categoryName}
 
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="size-8 shadow-sm"
+                    <div
                       onClick={(e) => {
                         e.stopPropagation();
                         setCategory(Number(item.categoryId));
@@ -161,7 +151,7 @@ export default function Products() {
                       }}
                     >
                       <PlusIcon />
-                    </Button>
+                    </div>
                   </AccordionTrigger>
                   <AccordionContent className="flex flex-col">
                     <>
@@ -241,7 +231,6 @@ export default function Products() {
           )}
         </CardContent>
       </Card>
-
       {toggle.createProductModal && (
         <CreateProductModal
           categoryId={category}
