@@ -14,7 +14,6 @@ import {
   ApiErrorResponse,
 } from "@/types";
 import {
-  BASE_UNIT,
   BASE_UNIT_OPTIONS,
   ERROR,
   UNIT_COLOR,
@@ -31,10 +30,12 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { cx } from "class-variance-authority";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
 import React, { useMemo } from "react";
+import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -76,7 +77,9 @@ export default function CombinationModal({
   const productCombinationDefaultValue: ProductCombinations = {
     productId: Number(product.id),
     reorderLevel: 10,
+    unit: product.baseUnit,
     price: 0,
+    conversionFactor: 1,
     values: variants.map((i) => ({
       variantTypeId: i.id,
       value: "",
@@ -90,8 +93,6 @@ export default function CombinationModal({
         variants,
       }: { combinations: ProductCombinations[]; variants: VariantTypes[] } =
         await productCombinationServices.getByProductId(product.id);
-      // await productCombinationServices.getByProductId(product.id);
-      console.log(combinations);
       const map = combinations.map((i) => i.values);
       const x = combinations.map((i) => {
         return {
@@ -183,9 +184,14 @@ export default function CombinationModal({
               name={`combinations.${index}.values.${idx}`}
               control={form.control}
               render={({ field }) => {
+                const error =
+                  form.formState.errors[`combinations`]?.[index]?.values?.[idx]
+                    ?.value;
+
                 return (
                   <Select
                     {...field}
+                    className={cx("w-full", error && "border-red-500")}
                     value={String(
                       variant.values.find((i) => i.id === field.value?.id)?.id,
                     )}
@@ -209,9 +215,10 @@ export default function CombinationModal({
       })),
       {
         accessorKey: "unit",
-        header: () => <div className="text-right">Unit</div>,
+        header: "Unit",
         meta: {
-          className: "text-right w-0",
+          headerClassName: "text-left",
+          className: "text-left w-0",
         },
         cell: ({ row }) => {
           return (
@@ -242,9 +249,10 @@ export default function CombinationModal({
       },
       {
         accessorKey: "conversionFactor",
-        header: () => <div className="text-right">Conversion Factor</div>,
+        header: "Conversion Factor",
         meta: {
-          className: "text-right w-0",
+          headerClassName: "text-left",
+          className: "text-left w-[50px]",
         },
         cell: ({ row }) => {
           return (
@@ -252,7 +260,7 @@ export default function CombinationModal({
               control={form.control}
               name={`combinations.${row.index}.conversionFactor`}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="">
                   <FormControl>
                     <NumberInput {...field} />
                   </FormControl>
@@ -264,9 +272,10 @@ export default function CombinationModal({
       },
       {
         accessorKey: "price",
-        header: () => <div className="text-right">Price</div>,
+        header: "Price",
         meta: {
-          className: "text-right w-0",
+          headerClassName: "text-right",
+          className: "text-right w-30 min-w-[100px]",
         },
         cell: ({ row }) => {
           return (
@@ -314,7 +323,7 @@ export default function CombinationModal({
       //   },
       // },
     ],
-    [form.control, remove, variants],
+    [form.control, form.formState.errors, remove, variants],
   );
   return (
     <Modal
@@ -355,9 +364,16 @@ export default function CombinationModal({
                             type="button"
                             variant="outline"
                             className="shadow-sm"
-                            onClick={() =>
-                              append(productCombinationDefaultValue)
-                            }
+                            onClick={() => {
+                              const lastItem = last(x);
+                              const unit = lastItem
+                                ? lastItem.unit
+                                : productCombinationDefaultValue.unit;
+                              append({
+                                ...productCombinationDefaultValue,
+                                unit,
+                              });
+                            }}
                           >
                             <Plus />
                           </Button>

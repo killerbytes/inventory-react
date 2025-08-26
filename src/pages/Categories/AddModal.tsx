@@ -22,24 +22,26 @@ export default function AddModal({
   isOpen,
   onClose,
   cb,
+  selected,
 }: {
   isOpen: boolean;
   onClose: () => void;
   cb: () => void;
+  selected?: Category;
 }) {
+  console.log(selected);
   const form = useForm<Category>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      name: "aaaaakillerbytes",
-      description: "1234",
+      name: "",
+      description: "",
+      ...(selected && { parentId: selected.id }),
     },
   });
 
   async function onSubmit(values: Category) {
     try {
-      const { name, description } = values;
-      const res = await categoryServices.create({ name, description });
-      console.log(res);
+      await categoryServices.create({ ...values, parentId: selected?.id });
       toast.success(`Submitted: ${values.name} (${values.description})`);
       form.reset();
       onClose();
@@ -81,6 +83,7 @@ export default function AddModal({
           }}
           className="space-y-8"
         >
+          <div className="mb-4 font-semibold">{selected?.name}</div>
           <FormField
             control={form.control}
             name="name"

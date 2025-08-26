@@ -68,6 +68,7 @@ export interface CategorizedProductList {
   categoryName: string;
   categoryOrder: number;
   products: Product[];
+  subCategories: CategorizedProductList[];
 }
 
 export interface CategorizedInventoryList {

@@ -25,17 +25,23 @@ import {
   Pencil,
   Save,
 } from "lucide-react";
+import {
+  BREAK_PACK_UNITS,
+  ERROR,
+  ROUTES,
+  UNIT_COLOR,
+} from "@/utils/definitions";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
 import CloneToUnitModal from "../../components/modals/CloneToUnitModal";
-import { BREAK_PACK_UNITS, ERROR, ROUTES } from "@/utils/definitions";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { categoryServices, productServices } from "@/services";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
+import PageHeader from "@/components/PageHeader";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Form } from "@/components/ui/form";
@@ -175,18 +181,35 @@ export default function ProductEdit() {
         },
       })),
       {
+        accessorKey: "unit",
+        header: "Unit",
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
+          );
+        },
+      },
+      {
         accessorKey: "price",
         header: "Price",
       },
       {
         header: "Quantity",
         accessorKey: "inventory.quantity",
+        meta: {
+          headerClassName: "text-right",
+          className: "w-0 text-right",
+        },
       },
       {
         header: "Re-order Level",
         accessorKey: "reorderLevel",
+        meta: {
+          headerClassName: "text-right",
+          className: "w-0 text-right",
+        },
       },
-      ...(BREAK_PACK_UNITS.includes(String(product?.unit))
+      ...(BREAK_PACK_UNITS.includes(String(product?.baseUnit))
         ? [
             {
               accessorKey: "id",
@@ -238,12 +261,11 @@ export default function ProductEdit() {
         ),
       },
     ],
-    [handleToggle, product?.unit, variants],
+    [handleToggle, product?.baseUnit, variants],
   );
   return (
     <Fragment key={id}>
-      {/* <Button onClick={handleClone}>Clone</Button> */}
-
+      <PageHeader title="Product Details" />
       <Form {...form}>
         <form
           className="h-full flex flex-col gap-4"
@@ -259,11 +281,6 @@ export default function ProductEdit() {
         >
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <SidebarTrigger />
-                <div className="bg-border h-5 w-[1px]"></div>
-                Product Details
-              </CardTitle>
               <CardAction>
                 <div className="flex gap-2">
                   <div className="ml-auto">

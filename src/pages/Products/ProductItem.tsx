@@ -86,7 +86,6 @@ export default function ProductItem({ item }: { item: Product }) {
           )}
         </div>
         <div className="ml-auto flex gap-2 items-center">
-          <ColorBadge colorMap={UNIT_COLOR}>{item.baseUnit}</ColorBadge>
           <Button
             asChild
             variant="outline"

@@ -1,10 +1,10 @@
 import { categoryServices, productServices } from "@/services";
 import { ApiError, ApiErrorResponse, Product } from "@/types";
+import { BASE_UNIT, ROUTES } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/utils";
-import { ROUTES } from "@/utils/definitions";
 import { Form } from "@/components/ui/form";
 import { useCategoryStore } from "@/stores";
 import { useNavigate } from "react-router";
@@ -23,13 +23,13 @@ export default function CreateProductModal({
   onClose: () => void;
 }) {
   const { categories, setCategories } = useCategoryStore();
-
   const form = useForm<Product>({
     resolver: zodResolver(productSchema),
 
     defaultValues: {
       categoryId,
       name: "",
+      baseUnit: BASE_UNIT.PCS,
     },
   });
   const navigate = useNavigate();

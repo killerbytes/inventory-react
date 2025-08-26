@@ -109,20 +109,19 @@ export const MODE_OF_PAYMENT_OPTIONS = Object.values(MODE_OF_PAYMENT).map(
 );
 
 export const BASE_UNIT = {
-  EA: "EA",
-  PC: "PC",
-  KG: "KG",
+  PCS: "PCS",
+  KGS: "KGS",
   BTL: "BTL",
-  RL: "RL",
-  MT: "MT",
-  FT: "FT",
-  LT: "LT",
+  RLS: "RLS",
+  MTS: "MTS",
+  FTS: "FTS",
+  LTS: "LTS",
 };
 export const UNIT = {
   BOX: "BOX",
   BAG: "BAG",
   GAL: "GAL",
-  PACK: "PACK",
+  PCK: "PCK",
   SET: "SET",
 };
 

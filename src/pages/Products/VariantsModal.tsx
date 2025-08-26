@@ -40,7 +40,7 @@ export default function VariantsModal({
       productId: Number(productId),
     };
     if (form.id) {
-      await variantTypesServices.update(String(form.id), payload);
+      await variantTypesServices.update(form.id, payload);
       toast.success("Variant updated successfully");
     } else {
       await variantTypesServices.create(payload);
@@ -59,7 +59,7 @@ export default function VariantsModal({
 
   const getData = React.useCallback(async () => {
     if (!productId) return;
-    const data = await variantTypesServices.get(String(productId));
+    const data = await variantTypesServices.get(productId);
     setVariantTypes(data);
   }, [productId]);
 
@@ -68,7 +68,7 @@ export default function VariantsModal({
   }, [getData]);
 
   const handleDelete = async () => {
-    await variantTypesServices.delete(String(selected?.id));
+    await variantTypesServices.delete(Number(selected?.id));
     form.reset(defaultValues);
     getData();
   };

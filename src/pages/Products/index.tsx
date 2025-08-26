@@ -11,9 +11,11 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
 import { GLOBAL_COLOR } from "@/utils/definitions";
+import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import useDebounce from "@/hooks/useDebounce";
 import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
@@ -73,17 +75,18 @@ export default function Products() {
   }, [getData]);
 
   React.useEffect(() => {
-    if (categories?.length === 0) {
-      const getData = async () => {
-        const res = await categoryServices.list();
-        setCategories(res);
-      };
-      getData();
-    }
-  }, [categories, setCategories]);
+    // if (categories?.length === 0) {
+    const getData = async () => {
+      const res = await categoryServices.list();
+      setCategories(res);
+    };
+    getData();
+    // }
+  }, []);
 
   return (
-    <div>
+    <>
+      <PageHeader title="Products" />
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -134,7 +137,7 @@ export default function Products() {
               className="w-full"
               // defaultValue={data.data?.map((item) => item.categoryId)}
               defaultValue={data.data
-                .filter((i) => i.products.length > 0)
+                // .filter((i) => i.products.length > 0)
                 .map((i) => i.categoryId)}
             >
               {data.data?.map((item) => (
@@ -148,10 +151,11 @@ export default function Products() {
                     {item.categoryName}
                   </AccordionTrigger>
                   <AccordionContent className="flex flex-col">
-                    {item.products.map((product) => (
-                      <Fragment key={product.id}>
-                        <ProductItem item={product} />
-                        {/* 
+                    <>
+                      {item.products.map((product) => (
+                        <Fragment key={product.id}>
+                          <ProductItem item={product} />
+                          {/* 
                         {product.combinations?.map((combination: Product) => {
                           return (
                             <Fragment key={combination.id}>
@@ -165,8 +169,33 @@ export default function Products() {
                             </Fragment>
                           );
                         })} */}
-                      </Fragment>
-                    ))}
+                        </Fragment>
+                      ))}
+                      {item.subCategories.map((i) => (
+                        <Fragment key={i.id}>
+                          <div className="flex gap-2 justify-start items-center">
+                            {i.categoryName}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8"
+                              onClick={() => {
+                                setCategory(Number(i.categoryId));
+                                handleToggle({ createProductModal: true });
+                              }}
+                            >
+                              <PlusIcon />
+                            </Button>
+                          </div>
+
+                          <div className="flex gap-2 justify-start items-center">
+                            {i.products.map((product) => (
+                              <ProductItem item={product} />
+                            ))}
+                          </div>
+                        </Fragment>
+                      ))}
+                    </>
 
                     <div className="flex justify-start  py-1">
                       <Button
@@ -180,6 +209,17 @@ export default function Products() {
                       >
                         <PlusIcon />
                       </Button>
+                      {/* {item.subCategories.map((i) => (
+                        <Badge
+                          onClick={() => {
+                            setCategory(Number(i.id));
+                            handleToggle({ createProductModal: true });
+                          }}
+                        >
+                          {console.log(i)}
+                          {i.subCategoryName}
+                        </Badge>
+                      ))} */}
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -198,6 +238,6 @@ export default function Products() {
           }}
         />
       )}
-    </div>
+    </>
   );
 }
