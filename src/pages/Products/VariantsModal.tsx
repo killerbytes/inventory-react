@@ -34,23 +34,27 @@ export default function VariantsModal({
     resolver: zodResolver(variantTypesSchema),
   });
 
-  const handleSubmit = async (form: VariantTypes) => {
+  const handleSubmit = async (values: VariantTypes) => {
     const payload = {
-      ...form,
+      ...values,
       productId: Number(productId),
     };
-    if (form.id) {
-      await variantTypesServices.update(String(form.id), payload);
+    if (values.id) {
+      await variantTypesServices.update(values.id, payload);
       toast.success("Variant updated successfully");
     } else {
       await variantTypesServices.create(payload);
       toast.success("Variant created successfully");
     }
     getData();
+    setSelected(undefined);
+    form.reset(defaultValues);
+    form.setFocus("name");
   };
 
   React.useEffect(() => {
     form.reset(selected);
+    form.setFocus("name");
   }, [form, selected]);
 
   React.useEffect(() => {
@@ -59,7 +63,7 @@ export default function VariantsModal({
 
   const getData = React.useCallback(async () => {
     if (!productId) return;
-    const data = await variantTypesServices.get(String(productId));
+    const data = await variantTypesServices.get(productId);
     setVariantTypes(data);
   }, [productId]);
 
@@ -68,7 +72,7 @@ export default function VariantsModal({
   }, [getData]);
 
   const handleDelete = async () => {
-    await variantTypesServices.delete(String(selected?.id));
+    await variantTypesServices.delete(Number(selected?.id));
     form.reset(defaultValues);
     getData();
   };

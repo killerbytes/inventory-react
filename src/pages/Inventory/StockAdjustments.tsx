@@ -11,6 +11,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
 import { Link } from "react-router";
@@ -107,18 +108,13 @@ export default function StockAdjustments() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Stock Adjustments
-        </CardTitle>
-        <CardAction></CardAction>
-      </CardHeader>
-      <CardContent>
-        <DataTable data={data.data} columns={columns} showFooter={false} />
-      </CardContent>
-    </Card>
+    <>
+      <PageHeader title="Stock Adjustments" />
+      <Card>
+        <CardContent>
+          <DataTable data={data.data} columns={columns} showFooter={false} />
+        </CardContent>
+      </Card>
+    </>
   );
 }

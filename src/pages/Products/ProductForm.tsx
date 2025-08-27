@@ -13,6 +13,7 @@ import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Category, Product } from "@/types";
 import Select from "@/components/Select";
+import React from "react";
 
 export default function ProductForm({
   form,
@@ -22,6 +23,10 @@ export default function ProductForm({
   onSubmit: (e: Product) => Promise<void>;
   categories: Category[];
 }) {
+  React.useEffect(() => {
+    form.setFocus("name");
+  }, [form]);
+
   return (
     <>
       <FormField
@@ -30,7 +35,7 @@ export default function ProductForm({
         render={({ field }) => (
           <FormItem className="mb-4">
             <FormLabel>Name</FormLabel>
-            <Input {...field} />
+            <Input {...field} autoFocus />
             <FormMessage />
             <FormField
               control={form.control}
@@ -69,7 +74,7 @@ export default function ProductForm({
                 {...field}
                 options={categories}
                 onChange={(value) => {
-                  field.onChange(value);
+                  field.onChange(Number(value));
                 }}
                 value={String(field.value)}
                 renderOption={({ id, name }) => (
@@ -85,10 +90,10 @@ export default function ProductForm({
       />
       <FormField
         control={form.control}
-        name="unit"
+        name="baseUnit"
         render={({ field }) => (
           <FormItem className="mb-4">
-            <FormLabel>Unit</FormLabel>
+            <FormLabel>Base Unit</FormLabel>
             <FormControl>
               <Select
                 {...field}
@@ -100,23 +105,6 @@ export default function ProductForm({
                     </ColorBadge>
                   </SelectItem>
                 )}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="conversionFactor"
-        render={({ field }) => (
-          <FormItem className="mb-4">
-            <FormLabel>Conversion Factor</FormLabel>
-            <FormControl>
-              <Input
-                {...field}
-                value={field.value ?? ""}
-                placeholder="eg: How many pieces of this product are in a unit?"
               />
             </FormControl>
             <FormMessage />

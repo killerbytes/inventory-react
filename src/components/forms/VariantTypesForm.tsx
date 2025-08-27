@@ -6,9 +6,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Plus, PlusIcon, Save, Search, Trash2, X } from "lucide-react";
+import VariantCopyTemplateModal from "../modals/VariantCopyTemplateModal";
 import VariantCopyTemplateForm from "./VariantCopyTemplateForm";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { Plus, Save, Search, Trash2, X } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCell, TableRow } from "../ui/table";
 import ConfirmDialog from "../ConfirmDialog";
@@ -34,6 +35,7 @@ export default function VariantTypesForm({
   onDelete: () => Promise<void>;
   onOpenVariantTemplatePicker?: () => void;
 }) {
+  const [values, setValues] = React.useState();
   const { toggle, handleToggle } = useToggle({
     saveTemplateModal: false,
   });
@@ -161,7 +163,7 @@ export default function VariantTypesForm({
                     showFooter={true}
                     renderFooter={() => (
                       <TableRow>
-                        <TableCell colSpan={8}>
+                        <TableCell>
                           <Button
                             type="button"
                             variant="outline"
@@ -172,6 +174,29 @@ export default function VariantTypesForm({
                           >
                             <Plus />
                           </Button>
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={values}
+                            onChange={(e) => setValues(e.target.value)}
+                            onKeyDown={(
+                              e: React.KeyboardEvent<HTMLInputElement>,
+                            ) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                const inputTarget =
+                                  e.target as HTMLInputElement;
+                                const values = inputTarget.value.split(",");
+                                values.forEach((value) => {
+                                  append({
+                                    value: value.trim(),
+                                    variantTypeId: undefined,
+                                  });
+                                });
+                                setValues("");
+                              }
+                            }}
+                          />
                         </TableCell>
                       </TableRow>
                     )}
@@ -218,15 +243,11 @@ export default function VariantTypesForm({
         </form>
       </Form>
       {toggle.saveTemplateModal && selected && (
-        <Modal
+        <VariantCopyTemplateModal
+          selected={selected}
           isOpen={toggle.saveTemplateModal}
-          onOpenChange={() => handleToggle({ saveTemplateModal: false })}
-          title="Save to Variant Template"
-          description="Save as new Variant Template"
-          size="sm"
-        >
-          <VariantCopyTemplateForm selected={selected} />
-        </Modal>
+          onClose={() => handleToggle({ saveTemplateModal: false })}
+        />
       )}
     </>
   );

@@ -34,6 +34,7 @@ export default function VariantCopyTemplateForm({
         values: selected.values,
       };
       await variantTypesServices.create(payload);
+      toast.success("Template saved successfully");
     } catch (error) {
       const apiError = error as ApiError;
       toast.error("Error saving template " + apiError.message);

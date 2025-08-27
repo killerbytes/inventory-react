@@ -37,6 +37,19 @@ export default function ProductItem({ item }: { item: Product }) {
         },
       },
       {
+        header: "Unit",
+        accessorKey: "unit",
+        meta: {
+          headerClassName: "h-0",
+          className: "w-20",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
+          );
+        },
+      },
+      {
         header: "Re-order",
         accessorKey: "reorderLevel",
         meta: {
@@ -52,7 +65,11 @@ export default function ProductItem({ item }: { item: Product }) {
           className: "w-20",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return row.original.values[idx]?.value;
+          const x = row.original.values.findIndex(
+            (i) => i.variantTypeId === item.variants?.[idx].id,
+          );
+
+          return row.original.values[x]?.value;
         },
       })) || []),
     ],
@@ -73,7 +90,6 @@ export default function ProductItem({ item }: { item: Product }) {
           )}
         </div>
         <div className="ml-auto flex gap-2 items-center">
-          <ColorBadge colorMap={UNIT_COLOR}>{item.unit}</ColorBadge>
           <Button
             asChild
             variant="outline"

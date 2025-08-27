@@ -131,7 +131,7 @@ export default function AppSidebar() {
   }, []);
 
   return (
-    <Sidebar>
+    <Sidebar variant="inset">
       <SidebarContent>
         <Header />
         <SidebarGroup>

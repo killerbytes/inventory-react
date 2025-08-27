@@ -23,6 +23,7 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router";
+import { ApiErrorResponse } from "@/types";
 import { authServices } from "@/services";
 import { loginSchema } from "@/schemas";
 import { cn } from "@/lib/utils";
@@ -33,7 +34,7 @@ export default function Login() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "user1",
+      username: "admin",
       password: "1234",
     },
   });
@@ -51,8 +52,9 @@ export default function Login() {
       form.reset();
       navigate(typeof callbackUrl === "string" ? callbackUrl : "/");
     } catch (error) {
-      console.log(error);
-      toast.error(`Login failed, ${error.response.data.message}`);
+      const apiError = error as ApiErrorResponse;
+
+      toast.error(`Login failed, ${apiError.message}`);
     }
   }
 
@@ -115,7 +117,7 @@ export default function Login() {
           </Form>
         </CardContent>
       </Card>
-      <Toaster position="bottom-right" richColors />
+      <Toaster position="bottom-left" richColors />
     </div>
   );
 }
