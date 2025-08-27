@@ -12,13 +12,14 @@ import { toast } from "sonner";
 import React from "react";
 
 export default function VariantTemplatePickerDialog({
-  openState,
+  isOpen,
   onSelect,
+  onClose,
 }: {
-  openState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  isOpen: boolean;
   onSelect: (variantType: VariantTypes) => void;
+  onClose: () => void;
 }) {
-  const [isOpen, setIsOpen] = openState;
   const [selected, setSelected] = React.useState<VariantTypes>();
   const loadingState = React.useState(false);
   const [variantTypes, setVariantTypes] = React.useState<VariantTypes[]>([]);
@@ -41,15 +42,15 @@ export default function VariantTemplatePickerDialog({
     }
   }, [getData, isOpen]);
 
-  React.useEffect(() => {
-    if (selected) {
-      onSelect({ name: selected.name, values: selected.values });
-      setIsOpen(false);
-    }
-  }, [onSelect, selected, setIsOpen]);
+  // React.useEffect(() => {
+  //   if (selected) {
+  //     onSelect({ name: selected.name, values: selected.values });
+  //     onClose();
+  //   }
+  // }, [onClose, onSelect, selected]);
 
   return (
-    <CommandDialog open={isOpen} onOpenChange={setIsOpen}>
+    <CommandDialog open={isOpen} onOpenChange={onClose}>
       <CommandInput placeholder="Type a command or search..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
@@ -57,7 +58,10 @@ export default function VariantTemplatePickerDialog({
           {variantTypes.map((variantType) => (
             <CommandItem
               key={variantType.id}
-              onSelect={() => setSelected(variantType)}
+              onSelect={() => {
+                onSelect(variantType);
+                onClose();
+              }}
             >
               <span className="font-semibold">{variantType.name}</span>
               {variantType.values.map(({ value }) => (

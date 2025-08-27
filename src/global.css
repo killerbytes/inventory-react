@@ -167,3 +167,7 @@
 body {
   letter-spacing: var(--tracking-normal);
 }
+
+.has-data-\[variant\=inset\]\: bg-sidebar:has([data-variant="inset"]) {
+  background-color: var(--sidebar);
+}

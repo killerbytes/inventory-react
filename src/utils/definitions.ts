@@ -108,29 +108,41 @@ export const MODE_OF_PAYMENT_OPTIONS = Object.values(MODE_OF_PAYMENT).map(
   }),
 );
 
+// export const BASE_UNIT = {};
 export const UNIT = {
+  PCS: "PCS",
+  KGS: "KGS",
+  BTL: "BTL",
+  RLS: "RLS",
+  MTS: "MTS",
+  FTS: "FTS",
+  LTS: "LTS",
   BOX: "BOX",
   BAG: "BAG",
   GAL: "GAL",
-  PACK: "PACK",
+  PCK: "PCK",
   SET: "SET",
-  PCS: "PCS",
-  KGS: "KGS",
-  MTRS: "MTRS",
-  ROLLS: "ROLLS",
 };
 
-export const BREAK_PACK_UNITS = [UNIT.BOX, UNIT.BAG, UNIT.GAL, UNIT.PACK];
+export const BREAK_PACK_UNITS = [UNIT.BOX, UNIT.BAG, UNIT.GAL, UNIT.PCK];
 
 export const UNIT_COLOR = {
-  BOX: "bg-indigo-400 ",
-  BAG: "bg-yellow-400 text-black",
-  GAL: "bg-green-400 text-black",
-  PACK: "bg-blue-500",
-  SET: "bg-purple-400 text-black",
-  PCS: "bg-red-500",
-  KGS: "bg-orange-400",
+  undefined: "text-black",
+  PCS: "bg-green-100 text-black border-green-500",
+  MTS: "bg-red-200 text-black border-red-500 ",
+  KGS: "bg-blue-200 text-black border-blue-500",
+  BOX: "bg-indigo-900 ",
+  BAG: "bg-yellow-900",
+  GAL: "bg-green-900",
+  PACK: "bg-blue-900",
+  SET: "bg-purple-900",
+  RLS: "bg-purple-900",
 };
+
+// export const BASE_UNIT_OPTIONS = Object.values(BASE_UNIT).map((value) => ({
+//   value,
+//   label: titleCase(value.toLowerCase()),
+// }));
 
 export const UNIT_OPTIONS = Object.values(UNIT).map((value) => ({
   value,

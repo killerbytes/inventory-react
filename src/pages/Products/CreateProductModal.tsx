@@ -1,13 +1,13 @@
 import { categoryServices, productServices } from "@/services";
 import { ApiError, ApiErrorResponse, Product } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
+import { ROUTES, UNIT } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/utils";
-import { ROUTES } from "@/utils/definitions";
 import { Form } from "@/components/ui/form";
 import { useCategoryStore } from "@/stores";
 import { useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
 import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import Modal from "@/components/Modal";
@@ -23,12 +23,13 @@ export default function CreateProductModal({
   onClose: () => void;
 }) {
   const { categories, setCategories } = useCategoryStore();
-
   const form = useForm<Product>({
     resolver: zodResolver(productSchema),
 
     defaultValues: {
       categoryId,
+      name: "",
+      baseUnit: UNIT.PCS,
     },
   });
   const navigate = useNavigate();
@@ -55,14 +56,10 @@ export default function CreateProductModal({
           type: "server",
           message: "Product with the same unit already exists",
         });
-        form.setError("unit", {
-          type: "server",
-          message: "Unit with same product already exists",
-        });
       }
     }
   }
-  const data = useWatch({ control: form.control });
+  // const data = useWatch({ control: form.control });
 
   React.useEffect(() => {
     const getData = async () => {

@@ -7,6 +7,7 @@ export default function NumberInput({
   type = "number",
   ...props
 }: {
+  tabIndex?: number;
   value: number | null | undefined;
   onChange: (value: number) => void;
   type?: "number" | "currency";

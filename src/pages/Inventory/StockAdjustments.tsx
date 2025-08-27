@@ -5,6 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderTitle,
+} from "@/components/PageHeader";
 import { InventoryMovement, PaginatedResponse, StockAdjustment } from "@/types";
 import { ROUTES, STOCK_ADJUSTMENT_TYPE_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -107,18 +112,21 @@ export default function StockAdjustments() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <>
+      <PageHeader>
+        <div className="flex items-center gap-2">
           <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Stock Adjustments
-        </CardTitle>
-        <CardAction></CardAction>
-      </CardHeader>
-      <CardContent>
-        <DataTable data={data.data} columns={columns} showFooter={false} />
-      </CardContent>
-    </Card>
+          <div className="bg-border h-5 w-[1px] mr-2" />
+          <div>
+            <PageHeaderTitle>Stock Adjustment</PageHeaderTitle>
+          </div>
+        </div>
+      </PageHeader>
+      <Card>
+        <CardContent>
+          <DataTable data={data.data} columns={columns} showFooter={false} />
+        </CardContent>
+      </Card>
+    </>
   );
 }

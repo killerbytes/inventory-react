@@ -13,8 +13,10 @@ import {
   VariantTypes,
   ApiErrorResponse,
 } from "@/types";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productCombinationsSchema } from "@/schemas";
@@ -22,12 +24,14 @@ import { SelectItem } from "@/components/ui/select";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { ERROR } from "@/utils/definitions";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
+import VariantCell from "./VariantCell";
 import Modal from "@/components/Modal";
 import React, { useMemo } from "react";
+import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -69,7 +73,9 @@ export default function CombinationModal({
   const productCombinationDefaultValue: ProductCombinations = {
     productId: Number(product.id),
     reorderLevel: 10,
+    unit: product.baseUnit,
     price: 0,
+    conversionFactor: 1,
     values: variants.map((i) => ({
       variantTypeId: i.id,
       value: "",
@@ -83,8 +89,6 @@ export default function CombinationModal({
         variants,
       }: { combinations: ProductCombinations[]; variants: VariantTypes[] } =
         await productCombinationServices.getByProductId(product.id);
-      await productCombinationServices.getByProductId(product.id);
-
       const map = combinations.map((i) => i.values);
       const x = combinations.map((i) => {
         return {
@@ -172,39 +176,52 @@ export default function CombinationModal({
           };
         }) => {
           return (
-            <Controller
-              name={`combinations.${index}.values.${idx}`}
+            // <Controller
+            //   name={`combinations.${index}.values.${idx}`}
+            //   control={form.control}
+            //   render={({ field }) => {
+            //     const error =
+            //       form.formState.errors[`combinations`]?.[index]?.values?.[idx]
+            //         ?.value;
+
+            //     return (
+            //       <Select
+            //         {...field}
+            //         className={cx("w-full", error && "border-red-500")}
+            //         value={String(
+            //           variant.values.find((i) => i.id === field.value?.id)?.id,
+            //         )}
+            //         options={variant.values}
+            //         onChange={(value) => {
+            //           field.onChange(
+            //             variant.values.find((v) => v.id === Number(value)),
+            //           );
+            //         }}
+            //         renderOption={(option) => (
+            //           <SelectItem key={option.id} value={String(option.id)}>
+            //             {option.value}
+            //           </SelectItem>
+            //         )}
+            //       />
+            //     );
+            //   }}
+            // />
+            <VariantCell
               control={form.control}
-              render={({ field }) => {
-                return (
-                  <Select
-                    {...field}
-                    value={String(
-                      variant.values.find((i) => i.id === field.value?.id)?.id,
-                    )}
-                    options={variant.values}
-                    onChange={(value) => {
-                      field.onChange(
-                        variant.values.find((v) => v.id === Number(value)),
-                      );
-                    }}
-                    renderOption={(option) => (
-                      <SelectItem key={option.id} value={String(option.id)}>
-                        {option.value}
-                      </SelectItem>
-                    )}
-                  />
-                );
-              }}
+              form={form}
+              index={index}
+              idx={idx}
+              variant={variant}
             />
           );
         },
       })),
       {
         accessorKey: "price",
-        header: () => <div className="text-right">Price</div>,
+        header: "Price",
         meta: {
-          className: "text-right w-0",
+          headerClassName: "text-right",
+          className: "text-right w-30 min-w-[100px]",
         },
         cell: ({ row }) => {
           return (
@@ -215,6 +232,70 @@ export default function CombinationModal({
                 <FormItem>
                   <FormControl>
                     <NumberInput {...field} type="currency" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "unit",
+        header: "Unit",
+        meta: {
+          headerClassName: "text-left",
+          className: "text-left w-0",
+        },
+        cell: ({ row }) => {
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.unit`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      {...field}
+                      tabIndex={-1}
+                      disabled={
+                        !form
+                          .watch(`combinations.${row.index}.values`)
+                          ?.every((v) => v?.id)
+                      }
+                      value={String(field.value)}
+                      options={UNIT_OPTIONS}
+                      renderOption={(unit) => (
+                        <SelectItem key={unit.value} value={String(unit.value)}>
+                          <ColorBadge colorMap={UNIT_COLOR}>
+                            {String(unit.label)}
+                          </ColorBadge>
+                        </SelectItem>
+                      )}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
+
+      {
+        accessorKey: "conversionFactor",
+        header: "Conversion Factor",
+        meta: {
+          headerClassName: "text-left",
+          className: "text-left w-[50px]",
+        },
+        cell: ({ row }) => {
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.conversionFactor`}
+              render={({ field }) => (
+                <FormItem className="">
+                  <FormControl>
+                    <NumberInput {...field} tabIndex={-1} />
                   </FormControl>
                 </FormItem>
               )}
@@ -236,7 +317,7 @@ export default function CombinationModal({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <NumberInput {...field} />
+                    <NumberInput {...field} tabIndex={-1} />
                   </FormControl>
                 </FormItem>
               )}
@@ -252,7 +333,7 @@ export default function CombinationModal({
       //   },
       // },
     ],
-    [form.control, remove, variants],
+    [form, remove, variants],
   );
   return (
     <Modal
@@ -281,35 +362,67 @@ export default function CombinationModal({
               <FormItem className="mb-2">
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
-                  <DataTable
-                    data={fields}
-                    columns={columns}
-                    errors={form.formState.errors}
-                    showFooter={true}
-                    renderFooter={() => (
-                      <TableRow>
-                        <TableCell colSpan={8}>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="shadow-sm"
-                            onClick={() =>
-                              append(productCombinationDefaultValue)
-                            }
-                          >
-                            <Plus />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
+                  <ScrollArea className="h-[280px]  rounded-md border">
+                    <DataTable
+                      data={fields}
+                      columns={columns}
+                      errors={form.formState.errors}
+                      showFooter={false}
+                      xrenderFooter={() => (
+                        <TableRow>
+                          <TableCell colSpan={8}>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="shadow-sm"
+                              autoFocus
+                              onClick={() => {
+                                const lastItem = last(x);
+                                const unit = lastItem
+                                  ? lastItem.unit
+                                  : productCombinationDefaultValue.unit;
+                                append({
+                                  ...productCombinationDefaultValue,
+                                  unit,
+                                });
+                                form.setFocus("combinations.3.values");
+                              }}
+                            >
+                              <Plus />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </ScrollArea>
                 </FormControl>
+                <div></div>
+
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <div className="flex justify-end">
+          <div className="flex justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              className="shadow-sm"
+              autoFocus
+              onClick={() => {
+                const lastItem = last(x);
+                const unit = lastItem
+                  ? lastItem.unit
+                  : productCombinationDefaultValue.unit;
+                append({
+                  ...productCombinationDefaultValue,
+                  unit,
+                });
+                form.setFocus("combinations.3.values");
+              }}
+            >
+              <Plus />
+            </Button>
             <Button className="shadow-sm" type="submit">
               Save changes
             </Button>
