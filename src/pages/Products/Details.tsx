@@ -38,6 +38,7 @@ import { categoryServices, productServices } from "@/services";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
+import { formatCurrency } from "@/utils/formatters";
 import { useForm, useWatch } from "react-hook-form";
 import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
@@ -196,6 +197,9 @@ export default function ProductEdit() {
       {
         accessorKey: "price",
         header: "Price",
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return formatCurrency(row.original.price);
+        },
       },
       {
         header: "Quantity",

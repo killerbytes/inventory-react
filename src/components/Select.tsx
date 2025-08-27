@@ -19,6 +19,8 @@ interface SelectProps {
   value?: string;
   valueKey?: string;
   labelKey?: string;
+  tabIndex?: number;
+  disabled?: boolean;
   renderOption?: (option: SelectOption) => React.ReactNode;
 }
 
@@ -36,6 +38,7 @@ function Select(props: SelectProps) {
     options,
     className,
     value,
+    tabIndex,
     renderOption = defaultRenderOption,
   } = props;
   const [selectOptions, setSelectOptions] = React.useState<SelectOption[]>([]);
@@ -58,7 +61,11 @@ function Select(props: SelectProps) {
       value={value || ""}
       onValueChange={handleChange}
     >
-      <SelectTrigger className={cx("w-full", className)} ref={triggerRef}>
+      <SelectTrigger
+        className={cx("w-full", className)}
+        ref={triggerRef}
+        tabIndex={tabIndex}
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

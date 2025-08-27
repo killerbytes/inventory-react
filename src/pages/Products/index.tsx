@@ -128,10 +128,10 @@ export default function Products() {
             <Accordion
               type="multiple"
               className="w-full"
-              defaultValue={data.data?.map((item) => item.categoryId)}
-              // defaultValue={data.data
-              //   // .filter((i) => i.products.length > 0)
-              //   .map((i) => i.categoryId)}
+              // defaultValue={data.data?.map((item) => item.categoryId)}
+              defaultValue={data.data
+                .filter((i) => i.products.length > 0)
+                .map((i) => i.categoryId)}
             >
               {data.data?.map((item) => (
                 <AccordionItem value={item.categoryId} key={item.categoryId}>

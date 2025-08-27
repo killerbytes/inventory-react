@@ -5,7 +5,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { BASE_UNIT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
+import { UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectItem } from "@/components/ui/select";
 import ColorBadge from "@/components/ColorBadge";
@@ -97,7 +97,7 @@ export default function ProductForm({
             <FormControl>
               <Select
                 {...field}
-                options={BASE_UNIT_OPTIONS}
+                options={UNIT_OPTIONS}
                 renderOption={(unit) => (
                   <SelectItem key={unit.value} value={String(unit.value)}>
                     <ColorBadge colorMap={UNIT_COLOR}>

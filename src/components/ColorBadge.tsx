@@ -14,7 +14,11 @@ export default function ColorBadge({
   const unit = children.toUpperCase() as keyof typeof colorMap;
   return (
     <Badge
-      className={cx("text-xs", className, colorMap[unit] || "bg-red-500")}
+      className={cx(
+        "text-xs",
+        className,
+        colorMap[unit] || "bg-white text-black",
+      )}
       {...props}
     >
       {unit}

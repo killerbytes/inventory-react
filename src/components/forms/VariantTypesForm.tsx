@@ -6,6 +6,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import VariantCopyTemplateModal from "../modals/VariantCopyTemplateModal";
 import VariantCopyTemplateForm from "./VariantCopyTemplateForm";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Plus, Save, Search, Trash2, X } from "lucide-react";
@@ -242,15 +243,11 @@ export default function VariantTypesForm({
         </form>
       </Form>
       {toggle.saveTemplateModal && selected && (
-        <Modal
+        <VariantCopyTemplateModal
+          selected={selected}
           isOpen={toggle.saveTemplateModal}
-          onOpenChange={() => handleToggle({ saveTemplateModal: false })}
-          title="Save to Variant Template"
-          description="Save as new Variant Template"
-          size="sm"
-        >
-          <VariantCopyTemplateForm selected={selected} />
-        </Modal>
+          onClose={() => handleToggle({ saveTemplateModal: false })}
+        />
       )}
     </>
   );
