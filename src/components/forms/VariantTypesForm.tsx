@@ -6,20 +6,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import VariantCopyTemplateModal from "../modals/VariantCopyTemplateModal";
-import VariantCopyTemplateForm from "./VariantCopyTemplateForm";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { Plus, Save, Search, Trash2, X } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCell, TableRow } from "../ui/table";
+import { ScrollArea } from "../ui/scroll-area";
+import { Plus, Trash2, X } from "lucide-react";
 import ConfirmDialog from "../ConfirmDialog";
 import { DialogFooter } from "../ui/dialog";
-import useToggle from "@/hooks/useToggle";
 import { DataTable } from "../DataTable";
 import { VariantTypes } from "@/types";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import Modal from "../Modal";
 import React from "react";
 
 export default function VariantTypesForm({
@@ -27,18 +24,15 @@ export default function VariantTypesForm({
   onSubmit,
   selected,
   onDelete,
-  onOpenVariantTemplatePicker,
+  variantTypes,
 }: {
   form: UseFormReturn<VariantTypes>;
   onSubmit: (e: VariantTypes) => Promise<void>;
   selected?: VariantTypes;
   onDelete: () => Promise<void>;
-  onOpenVariantTemplatePicker?: () => void;
+  variantTypes: VariantTypes[];
 }) {
-  const [values, setValues] = React.useState();
-  const { toggle, handleToggle } = useToggle({
-    saveTemplateModal: false,
-  });
+  const [values, setValues] = React.useState("");
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "values",
@@ -104,20 +98,7 @@ export default function VariantTypesForm({
 
                 <FormControl>
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 w-full">
-                      {onOpenVariantTemplatePicker && (
-                        <Button
-                          variant="outline"
-                          type="button"
-                          className="shadow-sm"
-                          onClick={() => {
-                            onOpenVariantTemplatePicker();
-                          }}
-                        >
-                          <Search />
-                        </Button>
-                      )}
-
+                    <div className="flex items-center gap-2 w-full">
                       <Input
                         placeholder="Variant Type, e.g. Color"
                         {...field}
@@ -125,7 +106,7 @@ export default function VariantTypesForm({
                       />
                     </div>
 
-                    {selected && (
+                    {selected && variantTypes.includes(selected) && (
                       <>
                         <ConfirmDialog
                           title={`Delete Variant`}
@@ -137,6 +118,7 @@ export default function VariantTypesForm({
                           <Button
                             variant="outline"
                             className="text-red-500 shadow-sm"
+                            tabIndex={-1}
                           >
                             <Trash2 />
                           </Button>
@@ -155,77 +137,98 @@ export default function VariantTypesForm({
               <FormItem>
                 <FormLabel>Values</FormLabel>
                 <FormControl>
-                  <DataTable
-                    data={fields}
-                    columns={columns}
-                    emptyText="Add values..."
-                    showHeader={false}
-                    showFooter={true}
-                    renderFooter={() => (
-                      <TableRow>
-                        <TableCell>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="shadow-sm"
-                            onClick={() =>
-                              append({ value: "", variantTypeId: undefined })
-                            }
-                          >
-                            <Plus />
-                          </Button>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={values}
-                            onChange={(e) => setValues(e.target.value)}
-                            onKeyDown={(
-                              e: React.KeyboardEvent<HTMLInputElement>,
-                            ) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                const inputTarget =
-                                  e.target as HTMLInputElement;
-                                const values = inputTarget.value.split(",");
-                                values.forEach((value) => {
-                                  append({
-                                    value: value.trim(),
-                                    variantTypeId: undefined,
-                                  });
-                                });
-                                setValues("");
+                  <ScrollArea
+                    className="h-[280px]  rounded-md border"
+                    tabIndex={-1}
+                    autoFocus={false}
+                  >
+                    <DataTable
+                      data={fields}
+                      columns={columns}
+                      emptyText="Add values..."
+                      showHeader={false}
+                      showFooter={false}
+                      xrenderFooter={() => (
+                        <TableRow>
+                          <TableCell>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="shadow-sm"
+                              onClick={() =>
+                                append({ value: "", variantTypeId: undefined })
                               }
-                            }}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
+                            >
+                              <Plus />
+                            </Button>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={values}
+                              onChange={(e) => setValues(e.target.value)}
+                              onKeyDown={(
+                                e: React.KeyboardEvent<HTMLInputElement>,
+                              ) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  const inputTarget =
+                                    e.target as HTMLInputElement;
+                                  const values = inputTarget.value.split(",");
+                                  values.forEach((value) => {
+                                    append({
+                                      value: value.trim(),
+                                      variantTypeId: undefined,
+                                    });
+                                  });
+                                  setValues("");
+                                }
+                              }}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </ScrollArea>
                 </FormControl>
+                <div className="flex gap-2 justify-between">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shadow-sm"
+                    onClick={() =>
+                      append({ value: "", variantTypeId: undefined })
+                    }
+                  >
+                    <Plus />
+                  </Button>
+                  <Input
+                    placeholder="Add values separated by comma"
+                    value={values}
+                    onChange={(e) => setValues(e.target.value)}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const inputTarget = e.target as HTMLInputElement;
+                        const values = inputTarget.value.split(",");
+                        values.forEach((value) => {
+                          append({
+                            value: value.trim(),
+                            variantTypeId: undefined,
+                          });
+                        });
+                        setValues("");
+                      }
+                    }}
+                  />
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex  gap-2 justify-between">
-            {selected?.id && (
-              <Button
-                variant="outline"
-                className="shadow-sm"
-                onClick={() => {
-                  handleToggle({
-                    saveTemplateModal: true,
-                  });
-                }}
-                type="button"
-              >
-                <Save />
-              </Button>
-            )}
-          </div>
 
           <DialogFooter>
             <Button
-              type="button"
+              type="submit"
               className="shadow-sm"
               onClick={(e) => {
                 e.preventDefault();
@@ -242,13 +245,6 @@ export default function VariantTypesForm({
           </DialogFooter>
         </form>
       </Form>
-      {toggle.saveTemplateModal && selected && (
-        <VariantCopyTemplateModal
-          selected={selected}
-          isOpen={toggle.saveTemplateModal}
-          onClose={() => handleToggle({ saveTemplateModal: false })}
-        />
-      )}
     </>
   );
 }

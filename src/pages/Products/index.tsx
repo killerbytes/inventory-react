@@ -1,21 +1,33 @@
 import {
+  PageHeader,
+  PageHeaderActions,
+  PageHeaderContent,
+  PageHeaderDescription,
+  PageHeaderTitle,
+} from "@/components/PageHeader";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  categoryServices,
+  productCombinationServices,
+  productServices,
+} from "@/services";
+import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
+import { useCategoryStore, useProductCombinationStore } from "@/stores";
 import { CategorizedProductList, PaginatedResponse } from "@/types";
-import { categoryServices, productServices } from "@/services";
+import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
-import { GLOBAL_COLOR } from "@/utils/definitions";
-import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
-import { useCategoryStore } from "@/stores";
+import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import ProductItem from "./ProductItem";
@@ -23,8 +35,11 @@ import { PlusIcon } from "lucide-react";
 import React, { Fragment } from "react";
 
 export default function Products() {
+  const navigate = useNavigate();
   const [category, setCategory] = React.useState<number>();
   const { categories, setCategories } = useCategoryStore();
+  const { productCombinations, setProductsCombinations } =
+    useProductCombinationStore();
   const [query, setQuery] = React.useState("");
   const [data, setData] = React.useState<
     PaginatedResponse<CategorizedProductList[]>
@@ -82,9 +97,41 @@ export default function Products() {
     // }
   }, []);
 
+  React.useEffect(() => {
+    const getData = async () => {
+      const data = await productCombinationServices.list();
+      setProductsCombinations(data);
+    };
+    getData();
+  }, [setProductsCombinations]);
+
   return (
     <>
-      <PageHeader title="Products" />
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderTitle>Products</PageHeaderTitle>
+          <PageHeaderDescription>
+            Manage your products and variants
+          </PageHeaderDescription>
+        </PageHeaderContent>
+        <PageHeaderActions>
+          <ProductComboSearchCommand
+            items={productCombinations}
+            onSelect={(item) => {
+              navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
+            }}
+          />
+          <Button
+            size="icon"
+            className="size-8 shadow-sm"
+            onClick={() => {
+              handleToggle({ createProductModal: true });
+            }}
+          >
+            <PlusIcon />
+          </Button>
+        </PageHeaderActions>
+      </PageHeader>
 
       <Card>
         <CardContent>

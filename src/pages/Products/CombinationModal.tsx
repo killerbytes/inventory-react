@@ -16,6 +16,7 @@ import {
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productCombinationsSchema } from "@/schemas";
@@ -361,44 +362,67 @@ export default function CombinationModal({
               <FormItem className="mb-2">
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
-                  <DataTable
-                    data={fields}
-                    columns={columns}
-                    errors={form.formState.errors}
-                    showFooter={true}
-                    renderFooter={() => (
-                      <TableRow>
-                        <TableCell colSpan={8}>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="shadow-sm"
-                            autoFocus
-                            onClick={() => {
-                              const lastItem = last(x);
-                              const unit = lastItem
-                                ? lastItem.unit
-                                : productCombinationDefaultValue.unit;
-                              append({
-                                ...productCombinationDefaultValue,
-                                unit,
-                              });
-                              form.setFocus("combinations.3.values");
-                            }}
-                          >
-                            <Plus />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  />
+                  <ScrollArea className="h-[280px]  rounded-md border">
+                    <DataTable
+                      data={fields}
+                      columns={columns}
+                      errors={form.formState.errors}
+                      showFooter={false}
+                      xrenderFooter={() => (
+                        <TableRow>
+                          <TableCell colSpan={8}>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="shadow-sm"
+                              autoFocus
+                              onClick={() => {
+                                const lastItem = last(x);
+                                const unit = lastItem
+                                  ? lastItem.unit
+                                  : productCombinationDefaultValue.unit;
+                                append({
+                                  ...productCombinationDefaultValue,
+                                  unit,
+                                });
+                                form.setFocus("combinations.3.values");
+                              }}
+                            >
+                              <Plus />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    />
+                  </ScrollArea>
                 </FormControl>
+                <div></div>
+
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <div className="flex justify-end">
+          <div className="flex justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              className="shadow-sm"
+              autoFocus
+              onClick={() => {
+                const lastItem = last(x);
+                const unit = lastItem
+                  ? lastItem.unit
+                  : productCombinationDefaultValue.unit;
+                append({
+                  ...productCombinationDefaultValue,
+                  unit,
+                });
+                form.setFocus("combinations.3.values");
+              }}
+            >
+              <Plus />
+            </Button>
             <Button className="shadow-sm" type="submit">
               Save changes
             </Button>

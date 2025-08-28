@@ -1,6 +1,7 @@
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { Product, ProductCombinations } from "@/types";
+import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,21 @@ export default function ProductItem({ item }: { item: Product }) {
           headerClassName: "h-0 py-1",
         },
       },
+      // ...(item.variants?.map((variant, idx) => ({
+      //   accessorKey: "values.values." + variant.name,
+      //   header: variant.name,
+      //   meta: {
+      //     headerClassName: "h-0",
+      //     className: "w-20",
+      //   },
+      //   cell: ({ row }: { row: Row<ProductCombinations> }) => {
+      //     const x = row.original.values.findIndex(
+      //       (i) => i.variantTypeId === item.variants?.[idx].id,
+      //     );
+
+      //     return row.original.values[x]?.value;
+      //   },
+      // })) || []),
 
       {
         accessorKey: "price",
@@ -27,7 +43,11 @@ export default function ProductItem({ item }: { item: Product }) {
           headerClassName: "h-0",
           className: "w-20",
         },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return formatCurrency(row.original.price);
+        },
       },
+
       {
         header: "Quantity",
         accessorKey: "inventory.quantity",
@@ -57,21 +77,6 @@ export default function ProductItem({ item }: { item: Product }) {
           className: "w-20",
         },
       },
-      ...(item.variants?.map((variant, idx) => ({
-        accessorKey: "values.values." + variant.name,
-        header: variant.name,
-        meta: {
-          headerClassName: "h-0",
-          className: "w-20",
-        },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          const x = row.original.values.findIndex(
-            (i) => i.variantTypeId === item.variants?.[idx].id,
-          );
-
-          return row.original.values[x]?.value;
-        },
-      })) || []),
     ],
     [item.variants],
   );

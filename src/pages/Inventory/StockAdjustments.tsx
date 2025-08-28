@@ -5,13 +5,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderTitle,
+} from "@/components/PageHeader";
 import { InventoryMovement, PaginatedResponse, StockAdjustment } from "@/types";
 import { ROUTES, STOCK_ADJUSTMENT_TYPE_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import PageHeader from "@/components/PageHeader";
 import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
 import { Link } from "react-router";
@@ -109,7 +113,15 @@ export default function StockAdjustments() {
 
   return (
     <>
-      <PageHeader title="Stock Adjustments" />
+      <PageHeader>
+        <div className="flex items-center gap-2">
+          <SidebarTrigger />
+          <div className="bg-border h-5 w-[1px] mr-2" />
+          <div>
+            <PageHeaderTitle>Stock Adjustment</PageHeaderTitle>
+          </div>
+        </div>
+      </PageHeader>
       <Card>
         <CardContent>
           <DataTable data={data.data} columns={columns} showFooter={false} />
