@@ -130,8 +130,10 @@ export const BREAK_PACK_UNITS = [UNIT.BOX, UNIT.BAG, UNIT.GAL, UNIT.PCK];
 export const UNIT_COLOR = {
   undefined: "text-black",
   PCS: "bg-green-100 text-black border-green-500",
-  MTS: "bg-red-200 text-black border-red-500 ",
-  KGS: "bg-blue-200 text-black border-blue-500",
+  MTS: "bg-green-100 text-black border-green-500",
+  FTS: "bg-green-100 text-black border-green-500",
+  KGS: "bg-green-100 text-black border-green-500",
+  LTS: "bg-green-100 text-black border-green-500",
   BOX: "bg-indigo-900 ",
   BAG: "bg-yellow-900",
   GAL: "bg-green-900",

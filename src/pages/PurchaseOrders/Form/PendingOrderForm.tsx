@@ -6,16 +6,26 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  productCombinationServices,
+  productServices,
+  supplierServices,
+} from "@/services";
+import {
+  useProductCombinationStore,
+  useProductStore,
+  useSupplierStore,
+} from "@/stores";
 import { CategorizedProductList, PurchaseOrderCreate, Supplier } from "@/types";
+import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
-import { productServices, supplierServices } from "@/services";
 import OrderItemForm from "@/components/forms/OrderItemForm";
-import { useProductStore, useSupplierStore } from "@/stores";
 import ProductCommand from "@/components/ProductCommand";
 import { CommandItem } from "@/components/ui/command";
+import { ChevronsUpDown, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
 import NumberInput from "@/components/NumberInput";
@@ -27,7 +37,6 @@ import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import { PurchaseOrderItem } from "@/types";
 import Select from "@/components/Select";
-import { Trash2 } from "lucide-react";
 import React from "react";
 
 export default function PendingOrderForm({
@@ -37,6 +46,8 @@ export default function PendingOrderForm({
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
   const { products, setProducts, flatProducts } = useProductStore();
+  const { productCombinations, setProductsCombinations } =
+    useProductCombinationStore();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -63,6 +74,14 @@ export default function PendingOrderForm({
       getData();
     }
   }, [setSuppliers, suppliers.length]);
+
+  React.useEffect(() => {
+    const getData = async () => {
+      const data = await productCombinationServices.list();
+      setProductsCombinations(data);
+    };
+    getData();
+  }, [setProductsCombinations]);
 
   const columns = React.useMemo<ColumnDef<PurchaseOrderItem>[]>(
     () => [
@@ -96,33 +115,49 @@ export default function PendingOrderForm({
               render={({ field }) => {
                 console.log(field.value);
                 return (
-                  <ProductCommand
-                    {...field}
-                    control={form.control}
-                    list={products}
-                    value={String(field.value)}
-                    field="purchaseOrderItems"
-                    onChange={(value) => {
-                      field.onChange(value);
-                    }}
-                    renderOption={(combination, onChange) => {
-                      return (
-                        <CommandItem
-                          keywords={[String(combination?.name)]}
-                          value={String(combination.id)}
-                          key={combination.id}
-                          onSelect={onChange}
-                          className="flex gap-2 items-center justify-between"
-                        >
-                          {combination?.name}
+                  // <ProductCommand
+                  //   {...field}
+                  //   control={form.control}
+                  //   list={products}
+                  //   value={String(field.value)}
+                  //   field="purchaseOrderItems"
+                  //   onChange={(value) => {
+                  //     console.log(value);
+                  //     field.onChange(value);
+                  //   }}
+                  //   renderOption={(combination, onChange) => {
+                  //     return (
+                  //       <CommandItem
+                  //         keywords={[String(combination?.name)]}
+                  //         value={String(combination.id)}
+                  //         key={combination.id}
+                  //         onSelect={onChange}
+                  //         className="flex gap-2 items-center justify-between"
+                  //       >
+                  //         {combination?.name}
 
-                          <ColorBadge className="ml-auto" colorMap={UNIT_COLOR}>
-                            {String(combination.product?.unit)}
-                          </ColorBadge>
-                        </CommandItem>
-                      );
-                    }}
-                  />
+                  //         <ColorBadge className="ml-auto" colorMap={UNIT_COLOR}>
+                  //           {String(combination.product?.unit)}
+                  //         </ColorBadge>
+                  //       </CommandItem>
+                  //     );
+                  //   }}
+                  // />
+                  <div className="flex gap-2 items-center justify-between">
+                    {
+                      productCombinations.find((i) => i.id === field.value)
+                        ?.name
+                    }
+                    <ProductComboSearchCommand
+                      items={productCombinations}
+                      onSelect={(item) => {
+                        field.onChange(item.id);
+                      }}
+                      className="ml-auto"
+                    >
+                      <ChevronsUpDown />
+                    </ProductComboSearchCommand>
+                  </div>
                 );
               }}
             />

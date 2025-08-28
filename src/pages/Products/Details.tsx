@@ -313,7 +313,12 @@ export default function ProductEdit() {
           </PageHeaderDescription>
         </PageHeaderContent>
         <PageHeaderActions>
-          <ProductComboSearchCommand items={productCombinations} />
+          <ProductComboSearchCommand
+            items={productCombinations}
+            onSelect={(item) =>
+              navigate(`${ROUTES.PRODUCTS}/${item.productId}`)
+            }
+          />
           <Button
             size="icon"
             className="size-8 shadow-sm"
