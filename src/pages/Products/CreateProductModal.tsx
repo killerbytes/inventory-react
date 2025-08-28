@@ -18,7 +18,7 @@ export default function CreateProductModal({
   isOpen,
   onClose,
 }: {
-  categoryId: number | undefined;
+  categoryId?: number | undefined;
   isOpen: boolean;
   onClose: () => void;
 }) {

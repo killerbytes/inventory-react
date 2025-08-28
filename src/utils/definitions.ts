@@ -122,6 +122,7 @@ export const UNIT = {
   GAL: "GAL",
   PCK: "PCK",
   SET: "SET",
+  DOZ: "DOZ",
 };
 
 export const BREAK_PACK_UNITS = [UNIT.BOX, UNIT.BAG, UNIT.GAL, UNIT.PCK];
@@ -135,8 +136,9 @@ export const UNIT_COLOR = {
   BAG: "bg-yellow-900",
   GAL: "bg-green-900",
   PACK: "bg-blue-900",
-  SET: "bg-purple-900",
+  SET: "bg-pink-900",
   RLS: "bg-purple-900",
+  DOZ: "bg-orange-900",
 };
 
 // export const BASE_UNIT_OPTIONS = Object.values(BASE_UNIT).map((value) => ({

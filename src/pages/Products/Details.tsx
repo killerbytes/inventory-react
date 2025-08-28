@@ -6,6 +6,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  PageHeader,
+  PageHeaderActions,
+  PageHeaderContent,
+  PageHeaderDescription,
+  PageHeaderTitle,
+} from "@/components/PageHeader";
+import {
+  Copy,
+  EllipsisVertical,
+  PackageOpen,
+  Pencil,
+  PlusIcon,
+  Save,
+} from "lucide-react";
+import {
   Card,
   CardAction,
   CardContent,
@@ -13,52 +28,53 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  categoryServices,
+  productCombinationServices,
+  productServices,
+} from "@/services";
+import {
   ApiErrorResponse,
   Product,
   ProductCombinations,
   VariantTypes,
 } from "@/types";
 import {
-  Copy,
-  EllipsisVertical,
-  PackageOpen,
-  Pencil,
-  Save,
-} from "lucide-react";
-import {
   BREAK_PACK_UNITS,
   ERROR,
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
+import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
 import CloneToUnitModal from "../../components/modals/CloneToUnitModal";
+import { useCategoryStore, useProductCombinationStore } from "@/stores";
 import BreakPackModal from "@/components/modals/BreakPackModal";
-import { categoryServices, productServices } from "@/services";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
+import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
 import { useForm, useWatch } from "react-hook-form";
 import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
-import PageHeader from "@/components/PageHeader";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
-import { useCategoryStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
 import { toast } from "sonner";
+import {} from "@/lib/utils";
 
 export default function ProductEdit() {
   const { id } = useParams();
   const [product, setProduct] = React.useState<Product>();
   const { categories, setCategories } = useCategoryStore();
+  const { productCombinations, setProductsCombinations } =
+    useProductCombinationStore();
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
     [],
   );
@@ -168,6 +184,14 @@ export default function ProductEdit() {
     }
   }, [categories.length, setCategories]);
 
+  React.useEffect(() => {
+    const getData = async () => {
+      const data = await productCombinationServices.list();
+      setProductsCombinations(data);
+    };
+    getData();
+  }, [setProductsCombinations]);
+
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
       {
@@ -198,13 +222,20 @@ export default function ProductEdit() {
         accessorKey: "price",
         header: "Price",
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          console.log(row.original);
           return formatCurrency(row.original.price);
         },
       },
       {
         header: "Quantity",
         accessorKey: "inventory.quantity",
+        meta: {
+          headerClassName: "text-right",
+          className: "w-0 text-right",
+        },
+      },
+      {
+        accessorKey: "conversionFactor",
+        header: "Conversion Factor",
         meta: {
           headerClassName: "text-right",
           className: "w-0 text-right",
@@ -274,6 +305,26 @@ export default function ProductEdit() {
   );
   return (
     <Fragment key={id}>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderTitle>Products</PageHeaderTitle>
+          <PageHeaderDescription>
+            Manage your products and variants
+          </PageHeaderDescription>
+        </PageHeaderContent>
+        <PageHeaderActions>
+          <ProductComboSearchCommand items={productCombinations} />
+          <Button
+            size="icon"
+            className="size-8 shadow-sm"
+            onClick={() => {
+              handleToggle({ createProductModal: true });
+            }}
+          >
+            <PlusIcon />
+          </Button>
+        </PageHeaderActions>
+      </PageHeader>
       <Form {...form}>
         <form
           className="h-full flex flex-col gap-4"
@@ -442,6 +493,14 @@ export default function ProductEdit() {
           onSubmit={async () => {
             // handleToggle({ stockAdjustmentModal: false });
             // navigate(`${ROUTES.PRODUCTS}/${productId}`);
+          }}
+        />
+      )}
+      {toggle.createProductModal && (
+        <CreateProductModal
+          isOpen={true}
+          onClose={() => {
+            handleToggle({ createProductModal: false });
           }}
         />
       )}

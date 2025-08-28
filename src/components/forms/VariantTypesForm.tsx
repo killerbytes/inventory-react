@@ -118,6 +118,7 @@ export default function VariantTypesForm({
                           <Button
                             variant="outline"
                             className="text-red-500 shadow-sm"
+                            tabIndex={-1}
                           >
                             <Trash2 />
                           </Button>
@@ -136,7 +137,11 @@ export default function VariantTypesForm({
               <FormItem>
                 <FormLabel>Values</FormLabel>
                 <FormControl>
-                  <ScrollArea className="h-[280px]  rounded-md border">
+                  <ScrollArea
+                    className="h-[280px]  rounded-md border"
+                    tabIndex={-1}
+                    autoFocus={false}
+                  >
                     <DataTable
                       data={fields}
                       columns={columns}
@@ -223,7 +228,7 @@ export default function VariantTypesForm({
 
           <DialogFooter>
             <Button
-              type="button"
+              type="submit"
               className="shadow-sm"
               onClick={(e) => {
                 e.preventDefault();

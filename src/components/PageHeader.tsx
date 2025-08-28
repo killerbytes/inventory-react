@@ -1,3 +1,4 @@
+import { SidebarTrigger } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
@@ -53,9 +54,27 @@ function PageHeaderActions({
   );
 }
 
+function PageHeaderContent({
+  children,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="page-header-content"
+      className="flex items-center gap-2"
+      {...props}
+    >
+      <SidebarTrigger />
+      <div className="bg-border h-5 w-[1px] mr-2" />
+      <div>{children}</div>
+    </div>
+  );
+}
+
 export {
   PageHeader,
   PageHeaderTitle,
   PageHeaderDescription,
   PageHeaderActions,
+  PageHeaderContent,
 };

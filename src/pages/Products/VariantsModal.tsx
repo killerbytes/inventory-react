@@ -88,7 +88,7 @@ export default function VariantsModal({
       title="Variants"
       description="Add variants to the product"
     >
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <div className="flex gap-2 flex-wrap justify-start">
           {variantTypes.map((v, index) => (
             <Badge

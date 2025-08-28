@@ -1,10 +1,4 @@
 import {
-  PageHeader,
-  PageHeaderActions,
-  PageHeaderDescription,
-  PageHeaderTitle,
-} from "@/components/PageHeader";
-import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -12,7 +6,6 @@ import {
 } from "@/components/ui/accordion";
 import { CategorizedProductList, PaginatedResponse } from "@/types";
 import { categoryServices, productServices } from "@/services";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
@@ -90,7 +83,7 @@ export default function Products() {
 
   return (
     <>
-      <PageHeader>
+      {/* <PageHeader>
         <div className="flex items-center gap-2">
           <SidebarTrigger />
           <div className="bg-border h-5 w-[1px] mr-2" />
@@ -113,7 +106,7 @@ export default function Products() {
             <PlusIcon />
           </Button>
         </PageHeaderActions>
-      </PageHeader>
+      </PageHeader> */}
 
       <Card>
         <CardContent>

@@ -38,6 +38,7 @@ export default function Modal({
     >
       <DialogContent
         className={cx("w-full ", `${Modal.sizes[size]}`, className)}
+        tabIndex={undefined}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
