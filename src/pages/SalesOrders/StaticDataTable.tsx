@@ -41,17 +41,6 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         },
       },
       {
-        header: "Original Price",
-        accessorKey: "originalPrice",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return formatCurrency(row.original.originalPrice ?? 0);
-        },
-      },
-      {
         header: "Price",
         accessorKey: "purchasePrice",
         meta: {

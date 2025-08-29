@@ -1,4 +1,4 @@
-import { Control, Path, useWatch } from "react-hook-form";
+import { Control, Path, useController, useWatch } from "react-hook-form";
 import { formatCurrency } from "@/utils/formatters";
 import React from "react";
 
@@ -14,29 +14,42 @@ export default function AmountColumn<T extends FieldValues>({
   name: Path<T>;
 }) {
   const [value, setValue] = React.useState(0);
-  const quantity =
-    useWatch({
-      control,
-      name: `${name}.${index}.quantity` as Path<T>,
-    }) || 0;
+  const quantity = useController({
+    name: `${name}.${index}.quantity` as Path<T>,
+    control,
+  });
+  const discount = useController({
+    name: `${name}.${index}.discount` as Path<T>,
+    control,
+  });
+  const purchasePrice = useController({
+    name: `${name}.${index}.purchasePrice` as Path<T>,
+    control,
+  });
 
-  const discount =
-    useWatch({
-      control,
-      name: `${name}.${index}.discount` as Path<T>,
-    }) || 0;
+  // const quantity =
+  //   useWatch({
+  //     control,
+  //     name: `${name}.${index}.quantity` as Path<T>,
+  //   }) || 0;
 
-  const price =
-    useWatch({
-      control,
-      name: `${name}.${index}.purchasePrice` as Path<T>,
-    }) || 0;
+  // const discount =
+  //   useWatch({
+  //     control,
+  //     name: `${name}.${index}.discount` as Path<T>,
+  //   }) || 0;
+
+  // const price =
+  //   useWatch({
+  //     control,
+  //     name: `${name}.${index}.purchasePrice` as Path<T>,
+  //   }) || 0;
 
   React.useEffect(() => {
-    const q = Number(quantity) || 0;
-    const p = Number(price) || 0;
-    setValue(q * p - discount);
-  }, [discount, price, quantity]);
+    const q = Number(quantity.field.value) || 0;
+    const p = Number(purchasePrice.field.value) || 0;
+    setValue(q * p - (discount.field.value || 0));
+  }, [discount.field.value, purchasePrice.field.value, quantity.field.value]);
 
   return formatCurrency(value);
 }

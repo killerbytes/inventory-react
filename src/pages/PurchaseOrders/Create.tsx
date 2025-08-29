@@ -9,22 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ERROR, MODE_OF_PAYMENT_OPTIONS, ROUTES } from "@/utils/definitions";
 import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
 import { ApiError, ApiErrorResponse, PurchaseOrderCreate } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import PendingOrderForm from "./Form/PendingOrderForm";
+import { ERROR, ROUTES } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import useDebounce from "@/hooks/useDebounce";
 import { useNavigate } from "react-router";
-import { randomInt } from "@/lib/utils";
-import { addWeeks } from "date-fns";
 import { toast } from "sonner";
 import React from "react";
 import * as z from "zod";
 
 const purchaseOrderItemDefault = {
-  quantity: 1,
   discountNote: "",
 };
 
@@ -32,7 +29,6 @@ const purchaseOrderDefault = {
   // purchaseOrderNumber: randomInt(1000000, 9999999).toString(),
   // supplierId: randomInt(1, 100),
   // modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
-  orderDate: new Date().toISOString(),
   deliveryDate: new Date().toISOString(),
   // dueDate: addWeeks(new Date(), 1).toISOString(),
   purchaseOrderItems: Array.from({ length: 3 }, () => purchaseOrderItemDefault),
@@ -56,7 +52,7 @@ export default function Create() {
     defaultValues,
   });
 
-  const data = useWatch({ control: form.control, name: "purchaseOrderItems" });
+  // const data = useWatch({ control: form.control, name: "purchaseOrderItems" });
 
   async function onSubmit(values: PurchaseOrderCreate) {
     try {
@@ -121,7 +117,7 @@ export default function Create() {
             </CardTitle>
             <CardAction></CardAction>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col gap-4">
             <PendingOrderForm form={form} />
             <div className="flex justify-end mt-auto">
               <Button

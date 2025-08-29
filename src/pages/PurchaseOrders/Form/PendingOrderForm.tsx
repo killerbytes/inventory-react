@@ -45,7 +45,7 @@ export default function PendingOrderForm({
   form: UseFormReturn<PurchaseOrderCreate>;
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
-  const { products, setProducts, flatProducts } = useProductStore();
+  const { setProducts } = useProductStore();
   const { productCombinations, setProductsCombinations } =
     useProductCombinationStore();
 
@@ -135,9 +135,6 @@ export default function PendingOrderForm({
       {
         accessorKey: "combinationId",
         header: "Product",
-        meta: {
-          // className: "w-50",
-        },
         cell: ({ row }) => {
           return (
             <Controller
@@ -150,30 +147,38 @@ export default function PendingOrderForm({
                     onSelect={(item) => {
                       field.onChange(item.id);
                     }}
-                    renderOptions={(items, setOpen, onSelect) => (
-                      <CommandGroup>
-                        {items.map((item) => (
-                          <CommandItem
-                            value={String(item.id)}
-                            key={item.id}
-                            onSelect={() => {
-                              setOpen(false);
-                              onSelect?.(item);
-                            }}
-                            className="flex items-center gap-2 justify-between"
-                          >
-                            {item.name}
-                            <div className="flex gap-2">
-                              {item.inventory.quantity}
-                              <span>{formatCurrency(item.price)}</span>
-                              <ColorBadge colorMap={UNIT_COLOR}>
-                                {item.unit}
-                              </ColorBadge>
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    )}
+                    renderOptions={(items, open, setOpen, onSelect) => {
+                      return (
+                        open &&
+                        items.map((item) => (
+                          <CommandGroup key={item.id}>
+                            <CommandItem
+                              value={String(item.name)}
+                              key={item.id}
+                              onSelect={() => {
+                                setOpen(false);
+                                onSelect?.(item);
+                                setTimeout(() => {
+                                  form.setFocus(
+                                    `purchaseOrderItems.${row.index}.purchasePrice`,
+                                  );
+                                }, 0);
+                              }}
+                              className="flex items-center gap-2 justify-between"
+                            >
+                              {item.name}
+                              <div className="flex gap-2">
+                                {item.inventory.quantity}
+                                <span>{formatCurrency(item.price)}</span>
+                                <ColorBadge colorMap={UNIT_COLOR}>
+                                  {item.unit}
+                                </ColorBadge>
+                              </div>
+                            </CommandItem>
+                          </CommandGroup>
+                        ))
+                      );
+                    }}
                   >
                     <Button
                       variant="outline"
@@ -220,7 +225,10 @@ export default function PendingOrderForm({
             name={`purchaseOrderItems.${row.index}.discountNote`}
             control={form.control}
             render={({ field }) => (
-              <Input {...field} value={String(field.value)} />
+              <Input
+                {...field}
+                value={field.value ? String(field.value) : undefined}
+              />
             )}
           />
         ),
@@ -240,7 +248,7 @@ export default function PendingOrderForm({
                 <FormControl>
                   <NumberInput
                     {...field}
-                    value={Number(field.value)}
+                    // value={Number(field.value)}
                     type="currency"
                   />
                 </FormControl>
@@ -265,42 +273,17 @@ export default function PendingOrderForm({
         ),
       },
     ],
-    [flatProducts, form, products, remove],
+    [form, productCombinations, remove],
   );
 
   return (
     <Form {...form}>
-      <form>
-        <div className="flex gap-4 items-start ">
-          <FormField
-            control={form.control}
-            name="purchaseOrderNumber"
-            render={({ field }) => (
-              <FormItem className="mb-4">
-                <FormLabel>PO #</FormLabel>
-                <Input {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="deliveryDate"
-            render={({ field }) => (
-              <FormItem className="mb-4">
-                <FormLabel>Delivery Date</FormLabel>
-                <DatePicker {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+      <form className="flex gap-4 items-start flex-col">
         <FormField
           control={form.control}
           name="supplierId"
           render={({ field }) => (
-            <FormItem className="mb-4">
+            <FormItem className="w-full">
               <FormLabel>Supplier</FormLabel>
               <Autocomplete
                 value={
@@ -321,12 +304,24 @@ export default function PendingOrderForm({
             </FormItem>
           )}
         />
-        <div className="flex gap-4 items-start">
+        <div className="w-full flex flex-col gap-4 items-start md:flex-row">
+          <FormField
+            control={form.control}
+            name="deliveryDate"
+            render={({ field }) => (
+              <FormItem className="w-full md:w-1/4">
+                <FormLabel>Delivery Date</FormLabel>
+                <DatePicker {...field} />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="modeOfPayment"
             render={({ field }) => (
-              <FormItem className="mb-4 w-50">
+              <FormItem className="w-full md:w-1/4">
                 <FormLabel>Mode of Payment</FormLabel>
                 <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
 
@@ -341,17 +336,13 @@ export default function PendingOrderForm({
               return (
                 <FormItem
                   className={cx(
-                    "mb-4",
+                    "w-full md:w-1/4",
                     modeOfPayment !== "CHECK" && "opacity-50",
                   )}
                 >
                   <FormLabel>Check Number</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      disabled={modeOfPayment !== "CHECK"}
-                      value={String(field.value)}
-                    />
+                    <Input {...field} disabled={modeOfPayment !== "CHECK"} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -364,7 +355,7 @@ export default function PendingOrderForm({
             render={({ field }) => (
               <FormItem
                 className={cx(
-                  "mb-4",
+                  "w-full md:w-1/4",
                   modeOfPayment !== "CHECK" && "opacity-50",
                 )}
               >
@@ -380,7 +371,7 @@ export default function PendingOrderForm({
           control={form.control}
           name="internalNotes"
           render={({ field }) => (
-            <FormItem className="mb-4">
+            <FormItem className="w-full">
               <FormLabel>Internal Notes</FormLabel>
               <FormControl>
                 <Textarea
@@ -398,7 +389,7 @@ export default function PendingOrderForm({
           control={form.control}
           name="notes"
           render={({ field }) => (
-            <FormItem className="mb-4">
+            <FormItem className="w-full">
               <FormLabel>Notes</FormLabel>
               <FormControl>
                 <Textarea
@@ -418,7 +409,7 @@ export default function PendingOrderForm({
           control={form.control}
           name="purchaseOrderItems"
           render={() => (
-            <FormItem className="w-full mb-4">
+            <FormItem className="w-full">
               <FormControl>
                 <OrderItemForm
                   fields={fields}
@@ -429,7 +420,7 @@ export default function PendingOrderForm({
                   append={() =>
                     append({
                       combinationId: null,
-                      quantity: 1,
+                      quantity: 0,
                       purchasePrice: 0,
                       discount: null,
                       discountNote: "",

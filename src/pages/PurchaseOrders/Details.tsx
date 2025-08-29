@@ -74,8 +74,8 @@ export default function Create() {
       });
       toast.success(`Purchase Order saved successfully`);
     } catch (error) {
-      const { message } = getErrorMessage(error as ApiErrorResponse);
-      toast.error("Submission failed - " + message);
+      const apiError = error as ApiErrorResponse;
+      toast.error("Submission failed - " + apiError.message);
     }
   }
 
@@ -88,9 +88,9 @@ export default function Create() {
 
       toast.success(`Purchase Order received`);
       navigate(ROUTES.PURCHASE_ORDERS);
-    } catch (error: any) {
-      const { message } = getErrorMessage(error);
-      toast.error("Submission failed - " + message);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      toast.error("Submission failed - " + apiError.message);
     }
   }
 
@@ -99,8 +99,9 @@ export default function Create() {
       await purchaseOrderServices.delete(Number(id));
       toast.success(`Purchase Order deleted successfully`);
       navigate(ROUTES.PURCHASE_ORDERS);
-    } catch (error: any) {
-      toast.error("Submission failed - " + error?.response.data.error);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      toast.error("Submission failed - " + apiError.message);
     }
   }
 
@@ -159,7 +160,7 @@ export default function Create() {
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
-            Purchase Order #{data?.purchaseOrderNumber}
+            {data?.purchaseOrderNumber}
           </CardTitle>
           <CardAction className="flex gap-2">
             {data?.modeOfPayment === MODE_OF_PAYMENT.CHECK && (
@@ -232,7 +233,7 @@ export default function Create() {
             </DropdownMenu>
           </CardAction>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-4">
           {data?.status === ORDER_STATUS.PENDING ? (
             <>
               <PendingOrderForm form={form} />
@@ -271,7 +272,7 @@ export default function Create() {
                   }}
                 />
               )}
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end">
                 {data?.status === ORDER_STATUS.RECEIVED && (
                   <ConfirmDialog
                     title="Complete Order"

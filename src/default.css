@@ -1,3 +1,7 @@
 input[readonly] {
   @apply shadow-none;
 }
+
+body {
+  font-family: "Open Sans", sans-serif;
+}
