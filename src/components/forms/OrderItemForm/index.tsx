@@ -45,7 +45,7 @@ function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
           </TableCell>
         </TableRow>
       )}
-      <TableRow>
+      <TableRow className="font-bold">
         <TableCell colSpan={4}>Total</TableCell>
         <TableCell className="text-right px-5">
           {total?.discount ? formatCurrency(total?.discount) : "-"}

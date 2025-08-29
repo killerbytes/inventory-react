@@ -225,7 +225,10 @@ export default function PendingOrderForm({
             name={`purchaseOrderItems.${row.index}.discountNote`}
             control={form.control}
             render={({ field }) => (
-              <Input {...field} value={String(field.value)} />
+              <Input
+                {...field}
+                value={field.value ? String(field.value) : undefined}
+              />
             )}
           />
         ),
