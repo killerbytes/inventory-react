@@ -19,6 +19,7 @@ import {
   Pencil,
   PlusIcon,
   Save,
+  Search,
 } from "lucide-react";
 import {
   Card,
@@ -95,11 +96,9 @@ export default function ProductEdit() {
     cloneModal: false,
     breakPackModal: false,
     stockAdjustmentModal: false,
+    createProductModal: false,
   });
 
-  const x = useWatch({
-    control: form.control,
-  });
   async function onSubmit(values: Product) {
     try {
       await productServices.update(Number(id), values);
@@ -191,6 +190,10 @@ export default function ProductEdit() {
     };
     getData();
   }, [setProductsCombinations]);
+
+  const x = useWatch<Product>({
+    control: form.control,
+  });
 
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
@@ -318,7 +321,11 @@ export default function ProductEdit() {
             onSelect={(item) =>
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`)
             }
-          />
+          >
+            <Button variant="outline" size="sm">
+              <Search />
+            </Button>
+          </ProductComboSearchCommand>
           <Button
             size="icon"
             className="size-8 shadow-sm"
@@ -439,6 +446,7 @@ export default function ProductEdit() {
           </Card>
         </form>
       </Form>
+
       {/* {JSON.stringify(x)} */}
       {toggle.variantModal && (
         <VariantsModal

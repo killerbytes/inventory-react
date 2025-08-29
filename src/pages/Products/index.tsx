@@ -18,12 +18,16 @@ import {
 } from "@/services";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { useCategoryStore, useProductCombinationStore } from "@/stores";
+import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { CategorizedProductList, PaginatedResponse } from "@/types";
-import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
+import { formatCurrency } from "@/utils/formatters";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { PlusIcon, Search } from "lucide-react";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
@@ -31,7 +35,6 @@ import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import ProductItem from "./ProductItem";
-import { PlusIcon } from "lucide-react";
 import React, { Fragment } from "react";
 
 export default function Products() {
@@ -120,7 +123,33 @@ export default function Products() {
             onSelect={(item) => {
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
             }}
-          />
+            renderOptions={(items, setOpen, onSelect) => (
+              <CommandGroup>
+                {items.map((item) => (
+                  <CommandItem
+                    value={item.id}
+                    key={item.id}
+                    onSelect={() => {
+                      setOpen(false);
+                      onSelect?.(item);
+                    }}
+                    className="flex items-center gap-2 justify-between"
+                  >
+                    {item.name}
+                    <div className="flex gap-2">
+                      {item.inventory.quantity}
+                      <span>{formatCurrency(item.price)}</span>
+                      <ColorBadge colorMap={UNIT_COLOR}>{item.unit}</ColorBadge>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          >
+            <Button variant="outline" size="sm">
+              <Search />
+            </Button>
+          </ProductComboSearchCommand>
           <Button
             size="icon"
             className="size-8 shadow-sm"

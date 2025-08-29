@@ -113,10 +113,10 @@ export const productBaseSchema = z.object({
 });
 
 export const productCombinationsSchema = z.object({
-  id: z.number().optional(),
+  id: z.number(),
   productId: z.number(),
-  name: z.string().nullish(),
-  sku: z.string().nullish(),
+  name: z.string(),
+  sku: z.string(),
   unit: z.string(),
   conversionFactor: z.coerce.number().min(1, {
     message: "Conversion Factor must be at least 1.",
@@ -126,8 +126,8 @@ export const productCombinationsSchema = z.object({
   }),
   reorderLevel: z.coerce.number(),
   values: z.array(variantValuesSchema),
-  inventory: inventorySchema.nullish(),
-  product: productBaseSchema.nullish(),
+  inventory: inventorySchema,
+  product: productBaseSchema,
 });
 
 export const productSchema = productBaseSchema.extend({

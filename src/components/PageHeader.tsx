@@ -1,17 +1,26 @@
+import { useStickySentinel } from "@/hooks/useStickySentinel";
 import { SidebarTrigger } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
 function PageHeader({ className, ...props }: React.ComponentProps<"header">) {
+  const { sentinelRef, stuck } = useStickySentinel();
+  console.log(stuck);
   return (
-    <header
-      data-slot="page-header"
-      className={cn(
-        "@container/page-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1 px-2 py-2 border-b border-border mb-4 has-data-[slot=page-header-actions]:grid-cols-[1fr_auto]",
-        className,
-      )}
-      {...props}
-    />
+    <>
+      <div ref={sentinelRef} aria-hidden className="h-px" />
+
+      <header
+        data-slot="page-header"
+        className={cn(
+          "@container/page-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1 px-2 py-2 border-b border-border mb-4 has-data-[slot=page-header-actions]:grid-cols-[1fr_auto]",
+          "sticky top-0 z-10 bg-background",
+          stuck && "shadow",
+          className,
+        )}
+        {...props}
+      />
+    </>
   );
 }
 

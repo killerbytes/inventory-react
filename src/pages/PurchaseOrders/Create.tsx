@@ -25,15 +25,16 @@ import * as z from "zod";
 
 const purchaseOrderItemDefault = {
   quantity: 1,
+  discountNote: "",
 };
 
 const purchaseOrderDefault = {
-  purchaseOrderNumber: randomInt(1000000, 9999999).toString(),
-  supplierId: randomInt(1, 100),
-  modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
+  // purchaseOrderNumber: randomInt(1000000, 9999999).toString(),
+  // supplierId: randomInt(1, 100),
+  // modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
   orderDate: new Date().toISOString(),
   deliveryDate: new Date().toISOString(),
-  dueDate: addWeeks(new Date(), 1).toISOString(),
+  // dueDate: addWeeks(new Date(), 1).toISOString(),
   purchaseOrderItems: Array.from({ length: 3 }, () => purchaseOrderItemDefault),
 };
 

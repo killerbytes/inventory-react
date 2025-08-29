@@ -22,12 +22,12 @@ import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
+import { CommandGroup, CommandItem } from "@/components/ui/command";
 import OrderItemForm from "@/components/forms/OrderItemForm";
-import ProductCommand from "@/components/ProductCommand";
-import { CommandItem } from "@/components/ui/command";
 import { ChevronsUpDown, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
+import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
@@ -102,97 +102,11 @@ export default function PendingOrderForm({
         ),
       },
       {
-        accessorKey: "combinationId",
-        header: "Product",
-        meta: {
-          className: "w-100",
-        },
-        cell: ({ row }) => {
-          return (
-            <Controller
-              name={`purchaseOrderItems.${row.index}.combinationId`}
-              control={form.control}
-              render={({ field }) => {
-                console.log(field.value);
-                return (
-                  // <ProductCommand
-                  //   {...field}
-                  //   control={form.control}
-                  //   list={products}
-                  //   value={String(field.value)}
-                  //   field="purchaseOrderItems"
-                  //   onChange={(value) => {
-                  //     console.log(value);
-                  //     field.onChange(value);
-                  //   }}
-                  //   renderOption={(combination, onChange) => {
-                  //     return (
-                  //       <CommandItem
-                  //         keywords={[String(combination?.name)]}
-                  //         value={String(combination.id)}
-                  //         key={combination.id}
-                  //         onSelect={onChange}
-                  //         className="flex gap-2 items-center justify-between"
-                  //       >
-                  //         {combination?.name}
-
-                  //         <ColorBadge className="ml-auto" colorMap={UNIT_COLOR}>
-                  //           {String(combination.product?.unit)}
-                  //         </ColorBadge>
-                  //       </CommandItem>
-                  //     );
-                  //   }}
-                  // />
-                  <div className="flex gap-2 items-center justify-between">
-                    {
-                      productCombinations.find((i) => i.id === field.value)
-                        ?.name
-                    }
-                    <ProductComboSearchCommand
-                      items={productCombinations}
-                      onSelect={(item) => {
-                        field.onChange(item.id);
-                      }}
-                      className="ml-auto"
-                    >
-                      <ChevronsUpDown />
-                    </ProductComboSearchCommand>
-                  </div>
-                );
-              }}
-            />
-          );
-        },
-      },
-      {
-        accessorKey: "purchasePrice",
-        header: "Price",
-        meta: {
-          className: "text-right min-w-[100px] w-[110px]",
-        },
-        cell: ({ row }) => (
-          <FormField
-            control={form.control}
-            name={`purchaseOrderItems.${row.index}.purchasePrice`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <NumberInput
-                    {...field}
-                    value={Number(field.value)}
-                    type="currency"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        ),
-      },
-      {
         accessorKey: "quantity",
         header: "Quantity",
         meta: {
-          className: "text-right min-w-[90px] w-[90px]",
+          headerClassName: "text-right",
+          className: "text-right w-20",
         },
         cell: ({ row }) => (
           <Controller
@@ -219,6 +133,68 @@ export default function PendingOrderForm({
         },
       },
       {
+        accessorKey: "combinationId",
+        header: "Product",
+        meta: {
+          // className: "w-50",
+        },
+        cell: ({ row }) => {
+          return (
+            <Controller
+              name={`purchaseOrderItems.${row.index}.combinationId`}
+              control={form.control}
+              render={({ field }) => {
+                return (
+                  <ProductComboSearchCommand
+                    items={productCombinations}
+                    onSelect={(item) => {
+                      field.onChange(item.id);
+                    }}
+                    renderOptions={(items, setOpen, onSelect) => (
+                      <CommandGroup>
+                        {items.map((item) => (
+                          <CommandItem
+                            value={String(item.id)}
+                            key={item.id}
+                            onSelect={() => {
+                              setOpen(false);
+                              onSelect?.(item);
+                            }}
+                            className="flex items-center gap-2 justify-between"
+                          >
+                            {item.name}
+                            <div className="flex gap-2">
+                              {item.inventory.quantity}
+                              <span>{formatCurrency(item.price)}</span>
+                              <ColorBadge colorMap={UNIT_COLOR}>
+                                {item.unit}
+                              </ColorBadge>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    )}
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full flex justify-between h-9 min-w-[200px]"
+                      type="button"
+                    >
+                      {
+                        productCombinations.find((i) => i.id === field.value)
+                          ?.name
+                      }
+                      <ChevronsUpDown className="ml-auto" />
+                    </Button>
+                  </ProductComboSearchCommand>
+                );
+              }}
+            />
+          );
+        },
+      },
+
+      {
         accessorKey: "discount",
         header: "Discount",
         meta: {
@@ -243,7 +219,33 @@ export default function PendingOrderForm({
           <Controller
             name={`purchaseOrderItems.${row.index}.discountNote`}
             control={form.control}
-            render={({ field }) => <Input {...field} />}
+            render={({ field }) => (
+              <Input {...field} value={String(field.value)} />
+            )}
+          />
+        ),
+      },
+      {
+        accessorKey: "purchasePrice",
+        header: "Price",
+        meta: {
+          className: "text-right min-w-[100px] w-[110px]",
+        },
+        cell: ({ row }) => (
+          <FormField
+            control={form.control}
+            name={`purchaseOrderItems.${row.index}.purchasePrice`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <NumberInput
+                    {...field}
+                    value={Number(field.value)}
+                    type="currency"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
         ),
       },
@@ -345,7 +347,11 @@ export default function PendingOrderForm({
                 >
                   <FormLabel>Check Number</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={modeOfPayment !== "CHECK"} />
+                    <Input
+                      {...field}
+                      disabled={modeOfPayment !== "CHECK"}
+                      value={String(field.value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
