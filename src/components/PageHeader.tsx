@@ -5,7 +5,6 @@ import * as React from "react";
 
 function PageHeader({ className, ...props }: React.ComponentProps<"header">) {
   const { sentinelRef, stuck } = useStickySentinel();
-  console.log(stuck);
   return (
     <>
       <div ref={sentinelRef} aria-hidden className="h-px" />

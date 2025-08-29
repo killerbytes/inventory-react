@@ -123,26 +123,29 @@ export default function Products() {
             onSelect={(item) => {
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
             }}
-            renderOptions={(items, setOpen, onSelect) => (
+            renderOptions={(items, open, setOpen, onSelect) => (
               <CommandGroup>
-                {items.map((item) => (
-                  <CommandItem
-                    value={item.id}
-                    key={item.id}
-                    onSelect={() => {
-                      setOpen(false);
-                      onSelect?.(item);
-                    }}
-                    className="flex items-center gap-2 justify-between"
-                  >
-                    {item.name}
-                    <div className="flex gap-2">
-                      {item.inventory.quantity}
-                      <span>{formatCurrency(item.price)}</span>
-                      <ColorBadge colorMap={UNIT_COLOR}>{item.unit}</ColorBadge>
-                    </div>
-                  </CommandItem>
-                ))}
+                {open &&
+                  items.map((item) => (
+                    <CommandItem
+                      value={item.id}
+                      key={item.id}
+                      onSelect={() => {
+                        setOpen(false);
+                        onSelect?.(item);
+                      }}
+                      className="flex items-center gap-2 justify-between"
+                    >
+                      {item.name}
+                      <div className="flex gap-2">
+                        {item.inventory.quantity}
+                        <span>{formatCurrency(item.price)}</span>
+                        <ColorBadge colorMap={UNIT_COLOR}>
+                          {item.unit}
+                        </ColorBadge>
+                      </div>
+                    </CommandItem>
+                  ))}
               </CommandGroup>
             )}
           >
@@ -219,7 +222,7 @@ export default function Products() {
                   >
                     {item.categoryName}
 
-                    <div
+                    {/* <div
                       onClick={(e) => {
                         e.stopPropagation();
                         setCategory(Number(item.categoryId));
@@ -227,7 +230,7 @@ export default function Products() {
                       }}
                     >
                       <PlusIcon />
-                    </div>
+                    </div> */}
                   </AccordionTrigger>
                   <AccordionContent className="flex flex-col">
                     <>
@@ -254,7 +257,7 @@ export default function Products() {
                         <Fragment key={i.id}>
                           <div className="flex gap-2 justify-start items-center">
                             {i.categoryName}
-                            <Button
+                            {/* <Button
                               variant="ghost"
                               size="icon"
                               className="size-8"
@@ -264,7 +267,7 @@ export default function Products() {
                               }}
                             >
                               <PlusIcon />
-                            </Button>
+                            </Button> */}
                           </div>
 
                           <div className="flex gap-2 justify-start items-center">
@@ -277,7 +280,7 @@ export default function Products() {
                     </>
 
                     <div className="flex justify-start  py-1">
-                      <Button
+                      {/* <Button
                         variant="outline"
                         size="icon"
                         className="size-8 shadow-sm"
@@ -287,7 +290,7 @@ export default function Products() {
                         }}
                       >
                         <PlusIcon />
-                      </Button>
+                      </Button> */}
                       {/* {item.subCategories.map((i) => (
                         <Badge
                           onClick={() => {

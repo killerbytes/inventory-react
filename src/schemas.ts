@@ -175,7 +175,6 @@ export const purchaseOrderItemSchema = z.object({
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
-  originalPrice: z.coerce.number().nullish(),
   purchasePrice: z.coerce.number().min(1, {
     message: "Unit Price must be at least 1.",
   }),
@@ -204,11 +203,7 @@ export const statusHistorySchema = z.object({
 
 const purchaseOrderBaseSchema = z.object({
   id: z.number().optional(),
-  purchaseOrderNumber: z
-    .string({
-      required_error: "PO number is required",
-    })
-    .min(2, { message: "PO number is required" }),
+  purchaseOrderNumber: z.string().nullish(),
   supplierId: z.coerce
     .number({
       required_error: "Supplier is required",

@@ -1,5 +1,6 @@
 import { Control, FieldArrayWithId, Path, useWatch } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { getTotalAmountTableFooter } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -27,20 +28,7 @@ type TableProps<T extends FieldArrayWithId, TColumns extends ColumnDef<T>> = {
 };
 
 function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
-  const total = data?.reduce(
-    (acc, item) => {
-      return {
-        amount: acc.amount + (item.purchasePrice || 0) * (item.quantity || 0),
-        purchasePrice: acc.purchasePrice + (Number(item.purchasePrice) || 0),
-        discount: acc.discount + (Number(item.discount) || 0),
-      };
-    },
-    {
-      amount: 0,
-      discount: 0,
-      purchasePrice: 0,
-    },
-  );
+  const total = getTotalAmountTableFooter(data);
   return (
     <>
       {append && (
@@ -58,16 +46,14 @@ function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
         </TableRow>
       )}
       <TableRow>
-        <TableCell colSpan={2}>Total</TableCell>
+        <TableCell colSpan={4}>Total</TableCell>
         <TableCell className="text-right px-5">
-          {formatCurrency(total?.purchasePrice)}
-        </TableCell>
-        <TableCell className="text-right"></TableCell>
-        <TableCell className="text-right"></TableCell>
-        <TableCell className="text-right px-5 ">
           {total?.discount ? formatCurrency(total?.discount) : "-"}
         </TableCell>
-        <TableCell className="text-right"></TableCell>
+        <TableCell></TableCell>
+        <TableCell className="text-right px-5 ">
+          {formatCurrency(total?.purchasePrice)}
+        </TableCell>
         <TableCell className="text-right">
           {formatCurrency(total?.amount - total?.discount)}
         </TableCell>
@@ -90,9 +76,6 @@ export default function OrderItemForm<T>({
       <DataTable
         data={fields}
         columns={columns}
-        // tableClassname={cx({
-        //   "border-red-500": errors.purchaseOrderItems,
-        // })}
         renderFooter={() => renderFooter(footerValues, append)}
         showFooter
       />

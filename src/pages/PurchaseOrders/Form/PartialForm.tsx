@@ -16,7 +16,9 @@ import PurchaseOrderItemForm from "../../../components/forms/OrderItemForm";
 import OrderItemForm from "../../../components/forms/OrderItemForm";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { PurchaseOrder, PurchaseOrderItem } from "@/types";
+import { getTotalAmountTableFooter } from "@/lib/utils";
 import SupplierPanel from "@/components/SupplierPanel";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
@@ -42,50 +44,25 @@ export default function PartialForm({
   const columns = useMemo<ColumnDef<PurchaseOrderItem>[]>(
     () => [
       {
-        accessorKey: "nameSnapshot",
-        header: "Product",
-        meta: {
-          className: GLOBAL_COLOR.PRODUCT,
-        },
-      },
-      {
-        accessorKey: "variantSnapshot",
-        header: "Variant",
+        accessorKey: "index",
+        header: "#",
         cell: ({ row }) => {
-          const variantSnapshot = row.original.variantSnapshot;
-          return Object.keys(variantSnapshot)
-            .map((key) => `${key}: ${variantSnapshot[key]}`)
-            .join(" | ");
-        },
-      },
-      {
-        header: "Original Price",
-        accessorKey: "originalPrice",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return formatCurrency(row.original.originalPrice ?? 0);
-        },
-      },
-      {
-        header: "Price",
-        accessorKey: "purchasePrice",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return formatCurrency(row.original.purchasePrice);
+          return row.index + 1;
         },
       },
       {
         header: () => "Quantity",
         accessorKey: "quantity",
         meta: {
-          headerClassName: "text-right",
+          headerClassName: "text-right w-10",
           className: "text-right",
+        },
+      },
+      {
+        accessorKey: "nameSnapshot",
+        header: "Product",
+        meta: {
+          className: GLOBAL_COLOR.PRODUCT,
         },
       },
       {
@@ -105,11 +82,26 @@ export default function PartialForm({
         meta: {
           className: "text-right",
         },
+        cell: ({ row }) => {
+          return formatCurrency(Number(row.original.discount));
+        },
       },
       {
         header: "Note",
         accessorKey: "discountNote",
       },
+      {
+        header: "Price",
+        accessorKey: "purchasePrice",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          return formatCurrency(row.original.purchasePrice);
+        },
+      },
+
       {
         header: "Amount",
         accessorKey: "totalAmount",
@@ -197,6 +189,24 @@ export default function PartialForm({
             errors={errors}
             control={form.control}
             name="purchaseOrderItems"
+            renderFooter={(data) => {
+              const total = getTotalAmountTableFooter(data);
+              return (
+                <TableRow>
+                  <TableCell colSpan={4}>Total</TableCell>
+                  <TableCell className="text-right font-bold">
+                    {total?.discount ? formatCurrency(total?.discount) : "-"}
+                  </TableCell>
+                  <TableCell></TableCell>
+                  <TableCell className="text-right font-bold">
+                    {formatCurrency(total?.purchasePrice)}
+                  </TableCell>
+                  <TableCell className="text-right font-bold">
+                    {formatCurrency(total?.amount - total?.discount)}
+                  </TableCell>
+                </TableRow>
+              );
+            }}
           />
         </div>
 

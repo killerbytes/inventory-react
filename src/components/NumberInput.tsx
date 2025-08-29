@@ -1,40 +1,45 @@
 import { NumericFormat } from "react-number-format";
 import { Input } from "./ui/input";
+import React from "react";
 
-export default function NumberInput({
-  value,
-  onChange,
-  type = "number",
-  ...props
-}: {
+interface NumberInputProps {
   tabIndex?: number;
   value: number | null | undefined;
   onChange: (value: number) => void;
   type?: "number" | "currency";
-}) {
-  const onFocus = (e) => {
-    e.target.select();
-  };
-
-  return (
-    <NumericFormat
-      {...props}
-      value={value}
-      onFocus={onFocus}
-      onValueChange={(values) => {
-        const { floatValue } = values;
-        onChange(floatValue ?? 0);
-      }}
-      style={{ textAlign: "inherit" }}
-      customInput={Input}
-      allowNegative={false} // optional, no negatives
-      decimalScale={0} // ✅ no decimals
-      thousandSeparator=","
-      {...(type === "currency" && {
-        prefix: "₱",
-        decimalScale: 2,
-        fixedDecimalScale: true,
-      })}
-    />
-  );
 }
+
+const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
+  ({ value, onChange, type = "number", ...props }, ref) => {
+    const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      e.target.select();
+    };
+
+    return (
+      <NumericFormat
+        {...props}
+        getInputRef={ref} // ✅ forward the ref to RHF
+        value={value}
+        onFocus={onFocus}
+        onValueChange={(values) => {
+          const { floatValue } = values;
+          onChange(floatValue ?? 0);
+        }}
+        style={{ textAlign: "inherit" }}
+        customInput={Input}
+        allowNegative={false}
+        decimalScale={0}
+        thousandSeparator=","
+        {...(type === "currency" && {
+          prefix: "₱",
+          decimalScale: 2,
+          fixedDecimalScale: true,
+        })}
+      />
+    );
+  },
+);
+
+NumberInput.displayName = "NumberInput";
+
+export default NumberInput;

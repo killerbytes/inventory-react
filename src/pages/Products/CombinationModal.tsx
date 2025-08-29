@@ -7,11 +7,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  ProductCombinations,
   Product,
   VariantValues,
   VariantTypes,
   ApiErrorResponse,
+  ProductCombinations,
 } from "@/types";
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -19,13 +19,13 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { productCombinationsSchema } from "@/schemas";
 import { SelectItem } from "@/components/ui/select";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { variantValuesSchema } from "@/schemas";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
@@ -34,6 +34,19 @@ import React, { useMemo } from "react";
 import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
+
+const formSchema = z.object({
+  productId: z.number(),
+  unit: z.string(),
+  conversionFactor: z.coerce.number().min(1, {
+    message: "Conversion Factor must be at least 1.",
+  }),
+  price: z.coerce.number().min(0.01, {
+    message: "Price must be at least 0.01.",
+  }),
+  reorderLevel: z.coerce.number(),
+  values: z.array(variantValuesSchema),
+});
 
 export default function CombinationModal({
   product,
@@ -47,14 +60,14 @@ export default function CombinationModal({
 }) {
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const form = useForm<{
-    combinations: ProductCombinations[];
+    combinations: z.infer<typeof formSchema>[];
   }>({
     defaultValues: {
       combinations: [],
     },
     resolver: zodResolver(
       z.object({
-        combinations: z.array(productCombinationsSchema),
+        combinations: z.array(formSchema),
       }),
     ),
   });
@@ -70,7 +83,7 @@ export default function CombinationModal({
     name: "combinations",
   });
 
-  const productCombinationDefaultValue: ProductCombinations = {
+  const productCombinationDefaultValue: z.infer<typeof formSchema> = {
     productId: Number(product.id),
     reorderLevel: 10,
     unit: product.baseUnit,
@@ -117,12 +130,12 @@ export default function CombinationModal({
   }, [getData]);
 
   const handleSubmit = async (values: {
-    combinations: ProductCombinations[];
+    combinations: z.infer<typeof formSchema>[];
   }) => {
     try {
       await productCombinationServices.updateByProductId(
         Number(product.id),
-        values,
+        values as ProductCombinations[],
       );
       toast.success("Variants saved successfully");
     } catch (error) {

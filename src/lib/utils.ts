@@ -141,3 +141,21 @@ export const getMappedProductComboName = (product, values) => {
 
   return `${product?.name} - ${outputParts.join(" | ")}`;
 };
+
+export const getTotalAmountTableFooter = (data) => {
+  const total = data?.reduce(
+    (acc, item) => {
+      return {
+        amount: acc.amount + (item.purchasePrice || 0) * (item.quantity || 0),
+        purchasePrice: acc.purchasePrice + (Number(item.purchasePrice) || 0),
+        discount: acc.discount + (Number(item.discount) || 0),
+      };
+    },
+    {
+      amount: 0,
+      discount: 0,
+      purchasePrice: 0,
+    },
+  );
+  return total;
+};

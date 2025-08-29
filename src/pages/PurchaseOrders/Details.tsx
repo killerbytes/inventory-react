@@ -74,8 +74,8 @@ export default function Create() {
       });
       toast.success(`Purchase Order saved successfully`);
     } catch (error) {
-      const { message } = getErrorMessage(error as ApiErrorResponse);
-      toast.error("Submission failed - " + message);
+      const apiError = error as ApiErrorResponse;
+      toast.error("Submission failed - " + apiError.message);
     }
   }
 
@@ -88,9 +88,9 @@ export default function Create() {
 
       toast.success(`Purchase Order received`);
       navigate(ROUTES.PURCHASE_ORDERS);
-    } catch (error: any) {
-      const { message } = getErrorMessage(error);
-      toast.error("Submission failed - " + message);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      toast.error("Submission failed - " + apiError.message);
     }
   }
 
@@ -99,8 +99,9 @@ export default function Create() {
       await purchaseOrderServices.delete(Number(id));
       toast.success(`Purchase Order deleted successfully`);
       navigate(ROUTES.PURCHASE_ORDERS);
-    } catch (error: any) {
-      toast.error("Submission failed - " + error?.response.data.error);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      toast.error("Submission failed - " + apiError.message);
     }
   }
 

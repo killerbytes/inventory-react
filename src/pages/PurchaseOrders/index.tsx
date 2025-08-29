@@ -47,6 +47,7 @@ export default function PurchaseOrders() {
   const [filter, setFilter] = React.useState({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
+    status: "ALL",
     ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
     ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
@@ -71,8 +72,13 @@ export default function PurchaseOrders() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
+      const payload = {
+        ...filter,
+        status: filter.status === "ALL" ? undefined : filter.status,
+      };
+
       const data: PaginatedResponse<PurchaseOrder[]> =
-        await purchaseOrderServices.getAll(filter);
+        await purchaseOrderServices.getAll(payload);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -116,7 +122,7 @@ export default function PurchaseOrders() {
       header: "Date",
       cell: ({ row }) => {
         const statusHistoryMap = mappedStatusHistory(
-          row.original.orderStatusHistory ?? [],
+          row.original.purchaseOrderStatusHistory ?? [],
         );
         return formatDate(statusHistoryMap[row.original.status]?.changedAt);
       },
@@ -126,7 +132,7 @@ export default function PurchaseOrders() {
       header: "User",
       cell: ({ row }) => {
         const statusHistoryMap = mappedStatusHistory(
-          row.original.orderStatusHistory ?? [],
+          row.original.purchaseOrderStatusHistory ?? [],
         );
         return statusHistoryMap[row.original.status]?.user.username;
       },
@@ -161,7 +167,6 @@ export default function PurchaseOrders() {
       cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
     },
   ];
-
   return (
     <div>
       <Card>
@@ -191,10 +196,10 @@ export default function PurchaseOrders() {
             <div className="w-1/4">
               <Select
                 options={ORDER_STATUS_OPTIONS}
-                value={ORDER_STATUS_OPTIONS[0].value}
+                value={filter.status}
                 onChange={(selected) => {
                   if (selected === "ALL") {
-                    setFilter(({ ...prev }) => ({ ...prev, status: "" }));
+                    setFilter(({ ...prev }) => ({ ...prev, status: "ALL" }));
                   } else {
                     setFilter((prev) => ({ ...prev, status: selected }));
                   }
@@ -212,9 +217,10 @@ export default function PurchaseOrders() {
                 onRowClick={(item: PurchaseOrder) =>
                   navigate(`/purchases/${item.id}`)
                 }
+                showFooter
                 renderFooter={(data: PurchaseOrder[]) => {
                   return (
-                    <TableRow>
+                    <TableRow className="font-bold">
                       <TableCell colSpan={7}>Total Amount</TableCell>
                       <TableCell className="text-right">
                         {formatCurrency(

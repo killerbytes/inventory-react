@@ -191,9 +191,9 @@ export default function ProductEdit() {
     getData();
   }, [setProductsCombinations]);
 
-  const x = useWatch<Product>({
-    control: form.control,
-  });
+  // const x = useWatch<Product>({
+  //   control: form.control,
+  // });
 
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
