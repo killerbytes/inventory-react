@@ -42,7 +42,7 @@ export default function ConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm}>
+          <AlertDialogAction onClick={handleConfirm} autoFocus>
             {confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -111,10 +111,10 @@ export default function SalesOrderDetails() {
     }
   }, [customers.length, setCustomers]);
 
-  async function onReceiveOrder(form: SalesOrderCreate) {
+  async function onReceiveOrder(values: SalesOrderCreate) {
     try {
       await salesOrderServices.update(Number(id), {
-        ...form,
+        ...values,
         status: ORDER_STATUS.RECEIVED,
       });
 
@@ -122,7 +122,14 @@ export default function SalesOrderDetails() {
       navigate(ROUTES.SALES_ORDERS);
     } catch (error: any) {
       const apiError = error as ApiErrorResponse;
-      toast.error("Submission failed - " + apiError.message);
+      apiError.errors.forEach((err) => {
+        if (err.field) {
+          form.setError(err.field as keyof SalesOrderCreate, {
+            type: "server",
+            message: err.message,
+          });
+        }
+      });
     }
   }
   async function onSaveOrder(form: SalesOrder) {
@@ -162,181 +169,6 @@ export default function SalesOrderDetails() {
   const data = useWatch<SalesOrder | SalesOrderCreate>({
     control: form.control,
   }) as SalesOrder | SalesOrderCreate;
-
-  // const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
-  //   () => [
-  //     {
-  //       accessorKey: "index",
-  //       header: "",
-  //       meta: {
-  //         className: "w-0",
-  //       },
-  //       cell: ({ row }) => (
-  //         <Button
-  //           onClick={() => remove(row.index)}
-  //           variant="outline"
-  //           type="button"
-  //         >
-  //           <Trash2 />
-  //         </Button>
-  //       ),
-  //     },
-  //     {
-  //       accessorKey: "combinationId",
-  //       header: "Product",
-  //       meta: {
-  //         className: "w-100",
-  //       },
-  //       cell: ({ row }) => {
-  //         return (
-  //           <Controller
-  //             name={`salesOrderItems.${row.index}.combinationId`}
-  //             control={form.control}
-  //             render={({ field }) => {
-  //               return (
-  //                 <ProductCommand
-  //                   {...field}
-  //                   control={form.control}
-  //                   list={products}
-  //                   index={row.index}
-  //                   value={String(field.value)}
-  //                   field="salesOrderItems"
-  //                   onChange={(value) => {
-  //                     field.onChange(value);
-  //                     const selected = flatProducts.find(
-  //                       (item) => item.combinationId === Number(value),
-  //                     );
-  //                     if (selected) {
-  //                       form.setValue(
-  //                         `salesOrderItems.${row.index}.purchasePrice`,
-  //                         selected.price,
-  //                       );
-  //                     }
-  //                   }}
-  //                   renderOption={(combination, onChange) => {
-  //                     return (
-  //                       <CommandItem
-  //                         keywords={[combination.sku ?? ""]}
-  //                         value={String(combination.id)}
-  //                         key={combination.id}
-  //                         onSelect={onChange}
-  //                         className="flex gap-2 items-center justify-between"
-  //                       >
-  //                         <div className="flex gap-2 items-center">
-  //                           {combination.values.map((value) => {
-  //                             return <span key={value.id}>{value.value}</span>;
-  //                           })}
-  //                           {combination.inventory?.quantity !== undefined &&
-  //                             combination.inventory?.quantity > 0 && (
-  //                               <small className="text-muted-foreground">
-  //                                 x{combination.inventory?.quantity}
-  //                               </small>
-  //                             )}
-  //                         </div>
-  //                         <span className="text-muted-foreground">
-  //                           {formatCurrency(combination.price)}
-  //                         </span>
-  //                       </CommandItem>
-  //                     );
-  //                   }}
-  //                 />
-  //               );
-  //             }}
-  //           />
-  //         );
-  //       },
-  //     },
-  //     {
-  //       accessorKey: "purchasePrice",
-  //       header: "Price",
-  //       meta: {
-  //         className: "text-right min-w-[100px] w-[110px]",
-  //       },
-  //       cell: ({ row }) => (
-  //         <FormField
-  //           control={form.control}
-  //           name={`salesOrderItems.${row.index}.purchasePrice`}
-  //           render={({ field }) => (
-  //             <FormItem>
-  //               <FormControl>
-  //                 <NumberInput
-  //                   {...field}
-  //                   value={Number(field.value)}
-  //                   type="currency"
-  //                 />
-  //               </FormControl>
-  //             </FormItem>
-  //           )}
-  //         />
-  //       ),
-  //     },
-  //     {
-  //       accessorKey: "quantity",
-  //       header: "Quantity",
-  //       meta: {
-  //         className: "text-right min-w-[90px] w-[90px]",
-  //       },
-  //       cell: ({ row }) => (
-  //         <Controller
-  //           name={`salesOrderItems.${row.index}.quantity`}
-  //           control={form.control}
-  //           render={({ field }) => <NumberInput {...field} />}
-  //         />
-  //       ),
-  //     },
-  //     {
-  //       accessorKey: "unit",
-  //       header: "Unit",
-  //       meta: {
-  //         className: "w-15",
-  //       },
-  //       cell: ({ row }) => {
-  //         return <UnitColumn index={row.index} form={form} />;
-  //       },
-  //     },
-  //     {
-  //       accessorKey: "discount",
-  //       header: "Discount",
-  //       meta: {
-  //         className: "text-right w-32",
-  //         type: "currency",
-  //       },
-  //       cell: ({ row }) => (
-  //         <Controller
-  //           name={`salesOrderItems.${row.index}.discount`}
-  //           control={form.control}
-  //           render={({ field }) => <NumberInput {...field} type="currency" />}
-  //         />
-  //       ),
-  //     },
-  //     {
-  //       accessorKey: "discountNote",
-  //       header: "Discount Note",
-  //       meta: {
-  //         className: "w-50",
-  //       },
-  //       cell: ({ row }) => (
-  //         <Controller
-  //           name={`salesOrderItems.${row.index}.discountNote`}
-  //           control={form.control}
-  //           render={({ field }) => <Input {...field} />}
-  //         />
-  //       ),
-  //     },
-  //     {
-  //       accessorKey: "amount",
-  //       header: () => <div className="text-right">Amount</div>,
-  //       meta: {
-  //         className: "text-right w-20",
-  //       },
-
-  //       cell: ({ row }) => (
-  //         <AmountColumn index={row.index} control={form.control} />
-  //       ),
-  //     },
-  //   ],
-  //   [flatProducts, form, products, remove],
-  // );
 
   return (
     <div className="flex flex-col gap-4">

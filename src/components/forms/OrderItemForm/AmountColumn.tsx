@@ -27,24 +27,6 @@ export default function AmountColumn<T extends FieldValues>({
     control,
   });
 
-  // const quantity =
-  //   useWatch({
-  //     control,
-  //     name: `${name}.${index}.quantity` as Path<T>,
-  //   }) || 0;
-
-  // const discount =
-  //   useWatch({
-  //     control,
-  //     name: `${name}.${index}.discount` as Path<T>,
-  //   }) || 0;
-
-  // const price =
-  //   useWatch({
-  //     control,
-  //     name: `${name}.${index}.purchasePrice` as Path<T>,
-  //   }) || 0;
-
   React.useEffect(() => {
     const q = Number(quantity.field.value) || 0;
     const p = Number(purchasePrice.field.value) || 0;

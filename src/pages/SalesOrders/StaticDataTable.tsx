@@ -11,7 +11,7 @@ const renderFooter = (data: SalesOrder) => {
   return (
     <>
       <TableRow>
-        <TableCell colSpan={8}>Total Amount</TableCell>
+        <TableCell colSpan={7}>Total Amount</TableCell>
         <TableCell className="text-right">
           {formatCurrency(Number(data?.totalAmount))}
         </TableCell>
@@ -98,6 +98,7 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
       data={data.salesOrderItems || []}
       columns={columns}
       renderFooter={() => renderFooter(data)}
+      showFooter
     />
   );
 }

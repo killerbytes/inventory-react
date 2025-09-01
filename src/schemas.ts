@@ -334,16 +334,11 @@ export const salesOrderItemSchema = z.object({
 
 const salesOrderBaseSchema = z.object({
   id: z.number().optional(),
-  salesOrderNumber: z
-    .string({
-      required_error: "SO number is required",
-    })
-    .min(2, { message: "SO number is required" }),
+  salesOrderNumber: z.string().nullish(),
   customerId: z.coerce.number().min(1, {
     message: "Customer is required.",
   }),
-  orderDate: z.coerce.date(),
-  deliveryDate: z.coerce.date().nullish(),
+  deliveryDate: z.string(),
   isDelivery: z.boolean().optional(),
   isDeliveryCompleted: z.boolean().nullish(),
   deliveryAddress: z.string().nullish(),
@@ -351,6 +346,12 @@ const salesOrderBaseSchema = z.object({
   // deliveryDate: z.string(),
   internalNotes: z.string().nullish(),
   notes: z.string().nullish(),
+  dueDate: z.string().nullish(),
+  modeOfPayment: z.enum(
+    Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
+  ),
+  checkNumber: z.string().nullish(),
+
   salesOrderItems: z.array(salesOrderItemSchema).min(1, {
     message: "At least one product is required.",
   }),

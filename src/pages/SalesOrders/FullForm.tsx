@@ -23,34 +23,53 @@ import {
   UseFormReturn,
   useWatch,
 } from "react-hook-form";
+import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
+import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
+import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
+import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { useCustomerStore } from "@/stores/customer.store";
-import ProductCommand from "@/components/ProductCommand";
-import { StaticInput } from "@/components/StaticInput";
-import { SalesOrder, SalesOrderItem } from "@/types";
+import { SalesOrderCreate, SalesOrderItem } from "@/types";
+import { productCombinationServices } from "@/services";
+import { ChevronsUpDown, Trash2 } from "lucide-react";
+import { useProductCombinationStore } from "@/stores";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
+import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import { useProductStore } from "@/stores";
-import { Trash2 } from "lucide-react";
+import Select from "@/components/Select";
 import React from "react";
 
 export default function FullForm({
   form,
 }: {
-  form: UseFormReturn<SalesOrder>;
+  form: UseFormReturn<SalesOrderCreate>;
 }) {
   const { customers } = useCustomerStore();
-  const { products, flatProducts } = useProductStore();
+  const { productCombinations, setProductsCombinations } =
+    useProductCombinationStore();
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "salesOrderItems",
   });
+  const modeOfPayment = form.watch("modeOfPayment");
 
+  React.useEffect(() => {
+    const getData = async () => {
+      const data = await productCombinationServices.list();
+      setProductsCombinations(data);
+    };
+    getData();
+  }, [setProductsCombinations]);
+
+  // const x = useWatch({ control: form.control, name: "salesOrderItems" });
   const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
     () => [
       {
@@ -69,6 +88,31 @@ export default function FullForm({
           </Button>
         ),
       },
+
+      {
+        accessorKey: "quantity",
+        header: "Quantity",
+        meta: {
+          headerClassName: "text-center",
+          className: "text-right min-w-[90px] w-[90px]",
+        },
+        cell: ({ row }) => (
+          <FormField
+            control={form.control}
+            name={`salesOrderItems.${row.index}.quantity`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <NumberInput
+                    {...field}
+                    // value={Number(field.value)}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        ),
+      },
       {
         accessorKey: "combinationId",
         header: "Product",
@@ -82,73 +126,75 @@ export default function FullForm({
               control={form.control}
               render={({ field }) => {
                 return (
-                  <ProductCommand
-                    {...field}
-                    control={form.control}
-                    list={products}
-                    value={String(field.value)}
-                    field="salesOrderItems"
-                    onChange={(value) => {
-                      field.onChange(value);
-                      const selected = flatProducts.find(
-                        (item) => item.combinationId === Number(value),
-                      );
-                      if (selected) {
-                        form.setValue(
-                          `salesOrderItems.${row.index}.purchasePrice`,
-                          selected.price,
-                        );
-                      }
+                  <ProductComboSearchCommand
+                    items={productCombinations}
+                    onSelect={(item) => {
+                      field.onChange(item.id);
                     }}
-                  />
+                    name="salesOrderItems"
+                    form={form}
+                    renderOptions={(items, open, setOpen, onSelect) => {
+                      return (
+                        open &&
+                        items.map((item) => (
+                          <CommandGroup key={item.id}>
+                            <CommandItem
+                              value={String(item.name)}
+                              disabled={item.inventory.quantity < 1}
+                              key={item.id}
+                              onSelect={() => {
+                                setOpen(false);
+                                onSelect?.(item);
+                                form.setValue(
+                                  `salesOrderItems.${row.index}.purchasePrice`,
+                                  item.price,
+                                );
+
+                                setTimeout(() => {
+                                  if (row.index + 1 === fields.length) {
+                                    document
+                                      .querySelector(".append-btn")
+                                      ?.focus();
+                                  } else {
+                                    form.setFocus(
+                                      `salesOrderItems.${row.index + 1}.quantity`,
+                                    );
+                                  }
+                                }, 0);
+                              }}
+                              className="flex items-center gap-2 justify-between"
+                            >
+                              {item.name}
+                              <div className="flex gap-2">
+                                {item.inventory.quantity}
+                                <span>{formatCurrency(item.price)}</span>
+                                <ColorBadge colorMap={UNIT_COLOR}>
+                                  {item.unit}
+                                </ColorBadge>
+                              </div>
+                            </CommandItem>
+                          </CommandGroup>
+                        ))
+                      );
+                    }}
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full flex justify-between h-9 min-w-[200px]"
+                      type="button"
+                    >
+                      {
+                        productCombinations.find((i) => i.id === field.value)
+                          ?.name
+                      }
+                      <ChevronsUpDown className="ml-auto" />
+                    </Button>
+                  </ProductComboSearchCommand>
                 );
               }}
             />
           );
         },
-      },
-      {
-        accessorKey: "purchasePrice",
-        header: "Price",
-        meta: {
-          headerClassName: "text-center",
-          className: "text-right",
-        },
-        cell: ({ row }) => (
-          <FormField
-            control={form.control}
-            name={`salesOrderItems.${row.index}.purchasePrice`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <StaticInput
-                    value={Number(field.value)}
-                    error={
-                      form.formState.errors.salesOrderItems?.[row.index]
-                        ?.purchasePrice?.message
-                    }
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        ),
-      },
-
-      {
-        accessorKey: "quantity",
-        header: "Quantity",
-        meta: {
-          headerClassName: "text-center",
-          className: "text-right min-w-[90px] w-[90px]",
-        },
-        cell: ({ row }) => (
-          <Controller
-            name={`salesOrderItems.${row.index}.quantity`}
-            control={form.control}
-            render={({ field }) => <NumberInput {...field} />}
-          />
-        ),
       },
       {
         accessorKey: "unit",
@@ -198,6 +244,33 @@ export default function FullForm({
           />
         ),
       },
+
+      {
+        accessorKey: "purchasePrice",
+        header: "Price",
+        meta: {
+          headerClassName: "text-center",
+          className: "text-right",
+        },
+        cell: ({ row }) => (
+          <FormField
+            control={form.control}
+            name={`salesOrderItems.${row.index}.purchasePrice`}
+            render={() => (
+              <FormItem>
+                <FormControl>
+                  <PriceColumn
+                    index={row.index}
+                    control={form.control}
+                    name="salesOrderItems"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        ),
+      },
+
       {
         accessorKey: "amount",
         header: () => <div className="text-right">Amount</div>,
@@ -214,7 +287,7 @@ export default function FullForm({
         ),
       },
     ],
-    [flatProducts, form, products, remove],
+    [fields.length, form, productCombinations, remove],
   );
 
   const isDelivery = useWatch({ control: form.control, name: "isDelivery" });
@@ -222,17 +295,6 @@ export default function FullForm({
     <>
       <Form {...form}>
         <form className="flex flex-col gap-4">
-          <FormField
-            control={form.control}
-            name="salesOrderNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sales Order Number</FormLabel>
-                <Input {...field} />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="customerId"
@@ -259,14 +321,63 @@ export default function FullForm({
             )}
           />
 
-          <div className="flex gap-4">
+          <div className="w-full flex flex-col gap-4 items-start md:flex-row">
             <FormField
               control={form.control}
-              name="orderDate"
+              name="deliveryDate"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Order Date</FormLabel>
-                  <DatePicker {...field} value={String(field.value ?? "")} />
+                <FormItem className="w-full md:w-1/4">
+                  <FormLabel>Delivery Date</FormLabel>
+                  <DatePicker {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="modeOfPayment"
+              render={({ field }) => (
+                <FormItem className="w-full md:w-1/4">
+                  <FormLabel>Mode of Payment</FormLabel>
+                  <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="checkNumber"
+              render={({ field }) => {
+                return (
+                  <FormItem
+                    className={cx(
+                      "w-full md:w-1/4",
+                      modeOfPayment !== "CHECK" && "opacity-50",
+                    )}
+                  >
+                    <FormLabel>Check Number</FormLabel>
+                    <FormControl>
+                      <Input {...field} disabled={modeOfPayment !== "CHECK"} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            <FormField
+              control={form.control}
+              name="dueDate"
+              render={({ field }) => (
+                <FormItem
+                  className={cx(
+                    "w-full md:w-1/4",
+                    modeOfPayment !== "CHECK" && "opacity-50",
+                  )}
+                >
+                  <FormLabel>Due Date</FormLabel>
+                  <DatePicker {...field} disabled={modeOfPayment !== "CHECK"} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -317,10 +428,9 @@ export default function FullForm({
                 <FormControl>
                   <OrderItemForm
                     fields={fields}
-                    control={form.control}
+                    form={form}
                     columns={columns}
                     name="salesOrderItems"
-                    errors={form.formState.errors}
                     append={() =>
                       append({
                         quantity: 1,
@@ -418,6 +528,7 @@ export default function FullForm({
           )}
         </form>
       </Form>
+      {/* {JSON.stringify(x)} */}
     </>
   );
 }

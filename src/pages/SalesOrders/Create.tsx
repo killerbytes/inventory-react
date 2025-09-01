@@ -1,66 +1,39 @@
 import {
-  ApiError,
-  ApiErrorResponse,
-  CategorizedProductList,
-  Customer,
-  SalesOrderCreate,
-} from "@/types";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  customerServices,
-  productServices,
-  salesOrderServices,
-} from "@/services";
-import { useCustomerStore, useProductStore } from "@/stores";
+import { ApiErrorResponse, Customer, SalesOrderCreate } from "@/types";
+import { customerServices, salesOrderServices } from "@/services";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ERROR, ROUTES } from "@/utils/definitions";
 import { useForm, useWatch } from "react-hook-form";
 import { salesOrderCreateSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
+import { useCustomerStore } from "@/stores";
 import { useNavigate } from "react-router";
-import { randomInt } from "@/lib/utils";
 import FullForm from "./FullForm";
 import { toast } from "sonner";
 import React from "react";
-
+const salesOrderItemDefault = {
+  discountNote: "",
+};
 export default function Create() {
   const navigate = useNavigate();
-  const { setProducts } = useProductStore();
   const { customers, setCustomers } = useCustomerStore();
 
   const form = useForm<SalesOrderCreate>({
     resolver: zodResolver(salesOrderCreateSchema),
     defaultValues: {
-      salesOrderNumber: randomInt(1000000, 9999999).toString(),
-      orderDate: new Date(),
-      // deliveryDate: new Date().toISOString(),
+      deliveryDate: new Date().toISOString(),
       customerId: 1,
-      // isDelivery: true,
-      salesOrderItems: [
-        {
-          // combinationId: 1,
-          quantity: 1,
-          purchasePrice: 0,
-          discount: null,
-        },
-      ],
+      modeOfPayment: "CASH",
+      salesOrderItems: Array.from({ length: 3 }, () => salesOrderItemDefault),
     },
   });
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const data: CategorizedProductList[] = await productServices.list();
-      setProducts(data);
-    };
-    getData();
-  }, [setProducts]);
 
   React.useEffect(() => {
     const getData = async () => {
@@ -80,7 +53,7 @@ export default function Create() {
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err: ApiError) => {
+        apiError.errors.forEach((err) => {
           if (err.field) {
             form.setError(err.field as keyof SalesOrderCreate, {
               type: "server",
@@ -88,6 +61,15 @@ export default function Create() {
             });
           }
         });
+
+        // apiError.errors?.forEach((err: ApiError) => {
+        //   if (err.field) {
+        //     form.setError(err.field as keyof SalesOrderCreate, {
+        //       type: "server",
+        //       message: err.message,
+        //     });
+        //   }
+        // });
       } else {
         toast.error("Submission failed: " + apiError.message);
       }

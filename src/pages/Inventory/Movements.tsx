@@ -74,7 +74,7 @@ export default function Movements() {
       },
       {
         accessorKey: "quantity",
-        header: "Quantity",
+        header: "Movement",
         meta: {
           headerClassName: "text-right",
           className: "text-right w-0",
@@ -83,7 +83,7 @@ export default function Movements() {
 
       {
         accessorKey: "new", // "inventory.quantity",
-        header: "Result",
+        header: "Inventory",
         meta: {
           headerClassName: "text-right",
           className: "w-0 text-right",

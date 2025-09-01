@@ -1,26 +1,25 @@
-import { useWatch } from "react-hook-form";
+import { Control, FieldValues, useWatch } from "react-hook-form";
+import { ProductCombinations } from "@/types";
 
-export default function useExcludeExistToList(list, control, field) {
+export default function useExcludeExistToList(
+  combinations: ProductCombinations[],
+  control: Control,
+  name: string,
+) {
   const fields = useWatch({
     control,
-    name: field,
+    name,
   });
 
   const exclude =
-    fields && fields.map((item) => Number(item.combinationId)).filter(Boolean);
-  const result = list?.map((category) => {
-    const products = category.products.map((product) => {
-      return {
-        ...product,
-        combinations: product.combinations.filter((combination) => {
-          return !exclude.includes(Number(combination.id));
-        }),
-      };
-    });
-    const productsWithCombo = products.filter((p) => p.combinations.length > 0);
-    return products.length > 0
-      ? { ...category, products: productsWithCombo }
-      : null;
+    fields &&
+    fields
+      .map((item: FieldValues) => Number(item.combinationId))
+      .filter(Boolean);
+  console.log(exclude);
+
+  const result = combinations?.filter((combination) => {
+    return !exclude.includes(Number(combination.id));
   });
 
   return result;

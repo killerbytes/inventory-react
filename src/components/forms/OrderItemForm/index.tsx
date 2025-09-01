@@ -1,4 +1,4 @@
-import { Control, FieldArrayWithId, Path, useWatch } from "react-hook-form";
+import { FieldArrayWithId, UseFormReturn, useWatch } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
@@ -16,8 +16,8 @@ type FooterValuesProps = {
 };
 
 type TableProps<T extends FieldArrayWithId, TColumns extends ColumnDef<T>> = {
-  name: Path<T>;
-  control: Control<T>;
+  name: string;
+  form: UseFormReturn<T>;
   fields: T[];
   columns: TColumns[];
   renderFooter?: (
@@ -37,7 +37,7 @@ function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
             <Button
               type="button"
               variant="outline"
-              className="shadow-sm"
+              className="shadow-sm append-btn"
               onClick={append}
             >
               <Plus />
@@ -64,18 +64,19 @@ function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
 
 export default function OrderItemForm<T>({
   name,
-  control,
   fields,
   columns,
+  form,
   renderFooter = defaultRenderFooter,
   append,
 }: TableProps<T, ColumnDef<T>>) {
-  const footerValues = useWatch({ control, name });
+  const footerValues = useWatch({ control: form?.control, name });
   return (
     <>
       <DataTable
         data={fields}
         columns={columns}
+        errors={form?.formState.errors}
         renderFooter={() => renderFooter(footerValues, append)}
         showFooter
       />

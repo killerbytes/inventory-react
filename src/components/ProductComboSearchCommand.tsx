@@ -8,6 +8,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import useExcludeExistToList from "@/hooks/useExcludeExists";
+import { UseFormReturn } from "react-hook-form";
 import { Button } from "./ui/button";
 
 type BaseProps = {
@@ -58,6 +60,8 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
   onSelect,
   children,
   className,
+  form,
+  name,
   renderOptions = (items, open, setOpen, onSelect) => (
     <RenderOptionsDefault
       items={items}
@@ -71,6 +75,8 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
   onSelect?: (item: T) => void;
   children: React.ReactNode;
   className?: string;
+  form?: UseFormReturn;
+  name?: string;
   renderOptions?: (
     items: T[],
     open: boolean,
@@ -91,6 +97,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  const options = useExcludeExistToList(items, form?.control, name);
   return (
     <div className={className}>
       <Button
@@ -106,7 +113,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          {renderOptions(items, open, setOpen, onSelect)}
+          {renderOptions(options, open, setOpen, onSelect)}
         </CommandList>
       </CommandDialog>
     </div>

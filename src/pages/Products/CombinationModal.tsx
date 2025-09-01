@@ -189,36 +189,6 @@ export default function CombinationModal({
           };
         }) => {
           return (
-            // <Controller
-            //   name={`combinations.${index}.values.${idx}`}
-            //   control={form.control}
-            //   render={({ field }) => {
-            //     const error =
-            //       form.formState.errors[`combinations`]?.[index]?.values?.[idx]
-            //         ?.value;
-
-            //     return (
-            //       <Select
-            //         {...field}
-            //         className={cx("w-full", error && "border-red-500")}
-            //         value={String(
-            //           variant.values.find((i) => i.id === field.value?.id)?.id,
-            //         )}
-            //         options={variant.values}
-            //         onChange={(value) => {
-            //           field.onChange(
-            //             variant.values.find((v) => v.id === Number(value)),
-            //           );
-            //         }}
-            //         renderOption={(option) => (
-            //           <SelectItem key={option.id} value={String(option.id)}>
-            //             {option.value}
-            //           </SelectItem>
-            //         )}
-            //       />
-            //     );
-            //   }}
-            // />
             <VariantCell
               control={form.control}
               form={form}
@@ -381,31 +351,6 @@ export default function CombinationModal({
                       columns={columns}
                       errors={form.formState.errors}
                       showFooter={false}
-                      xrenderFooter={() => (
-                        <TableRow>
-                          <TableCell colSpan={8}>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="shadow-sm"
-                              autoFocus
-                              onClick={() => {
-                                const lastItem = last(x);
-                                const unit = lastItem
-                                  ? lastItem.unit
-                                  : productCombinationDefaultValue.unit;
-                                append({
-                                  ...productCombinationDefaultValue,
-                                  unit,
-                                });
-                                form.setFocus("combinations.3.values");
-                              }}
-                            >
-                              <Plus />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      )}
                     />
                   </ScrollArea>
                 </FormControl>

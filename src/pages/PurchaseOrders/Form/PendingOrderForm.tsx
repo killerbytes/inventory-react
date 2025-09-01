@@ -413,10 +413,9 @@ export default function PendingOrderForm({
               <FormControl>
                 <OrderItemForm
                   fields={fields}
-                  control={form.control}
+                  form={form}
                   columns={columns}
                   name="purchaseOrderItems"
-                  errors={form.formState.errors}
                   append={() =>
                     append({
                       combinationId: null,
