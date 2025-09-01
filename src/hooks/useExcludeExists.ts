@@ -11,10 +11,11 @@ export default function useExcludeExistToList<T extends { id: number }>(
   });
 
   const exclude =
-    fields &&
-    fields
-      .map((item: FieldValues) => Number(item.combinationId))
-      .filter(Boolean);
+    (fields &&
+      fields
+        .map((item: FieldValues) => Number(item.combinationId))
+        .filter(Boolean)) ||
+    [];
   const result = combinations?.filter((combination) => {
     return !exclude.includes(Number(combination.id));
   });

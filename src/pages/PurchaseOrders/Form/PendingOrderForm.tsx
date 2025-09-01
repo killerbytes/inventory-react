@@ -7,6 +7,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  CategorizedProductList,
+  ProductCombinations,
+  PurchaseOrderCreate,
+  Supplier,
+} from "@/types";
+import {
   productCombinationServices,
   productServices,
   supplierServices,
@@ -16,15 +22,13 @@ import {
   useProductStore,
   useSupplierStore,
 } from "@/stores";
-import { CategorizedProductList, PurchaseOrderCreate, Supplier } from "@/types";
-import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
+import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import OrderItemForm from "@/components/forms/OrderItemForm";
-import { ChevronsUpDown, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
 import { formatCurrency } from "@/utils/formatters";
@@ -37,6 +41,7 @@ import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import { PurchaseOrderItem } from "@/types";
 import Select from "@/components/Select";
+import { Trash2 } from "lucide-react";
 import React from "react";
 
 export default function PendingOrderForm({
@@ -56,7 +61,9 @@ export default function PendingOrderForm({
   });
 
   const modeOfPayment = form.watch("modeOfPayment");
-
+  React.useEffect(() => {
+    form.setFocus("supplierId");
+  }, [form]);
   React.useEffect(() => {
     const getData = async () => {
       const data: CategorizedProductList[] = await productServices.list();
@@ -96,6 +103,7 @@ export default function PendingOrderForm({
             onClick={() => remove(row.index)}
             variant="outline"
             type="button"
+            tabIndex={-1}
           >
             <Trash2 />
           </Button>
@@ -142,10 +150,31 @@ export default function PendingOrderForm({
               control={form.control}
               render={({ field }) => {
                 return (
-                  <ProductComboSearchCommand
-                    items={productCombinations}
-                    onSelect={(item) => {
-                      field.onChange(item.id);
+                  <ProductLookupInput
+                    items={productCombinations as ProductCombinations[]}
+                    form={form}
+                    {...field}
+                    name="purchaseOrderItems"
+                    onChange={(value) => {
+                      field.onChange(value.id);
+                      form.setValue(
+                        `purchaseOrderItems.${row.index}.purchasePrice`,
+                        value.price,
+                      );
+
+                      setTimeout(() => {
+                        if (row.index + 1 === fields.length) {
+                          const button: HTMLButtonElement | null =
+                            document.querySelector(".append-btn");
+                          if (button) {
+                            button.focus();
+                          }
+                        } else {
+                          form.setFocus(
+                            `purchaseOrderItems.${row.index + 1}.quantity`,
+                          );
+                        }
+                      }, 0);
                     }}
                     renderOptions={(items, open, setOpen, onSelect) => {
                       return (
@@ -158,17 +187,11 @@ export default function PendingOrderForm({
                               onSelect={() => {
                                 setOpen(false);
                                 onSelect?.(item);
-                                setTimeout(() => {
-                                  form.setFocus(
-                                    `purchaseOrderItems.${row.index}.purchasePrice`,
-                                  );
-                                }, 0);
                               }}
                               className="flex items-center gap-2 justify-between"
                             >
                               {item.name}
                               <div className="flex gap-2">
-                                {item.inventory.quantity}
                                 <span>{formatCurrency(item.price)}</span>
                                 <ColorBadge colorMap={UNIT_COLOR}>
                                   {item.unit}
@@ -179,19 +202,61 @@ export default function PendingOrderForm({
                         ))
                       );
                     }}
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full flex justify-between h-9 min-w-[200px]"
-                      type="button"
-                    >
-                      {
-                        productCombinations.find((i) => i.id === field.value)
-                          ?.name
-                      }
-                      <ChevronsUpDown className="ml-auto" />
-                    </Button>
-                  </ProductComboSearchCommand>
+                  />
+                  // <ProductComboSearchCommand
+                  //   items={productCombinations}
+                  //   onSelect={(item) => {
+                  //     field.onChange(item.id);
+                  //   }}
+                  //   renderOptions={(items, open, setOpen, onSelect) => {
+                  //     return (
+                  //       open &&
+                  //       items.map((item) => (
+                  //         <CommandGroup key={item.id}>
+                  //           <CommandItem
+                  //             value={String(item.name)}
+                  //             key={item.id}
+                  //             onSelect={() => {
+                  //               setOpen(false);
+                  //               onSelect?.(item);
+                  //               setTimeout(() => {
+                  //                 form.setValue(
+                  //                   `purchaseOrderItems.${row.index}.purchasePrice`,
+                  //                   item.price,
+                  //                 );
+                  //                 form.setFocus(
+                  //                   `purchaseOrderItems.${row.index}.purchasePrice`,
+                  //                 );
+                  //               }, 0);
+                  //             }}
+                  //             className="flex items-center gap-2 justify-between"
+                  //           >
+                  //             {item.name}
+                  //             <div className="flex gap-2">
+                  //               {item.inventory.quantity}
+                  //               <span>{formatCurrency(item.price)}</span>
+                  //               <ColorBadge colorMap={UNIT_COLOR}>
+                  //                 {item.unit}
+                  //               </ColorBadge>
+                  //             </div>
+                  //           </CommandItem>
+                  //         </CommandGroup>
+                  //       ))
+                  //     );
+                  //   }}
+                  // >
+                  //   <Button
+                  //     variant="outline"
+                  //     className="w-full flex justify-between h-9 min-w-[200px]"
+                  //     type="button"
+                  //   >
+                  //     {
+                  //       productCombinations.find((i) => i.id === field.value)
+                  //         ?.name
+                  //     }
+                  //     <ChevronsUpDown className="ml-auto" />
+                  //   </Button>
+                  // </ProductComboSearchCommand>
                 );
               }}
             />
@@ -273,7 +338,7 @@ export default function PendingOrderForm({
         ),
       },
     ],
-    [form, productCombinations, remove],
+    [fields.length, form, productCombinations, remove],
   );
 
   return (
@@ -292,9 +357,8 @@ export default function PendingOrderForm({
                 }
                 options={suppliers}
                 placeholder="Supplier"
-                onChange={(e) => {
-                  const value = (e.target as HTMLInputElement).value;
-                  form.setValue("supplierId", parseInt(value), {
+                onChange={(value) => {
+                  form.setValue("supplierId", Number(value.id), {
                     shouldValidate: true,
                   });
                 }}

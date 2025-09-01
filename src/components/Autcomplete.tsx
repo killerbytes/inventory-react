@@ -12,18 +12,50 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
-import React, { SyntheticEvent } from "react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 interface AutocompleteProps<T> {
   value: string | undefined;
+  onChange: (item: T) => void;
   options: T[];
   placeholder?: string;
-  onChange: (e: SyntheticEvent<HTMLSelectElement>) => void;
-  valueKey?: string;
-  labelKey?: string;
-  name?: string;
+}
+
+function renderOptionsDefault<T extends { id: number | string; name: string }>({
+  options,
+  setOpen,
+  onChange,
+  value,
+}: {
+  options: T[];
+  setOpen: (open: boolean) => void;
+  onChange: (item: T) => void;
+  value: string | undefined;
+}) {
+  return (
+    <CommandGroup>
+      {options.map((item) => (
+        <CommandItem
+          value={String(item.id)}
+          key={item.id}
+          onSelect={() => {
+            onChange(item);
+            setOpen(false);
+          }}
+        >
+          {item.name}
+          <Check
+            className={cn(
+              "ml-auto",
+              item.id === value ? "opacity-100" : "opacity-0",
+            )}
+          />
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  );
 }
 
 export default function Autocomplete<T>({
@@ -31,9 +63,6 @@ export default function Autocomplete<T>({
   onChange,
   options = [],
   placeholder = "Type to search...",
-  valueKey = "id",
-  labelKey = "name",
-  name,
 }: AutocompleteProps<T>) {
   const [open, setOpen] = React.useState(false);
 
@@ -43,6 +72,7 @@ export default function Autocomplete<T>({
         <Button
           variant="outline"
           role="combobox"
+          autoFocus
           className={cn(
             "w-full justify-between",
             !value && "text-muted-foreground",
@@ -57,31 +87,7 @@ export default function Autocomplete<T>({
           <CommandInput placeholder={placeholder} className="h-9" />
           <CommandList>
             <CommandEmpty>No products found.</CommandEmpty>
-            <CommandGroup heading="Products">
-              {options.map((item) => (
-                <CommandItem
-                  // disabled={item.quantity === 0}
-                  value={item[valueKey]}
-                  key={item[valueKey]}
-                  onSelect={() => {
-                    const e = {
-                      target: { value: item[valueKey], name },
-                    } as React.ChangeEvent<HTMLSelectElement>;
-
-                    onChange(e);
-                    setOpen(false);
-                  }}
-                >
-                  {labelKey.split(".").reduce((obj, key) => obj?.[key], item)}
-                  <Check
-                    className={cn(
-                      "ml-auto",
-                      item[valueKey] === value ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {renderOptionsDefault({ options, open, setOpen, onChange, value })}
           </CommandList>
         </Command>
       </PopoverContent>

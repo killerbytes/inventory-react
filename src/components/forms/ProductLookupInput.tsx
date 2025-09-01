@@ -22,12 +22,19 @@ export default function ProductLookupInput<
   onChange,
   value,
   name,
+  renderOptions,
 }: {
   items: T[];
   form: UseFormReturn;
   onChange: (value: T) => void;
   value: number;
   name: string;
+  renderOptions?: (
+    items: T[],
+    open: boolean,
+    setOpen: (open: boolean) => void,
+    onSelect?: (item: T) => void,
+  ) => React.ReactNode;
 }) {
   const options = useExcludeExistToList(items, form?.control, name);
   return (
@@ -37,33 +44,7 @@ export default function ProductLookupInput<
         onChange(item);
       }}
       name={name}
-      form={form}
-      renderOptions={(items, open, setOpen, onSelect) => {
-        return (
-          open &&
-          items.map((item) => (
-            <CommandGroup key={item.id}>
-              <CommandItem
-                value={String(item.name)}
-                disabled={item.inventory.quantity < 1}
-                key={item.id}
-                onSelect={() => {
-                  setOpen(false);
-                  onSelect?.(item);
-                }}
-                className="flex items-center gap-2 justify-between"
-              >
-                {item.name}
-                <div className="flex gap-2">
-                  {item.inventory.quantity}
-                  <span>{formatCurrency(item.price)}</span>
-                  <ColorBadge colorMap={UNIT_COLOR}>{item.unit}</ColorBadge>
-                </div>
-              </CommandItem>
-            </CommandGroup>
-          ))
-        );
-      }}
+      renderOptions={renderOptions}
     >
       <Button
         variant="outline"

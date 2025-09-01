@@ -12,15 +12,16 @@ interface SelectOption {
   [key: string]: string | number | null;
 }
 
-interface SelectProps {
+interface SelectProps<T> {
   onChange: (value: string) => void;
-  options: any[];
+  options: T[];
   className?: string;
   value?: string;
   valueKey?: string;
   labelKey?: string;
   tabIndex?: number;
   disabled?: boolean;
+  autoFocus?: boolean;
   renderOption?: (option: SelectOption) => React.ReactNode;
 }
 
@@ -31,7 +32,7 @@ function defaultRenderOption(option: SelectOption) {
     </SelectItem>
   );
 }
-function Select(props: SelectProps) {
+function Select<T>(props: SelectProps<T>) {
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const {
     onChange,
@@ -39,12 +40,17 @@ function Select(props: SelectProps) {
     className,
     value,
     tabIndex,
+    autoFocus = false,
     renderOption = defaultRenderOption,
   } = props;
   const [selectOptions, setSelectOptions] = React.useState<SelectOption[]>([]);
   React.useEffect(() => {
-    triggerRef.current?.focus();
-  }, []);
+    if (autoFocus) {
+      setTimeout(() => {
+        triggerRef.current?.focus();
+      }, 0);
+    }
+  }, [autoFocus]);
 
   React.useEffect(() => {
     setSelectOptions(options);

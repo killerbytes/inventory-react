@@ -1,4 +1,5 @@
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -66,8 +67,6 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
   onSelect?: (item: T) => void;
   children: React.ReactNode;
   className?: string;
-  form?: UseFormReturn;
-  name?: string;
   renderOptions?: (
     items: T[],
     open: boolean,
@@ -76,6 +75,9 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
   ) => React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [search, setSearch] = React.useState("");
+  const listRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
@@ -100,11 +102,30 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
         {children}
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Type a command or search..." />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          {renderOptions(items, open, setOpen, onSelect)}
-        </CommandList>
+        <Command
+          filter={(value, search) => {
+            if (value.toLowerCase() === search.toLowerCase()) {
+              return 100; // exact match → highest priority
+            }
+            if (value.toLowerCase().startsWith(search.toLowerCase())) {
+              return 50; // startsWith → next
+            }
+            return value.toLowerCase().includes(search) ? 10 : 0; // include or hide
+          }}
+        >
+          <CommandInput
+            placeholder="Type a command or search..."
+            value={search}
+            onValueChange={(val) => {
+              setSearch(val);
+              listRef.current?.scrollTo(0, 0);
+            }}
+          />
+          <CommandList ref={listRef}>
+            <CommandEmpty>No results found.</CommandEmpty>
+            {renderOptions(items, open, setOpen, onSelect)}
+          </CommandList>
+        </Command>
       </CommandDialog>
     </div>
   );

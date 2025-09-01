@@ -9,17 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { purchaseOrderCreateSchema, purchaseOrderSchema } from "@/schemas";
 import { ApiError, ApiErrorResponse, PurchaseOrderCreate } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import PendingOrderForm from "./Form/PendingOrderForm";
+import { purchaseOrderCreateSchema } from "@/schemas";
 import { ERROR, ROUTES } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import useDebounce from "@/hooks/useDebounce";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import React from "react";
-import * as z from "zod";
 
 const purchaseOrderItemDefault = {
   discountNote: "",
@@ -53,6 +52,11 @@ export default function Create() {
   });
 
   // const data = useWatch({ control: form.control, name: "purchaseOrderItems" });
+  React.useEffect(() => {
+    setTimeout(() => {
+      form.setFocus("supplierId");
+    });
+  }, [form]);
 
   async function onSubmit(values: PurchaseOrderCreate) {
     try {
@@ -67,13 +71,10 @@ export default function Create() {
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err: ApiError) => {
           if (err.field) {
-            form.setError(
-              err.field as keyof z.infer<typeof purchaseOrderSchema>,
-              {
-                type: "server",
-                message: err.message,
-              },
-            );
+            form.setError(err.field as keyof PurchaseOrderCreate, {
+              type: "server",
+              message: err.message,
+            });
           }
         });
       } else {

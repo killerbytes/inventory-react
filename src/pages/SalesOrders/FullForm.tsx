@@ -24,18 +24,21 @@ import {
   useWatch,
 } from "react-hook-form";
 import { ProductCombinations, SalesOrderCreate, SalesOrderItem } from "@/types";
+import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
 import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
-import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
+import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { useCustomerStore } from "@/stores/customer.store";
 import { productCombinationServices } from "@/services";
 import { useProductCombinationStore } from "@/stores";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
+import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
@@ -149,6 +152,34 @@ export default function FullForm({
                             );
                           }
                         }, 0);
+                      }}
+                      renderOptions={(items, open, setOpen, onSelect) => {
+                        return (
+                          open &&
+                          items.map((item) => (
+                            <CommandGroup key={item.id}>
+                              <CommandItem
+                                value={String(item.name)}
+                                disabled={item.inventory.quantity < 1}
+                                key={item.id}
+                                onSelect={() => {
+                                  setOpen(false);
+                                  onSelect?.(item);
+                                }}
+                                className="flex items-center gap-2 justify-between"
+                              >
+                                {item.name}
+                                <div className="flex gap-2">
+                                  {item.inventory.quantity}
+                                  <span>{formatCurrency(item.price)}</span>
+                                  <ColorBadge colorMap={UNIT_COLOR}>
+                                    {item.unit}
+                                  </ColorBadge>
+                                </div>
+                              </CommandItem>
+                            </CommandGroup>
+                          ))
+                        );
                       }}
                     />
                     {/* <ProductComboSearchCommand
@@ -334,9 +365,8 @@ export default function FullForm({
                   }
                   options={customers}
                   placeholder="Customer"
-                  onChange={(e) => {
-                    const value = (e.target as HTMLInputElement).value;
-                    form.setValue("customerId", parseInt(value), {
+                  onChange={(value) => {
+                    form.setValue("customerId", Number(value.id), {
                       shouldValidate: true,
                     });
                   }}
