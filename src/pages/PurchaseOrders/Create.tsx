@@ -15,6 +15,7 @@ import PendingOrderForm from "./Form/PendingOrderForm";
 import { purchaseOrderCreateSchema } from "@/schemas";
 import { ERROR, ROUTES } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -35,6 +36,7 @@ const purchaseOrderDefault = {
 
 export default function Create() {
   const navigate = useNavigate();
+  const [json, setJson] = React.useState(null);
 
   const defaultValues = localStorage.getItem(
     `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
@@ -106,6 +108,26 @@ export default function Create() {
   React.useEffect(() => {
     saveDraft();
   }, [debouncedFormData, saveDraft]);
+
+  React.useEffect(() => {
+    if (json) {
+      const data = JSON.parse(json);
+
+      console.log(data);
+      form.setValue(
+        "purchaseOrderItems",
+        data.map((item) => {
+          return {
+            quantity: item.QTY,
+            purchasePrice: item.Price,
+            discount: item.Discount,
+            discountNote: item.Net === "Net" ? null : item.Net,
+          };
+        }),
+      );
+    }
+  }, [form, json]);
+
   return (
     <>
       <div>
@@ -116,7 +138,12 @@ export default function Create() {
               <div className="bg-border h-5 w-[1px]"></div>
               Create Purchase Order
             </CardTitle>
-            <CardAction></CardAction>
+            <CardAction>
+              <Input
+                onChange={(e) => setJson(e.target.value)}
+                placeholder="Paste JSON here..."
+              />
+            </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <PendingOrderForm form={form} />
