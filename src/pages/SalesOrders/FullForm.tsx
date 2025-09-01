@@ -23,27 +23,24 @@ import {
   UseFormReturn,
   useWatch,
 } from "react-hook-form";
-import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
-import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
+import { ProductCombinations, SalesOrderCreate, SalesOrderItem } from "@/types";
 import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
-import { CommandGroup, CommandItem } from "@/components/ui/command";
+import ProductLookupInput from "@/components/forms/ProductLookupInput";
+import { MODE_OF_PAYMENT_OPTIONS } from "@/utils/definitions";
 import { useCustomerStore } from "@/stores/customer.store";
-import { SalesOrderCreate, SalesOrderItem } from "@/types";
 import { productCombinationServices } from "@/services";
-import { ChevronsUpDown, Trash2 } from "lucide-react";
 import { useProductCombinationStore } from "@/stores";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
-import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
-import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import Select from "@/components/Select";
+import { Trash2 } from "lucide-react";
 import React from "react";
 
 export default function FullForm({
@@ -126,70 +123,99 @@ export default function FullForm({
               control={form.control}
               render={({ field }) => {
                 return (
-                  <ProductComboSearchCommand
-                    items={productCombinations}
-                    onSelect={(item) => {
-                      field.onChange(item.id);
-                    }}
-                    name="salesOrderItems"
-                    form={form}
-                    renderOptions={(items, open, setOpen, onSelect) => {
-                      return (
-                        open &&
-                        items.map((item) => (
-                          <CommandGroup key={item.id}>
-                            <CommandItem
-                              value={String(item.name)}
-                              disabled={item.inventory.quantity < 1}
-                              key={item.id}
-                              onSelect={() => {
-                                setOpen(false);
-                                onSelect?.(item);
-                                form.setValue(
-                                  `salesOrderItems.${row.index}.purchasePrice`,
-                                  item.price,
-                                );
+                  <>
+                    <ProductLookupInput
+                      items={productCombinations as ProductCombinations[]}
+                      form={form}
+                      {...field}
+                      name="salesOrderItems"
+                      onChange={(value) => {
+                        field.onChange(value.id);
+                        form.setValue(
+                          `salesOrderItems.${row.index}.purchasePrice`,
+                          value.price,
+                        );
 
-                                setTimeout(() => {
-                                  if (row.index + 1 === fields.length) {
-                                    document
-                                      .querySelector(".append-btn")
-                                      ?.focus();
-                                  } else {
-                                    form.setFocus(
-                                      `salesOrderItems.${row.index + 1}.quantity`,
-                                    );
-                                  }
-                                }, 0);
-                              }}
-                              className="flex items-center gap-2 justify-between"
-                            >
-                              {item.name}
-                              <div className="flex gap-2">
-                                {item.inventory.quantity}
-                                <span>{formatCurrency(item.price)}</span>
-                                <ColorBadge colorMap={UNIT_COLOR}>
-                                  {item.unit}
-                                </ColorBadge>
-                              </div>
-                            </CommandItem>
-                          </CommandGroup>
-                        ))
-                      );
-                    }}
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full flex justify-between h-9 min-w-[200px]"
-                      type="button"
+                        setTimeout(() => {
+                          if (row.index + 1 === fields.length) {
+                            const button: HTMLButtonElement | null =
+                              document.querySelector(".append-btn");
+                            if (button) {
+                              button.focus();
+                            }
+                          } else {
+                            form.setFocus(
+                              `salesOrderItems.${row.index + 1}.quantity`,
+                            );
+                          }
+                        }, 0);
+                      }}
+                    />
+                    {/* <ProductComboSearchCommand
+                      items={productCombinations}
+                      onSelect={(item) => {
+                        field.onChange(item.id);
+                      }}
+                      name="salesOrderItems"
+                      form={form}
+                      renderOptions={(items, open, setOpen, onSelect) => {
+                        return (
+                          open &&
+                          items.map((item) => (
+                            <CommandGroup key={item.id}>
+                              <CommandItem
+                                value={String(item.name)}
+                                disabled={item.inventory.quantity < 1}
+                                key={item.id}
+                                onSelect={() => {
+                                  setOpen(false);
+                                  onSelect?.(item);
+                                  form.setValue(
+                                    `salesOrderItems.${row.index}.purchasePrice`,
+                                    item.price,
+                                  );
+
+                                  setTimeout(() => {
+                                    if (row.index + 1 === fields.length) {
+                                      document
+                                        .querySelector(".append-btn")
+                                        ?.focus();
+                                    } else {
+                                      form.setFocus(
+                                        `salesOrderItems.${row.index + 1}.quantity`,
+                                      );
+                                    }
+                                  }, 0);
+                                }}
+                                className="flex items-center gap-2 justify-between"
+                              >
+                                {item.name}
+                                <div className="flex gap-2">
+                                  {item.inventory.quantity}
+                                  <span>{formatCurrency(item.price)}</span>
+                                  <ColorBadge colorMap={UNIT_COLOR}>
+                                    {item.unit}
+                                  </ColorBadge>
+                                </div>
+                              </CommandItem>
+                            </CommandGroup>
+                          ))
+                        );
+                      }}
                     >
-                      {
-                        productCombinations.find((i) => i.id === field.value)
-                          ?.name
-                      }
-                      <ChevronsUpDown className="ml-auto" />
-                    </Button>
-                  </ProductComboSearchCommand>
+                      <Button
+                        variant="outline"
+                        className="w-full flex justify-between h-9 min-w-[200px]"
+                        type="button"
+                      >
+                        {
+                          productCombinations.find((i) => i.id === field.value)
+                            ?.name
+                        }
+                        <ChevronsUpDown className="ml-auto" />
+                      </Button>
+                    </ProductComboSearchCommand> */}
+                  </>
                 );
               }}
             />
@@ -459,6 +485,7 @@ export default function FullForm({
                     onCheckedChange={(value) => {
                       field.onChange(value);
                     }}
+                    value={String(field.value)}
                   />
                 </FormControl>
                 <FormLabel>For Delivery</FormLabel>

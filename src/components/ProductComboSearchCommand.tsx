@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import {
   CommandDialog,
   CommandEmpty,
@@ -8,9 +6,9 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import useExcludeExistToList from "@/hooks/useExcludeExists";
 import { UseFormReturn } from "react-hook-form";
 import { Button } from "./ui/button";
+import * as React from "react";
 
 type BaseProps = {
   id: string | number;
@@ -48,20 +46,13 @@ const RenderOptionsDefault = React.memo(function RenderOptionsDefault<
         ))}
     </CommandGroup>
   );
-}) as <T extends BaseProps>(props: {
-  items: T[];
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  onSelect?: (item: T) => void;
-}) => JSX.Element;
+});
 
 function ProductComboSearchCommandComponent<T extends BaseProps>({
   items,
   onSelect,
   children,
   className,
-  form,
-  name,
   renderOptions = (items, open, setOpen, onSelect) => (
     <RenderOptionsDefault
       items={items}
@@ -97,7 +88,6 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const options = useExcludeExistToList(items, form?.control, name);
   return (
     <div className={className}>
       <Button
@@ -113,7 +103,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          {renderOptions(options, open, setOpen, onSelect)}
+          {renderOptions(items, open, setOpen, onSelect)}
         </CommandList>
       </CommandDialog>
     </div>

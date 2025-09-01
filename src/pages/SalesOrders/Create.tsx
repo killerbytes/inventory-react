@@ -61,22 +61,13 @@ export default function Create() {
             });
           }
         });
-
-        // apiError.errors?.forEach((err: ApiError) => {
-        //   if (err.field) {
-        //     form.setError(err.field as keyof SalesOrderCreate, {
-        //       type: "server",
-        //       message: err.message,
-        //     });
-        //   }
-        // });
       } else {
         toast.error("Submission failed: " + apiError.message);
       }
     }
   }
 
-  const formData = useWatch({ control: form.control });
+  // const formData = useWatch({ control: form.control });
 
   return (
     <>
@@ -111,7 +102,7 @@ export default function Create() {
         </CardContent>
       </Card>
 
-      {JSON.stringify(formData, null, 2)}
+      {/* {JSON.stringify(formData, null, 2)} */}
     </>
   );
 }

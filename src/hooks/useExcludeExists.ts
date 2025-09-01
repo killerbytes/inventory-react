@@ -1,8 +1,7 @@
 import { Control, FieldValues, useWatch } from "react-hook-form";
-import { ProductCombinations } from "@/types";
 
-export default function useExcludeExistToList(
-  combinations: ProductCombinations[],
+export default function useExcludeExistToList<T extends { id: number }>(
+  combinations: T[],
   control: Control,
   name: string,
 ) {
@@ -16,8 +15,6 @@ export default function useExcludeExistToList(
     fields
       .map((item: FieldValues) => Number(item.combinationId))
       .filter(Boolean);
-  console.log(exclude);
-
   const result = combinations?.filter((combination) => {
     return !exclude.includes(Number(combination.id));
   });
