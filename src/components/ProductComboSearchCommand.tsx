@@ -7,7 +7,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { UseFormReturn } from "react-hook-form";
 import { Button } from "./ui/button";
 import * as React from "react";
 
@@ -23,11 +22,13 @@ const RenderOptionsDefault = React.memo(function RenderOptionsDefault<
   open,
   setOpen,
   onSelect,
+  search,
 }: {
   items: T[];
   open: boolean;
   setOpen: (open: boolean) => void;
   onSelect?: (item: T) => void;
+  search: string;
 }) {
   return (
     <CommandGroup>
@@ -60,6 +61,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
       open={open}
       setOpen={setOpen}
       onSelect={onSelect}
+      search
     />
   ),
 }: {
@@ -72,7 +74,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
     open: boolean,
     setOpen: (open: boolean) => void,
     onSelect?: (item: T) => void,
-    search?: string,
+    search: string,
   ) => React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);

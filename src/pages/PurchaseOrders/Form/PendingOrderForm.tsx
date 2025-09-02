@@ -6,32 +6,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  CategorizedProductList,
-  ProductCombinations,
-  PurchaseOrderCreate,
-  Supplier,
-} from "@/types";
-import {
-  productCombinationServices,
-  productServices,
-  supplierServices,
-} from "@/services";
-import {
-  useProductCombinationStore,
-  useProductStore,
-  useSupplierStore,
-} from "@/stores";
+import { ProductCombinations, PurchaseOrderCreate, Supplier } from "@/types";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
+import { productCombinationServices, supplierServices } from "@/services";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
+import { useProductCombinationStore, useSupplierStore } from "@/stores";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
+import { formatCurrency, getScore } from "@/utils/formatters";
 import OrderItemForm from "@/components/forms/OrderItemForm";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
-import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
@@ -39,9 +26,9 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import { Club, Trash2 } from "lucide-react";
 import { PurchaseOrderItem } from "@/types";
 import Select from "@/components/Select";
+import { Trash2 } from "lucide-react";
 import React from "react";
 
 export default function PendingOrderForm({
@@ -183,33 +170,6 @@ export default function PendingOrderForm({
                         onSelect,
                         search,
                       ) => {
-                        const getScore = (value: string, search: string) => {
-                          const normalize = (str: string) =>
-                            str
-                              .toLowerCase()
-                              .replace(/[^a-z0-9 ]/gi, " ")
-                              .trim();
-
-                          const v = normalize(value);
-                          const s = normalize(search);
-
-                          if (!s) return 1;
-
-                          if (v === s) return 100;
-                          if (v.startsWith(s)) return 80;
-                          if (v.includes(s)) return 50;
-
-                          const searchWords = s.split(/\s+/).filter(Boolean);
-                          let matched = 0;
-                          for (const word of searchWords) {
-                            if (v.includes(word)) matched++;
-                          }
-
-                          if (matched === searchWords.length) return 40;
-                          if (matched > 0) return 20;
-
-                          return 0;
-                        };
                         return (
                           open &&
                           items

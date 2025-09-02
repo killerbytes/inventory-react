@@ -31,6 +31,7 @@ export default function ProductLookupInput<
     open: boolean,
     setOpen: (open: boolean) => void,
     onSelect?: (item: T) => void,
+    search: string,
   ) => React.ReactNode;
   ariaInvalid?: boolean;
 }) {

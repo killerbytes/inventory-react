@@ -15,7 +15,6 @@ import {
 } from "@/types";
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,6 +35,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 const formSchema = z.object({
+  id: z.number().nullish(),
   productId: z.number(),
   unit: z.string(),
   conversionFactor: z.coerce.number().min(1, {
@@ -117,7 +117,6 @@ export default function CombinationModal({
         });
         return { ...i };
       });
-
       form.reset({
         combinations: xx,
       });
@@ -129,9 +128,8 @@ export default function CombinationModal({
     getData();
   }, [getData]);
 
-  const handleSubmit = async (values: {
-    combinations: z.infer<typeof formSchema>[];
-  }) => {
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log(values);
     try {
       await productCombinationServices.updateByProductId(
         Number(product.id),
