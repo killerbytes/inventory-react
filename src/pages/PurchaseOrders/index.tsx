@@ -48,6 +48,8 @@ export default function PurchaseOrders() {
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     status: "ALL",
+    sort: "notes",
+    orderBy: "ASC",
     ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
     ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
@@ -157,6 +159,7 @@ export default function PurchaseOrders() {
         );
       },
     },
+    { accessorKey: "notes", header: "Notes" },
     {
       accessorKey: "totalAmount",
       header: () => "Total Amount",
@@ -221,7 +224,7 @@ export default function PurchaseOrders() {
                 renderFooter={(data: PurchaseOrder[]) => {
                   return (
                     <TableRow className="font-bold">
-                      <TableCell colSpan={7}>Total Amount</TableCell>
+                      <TableCell colSpan={8}>Total Amount</TableCell>
                       <TableCell className="text-right">
                         {formatCurrency(
                           data.reduce(

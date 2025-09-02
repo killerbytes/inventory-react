@@ -159,19 +159,16 @@ export const supplierSchema = z.object({
     .email({
       message: "Please enter a valid email address.",
     })
-    .optional(),
+    .nullish(),
 });
 
 export const customerSchema = supplierSchema;
 
 export const purchaseOrderItemSchema = z.object({
   id: z.coerce.number().nullish(),
-  combinationId: z.coerce
-    .number()
-    .min(1, {
-      message: "Product must be selected.",
-    })
-    .nullable(),
+  combinationId: z.coerce.number().min(1, {
+    message: "Product must be selected.",
+  }),
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
@@ -196,7 +193,7 @@ export const cancelOrderSchema = z.object({
 export const statusHistorySchema = z.object({
   id: z.number().optional(),
   status: z.string(),
-  changedBy: z.string(),
+  changedBy: z.number(),
   changedAt: z.string(),
   user: z.any(),
 });
@@ -221,6 +218,7 @@ const purchaseOrderBaseSchema = z.object({
     Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
   ),
   checkNumber: z.string().nullish(),
+  purchaseOrderStatusHistory: z.array(statusHistorySchema).nullish(),
 });
 export const purchaseOrderCreateSchema = purchaseOrderBaseSchema.superRefine(
   (data, ctx) => {
@@ -272,7 +270,6 @@ export const purchaseOrderSchema = purchaseOrderBaseSchema
     //   })
     //   .nullish(),
     status: z.string(),
-    purchaseOrderStatusHistory: z.array(statusHistorySchema).nullish(),
     totalAmount: z.string().optional(),
     supplier: z.any(),
     // deliveryDate: z.string(),

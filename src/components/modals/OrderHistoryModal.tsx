@@ -12,11 +12,11 @@ import { StatusHistory } from "@/types";
 import ColorBadge from "../ColorBadge";
 import Modal from "../Modal";
 
-export default function OrderHistoryModal({
+export default function OrderHistoryModal<T extends StatusHistory>({
   data,
   onClose,
 }: {
-  data: StatusHistory[];
+  data: T[];
   onClose: () => void;
 }) {
   return (

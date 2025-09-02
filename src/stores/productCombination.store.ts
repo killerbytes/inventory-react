@@ -2,6 +2,8 @@ import { ProductCombinations } from "@/types";
 import { create } from "zustand";
 
 type ProductCombinationStore = {
+  loaded: boolean;
+  invalidate: () => void;
   productCombinations: ProductCombinations[];
   setProductsCombinations: (
     productsCombinations: ProductCombinations[],
@@ -11,7 +13,9 @@ type ProductCombinationStore = {
 export const useProductCombinationStore = create<ProductCombinationStore>(
   (set) => ({
     productCombinations: [],
+    loaded: false,
     setProductsCombinations: (productCombinations: ProductCombinations[]) =>
-      set({ productCombinations }),
+      set({ productCombinations, loaded: true }),
+    invalidate: () => set({ loaded: false }),
   }),
 );
