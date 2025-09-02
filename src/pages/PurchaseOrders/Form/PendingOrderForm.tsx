@@ -39,9 +39,9 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import { Club, Trash2 } from "lucide-react";
 import { PurchaseOrderItem } from "@/types";
 import Select from "@/components/Select";
-import { Trash2 } from "lucide-react";
 import React from "react";
 
 export default function PendingOrderForm({
@@ -50,9 +50,7 @@ export default function PendingOrderForm({
   form: UseFormReturn<PurchaseOrderCreate>;
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
-  const { setProducts } = useProductStore();
-  const { productCombinations, setProductsCombinations } =
-    useProductCombinationStore();
+  const productCombinationStore = useProductCombinationStore();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -64,13 +62,6 @@ export default function PendingOrderForm({
   React.useEffect(() => {
     form.setFocus("supplierId");
   }, [form]);
-  React.useEffect(() => {
-    const getData = async () => {
-      const data: CategorizedProductList[] = await productServices.list();
-      setProducts(data);
-    };
-    getData();
-  }, []);
 
   React.useEffect(() => {
     const getData = async () => {
@@ -84,11 +75,13 @@ export default function PendingOrderForm({
 
   React.useEffect(() => {
     const getData = async () => {
-      const data = await productCombinationServices.list();
-      setProductsCombinations(data);
+      if (!productCombinationStore.loaded) {
+        const data = await productCombinationServices.list();
+        productCombinationStore.setProductsCombinations(data);
+      }
     };
     getData();
-  }, [setProductsCombinations]);
+  }, [productCombinationStore]);
 
   const columns = React.useMemo<ColumnDef<PurchaseOrderItem>[]>(
     () => [
@@ -145,120 +138,114 @@ export default function PendingOrderForm({
         header: "Product",
         cell: ({ row }) => {
           return (
-            <Controller
-              name={`purchaseOrderItems.${row.index}.combinationId`}
+            <FormField
               control={form.control}
-              render={({ field }) => {
-                return (
-                  <ProductLookupInput
-                    items={productCombinations as ProductCombinations[]}
-                    form={form}
-                    {...field}
-                    name="purchaseOrderItems"
-                    onChange={(value) => {
-                      field.onChange(value.id);
-                      form.setValue(
-                        `purchaseOrderItems.${row.index}.purchasePrice`,
-                        value.price,
-                      );
+              name={`purchaseOrderItems.${row.index}.combinationId`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <ProductLookupInput
+                      ariaInvalid={Boolean(
+                        form.formState.errors?.purchaseOrderItems?.[row.index]
+                          ?.combinationId,
+                      )}
+                      items={
+                        productCombinationStore.productCombinations as ProductCombinations[]
+                      }
+                      form={form}
+                      {...field}
+                      name="purchaseOrderItems"
+                      onChange={(value) => {
+                        field.onChange(value.id);
+                        form.setValue(
+                          `purchaseOrderItems.${row.index}.purchasePrice`,
+                          value.price,
+                        );
 
-                      setTimeout(() => {
-                        if (row.index + 1 === fields.length) {
-                          const button: HTMLButtonElement | null =
-                            document.querySelector(".append-btn");
-                          if (button) {
-                            button.focus();
+                        setTimeout(() => {
+                          if (row.index + 1 === fields.length) {
+                            const button: HTMLButtonElement | null =
+                              document.querySelector(".append-btn");
+                            if (button) {
+                              button.focus();
+                            }
+                          } else {
+                            form.setFocus(
+                              `purchaseOrderItems.${row.index + 1}.quantity`,
+                            );
                           }
-                        } else {
-                          form.setFocus(
-                            `purchaseOrderItems.${row.index + 1}.quantity`,
-                          );
-                        }
-                      }, 0);
-                    }}
-                    renderOptions={(items, open, setOpen, onSelect) => {
-                      return (
-                        open &&
-                        items.map((item) => (
-                          <CommandGroup key={item.id}>
-                            <CommandItem
-                              value={String(item.name)}
-                              key={item.id}
-                              onSelect={() => {
-                                setOpen(false);
-                                onSelect?.(item);
-                              }}
-                              className="flex items-center gap-2 justify-between"
-                            >
-                              {item.name}
-                              <div className="flex gap-2">
-                                <span>{formatCurrency(item.price)}</span>
-                                <ColorBadge colorMap={UNIT_COLOR}>
-                                  {item.unit}
-                                </ColorBadge>
-                              </div>
-                            </CommandItem>
-                          </CommandGroup>
-                        ))
-                      );
-                    }}
-                  />
-                  // <ProductComboSearchCommand
-                  //   items={productCombinations}
-                  //   onSelect={(item) => {
-                  //     field.onChange(item.id);
-                  //   }}
-                  //   renderOptions={(items, open, setOpen, onSelect) => {
-                  //     return (
-                  //       open &&
-                  //       items.map((item) => (
-                  //         <CommandGroup key={item.id}>
-                  //           <CommandItem
-                  //             value={String(item.name)}
-                  //             key={item.id}
-                  //             onSelect={() => {
-                  //               setOpen(false);
-                  //               onSelect?.(item);
-                  //               setTimeout(() => {
-                  //                 form.setValue(
-                  //                   `purchaseOrderItems.${row.index}.purchasePrice`,
-                  //                   item.price,
-                  //                 );
-                  //                 form.setFocus(
-                  //                   `purchaseOrderItems.${row.index}.purchasePrice`,
-                  //                 );
-                  //               }, 0);
-                  //             }}
-                  //             className="flex items-center gap-2 justify-between"
-                  //           >
-                  //             {item.name}
-                  //             <div className="flex gap-2">
-                  //               {item.inventory.quantity}
-                  //               <span>{formatCurrency(item.price)}</span>
-                  //               <ColorBadge colorMap={UNIT_COLOR}>
-                  //                 {item.unit}
-                  //               </ColorBadge>
-                  //             </div>
-                  //           </CommandItem>
-                  //         </CommandGroup>
-                  //       ))
-                  //     );
-                  //   }}
-                  // >
-                  //   <Button
-                  //     variant="outline"
-                  //     className="w-full flex justify-between h-9 min-w-[200px]"
-                  //     type="button"
-                  //   >
-                  //     {
-                  //       productCombinations.find((i) => i.id === field.value)
-                  //         ?.name
-                  //     }
-                  //     <ChevronsUpDown className="ml-auto" />
-                  //   </Button>
-                  // </ProductComboSearchCommand>
-                );
-              }}
+                        }, 0);
+                      }}
+                      renderOptions={(
+                        items,
+                        open,
+                        setOpen,
+                        onSelect,
+                        search,
+                      ) => {
+                        const getScore = (value: string, search: string) => {
+                          const normalize = (str: string) =>
+                            str
+                              .toLowerCase()
+                              .replace(/[^a-z0-9 ]/gi, " ")
+                              .trim();
+
+                          const v = normalize(value);
+                          const s = normalize(search);
+
+                          if (!s) return 1;
+
+                          if (v === s) return 100;
+                          if (v.startsWith(s)) return 80;
+                          if (v.includes(s)) return 50;
+
+                          const searchWords = s.split(/\s+/).filter(Boolean);
+                          let matched = 0;
+                          for (const word of searchWords) {
+                            if (v.includes(word)) matched++;
+                          }
+
+                          if (matched === searchWords.length) return 40;
+                          if (matched > 0) return 20;
+
+                          return 0;
+                        };
+                        return (
+                          open &&
+                          items
+                            .map((item) => ({
+                              item,
+                              score: getScore(item.name, search), // 🔥 use score
+                            }))
+                            .filter(({ score }) => score > 0)
+                            .sort((a, b) => b.score - a.score) // 🔥 sort by score
+                            .map(({ item }) => (
+                              <CommandGroup key={item.id}>
+                                <CommandItem
+                                  value={String(item.name)}
+                                  key={item.id}
+                                  onSelect={() => {
+                                    setOpen(false);
+                                    onSelect?.(item);
+                                  }}
+                                  className="flex items-center gap-2 justify-between"
+                                >
+                                  {item.name}
+                                  <div className="flex gap-2">
+                                    <span>{formatCurrency(item.price)}</span>
+                                    <ColorBadge colorMap={UNIT_COLOR}>
+                                      {item.unit}
+                                    </ColorBadge>
+                                  </div>
+                                </CommandItem>
+                              </CommandGroup>
+                            ))
+                        );
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
           );
         },
@@ -338,7 +325,7 @@ export default function PendingOrderForm({
         ),
       },
     ],
-    [fields.length, form, productCombinations, remove],
+    [fields.length, form, productCombinationStore.productCombinations, remove],
   );
 
   return (

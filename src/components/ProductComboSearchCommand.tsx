@@ -72,6 +72,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
     open: boolean,
     setOpen: (open: boolean) => void,
     onSelect?: (item: T) => void,
+    search?: string,
   ) => React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
@@ -103,15 +104,54 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <Command
-          filter={(value, search) => {
-            if (value.toLowerCase() === search.toLowerCase()) {
-              return 100; // exact match → highest priority
-            }
-            if (value.toLowerCase().startsWith(search.toLowerCase())) {
-              return 50; // startsWith → next
-            }
-            return value.toLowerCase().includes(search) ? 10 : 0; // include or hide
-          }}
+          onValueChange={(val) => setSearch(val)}
+          // filter={(value, search) => {
+          //   // Normalize: lowercase + remove non-alphanumeric characters
+          //   const normalize = (str: string) =>
+          //     str.toLowerCase().replace(/[^a-z0-9]/gi, "");
+
+          //   const v = normalize(value);
+          //   const s = normalize(search);
+
+          //   if (!s) return 1; // if no search, show all
+
+          //   if (v === s) return 100; // exact match
+          //   if (v.startsWith(s)) return 50; // startsWith
+          //   if (v.includes(s)) return 10; // substring
+
+          //   return 0; // no match
+          // }}
+          // filter={(value, search) => {
+          //   // Normalize: lowercase + remove non-alphanumeric
+          //   const normalize = (str: string) =>
+          //     str
+          //       .toLowerCase()
+          //       .replace(/[^a-z0-9 ]/gi, " ")
+          //       .trim();
+
+          //   const v = normalize(value);
+          //   const s = normalize(search);
+
+          //   if (!s) return 1; // show all if search is empty
+
+          //   // === Exact, startsWith, includes ===
+          //   // if (v === s) return 100;
+          //   // if (v.startsWith(s)) return 80;
+          //   // if (v.includes(s)) return 50;
+
+          //   // === Multi-word token match ===
+          //   const searchWords = s.split(/\s+/).filter(Boolean);
+          //   let matched = 0;
+          //   for (const word of searchWords) {
+          //     if (v.includes(word)) matched++;
+          //   }
+          //   // if (matched === searchWords.length) return 40; // all words matched (order ignored)
+          //   if (matched > 0 && matched < 3) return 1; // partial match
+          //   if (matched >= 3) return 100; // partial match
+          //   console.log(v, matched, searchWords);
+
+          //   return 0;
+          // }}
         >
           <CommandInput
             placeholder="Type a command or search..."
@@ -123,7 +163,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
           />
           <CommandList ref={listRef}>
             <CommandEmpty>No results found.</CommandEmpty>
-            {renderOptions(items, open, setOpen, onSelect)}
+            {renderOptions(items, open, setOpen, onSelect, search)}
           </CommandList>
         </Command>
       </CommandDialog>

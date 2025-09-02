@@ -13,19 +13,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  ApiErrorResponse,
-  CancelOrder,
-  PurchaseOrder,
-  PurchaseOrderCreate,
-  SalesOrder,
-} from "@/types";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  ApiErrorResponse,
+  CancelOrder,
+  PurchaseOrder,
+  PurchaseOrderCreate,
+} from "@/types";
 import {
   Ban,
   ClipboardList,
@@ -58,15 +57,14 @@ export default function Create() {
   const { id } = useParams();
   const { toggle, handleToggle } = useToggle({
     cancelModal: false,
+    dropdownMenu: false,
   });
 
-  const form = useForm<PurchaseOrder | PurchaseOrderCreate>({
-    resolver: zodResolver(
-      z.union([purchaseOrderSchema, purchaseOrderCreateSchema]),
-    ),
+  const form = useForm<PurchaseOrderCreate>({
+    resolver: zodResolver(purchaseOrderCreateSchema),
   });
 
-  async function onSaveOrder(form: PurchaseOrder) {
+  async function onSaveOrder(form: PurchaseOrderCreate) {
     try {
       await purchaseOrderServices.update(Number(id), {
         ...form,
@@ -77,6 +75,7 @@ export default function Create() {
       const apiError = error as ApiErrorResponse;
       toast.error("Submission failed - " + apiError.message);
     }
+    handleToggle({ dropdownMenu: false });
   }
 
   async function onReceiveOrder(form: PurchaseOrderCreate) {
@@ -149,9 +148,9 @@ export default function Create() {
     getData();
   }, [getData]);
 
-  const data = useWatch<SalesOrder>({
+  const data = useWatch<PurchaseOrder>({
     control: form.control,
-  }) as SalesOrder;
+  }) as PurchaseOrder;
 
   return (
     <div className="flex flex-col gap-4">
@@ -173,17 +172,22 @@ export default function Create() {
             <ColorBadge colorMap={STATUS_COLOR}>
               {String(data?.status)}
             </ColorBadge>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <DropdownMenu open={toggle.dropdownMenu}>
+              <DropdownMenuTrigger
+                asChild
+                onClick={() => handleToggle({ dropdownMenu: true })}
+              >
                 <Button variant="outline" size="icon" className="size-8">
                   <EllipsisVertical />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    handleToggle({ orderHistoryModal: true });
+                  onSelect={() => {
+                    handleToggle({
+                      orderHistoryModal: true,
+                      dropdownMenu: false,
+                    });
                   }}
                 >
                   <ClipboardList />
@@ -195,7 +199,7 @@ export default function Create() {
                   <DropdownMenuItem
                     onSelect={(e) => {
                       e.preventDefault();
-                      handleToggle({ cancelModal: true });
+                      handleToggle({ cancelModal: true, dropdownMenu: false });
                     }}
                   >
                     <Ban color="red" />
@@ -206,7 +210,7 @@ export default function Create() {
                   <>
                     <DropdownMenuItem
                       onClick={(e) => {
-                        e.preventDefault();
+                        // e.preventDefault();
                         console.log(form.formState.errors);
                         form
                           .handleSubmit(onSaveOrder)(e)
@@ -299,9 +303,9 @@ export default function Create() {
           )}
         </CardContent>
       </Card>
-      {toggle.orderHistoryModal && (
+      {toggle.orderHistoryModal && data?.purchaseOrderStatusHistory && (
         <OrderHistoryModal
-          data={data?.purchaseOrderStatusHistory}
+          data={data.purchaseOrderStatusHistory}
           onClose={() => handleToggle({ orderHistoryModal: false })}
         />
       )}
