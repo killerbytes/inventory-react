@@ -153,7 +153,7 @@ export default function FullForm({
                           }
                         }, 0);
                       }}
-                      renderOptions={(items, open, setOpen, onSelect) => {
+                      renderOptions={({ items, open, setOpen, onSelect }) => {
                         return (
                           open &&
                           items.map((item) => (

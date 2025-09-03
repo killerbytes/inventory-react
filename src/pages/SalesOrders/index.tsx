@@ -84,7 +84,7 @@ export default function SalesOrders() {
 
   React.useEffect(() => {
     getData();
-  }, [filter, getData]);
+  }, []);
 
   React.useEffect(() => {
     setFilter((prev) => ({

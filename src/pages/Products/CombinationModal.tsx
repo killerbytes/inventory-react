@@ -45,7 +45,15 @@ const formSchema = z.object({
     message: "Price must be at least 0.01.",
   }),
   reorderLevel: z.coerce.number(),
-  values: z.array(variantValuesSchema),
+  values: z.array(
+    z
+      .object({
+        id: z.number().nullish(),
+        value: z.string().nullish(),
+        variantTypeId: z.number().nullish(),
+      })
+      .required(),
+  ),
 });
 
 export default function CombinationModal({
@@ -91,7 +99,6 @@ export default function CombinationModal({
     conversionFactor: 1,
     values: variants.map((i) => ({
       variantTypeId: i.id,
-      value: "",
     })),
   };
 
@@ -106,7 +113,7 @@ export default function CombinationModal({
       const x = combinations.map((i) => {
         return {
           ...i,
-          values: Array(variants.length).fill(null),
+          values: Array(variants.length).fill({ id: "" }),
         };
       });
 

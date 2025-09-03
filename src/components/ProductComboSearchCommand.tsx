@@ -55,7 +55,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
   onSelect,
   children,
   className,
-  renderOptions = (items, open, setOpen, onSelect) => (
+  renderOptions = ({ items, open, setOpen, onSelect }) => (
     <RenderOptionsDefault
       items={items}
       open={open}
@@ -69,13 +69,18 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
   onSelect?: (item: T) => void;
   children: React.ReactNode;
   className?: string;
-  renderOptions?: (
-    items: T[],
-    open: boolean,
-    setOpen: (open: boolean) => void,
-    onSelect?: (item: T) => void,
-    search: string,
-  ) => React.ReactNode;
+  renderOptions?: ({
+    items,
+    open,
+    setOpen,
+    onSelect,
+  }: {
+    items: T[];
+    open: boolean;
+    setOpen: (open: boolean) => void;
+    onSelect?: (item: T) => void;
+    search: string;
+  }) => React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
@@ -165,7 +170,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
           />
           <CommandList ref={listRef}>
             <CommandEmpty>No results found.</CommandEmpty>
-            {renderOptions(items, open, setOpen, onSelect, search)}
+            {renderOptions({ items, open, setOpen, onSelect, search })}
           </CommandList>
         </Command>
       </CommandDialog>

@@ -123,7 +123,7 @@ export default function Products() {
             onSelect={(item) => {
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
             }}
-            renderOptions={(items, open, setOpen, onSelect) => (
+            renderOptions={({ items, open, setOpen, onSelect }) => (
               <CommandGroup>
                 {open &&
                   items.map((item) => (

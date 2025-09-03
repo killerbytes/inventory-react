@@ -62,14 +62,13 @@ export default function PendingOrderForm({
 
   React.useEffect(() => {
     const getData = async () => {
-      if (!productCombinationStore.loaded) {
+      if (!productCombinationStore.hasLoaded) {
         const data = await productCombinationServices.list();
         productCombinationStore.setProductsCombinations(data);
       }
     };
     getData();
   }, [productCombinationStore]);
-
   const columns = React.useMemo<ColumnDef<PurchaseOrderItem>[]>(
     () => [
       {
@@ -163,22 +162,22 @@ export default function PendingOrderForm({
                           }
                         }, 0);
                       }}
-                      renderOptions={(
+                      renderOptions={({
                         items,
                         open,
                         setOpen,
                         onSelect,
                         search,
-                      ) => {
+                      }) => {
                         return (
                           open &&
                           items
                             .map((item) => ({
                               item,
-                              score: getScore(item.name, search), // 🔥 use score
+                              score: getScore(item.name, search),
                             }))
                             .filter(({ score }) => score > 0)
-                            .sort((a, b) => b.score - a.score) // 🔥 sort by score
+                            .sort((a, b) => b.score - a.score)
                             .map(({ item }) => (
                               <CommandGroup key={item.id}>
                                 <CommandItem
@@ -415,7 +414,6 @@ export default function PendingOrderForm({
           )}
         />
 
-        {/* <PendingOrderForm form={form} /> */}
         <FormField
           control={form.control}
           name="purchaseOrderItems"

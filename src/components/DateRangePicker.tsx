@@ -1,9 +1,9 @@
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { endOfDay, format, startOfDay } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "./ui/calendar";
 import { Button } from "./ui/button";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -14,6 +14,11 @@ interface DateRangePickerProps {
   placeholder?: string;
   disabled?: (date: Date) => boolean;
   numberOfMonths?: number;
+}
+
+function normalizeToDay(date: Date | undefined) {
+  if (!date) return undefined;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()); // midnight local
 }
 
 export default function DateRangePicker({
@@ -31,8 +36,11 @@ export default function DateRangePicker({
       onChange({ from: undefined, to: undefined });
       return;
     }
-
-    onChange(selectedRange);
+    const { from, to } = selectedRange;
+    onChange({
+      from: from.toLocaleString(),
+      to: to.toLocaleString(),
+    });
     // Close the popover only when both dates are selected
     if (selectedRange.from && selectedRange.to) {
       // setOpen(false);
@@ -81,12 +89,11 @@ export default function DateRangePicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
-          initialFocus
           mode="range"
           defaultMonth={value?.from || new Date()}
           selected={{
-            from: value?.from,
-            to: value?.to,
+            from: value?.from ? startOfDay(value.from) : undefined,
+            to: value?.to ? endOfDay(value.to) : undefined,
           }}
           onSelect={handleSelect}
           numberOfMonths={numberOfMonths}

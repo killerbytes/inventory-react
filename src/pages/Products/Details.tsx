@@ -55,7 +55,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
-import { useForm, useWatch } from "react-hook-form";
 import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
 import ColorBadge from "@/components/ColorBadge";
@@ -64,6 +63,7 @@ import { Badge } from "@/components/ui/badge";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
 import useToggle from "@/hooks/useToggle";
+import { useForm } from "react-hook-form";
 import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
@@ -74,8 +74,7 @@ export default function ProductEdit() {
   const { id } = useParams();
   const [product, setProduct] = React.useState<Product>();
   const { categories, setCategories } = useCategoryStore();
-  const { productCombinations, setProductsCombinations } =
-    useProductCombinationStore();
+  const productCombinationStore = useProductCombinationStore();
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
     [],
   );
@@ -185,11 +184,13 @@ export default function ProductEdit() {
 
   React.useEffect(() => {
     const getData = async () => {
-      const data = await productCombinationServices.list();
-      setProductsCombinations(data);
+      if (!productCombinationStore.hasLoaded) {
+        const data = await productCombinationServices.list();
+        productCombinationStore.setProductsCombinations(data);
+      }
     };
     getData();
-  }, [setProductsCombinations]);
+  }, [productCombinationStore]);
 
   // const x = useWatch<Product>({
   //   control: form.control,
@@ -317,7 +318,7 @@ export default function ProductEdit() {
         </PageHeaderContent>
         <PageHeaderActions>
           <ProductComboSearchCommand
-            items={productCombinations}
+            items={productCombinationStore.productCombinations}
             onSelect={(item) =>
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`)
             }
@@ -452,9 +453,12 @@ export default function ProductEdit() {
         <VariantsModal
           productId={Number(id)}
           isOpen={true}
-          onClose={() => {
+          onClose={(shouldOpenComboModal) => {
             handleToggle({ variantModal: false });
             getData();
+            if (shouldOpenComboModal) {
+              handleToggle({ combinationModal: true });
+            }
           }}
         />
       )}
@@ -465,6 +469,7 @@ export default function ProductEdit() {
           onSubmit={onSubmit}
           onClose={() => {
             getData();
+            productCombinationStore.invalidate();
             handleToggle({ combinationModal: false });
           }}
         />

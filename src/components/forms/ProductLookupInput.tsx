@@ -26,16 +26,23 @@ export default function ProductLookupInput<
   onChange: (value: T) => void;
   value: number;
   name: string;
-  renderOptions?: (
-    items: T[],
-    open: boolean,
-    setOpen: (open: boolean) => void,
-    onSelect?: (item: T) => void,
-    search: string,
-  ) => React.ReactNode;
+  renderOptions?: ({
+    items,
+    open,
+    setOpen,
+    onSelect,
+    search,
+  }: {
+    items: T[];
+    open: boolean;
+    setOpen: (open: boolean) => void;
+    onSelect: (item: T) => void;
+    search: string;
+  }) => React.ReactNode;
   ariaInvalid?: boolean;
 }) {
   const options = useExcludeExistToList(items, form?.control, name);
+
   return (
     <ProductComboSearchCommand
       items={options}

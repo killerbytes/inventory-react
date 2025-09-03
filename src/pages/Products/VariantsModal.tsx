@@ -1,6 +1,7 @@
 import VariantCopyTemplateModal from "@/components/modals/VariantCopyTemplateModal";
 import VariantTemplatePickerDialog from "@/components/VariantTemplatePickerDialog";
 import VariantTypesForm from "@/components/forms/VariantTypesForm";
+import { ApiErrorResponse, VariantTypes } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, Save, Search } from "lucide-react";
 import { variantTypesServices } from "@/services";
@@ -8,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { variantTypesSchema } from "@/schemas";
 import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
+import { ERROR } from "@/utils/definitions";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { VariantTypes } from "@/types";
 import { toast } from "sonner";
 import React from "react";
 
@@ -26,34 +27,52 @@ export default function VariantsModal({
 }: {
   productId: number;
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (shouldOpenComboModal: boolean) => void;
 }) {
   const [toggle, handleToggle] = useToggle({
     variantTemplatePicker: false,
   });
   const [selected, setSelected] = React.useState<VariantTypes>();
   const [variantTypes, setVariantTypes] = React.useState<VariantTypes[]>([]);
+  const [shouldOpenComboModal, setShouldOpenComboModal] = React.useState(false);
   const form = useForm<VariantTypes>({
     defaultValues,
     resolver: zodResolver(variantTypesSchema),
   });
 
   const handleSubmit = async (values: VariantTypes) => {
-    const payload = {
-      ...values,
-      productId: Number(productId),
-    };
-    if (values.id) {
-      await variantTypesServices.update(values.id, payload);
-      toast.success("Variant updated successfully");
-    } else {
-      await variantTypesServices.create(payload);
-      toast.success("Variant created successfully");
+    try {
+      const payload = {
+        ...values,
+        productId: Number(productId),
+      };
+      if (values.id) {
+        await variantTypesServices.update(values.id, payload);
+        toast.success("Variant updated successfully");
+      } else {
+        await variantTypesServices.create(payload);
+        toast.success("Variant created successfully");
+      }
+      getData();
+      setSelected(undefined);
+      form.reset(defaultValues);
+      form.setFocus("name");
+      setShouldOpenComboModal(true);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field as keyof VariantTypes, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      } else {
+        toast.error("Submission failed: " + apiError.message);
+      }
     }
-    getData();
-    setSelected(undefined);
-    form.reset(defaultValues);
-    form.setFocus("name");
   };
 
   React.useEffect(() => {
@@ -84,7 +103,7 @@ export default function VariantsModal({
   return (
     <Modal
       isOpen={isOpen}
-      onOpenChange={onClose}
+      onOpenChange={() => onClose(shouldOpenComboModal)}
       title="Variants"
       description="Add variants to the product"
     >

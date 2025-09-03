@@ -227,7 +227,7 @@ export default function VariantTypesForm({
           />
 
           <DialogFooter>
-            <Button
+            {/* <Button
               type="submit"
               className="shadow-sm"
               onClick={(e) => {
@@ -241,7 +241,36 @@ export default function VariantTypesForm({
               }}
             >
               {selected?.id ? "Update Variant" : "Add Variant"}
-            </Button>
+            </Button> */}
+            <ConfirmDialog
+              title="Notice"
+              description="You need to update the combinations to reflect the changes"
+              onConfirm={(e) => {
+                e.preventDefault();
+                console.log(form.getValues(), form.formState.errors);
+                form
+                  .handleSubmit(onSubmit)(e)
+                  .catch((error) => {
+                    console.error("Form submission error:", error);
+                  });
+              }}
+            >
+              <Button
+                type="button"
+                className="shadow-sm"
+                // onClick={(e) => {
+                //   e.preventDefault();
+                //   console.log(form.getValues(), form.formState.errors);
+                //   form
+                //     .handleSubmit(onSubmit)(e)
+                //     .catch((error) => {
+                //       console.error("Form submission error:", error);
+                //     });
+                // }}
+              >
+                {selected?.id ? "Update Variant" : "Add Variant"}
+              </Button>
+            </ConfirmDialog>
           </DialogFooter>
         </form>
       </Form>

@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ArrowUpDown, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
@@ -26,12 +27,10 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
-import { Plus } from "lucide-react";
 import React from "react";
 
 export default function PurchaseOrders() {
   const navigate = useNavigate();
-  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<PurchaseOrder[]>>({
     data: [],
     total: 0,
@@ -45,40 +44,45 @@ export default function PurchaseOrders() {
     to: endOfMonth(new Date()),
   });
   const [filter, setFilter] = React.useState({
+    status: "ALL",
+    sort: "purchaseOrderNumber",
+    order: "DESC",
+    // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
+    // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
+  });
+  const [tableFilters, setTableFilters] = React.useState({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    status: "ALL",
-    sort: "notes",
-    orderBy: "ASC",
-    ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
-    ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
-
-  React.useEffect(() => {
-    const { from, to } = range || {};
-    if (from && to) {
-      setFilter((prev) => ({
-        ...prev,
-        startDate: from.toISOString(),
-        endDate: to.toISOString(),
-      }));
-    } else {
-      setFilter((prev) => ({
-        ...prev,
-        startDate: "",
-        endDate: "",
-      }));
-    }
-  }, [range]);
+  // React.useEffect(() => {
+  //   const { from, to } = range || {};
+  //   if (from && to) {
+  //     setFilter((prev) => ({
+  //       ...prev,
+  //       startDate: from.toISOString(),
+  //       endDate: to.toISOString(),
+  //     }));
+  //   } else {
+  //     setFilter((prev) => ({
+  //       ...prev,
+  //       startDate: "",
+  //       endDate: "",
+  //     }));
+  //   }
+  // }, [range]);
 
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
       const payload = {
         ...filter,
+        ...tableFilters,
+        ...(range?.from && range?.to && { startDate: range.from }),
+        ...(range?.from && range?.to && { endDate: range.to }),
+
         status: filter.status === "ALL" ? undefined : filter.status,
       };
-
+      console.log(payload);
       const data: PaginatedResponse<PurchaseOrder[]> =
         await purchaseOrderServices.getAll(payload);
       setData(data);
@@ -87,89 +91,156 @@ export default function PurchaseOrders() {
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, range.from, range.to, tableFilters]);
 
   React.useEffect(() => {
     getData();
-  }, [filter, getData]);
+  }, [getData]);
 
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
+  const handleFilterChange = React.useCallback((data) => {
+    setFilter((prevState) => ({ ...prevState, ...data }));
+  }, []);
 
-  const columns: ColumnDef<PurchaseOrder>[] = [
-    {
-      accessorKey: "purchaseOrderNumber",
-      header: "PO #",
-    },
-    {
-      accessorKey: "supplier.name",
-      header: "Supplier",
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status;
-        return (
-          <ColorBadge colorMap={STATUS_COLOR}>{String(status)}</ColorBadge>
-        );
+  // React.useEffect(() => {
+  //   setFilter((prev) => ({
+  //     ...prev,
+  //     page,
+  //   }));
+  // }, [page]);
+
+  const columns: ColumnDef<PurchaseOrder>[] = React.useMemo(
+    () => [
+      {
+        accessorKey: "purchaseOrderNumber",
+        header: ({ column }) => {
+          return (
+            <span
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                handleFilterChange({
+                  order: filter.order === "ASC" ? "DESC" : "ASC",
+                  sort: column.id,
+                });
+              }}
+            >
+              PO#
+              {filter.sort === column.id && filter.order === "ASC" ? (
+                <ChevronUp />
+              ) : (
+                filter.sort === column.id && <ChevronDown />
+              )}
+            </span>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "statusHistory",
-      header: "Date",
-      cell: ({ row }) => {
-        const statusHistoryMap = mappedStatusHistory(
-          row.original.purchaseOrderStatusHistory ?? [],
-        );
-        return formatDate(statusHistoryMap[row.original.status]?.changedAt);
+      {
+        accessorKey: "supplier.name",
+        header: "Supplier",
       },
-    },
-    {
-      accessorKey: "orderDate",
-      header: "User",
-      cell: ({ row }) => {
-        const statusHistoryMap = mappedStatusHistory(
-          row.original.purchaseOrderStatusHistory ?? [],
-        );
-        return statusHistoryMap[row.original.status]?.user.username;
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+          const status = row.original.status;
+          return (
+            <ColorBadge colorMap={STATUS_COLOR}>{String(status)}</ColorBadge>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "deliveryDate",
-      header: "Delivery Date",
-      cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
-    },
-    {
-      accessorKey: "modeOfPayment",
-      header: "Payment Mode",
-      meta: {
-        headerClassName: "text-center",
-        className: "text-center",
+      {
+        accessorKey: "updatedAt",
+        header: ({ column }) => {
+          return (
+            <span
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                handleFilterChange({
+                  order: filter.order === "ASC" ? "DESC" : "ASC",
+                  sort: column.id,
+                });
+              }}
+            >
+              Date
+              {filter.sort === column.id && filter.order === "ASC" ? (
+                <ChevronUp />
+              ) : (
+                filter.sort === column.id && <ChevronDown />
+              )}
+            </span>
+          );
+        },
+        cell: ({ row }) => {
+          const statusHistoryMap = mappedStatusHistory(
+            row.original.purchaseOrderStatusHistory ?? [],
+          );
+          return formatDate(statusHistoryMap[row.original.status]?.changedAt);
+        },
       },
-      cell: ({ row }) => {
-        return (
-          <ColorBadge colorMap={MODE_OF_PAYMENT_COLOR}>
-            {String(row.original.modeOfPayment)}
-          </ColorBadge>
-        );
+      {
+        accessorKey: "orderDate",
+        header: "User",
+        cell: ({ row }) => {
+          const statusHistoryMap = mappedStatusHistory(
+            row.original.purchaseOrderStatusHistory ?? [],
+          );
+          return statusHistoryMap[row.original.status]?.user.username;
+        },
       },
-    },
-    { accessorKey: "notes", header: "Notes" },
-    {
-      accessorKey: "totalAmount",
-      header: () => "Total Amount",
-      meta: {
-        headerClassName: "text-right",
-        className: "text-right",
+      {
+        accessorKey: "deliveryDate",
+        header: "Delivery Date",
+        cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
       },
-      cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
-    },
-  ];
+      {
+        accessorKey: "modeOfPayment",
+        header: "Payment Mode",
+        meta: {
+          headerClassName: "text-center",
+          className: "text-center",
+        },
+        cell: ({ row }) => {
+          return (
+            <ColorBadge colorMap={MODE_OF_PAYMENT_COLOR}>
+              {String(row.original.modeOfPayment)}
+            </ColorBadge>
+          );
+        },
+      },
+      {
+        accessorKey: "notes",
+        header: ({ column }) => {
+          return (
+            <span
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                handleFilterChange({
+                  order: filter.order === "ASC" ? "DESC" : "ASC",
+                  sort: column.id,
+                });
+              }}
+            >
+              Notes
+              {filter.sort === column.id && filter.order === "ASC" ? (
+                <ChevronUp />
+              ) : (
+                filter.sort === column.id && <ChevronDown />
+              )}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "totalAmount",
+        header: () => "Total Amount",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
+      },
+    ],
+    [filter.order, handleFilterChange],
+  );
   return (
     <div>
       <Card>
@@ -193,7 +264,10 @@ export default function PurchaseOrders() {
               <DateRangePicker
                 className="mb-4"
                 value={range}
-                onChange={setRange}
+                onChange={(e) => {
+                  console.log(e);
+                  setRange(e);
+                }}
               />
             </div>
             <div className="w-1/4">
@@ -239,7 +313,11 @@ export default function PurchaseOrders() {
                 }}
               />
               {data.totalPages > 1 && (
-                <Pager data={data} page={page} setPage={setPage} />
+                <Pager
+                  data={data}
+                  page={tableFilters.page}
+                  setPage={(page) => setTableFilters({ ...tableFilters, page })}
+                />
               )}
             </>
           )}

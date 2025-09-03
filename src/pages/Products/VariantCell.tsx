@@ -37,7 +37,7 @@ export default function VariantCell({
             {...field}
             className={cx("w-full", error && "border-red-500")}
             value={String(
-              variant.values.find((i) => i.id === field.value?.id)?.id,
+              variant.values.find((i) => i.id === field.value?.id)?.id ?? "",
             )}
             options={variant.values}
             onChange={(value) => {
