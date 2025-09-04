@@ -1,6 +1,6 @@
 import ProductCombinationService from "./productCombination";
-import PurchaseOrderService from "./purchaseOrder";
 import VariantTypesService from "./variantTypes";
+import GoodReceiptService from "./goodReceipts";
 import SalesOrderService from "./salesOrder";
 import CategoryService from "./categories";
 import InventoryService from "./inventory";
@@ -15,7 +15,7 @@ const http = new Http();
 
 export const authServices = new AuthService({ http });
 export const salesOrderServices = new SalesOrderService({ http });
-export const purchaseOrderServices = new PurchaseOrderService({ http });
+export const goodReceiptServices = new GoodReceiptService({ http });
 export const categoryServices = new CategoryService({ http });
 export const userServices = new UserService({ http });
 export const productServices = new ProductService({ http });

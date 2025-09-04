@@ -1,5 +1,5 @@
 import { CommandGroup, CommandItem } from "@/components/ui/command";
-import { CategorizedProductList, PurchaseOrder } from "@/types";
+import { CategorizedProductList, GoodReceipt } from "@/types";
 import { Control, useWatch } from "react-hook-form";
 import ComboBox from "@/components/ComboBox";
 import React, { Fragment } from "react";
@@ -37,7 +37,7 @@ export default function ProductList({
   value,
   onChange,
 }: {
-  control: Control<PurchaseOrder>;
+  control: Control<GoodReceipt>;
   list: CategorizedProductList[];
   value: number | string | undefined | null;
   onChange: (selected: string) => void;

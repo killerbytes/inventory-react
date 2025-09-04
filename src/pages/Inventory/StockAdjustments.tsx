@@ -61,7 +61,7 @@ export default function StockAdjustments() {
         },
         cell: ({ row }) => {
           return (
-            <Link to={`${ROUTES.PURCHASE_ORDERS}/${row.original.reference}`}>
+            <Link to={`${ROUTES.GOOD_RECEIPT}/${row.original.reference}`}>
               <ColorBadge colorMap={STOCK_ADJUSTMENT_TYPE_COLOR}>
                 {String(row.original.reason)}
               </ColorBadge>

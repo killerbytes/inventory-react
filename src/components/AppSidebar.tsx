@@ -47,8 +47,8 @@ const items = [
     icon: Home,
   },
   {
-    title: "Purchases",
-    url: ROUTES.PURCHASE_ORDERS,
+    title: "Good Receipt",
+    url: ROUTES.GOOD_RECEIPT,
     icon: BanknoteArrowDown,
   },
   {
@@ -113,9 +113,7 @@ export default function AppSidebar() {
   const pathRef = React.useRef(location.pathname);
 
   React.useEffect(() => {
-    console.log("Route changed to:", location.pathname, pathRef.current);
     if (location.pathname !== pathRef.current) {
-      // setOpen(false);
       setOpenMobile(false);
       setVariantTemplateModal(false);
     }

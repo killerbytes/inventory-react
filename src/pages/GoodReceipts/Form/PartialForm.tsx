@@ -12,14 +12,14 @@ import {
   ORDER_STATUS,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import PurchaseOrderItemForm from "../../../components/forms/OrderItemForm";
+import GoodReceiptItemForm from "../../../components/forms/OrderItemForm";
 import OrderItemForm from "../../../components/forms/OrderItemForm";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { PurchaseOrder, PurchaseOrderItem } from "@/types";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import SupplierPanel from "@/components/SupplierPanel";
+import { GoodReceipt, GoodReceiptItem } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
@@ -28,7 +28,7 @@ import { useMemo } from "react";
 export default function PartialForm({
   form,
 }: {
-  form: UseFormReturn<PurchaseOrder>;
+  form: UseFormReturn<GoodReceipt>;
 }) {
   const {
     control,
@@ -36,12 +36,12 @@ export default function PartialForm({
   } = form;
   const { fields } = useFieldArray({
     control,
-    name: "purchaseOrderItems",
+    name: "goodReceiptLines",
   });
 
   const data = form.getValues();
 
-  const columns = useMemo<ColumnDef<PurchaseOrderItem>[]>(
+  const columns = useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
       {
         accessorKey: "index",
@@ -188,7 +188,7 @@ export default function PartialForm({
             columns={columns}
             errors={errors}
             control={form.control}
-            name="purchaseOrderItems"
+            name="goodReceiptLines"
             renderFooter={(data) => {
               const total = getTotalAmountTableFooter(data);
               return (

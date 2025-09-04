@@ -1,10 +1,10 @@
-import { CancelOrder, PurchaseOrder } from "@/types";
+import { CancelOrder, GoodReceipt } from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 
-export default class PurchaseOrderService extends BaseService<PurchaseOrder> {
+export default class GoodReceiptService extends BaseService<GoodReceipt> {
   constructor(props: { http: Http }) {
-    super({ ...props, url: "/purchase" });
+    super({ ...props, url: "/goodReceipt" });
   }
   cancelOrder = async (id: number, payload: CancelOrder) => {
     const response = await this.http.patch(`${this.url}/${id}/cancel`, payload);

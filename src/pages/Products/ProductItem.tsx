@@ -4,9 +4,7 @@ import { Product, ProductCombinations } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import ColorBadge from "@/components/ColorBadge";
-import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
-import { Pencil } from "lucide-react";
 import { Link } from "react-router";
 import React from "react";
 
@@ -15,9 +13,20 @@ export default function ProductItem({ item }: { item: Product }) {
     () => [
       {
         accessorKey: "name",
-        header: "Product",
+        header: () => {
+          return (
+            <>
+              <Link to={`${ROUTES.PRODUCTS}/${item.id}`}>{item.name}</Link>
+              {item.sku && (
+                <span className="text-xs text-muted-foreground">
+                  ({item.sku})
+                </span>
+              )}
+            </>
+          );
+        },
         meta: {
-          headerClassName: "h-0 py-1",
+          headerClassName: cx("flex items-center gap-2", GLOBAL_COLOR.PRODUCT),
         },
       },
       // ...(item.variants?.map((variant, idx) => ({
@@ -83,17 +92,7 @@ export default function ProductItem({ item }: { item: Product }) {
 
   return (
     <div className="flex flex-col gap-2 py-2">
-      <div className="flex gap-2 items-center">
-        <div className="">
-          <div className="flex gap-2 items-center">
-            <div className={cx("font-semibold", GLOBAL_COLOR.PRODUCT)}>
-              {item.name}
-            </div>
-          </div>
-          {item.description && (
-            <div className="text-xs text-gray-500">{item.description}</div>
-          )}
-        </div>
+      {/* <div className="flex gap-2 items-center">
         <div className="ml-auto flex gap-2 items-center">
           <Button
             asChild
@@ -106,7 +105,7 @@ export default function ProductItem({ item }: { item: Product }) {
             </Link>
           </Button>
         </div>
-      </div>
+      </div> */}
       <DataTable
         data={item.combinations || []}
         columns={columns}

@@ -164,7 +164,7 @@ export const supplierSchema = z.object({
 
 export const customerSchema = supplierSchema;
 
-export const purchaseOrderItemSchema = z.object({
+export const goodReceiptLineSchema = z.object({
   id: z.coerce.number().nullish(),
   combinationId: z.coerce.number().min(1, {
     message: "Product must be selected.",
@@ -198,9 +198,9 @@ export const statusHistorySchema = z.object({
   user: z.any(),
 });
 
-const purchaseOrderBaseSchema = z.object({
+const goodReceiptBaseSchema = z.object({
   id: z.number().optional(),
-  purchaseOrderNumber: z.string().nullish(),
+  goodReceiptNumber: z.string().nullish(),
   supplierId: z.coerce
     .number({
       required_error: "Supplier is required",
@@ -208,49 +208,42 @@ const purchaseOrderBaseSchema = z.object({
     })
     .min(1, { message: "Supplier is required." }),
   internalNotes: z.string().nullish(),
-  notes: z.string().nullish(),
-  purchaseOrderItems: z.array(purchaseOrderItemSchema).min(1, {
+  referenceNo: z.string().nullish(),
+  goodReceiptLines: z.array(goodReceiptLineSchema).min(1, {
     message: "At least one product is required.",
   }),
-  deliveryDate: z.string(),
-  dueDate: z.string().nullish(),
-  modeOfPayment: z.enum(
-    Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
-  ),
-  checkNumber: z.string().nullish(),
-  purchaseOrderStatusHistory: z.array(statusHistorySchema).nullish(),
+  receiptDate: z.string(),
+  goodReceiptStatusHistory: z.array(statusHistorySchema).nullish(),
 });
-export const purchaseOrderCreateSchema = purchaseOrderBaseSchema.superRefine(
-  (data, ctx) => {
-    // if (
-    //   data.status === ORDER_STATUS.PENDING &&
-    //   data.purchaseOrderItems?.length === 0
-    // ) {
-    //   ctx.addIssue({
-    //     path: ["purchaseOrderItems"],
-    //     code: z.ZodIssueCode.custom,
-    //     message: "Purchase Order Items are required",
-    //   });
-    // }
-    if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
-      ctx.addIssue({
-        path: ["checkNumber"],
-        code: z.ZodIssueCode.custom,
-        message: "Check number is required when payment is by check",
-      });
-      ctx.addIssue({
-        path: ["dueDate"],
-        code: z.ZodIssueCode.custom,
-        message: "Due date is required when payment is by check",
-      });
-    }
-  },
-);
+export const goodReceiptCreateSchema = goodReceiptBaseSchema.superRefine(() => {
+  // if (
+  //   data.status === ORDER_STATUS.DRAFT &&
+  //   data.goodReceiptLines?.length === 0
+  // ) {
+  //   ctx.addIssue({
+  //     path: ["goodReceiptLines"],
+  //     code: z.ZodIssueCode.custom,
+  //     message: "Purchase Order Items are required",
+  //   });
+  // }
+  // if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
+  //   ctx.addIssue({
+  //     path: ["checkNumber"],
+  //     code: z.ZodIssueCode.custom,
+  //     message: "Check number is required when payment is by check",
+  //   });
+  //   ctx.addIssue({
+  //     path: ["dueDate"],
+  //     code: z.ZodIssueCode.custom,
+  //     message: "Due date is required when payment is by check",
+  //   });
+  // }
+});
 
-export const purchaseOrderSchema = purchaseOrderBaseSchema
+export const goodReceiptSchema = goodReceiptBaseSchema
   .extend({
     // id: z.number().optional(),
-    // purchaseOrderNumber: z
+    // goodReceiptNumber: z
     //   .string({
     //     required_error: "PO number is required",
     //   })
@@ -263,8 +256,8 @@ export const purchaseOrderSchema = purchaseOrderBaseSchema
     //   .min(1, { message: "Supplier is required." }),
     // internalNotes: z.string().nullish(),
     // notes: z.string().nullish(),
-    // purchaseOrderItems: z
-    //   .array(purchaseOrderItemSchema)
+    // goodReceiptLines: z
+    //   .array(goodReceiptItemSchema)
     //   .min(1, {
     //     message: "At least one product is required.",
     //   })
@@ -282,27 +275,27 @@ export const purchaseOrderSchema = purchaseOrderBaseSchema
   })
   .superRefine((data, ctx) => {
     if (
-      data.status === ORDER_STATUS.PENDING &&
-      data.purchaseOrderItems?.length === 0
+      data.status === ORDER_STATUS.DRAFT &&
+      data.goodReceiptLines?.length === 0
     ) {
       ctx.addIssue({
-        path: ["purchaseOrderItems"],
+        path: ["goodReceiptLines"],
         code: z.ZodIssueCode.custom,
         message: "Purchase Order Items are required",
       });
     }
-    if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
-      ctx.addIssue({
-        path: ["checkNumber"],
-        code: z.ZodIssueCode.custom,
-        message: "Check number is required when payment is by check",
-      });
-      // ctx.addIssue({
-      //   path: ["dueDate"],
-      //   code: z.ZodIssueCode.custom,
-      //   message: "Due date is required when payment is by check",
-      // });
-    }
+    // if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
+    //   ctx.addIssue({
+    //     path: ["checkNumber"],
+    //     code: z.ZodIssueCode.custom,
+    //     message: "Check number is required when payment is by check",
+    //   });
+    //   // ctx.addIssue({
+    //   //   path: ["dueDate"],
+    //   //   code: z.ZodIssueCode.custom,
+    //   //   message: "Due date is required when payment is by check",
+    //   // });
+    // }
   });
 
 export const salesOrderItemSchema = z.object({
@@ -383,7 +376,7 @@ export const salesOrderSchema = salesOrderBaseSchema
   })
   .superRefine((data, ctx) => {
     if (
-      data.status === ORDER_STATUS.PENDING &&
+      data.status === ORDER_STATUS.DRAFT &&
       data.salesOrderItems?.length === 0
     ) {
       ctx.addIssue({
