@@ -21,10 +21,10 @@ import { useCategoryStore, useProductCombinationStore } from "@/stores";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { CategorizedProductList, PaginatedResponse } from "@/types";
+import { formatCurrency, getScore } from "@/utils/formatters";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
-import { formatCurrency } from "@/utils/formatters";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, Search } from "lucide-react";
@@ -123,31 +123,40 @@ export default function Products() {
             onSelect={(item) => {
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
             }}
-            renderOptions={({ items, open, setOpen, onSelect }) => (
-              <CommandGroup>
-                {open &&
-                  items.map((item) => (
-                    <CommandItem
-                      value={item.id}
-                      key={item.id}
-                      onSelect={() => {
-                        setOpen(false);
-                        onSelect?.(item);
-                      }}
-                      className="flex items-center gap-2 justify-between"
-                    >
-                      {item.name}
-                      <div className="flex gap-2">
-                        {item.inventory.quantity}
-                        <span>{formatCurrency(item.price)}</span>
+            renderOptions={({ items, open, setOpen, onSelect, search }) => {
+              return (
+                open &&
+                items
+                  .map((item) => ({
+                    item,
+                    score: getScore(item.name, search),
+                  }))
+                  .filter(({ score }) => score > 0)
+                  .sort((a, b) => b.score - a.score)
+                  .map(({ item }) => (
+                    <CommandGroup key={item.id}>
+                      <CommandItem
+                        value={String(item.name + item.unit)}
+                        key={item.id}
+                        onSelect={() => {
+                          setOpen(false);
+                          onSelect?.(item);
+                        }}
+                        className="flex items-center gap-2 "
+                      >
                         <ColorBadge colorMap={UNIT_COLOR}>
                           {item.unit}
                         </ColorBadge>
-                      </div>
-                    </CommandItem>
-                  ))}
-              </CommandGroup>
-            )}
+
+                        {item.name}
+                        <div className="flex gap-2 ml-auto">
+                          <span>{formatCurrency(item.price)}</span>
+                        </div>
+                      </CommandItem>
+                    </CommandGroup>
+                  ))
+              );
+            }}
           >
             <Button variant="outline" size="sm">
               <Search />

@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/form";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { ProductCombinations, GoodReceiptCreate, Supplier } from "@/types";
-import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
 import { productCombinationServices, supplierServices } from "@/services";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
 import { useProductCombinationStore, useSupplierStore } from "@/stores";
@@ -23,11 +22,10 @@ import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
+import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
-import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import { GoodReceiptItem } from "@/types";
-import Select from "@/components/Select";
 import { Trash2 } from "lucide-react";
 import React from "react";
 
@@ -45,7 +43,6 @@ export default function PendingForm({
     keyName: "fieldId",
   });
 
-  const modeOfPayment = form.watch("modeOfPayment");
   React.useEffect(() => {
     form.setFocus("supplierId");
   }, [form]);
@@ -181,20 +178,20 @@ export default function PendingForm({
                             .map(({ item }) => (
                               <CommandGroup key={item.id}>
                                 <CommandItem
-                                  value={String(item.name)}
+                                  value={String(item.name + item.unit)}
                                   key={item.id}
                                   onSelect={() => {
                                     setOpen(false);
                                     onSelect?.(item);
                                   }}
-                                  className="flex items-center gap-2 justify-between"
+                                  className="flex items-center gap-2 "
                                 >
+                                  <ColorBadge colorMap={UNIT_COLOR}>
+                                    {item.unit}
+                                  </ColorBadge>
                                   {item.name}
-                                  <div className="flex gap-2">
+                                  <div className="flex gap-2 ml-auto">
                                     <span>{formatCurrency(item.price)}</span>
-                                    <ColorBadge colorMap={UNIT_COLOR}>
-                                      {item.unit}
-                                    </ColorBadge>
                                   </div>
                                 </CommandItem>
                               </CommandGroup>
@@ -317,60 +314,29 @@ export default function PendingForm({
         <div className="w-full flex flex-col gap-4 items-start md:flex-row">
           <FormField
             control={form.control}
-            name="deliveryDate"
+            name="receiptDate"
             render={({ field }) => (
               <FormItem className="w-full md:w-1/4">
-                <FormLabel>Delivery Date</FormLabel>
+                <FormLabel>Receipt Date</FormLabel>
                 <DatePicker {...field} />
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
-            name="modeOfPayment"
+            name="referenceNo"
             render={({ field }) => (
               <FormItem className="w-full md:w-1/4">
-                <FormLabel>Mode of Payment</FormLabel>
-                <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="checkNumber"
-            render={({ field }) => {
-              return (
-                <FormItem
-                  className={cx(
-                    "w-full md:w-1/4",
-                    modeOfPayment !== "CHECK" && "opacity-50",
-                  )}
-                >
-                  <FormLabel>Check Number</FormLabel>
-                  <FormControl>
-                    <Input {...field} disabled={modeOfPayment !== "CHECK"} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-          <FormField
-            control={form.control}
-            name="dueDate"
-            render={({ field }) => (
-              <FormItem
-                className={cx(
-                  "w-full md:w-1/4",
-                  modeOfPayment !== "CHECK" && "opacity-50",
-                )}
-              >
-                <FormLabel>Due Date</FormLabel>
-                <DatePicker {...field} disabled={modeOfPayment !== "CHECK"} />
+                <FormLabel>Reference No</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter some notes..."
+                    className="resize-none"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -386,24 +352,6 @@ export default function PendingForm({
               <FormControl>
                 <Textarea
                   placeholder="Enter some internal notes..."
-                  className="resize-none"
-                  {...field}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Notes</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter some notes..."
                   className="resize-none"
                   {...field}
                   value={field.value ?? ""}

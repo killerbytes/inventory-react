@@ -110,56 +110,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
         {children}
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <Command
-          onValueChange={(val) => setSearch(val)}
-          // filter={(value, search) => {
-          //   // Normalize: lowercase + remove non-alphanumeric characters
-          //   const normalize = (str: string) =>
-          //     str.toLowerCase().replace(/[^a-z0-9]/gi, "");
-
-          //   const v = normalize(value);
-          //   const s = normalize(search);
-
-          //   if (!s) return 1; // if no search, show all
-
-          //   if (v === s) return 100; // exact match
-          //   if (v.startsWith(s)) return 50; // startsWith
-          //   if (v.includes(s)) return 10; // substring
-
-          //   return 0; // no match
-          // }}
-          // filter={(value, search) => {
-          //   // Normalize: lowercase + remove non-alphanumeric
-          //   const normalize = (str: string) =>
-          //     str
-          //       .toLowerCase()
-          //       .replace(/[^a-z0-9 ]/gi, " ")
-          //       .trim();
-
-          //   const v = normalize(value);
-          //   const s = normalize(search);
-
-          //   if (!s) return 1; // show all if search is empty
-
-          //   // === Exact, startsWith, includes ===
-          //   // if (v === s) return 100;
-          //   // if (v.startsWith(s)) return 80;
-          //   // if (v.includes(s)) return 50;
-
-          //   // === Multi-word token match ===
-          //   const searchWords = s.split(/\s+/).filter(Boolean);
-          //   let matched = 0;
-          //   for (const word of searchWords) {
-          //     if (v.includes(word)) matched++;
-          //   }
-          //   // if (matched === searchWords.length) return 40; // all words matched (order ignored)
-          //   if (matched > 0 && matched < 3) return 1; // partial match
-          //   if (matched >= 3) return 100; // partial match
-          //   console.log(v, matched, searchWords);
-
-          //   return 0;
-          // }}
-        >
+        <Command onValueChange={(val) => setSearch(val)}>
           <CommandInput
             placeholder="Type a command or search..."
             value={search}
