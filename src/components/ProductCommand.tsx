@@ -91,7 +91,7 @@ export default function ProductCommand<T extends FieldValues>({
   const [open, setOpen] = React.useState(false);
   // const fields = useWatch({
   //   control,
-  //   name: `purchaseOrderItems`,
+  //   name: `goodReceiptLines`,
   // });
   const { flatProducts } = useProductStore();
 

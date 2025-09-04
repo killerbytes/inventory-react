@@ -10,9 +10,9 @@ export const ROUTES = {
   CATEGORIES: "/categories",
   SUPPLIERS: "/suppliers",
   CUSTOMERS: "/customers",
-  PURCHASE_ORDERS: "/purchases",
-  PURCHASE_ORDERS_CREATE: "/purchases/new",
-  PURCHASE_ORDERS_DETAILS: "/purchases/:id",
+  GOOD_RECEIPT: "/good-receipt",
+  GOOD_RECEIPT_CREATE: "/good-receipt/new",
+  GOOD_RECEIPT_DETAILS: "/good-receipt/:id",
   SALES_ORDERS: "/sales",
   SALES_ORDERS_CREATE: "/sales/new",
   SALES_ORDERS_DETAILS: "/sales/:id",
@@ -52,7 +52,7 @@ export const INVENTORY_MOVEMENT_TYPE_COLOR = {
 };
 
 export const STATUS_COLOR = {
-  PENDING: "text-gray-600 border-gray-600 bg-gray-100",
+  DRAFT: "text-gray-600 border-gray-600 bg-gray-100",
   RECEIVED: "text-orange-600 border-orange-600 bg-orange-100",
   COMPLETED: "text-green-600 border-green-600 bg-green-100",
   CANCELLED: "text-red-600 border-red-600 bg-red-100",
@@ -73,11 +73,11 @@ export const PAGINATION = {
 export const DATE_FORMAT = "MMM-dd-yy";
 export const DATETIME_FORMAT = "MMM-dd-yy h:mm:ss a";
 
-export const STATUS = ["PENDING", "RECEIVED", "COMPLETED", "CANCELLED"];
+export const STATUS = ["DRAFT", "RECEIVED", "COMPLETED", "CANCELLED"];
 
 export const ORDER_STATUS = {
   ALL: "ALL",
-  PENDING: "PENDING",
+  DRAFT: "DRAFT",
   RECEIVED: "RECEIVED",
   COMPLETED: "COMPLETED",
   CANCELLED: "CANCELLED",

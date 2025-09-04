@@ -2,6 +2,7 @@ import {
   MODE_OF_PAYMENT_COLOR,
   ORDER_STATUS_OPTIONS,
   PAGINATION,
+  ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
 import {
@@ -11,27 +12,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowUpDown, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
-import { PaginatedResponse, PurchaseOrder } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { PaginatedResponse, GoodReceipt } from "@/types";
 import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
-import { purchaseOrderServices } from "@/services";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
 import ColorBadge from "@/components/ColorBadge";
+import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
 import React from "react";
 
-export default function PurchaseOrders() {
+export default function GoodReceipts() {
   const navigate = useNavigate();
-  const [data, setData] = React.useState<PaginatedResponse<PurchaseOrder[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<GoodReceipt[]>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -45,7 +46,7 @@ export default function PurchaseOrders() {
   });
   const [filter, setFilter] = React.useState({
     status: "ALL",
-    sort: "purchaseOrderNumber",
+    sort: "id",
     order: "DESC",
     // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
     // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
@@ -82,9 +83,8 @@ export default function PurchaseOrders() {
 
         status: filter.status === "ALL" ? undefined : filter.status,
       };
-      console.log(payload);
-      const data: PaginatedResponse<PurchaseOrder[]> =
-        await purchaseOrderServices.getAll(payload);
+      const data: PaginatedResponse<GoodReceipt[]> =
+        await goodReceiptServices.getAll(payload);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -108,10 +108,10 @@ export default function PurchaseOrders() {
   //   }));
   // }, [page]);
 
-  const columns: ColumnDef<PurchaseOrder>[] = React.useMemo(
+  const columns: ColumnDef<GoodReceipt>[] = React.useMemo(
     () => [
       {
-        accessorKey: "purchaseOrderNumber",
+        accessorKey: "id",
         header: ({ column }) => {
           return (
             <span
@@ -123,7 +123,7 @@ export default function PurchaseOrders() {
                 });
               }}
             >
-              PO#
+              ID
               {filter.sort === column.id && filter.order === "ASC" ? (
                 <ChevronUp />
               ) : (
@@ -148,7 +148,7 @@ export default function PurchaseOrders() {
         },
       },
       {
-        accessorKey: "updatedAt",
+        accessorKey: "createdAt",
         header: ({ column }) => {
           return (
             <span
@@ -171,43 +171,27 @@ export default function PurchaseOrders() {
         },
         cell: ({ row }) => {
           const statusHistoryMap = mappedStatusHistory(
-            row.original.purchaseOrderStatusHistory ?? [],
+            row.original.goodReceiptStatusHistory ?? [],
           );
           return formatDate(statusHistoryMap[row.original.status]?.changedAt);
         },
       },
       {
-        accessorKey: "orderDate",
         header: "User",
         cell: ({ row }) => {
           const statusHistoryMap = mappedStatusHistory(
-            row.original.purchaseOrderStatusHistory ?? [],
+            row.original.goodReceiptStatusHistory ?? [],
           );
           return statusHistoryMap[row.original.status]?.user.username;
         },
       },
       {
-        accessorKey: "deliveryDate",
+        accessorKey: "receiptDate",
         header: "Delivery Date",
-        cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
+        cell: ({ row }) => formatDate(row.getValue("receiptDate")),
       },
       {
-        accessorKey: "modeOfPayment",
-        header: "Payment Mode",
-        meta: {
-          headerClassName: "text-center",
-          className: "text-center",
-        },
-        cell: ({ row }) => {
-          return (
-            <ColorBadge colorMap={MODE_OF_PAYMENT_COLOR}>
-              {String(row.original.modeOfPayment)}
-            </ColorBadge>
-          );
-        },
-      },
-      {
-        accessorKey: "notes",
+        accessorKey: "referenceNo",
         header: ({ column }) => {
           return (
             <span
@@ -219,7 +203,7 @@ export default function PurchaseOrders() {
                 });
               }}
             >
-              Notes
+              Reference
               {filter.sort === column.id && filter.order === "ASC" ? (
                 <ChevronUp />
               ) : (
@@ -251,7 +235,7 @@ export default function PurchaseOrders() {
             Purchase Orders
           </CardTitle>
           <CardAction>
-            <Link to="/purchases/new">
+            <Link to={ROUTES.GOOD_RECEIPT_CREATE}>
               <Button className="shadow-md">
                 <Plus /> Create Order
               </Button>
@@ -291,18 +275,18 @@ export default function PurchaseOrders() {
               <DataTable
                 data={data.data || []}
                 columns={columns}
-                onRowClick={(item: PurchaseOrder) =>
-                  navigate(`/purchases/${item.id}`)
+                onRowClick={(item: GoodReceipt) =>
+                  navigate(`${ROUTES.GOOD_RECEIPT}/${item.id}`)
                 }
                 showFooter
-                renderFooter={(data: PurchaseOrder[]) => {
+                renderFooter={(data: GoodReceipt[]) => {
                   return (
                     <TableRow className="font-bold">
-                      <TableCell colSpan={8}>Total Amount</TableCell>
+                      <TableCell colSpan={7}>Total Amount</TableCell>
                       <TableCell className="text-right">
                         {formatCurrency(
                           data.reduce(
-                            (acc: number, item: PurchaseOrder) =>
+                            (acc: number, item: GoodReceipt) =>
                               acc + parseFloat(item.totalAmount ?? "0"),
                             0,
                           ),

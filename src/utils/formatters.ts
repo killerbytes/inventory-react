@@ -27,17 +27,6 @@ export const formatDateTime = (
   return value && format(value, formatStr);
 };
 
-export const getStatus = (status: string | null | undefined, next = false) => {
-  if (status) {
-    return next
-      ? ORDER_STATUS[
-          STATUS[STATUS.indexOf(status) + 1] as keyof typeof ORDER_STATUS
-        ]
-      : ORDER_STATUS[status as keyof typeof ORDER_STATUS];
-  }
-  return { label: "-", description: "-" };
-};
-
 export const getScore = (value: string, search: string) => {
   const normalize = (str: string) =>
     str

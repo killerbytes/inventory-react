@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
-import { purchaseOrderServices } from "@/services";
+import { goodReceiptServices } from "@/services";
 
 import {
   Card,
@@ -9,11 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ApiError, ApiErrorResponse, PurchaseOrderCreate } from "@/types";
+import { ApiError, ApiErrorResponse, GoodReceiptCreate } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import PendingOrderForm from "./Form/PendingOrderForm";
-import { purchaseOrderCreateSchema } from "@/schemas";
 import { ERROR, ROUTES } from "@/utils/definitions";
+import { goodReceiptCreateSchema } from "@/schemas";
+import PendingOrderForm from "./Form/PendingForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
@@ -21,17 +21,17 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import React from "react";
 
-const purchaseOrderItemDefault = {
+const goodReceiptItemDefault = {
   discountNote: "",
 };
 
-const purchaseOrderDefault = {
-  // purchaseOrderNumber: randomInt(1000000, 9999999).toString(),
+const goodReceiptDefault = {
+  // goodReceiptNumber: randomInt(1000000, 9999999).toString(),
   // supplierId: randomInt(1, 100),
   // modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
   deliveryDate: new Date().toISOString(),
   // dueDate: addWeeks(new Date(), 1).toISOString(),
-  purchaseOrderItems: Array.from({ length: 3 }, () => purchaseOrderItemDefault),
+  goodReceiptLines: Array.from({ length: 3 }, () => goodReceiptItemDefault),
 };
 
 export default function Create() {
@@ -46,35 +46,35 @@ export default function Create() {
           `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
         ) as string,
       )
-    : purchaseOrderDefault;
+    : goodReceiptDefault;
 
-  const form = useForm<PurchaseOrderCreate>({
-    resolver: zodResolver(purchaseOrderCreateSchema),
+  const form = useForm<GoodReceiptCreate>({
+    resolver: zodResolver(goodReceiptCreateSchema),
     defaultValues,
   });
 
-  // const data = useWatch({ control: form.control, name: "purchaseOrderItems" });
+  // const data = useWatch({ control: form.control, name: "goodReceiptLines" });
   React.useEffect(() => {
     setTimeout(() => {
       form.setFocus("supplierId");
     });
   }, [form]);
 
-  async function onSubmit(values: PurchaseOrderCreate) {
+  async function onSubmit(values: GoodReceiptCreate) {
     try {
-      await purchaseOrderServices.create(values);
+      await goodReceiptServices.create(values);
       toast.success(`Purchase Order created successfully`);
       localStorage.removeItem(
         `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
       );
-      navigate(ROUTES.PURCHASE_ORDERS);
+      navigate(ROUTES.GOOD_RECEIPT);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err: ApiError) => {
           if (err.field) {
             console.log(err.field);
-            form.setError(err.field as keyof PurchaseOrderCreate, {
+            form.setError(err.field as keyof GoodReceiptCreate, {
               type: "server",
               message: err.message,
             });
@@ -115,7 +115,7 @@ export default function Create() {
       const data = JSON.parse(json);
 
       form.setValue(
-        "purchaseOrderItems",
+        "goodReceiptLines",
         data.map((item) => {
           return {
             quantity: item.QTY,
@@ -152,17 +152,17 @@ export default function Create() {
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  const { purchaseOrderItems, ...rest } = form.getValues();
-                  const valid = purchaseOrderItems.filter(
+                  const { goodReceiptLines, ...rest } = form.getValues();
+                  const valid = goodReceiptLines.filter(
                     (item) =>
                       item.combinationId || item.quantity || item.purchasePrice,
                   );
                   console.log(form.getValues(), form.formState.errors);
                   // form.reset({
                   //   ...rest,
-                  //   purchaseOrderItems: valid.length
+                  //   goodReceiptLines: valid.length
                   //     ? valid
-                  //     : [purchaseOrderItemDefault],
+                  //     : [goodReceiptItemDefault],
                   // });
                   form
                     .handleSubmit(onSubmit)(e)

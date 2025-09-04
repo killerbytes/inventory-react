@@ -222,7 +222,7 @@ export default function SalesOrderDetails() {
                     Cancel Order
                   </DropdownMenuItem>
                 )}
-                {data?.status === ORDER_STATUS.PENDING && (
+                {data?.status === ORDER_STATUS.DRAFT && (
                   <>
                     <DropdownMenuItem
                       onClick={(e) => {

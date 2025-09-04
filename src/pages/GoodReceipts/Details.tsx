@@ -22,8 +22,8 @@ import {
 import {
   ApiErrorResponse,
   CancelOrder,
-  PurchaseOrder,
-  PurchaseOrderCreate,
+  GoodReceipt,
+  GoodReceiptCreate,
 } from "@/types";
 import {
   Ban,
@@ -36,13 +36,13 @@ import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
 import { CancelModal } from "../../components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import PendingOrderForm from "./Form/PendingOrderForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
-import { purchaseOrderCreateSchema } from "@/schemas";
 import { useForm, useWatch } from "react-hook-form";
-import { purchaseOrderServices } from "@/services";
+import { goodReceiptCreateSchema } from "@/schemas";
+import PendingOrderForm from "./Form/PendingForm";
 import ColorBadge from "@/components/ColorBadge";
+import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { getErrorMessage } from "@/lib/utils";
@@ -59,13 +59,13 @@ export default function Create() {
     dropdownMenu: false,
   });
 
-  const form = useForm<PurchaseOrderCreate>({
-    resolver: zodResolver(purchaseOrderCreateSchema),
+  const form = useForm<GoodReceiptCreate>({
+    resolver: zodResolver(goodReceiptCreateSchema),
   });
 
-  async function onSaveOrder(form: PurchaseOrderCreate) {
+  async function onSaveOrder(form: GoodReceiptCreate) {
     try {
-      await purchaseOrderServices.update(Number(id), {
+      await goodReceiptServices.update(Number(id), {
         ...form,
         status: data.status,
       });
@@ -77,15 +77,15 @@ export default function Create() {
     handleToggle({ dropdownMenu: false });
   }
 
-  async function onReceiveOrder(form: PurchaseOrderCreate) {
+  async function onReceiveOrder(form: GoodReceiptCreate) {
     try {
-      await purchaseOrderServices.update(Number(id), {
+      await goodReceiptServices.update(Number(id), {
         ...form,
         status: ORDER_STATUS.RECEIVED,
       });
 
       toast.success(`Purchase Order received`);
-      navigate(ROUTES.PURCHASE_ORDERS);
+      navigate(ROUTES.GOOD_RECEIPT);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       toast.error("Submission failed - " + apiError.message);
@@ -94,9 +94,9 @@ export default function Create() {
 
   async function onDeleteOrder() {
     try {
-      await purchaseOrderServices.delete(Number(id));
+      await goodReceiptServices.delete(Number(id));
       toast.success(`Purchase Order deleted successfully`);
-      navigate(ROUTES.PURCHASE_ORDERS);
+      navigate(ROUTES.GOOD_RECEIPT);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       toast.error("Submission failed - " + apiError.message);
@@ -105,27 +105,27 @@ export default function Create() {
 
   async function onCancelOrder(form: CancelOrder) {
     try {
-      await purchaseOrderServices.cancelOrder(Number(id), {
+      await goodReceiptServices.cancelOrder(Number(id), {
         ...form,
       });
       toast.success(`Purchase Order cancelled successfully`);
-      navigate(ROUTES.PURCHASE_ORDERS);
+      navigate(ROUTES.GOOD_RECEIPT);
     } catch (error) {
       const { message } = getErrorMessage(error as ApiErrorResponse);
       toast.error(`Submission failed, ${message}`);
     }
   }
 
-  async function onCompleteOrder(form: PurchaseOrder) {
+  async function onCompleteOrder(form: GoodReceipt) {
     console.log(form);
     try {
-      await purchaseOrderServices.update(Number(id), {
+      await goodReceiptServices.update(Number(id), {
         ...form,
         status: ORDER_STATUS.COMPLETED,
       });
 
       toast.success(`Purchase Order completed successfully`);
-      navigate(ROUTES.PURCHASE_ORDERS);
+      navigate(ROUTES.GOOD_RECEIPT);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       toast.error("Submission failed - " + apiError.message);
@@ -134,12 +134,12 @@ export default function Create() {
 
   const getData = useCallback(async () => {
     try {
-      const data = await purchaseOrderServices.get(Number(id));
+      const data = await goodReceiptServices.get(Number(id));
       form.reset(data);
     } catch (error) {
       const { message } = getErrorMessage(error as ApiErrorResponse);
       toast.error(message);
-      navigate(ROUTES.PURCHASE_ORDERS);
+      navigate(ROUTES.GOOD_RECEIPT);
     }
   }, [form, id, navigate]);
 
@@ -147,9 +147,9 @@ export default function Create() {
     getData();
   }, [getData]);
 
-  const data = useWatch<PurchaseOrder>({
+  const data = useWatch<GoodReceipt>({
     control: form.control,
-  }) as PurchaseOrder;
+  }) as GoodReceipt;
 
   return (
     <div className="flex flex-col gap-4">
@@ -158,7 +158,7 @@ export default function Create() {
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
-            {data?.purchaseOrderNumber}
+            {data?.goodReceiptNumber}
           </CardTitle>
           <CardAction className="flex gap-2">
             {data?.modeOfPayment === MODE_OF_PAYMENT.CHECK && (
@@ -205,7 +205,7 @@ export default function Create() {
                     Cancel Order
                   </DropdownMenuItem>
                 )}
-                {data?.status === ORDER_STATUS.PENDING && (
+                {data?.status === ORDER_STATUS.DRAFT && (
                   <>
                     <DropdownMenuItem
                       onClick={(e) => {
@@ -237,7 +237,7 @@ export default function Create() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          {data?.status === ORDER_STATUS.PENDING ? (
+          {data?.status === ORDER_STATUS.DRAFT ? (
             <>
               <PendingOrderForm form={form} />
               <div className="flex justify-end mt-auto mb-10">
@@ -302,9 +302,9 @@ export default function Create() {
           )}
         </CardContent>
       </Card>
-      {toggle.orderHistoryModal && data?.purchaseOrderStatusHistory && (
+      {toggle.orderHistoryModal && data?.goodReceiptStatusHistory && (
         <OrderHistoryModal
-          data={data.purchaseOrderStatusHistory}
+          data={data.goodReceiptStatusHistory}
           onClose={() => handleToggle({ orderHistoryModal: false })}
         />
       )}

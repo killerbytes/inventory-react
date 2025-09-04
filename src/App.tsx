@@ -1,15 +1,13 @@
-import InventoryTransactions from "./pages/Inventory/Transactions";
 import StockAdjustments from "./pages/Inventory/StockAdjustments";
-import PurchaseOrderDetails from "./pages/PurchaseOrders/Details";
+import GoodReceiptDetails from "./pages/GoodReceipts/Details";
+import GoodReceiptCreate from "./pages/GoodReceipts/Create";
 import { BrowserRouter, Routes, Route } from "react-router";
-import PurchaseCreate from "./pages/PurchaseOrders/Create";
 import SalesDetails from "./pages/SalesOrders/Details";
 import BreakPacks from "./pages/Inventory/BreakPacks";
 import ProductDetails from "./pages/Products/Details";
 import SalesCreate from "./pages/SalesOrders/Create";
 import Movements from "./pages/Inventory/Movements";
-import PurchaseOrders from "./pages/PurchaseOrders";
-import ProductEdit from "./pages/Products/Details";
+import GoodReceipts from "./pages/GoodReceipts";
 import SalesOrders from "./pages/SalesOrders";
 import { ROUTES } from "./utils/definitions";
 import Categories from "./pages/Categories";
@@ -87,27 +85,27 @@ function App() {
             }
           />
           <Route
-            path={ROUTES.PURCHASE_ORDERS_CREATE}
+            path={ROUTES.GOOD_RECEIPT_CREATE}
             element={
               <Layout>
-                <PurchaseCreate />
+                <GoodReceiptCreate />
               </Layout>
             }
           />
           <Route
-            path={`${ROUTES.PURCHASE_ORDERS}/:id`}
+            path={`${ROUTES.GOOD_RECEIPT}/:id`}
             element={
               <Layout>
-                <PurchaseOrderDetails />
+                <GoodReceiptDetails />
               </Layout>
             }
           />
 
           <Route
-            path={ROUTES.PURCHASE_ORDERS}
+            path={ROUTES.GOOD_RECEIPT}
             element={
               <Layout>
-                <PurchaseOrders />
+                <GoodReceipts />
               </Layout>
             }
           />

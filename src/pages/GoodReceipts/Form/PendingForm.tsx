@@ -6,8 +6,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ProductCombinations, PurchaseOrderCreate, Supplier } from "@/types";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { ProductCombinations, GoodReceiptCreate, Supplier } from "@/types";
 import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
 import { productCombinationServices, supplierServices } from "@/services";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
@@ -26,22 +26,22 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import { PurchaseOrderItem } from "@/types";
+import { GoodReceiptItem } from "@/types";
 import Select from "@/components/Select";
 import { Trash2 } from "lucide-react";
 import React from "react";
 
-export default function PendingOrderForm({
+export default function PendingForm({
   form,
 }: {
-  form: UseFormReturn<PurchaseOrderCreate>;
+  form: UseFormReturn<GoodReceiptCreate>;
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
   const productCombinationStore = useProductCombinationStore();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "purchaseOrderItems",
+    name: "goodReceiptLines",
     keyName: "fieldId",
   });
 
@@ -69,7 +69,7 @@ export default function PendingOrderForm({
     };
     getData();
   }, [productCombinationStore]);
-  const columns = React.useMemo<ColumnDef<PurchaseOrderItem>[]>(
+  const columns = React.useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
       {
         accessorKey: "index",
@@ -97,7 +97,7 @@ export default function PendingOrderForm({
         },
         cell: ({ row }) => (
           <Controller
-            name={`purchaseOrderItems.${row.index}.quantity`}
+            name={`goodReceiptLines.${row.index}.quantity`}
             control={form.control}
             render={({ field }) => <NumberInput {...field} />}
           />
@@ -114,7 +114,7 @@ export default function PendingOrderForm({
             <UnitColumn
               index={row.index}
               control={form.control}
-              name="purchaseOrderItems"
+              name="goodReceiptLines"
             />
           );
         },
@@ -126,13 +126,13 @@ export default function PendingOrderForm({
           return (
             <FormField
               control={form.control}
-              name={`purchaseOrderItems.${row.index}.combinationId`}
+              name={`goodReceiptLines.${row.index}.combinationId`}
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <ProductLookupInput
                       ariaInvalid={Boolean(
-                        form.formState.errors?.purchaseOrderItems?.[row.index]
+                        form.formState.errors?.goodReceiptLines?.[row.index]
                           ?.combinationId,
                       )}
                       items={
@@ -140,11 +140,11 @@ export default function PendingOrderForm({
                       }
                       form={form}
                       {...field}
-                      name="purchaseOrderItems"
+                      name="goodReceiptLines"
                       onChange={(value) => {
                         field.onChange(value.id);
                         form.setValue(
-                          `purchaseOrderItems.${row.index}.purchasePrice`,
+                          `goodReceiptLines.${row.index}.purchasePrice`,
                           value.price,
                         );
 
@@ -157,7 +157,7 @@ export default function PendingOrderForm({
                             }
                           } else {
                             form.setFocus(
-                              `purchaseOrderItems.${row.index + 1}.quantity`,
+                              `goodReceiptLines.${row.index + 1}.quantity`,
                             );
                           }
                         }, 0);
@@ -219,7 +219,7 @@ export default function PendingOrderForm({
         },
         cell: ({ row }) => (
           <Controller
-            name={`purchaseOrderItems.${row.index}.discount`}
+            name={`goodReceiptLines.${row.index}.discount`}
             control={form.control}
             render={({ field }) => <NumberInput {...field} type="currency" />}
           />
@@ -233,7 +233,7 @@ export default function PendingOrderForm({
         },
         cell: ({ row }) => (
           <Controller
-            name={`purchaseOrderItems.${row.index}.discountNote`}
+            name={`goodReceiptLines.${row.index}.discountNote`}
             control={form.control}
             render={({ field }) => (
               <Input
@@ -253,7 +253,7 @@ export default function PendingOrderForm({
         cell: ({ row }) => (
           <FormField
             control={form.control}
-            name={`purchaseOrderItems.${row.index}.purchasePrice`}
+            name={`goodReceiptLines.${row.index}.purchasePrice`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -279,7 +279,7 @@ export default function PendingOrderForm({
           <AmountColumn
             index={row.index}
             control={form.control}
-            name="purchaseOrderItems"
+            name="goodReceiptLines"
           />
         ),
       },
@@ -416,7 +416,7 @@ export default function PendingOrderForm({
 
         <FormField
           control={form.control}
-          name="purchaseOrderItems"
+          name="goodReceiptLines"
           render={() => (
             <FormItem className="w-full">
               <FormControl>
@@ -424,7 +424,7 @@ export default function PendingOrderForm({
                   fields={fields}
                   form={form}
                   columns={columns}
-                  name="purchaseOrderItems"
+                  name="goodReceiptLines"
                   append={() =>
                     append({
                       combinationId: null,

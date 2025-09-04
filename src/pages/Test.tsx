@@ -21,17 +21,13 @@ import {
   getCoreRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import {
-  inventoryServices,
-  PurchaseOrder,
-  PurchaseOrderItem,
-} from "@/services";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { inventoryServices, GoodReceipt, GoodReceiptItem } from "@/services";
 import { createColumnHelper } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { purchaseOrderSchema } from "@/schemas";
 import { Input } from "@/components/ui/input";
+import { goodReceiptSchema } from "@/schemas";
 import Select from "@/components/Select";
 import React, { useMemo } from "react";
 
@@ -45,16 +41,16 @@ export default function Test() {
     getData();
   }, []);
 
-  const form = useForm<PurchaseOrder>({
-    resolver: zodResolver(purchaseOrderSchema),
+  const form = useForm<GoodReceipt>({
+    resolver: zodResolver(goodReceiptSchema),
     defaultValues: {
-      purchaseOrderNumber: "123123123",
+      goodReceiptNumber: "123123123",
       supplierId: 1,
       modeOfPayment: MODE_OF_PAYMENT_OPTIONS[0].value,
       orderDate: new Date().toISOString(),
       deliveryDate: new Date().toISOString(),
 
-      purchaseOrderItems: [
+      goodReceiptLines: [
         { productId: 1, unit: "BOX", unitPrice: 1, quantity: 20 },
       ],
     },
@@ -68,14 +64,14 @@ export default function Test() {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "purchaseOrderItems",
+    name: "goodReceiptLines",
   });
 
-  const onSubmit = (values: PurchaseOrder) => {
+  const onSubmit = (values: GoodReceipt) => {
     console.log(values);
   };
 
-  const columnHelper = createColumnHelper<PurchaseOrderItem>();
+  const columnHelper = createColumnHelper<GoodReceiptItem>();
 
   const columns = useMemo(
     () => [
@@ -88,7 +84,7 @@ export default function Test() {
         header: "Unit Price",
         cell: ({ row }) => (
           <input
-            {...register(`purchaseOrderItems.${row.index}.unitPrice`, {
+            {...register(`goodReceiptLines.${row.index}.unitPrice`, {
               valueAsNumber: true,
             })}
             className="border px-2"
@@ -102,7 +98,7 @@ export default function Test() {
 
           return (
             <Controller
-              name={`purchaseOrderItems.${row.index}.unit`}
+              name={`goodReceiptLines.${row.index}.unit`}
               control={control}
               render={({ field }) => (
                 <Select
@@ -116,7 +112,7 @@ export default function Test() {
         },
         xxxcell: ({ row }) => (
           <Select
-            {...register(`purchaseOrderItems.${row.index}.unit`)}
+            {...register(`goodReceiptLines.${row.index}.unit`)}
             value={row.getValue("unit")}
           >
             {/* <SelectTrigger className="w-[200px]">
@@ -130,7 +126,7 @@ export default function Test() {
           </Select>
 
           // <select
-          //   {...register(`purchaseOrderItems.${row.index}.unit`)}
+          //   {...register(`goodReceiptLines.${row.index}.unit`)}
           //   onChange={(e) => console.log(e.target.name)}
           //   className="border px-2"
           // >
@@ -148,7 +144,7 @@ export default function Test() {
         cell: ({ row }) => (
           <input
             // type="number"
-            {...register(`purchaseOrderItems.${row.index}.quantity`, {
+            {...register(`goodReceiptLines.${row.index}.quantity`, {
               valueAsNumber: true,
             })}
             className="border px-2 w-16"
@@ -173,7 +169,7 @@ export default function Test() {
 
   const data = useWatch({
     control,
-    name: "purchaseOrderItems",
+    name: "goodReceiptLines",
   });
 
   const table = useReactTable({
