@@ -9,7 +9,7 @@ import {
   productCombinationsSchema,
   productSchema,
   goodReceiptCreateSchema,
-  goodReceiptItemSchema,
+  goodReceiptLineSchema,
   goodReceiptSchema,
   salesOrderCreateSchema,
   salesOrderItemSchema,
@@ -21,6 +21,10 @@ import {
   userSchema,
   variantTypesSchema,
   variantValuesSchema,
+  invoiceSchema,
+  paymentSchema,
+  invoiceLineSchema,
+  paymentApplicationSchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -86,7 +90,7 @@ type Supplier = z.infer<typeof supplierSchema>;
 type Customer = z.infer<typeof customerSchema>;
 type GoodReceipt = z.infer<typeof goodReceiptSchema>;
 type GoodReceiptCreate = z.infer<typeof goodReceiptCreateSchema>;
-type GoodReceiptItem = z.infer<typeof goodReceiptItemSchema>;
+type GoodReceiptItem = z.infer<typeof goodReceiptLineSchema>;
 type CancelOrder = z.infer<typeof cancelOrderSchema>;
 type SalesOrder = z.infer<typeof salesOrderSchema>;
 type SalesOrderCreate = z.infer<typeof salesOrderCreateSchema>;
@@ -99,6 +103,10 @@ type BreakPack = z.infer<typeof breakPackSchema>;
 type StatusHistory = z.infer<typeof statusHistorySchema>;
 type InventoryMovement = z.infer<typeof inventoryMovementSchema>;
 type StockAdjustment = z.infer<typeof stockAdjustmentSchema>;
+type Invoice = z.infer<typeof invoiceSchema>;
+type InvoiceLine = z.infer<typeof invoiceLineSchema>;
+type Payment = z.infer<typeof paymentSchema>;
+type PaymentApplication = z.infer<typeof paymentApplicationSchema>;
 
 export type {
   User,
@@ -123,4 +131,8 @@ export type {
   StatusHistory,
   InventoryMovement,
   StockAdjustment,
+  Invoice,
+  InvoiceLine,
+  Payment,
+  PaymentApplication,
 };

@@ -172,8 +172,8 @@ export const goodReceiptLineSchema = z.object({
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
-  purchasePrice: z.coerce.number().min(1, {
-    message: "Unit Price must be at least 1.",
+  purchasePrice: z.coerce.number().min(0, {
+    message: "Unit Price must be at least 0.",
   }),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),
@@ -433,4 +433,40 @@ export const stockAdjustmentSchema = z.object({
   notes: z.string().nullish(),
   createdAt: z.string().nullish(),
   createdBy: z.number().nullish(),
+});
+export const invoiceLineSchema = z.object({
+  amount: z.number(),
+  goodReceiptId: z.number(),
+  goodReceipt: goodReceiptSchema.nullish(),
+});
+
+export const invoiceSchema = z.object({
+  id: z.number().optional(),
+  supplierId: z.number(),
+  invoiceNumber: z.string(),
+  invoiceDate: z.string(),
+  dueDate: z.string(),
+  status: z.string(),
+  totalAmount: z.string().optional(),
+  notes: z.string().nullish(),
+  invoiceLines: z.array(invoiceLineSchema),
+});
+
+export const paymentApplicationSchema = z.object({
+  id: z.number().optional(),
+  invoiceId: z.number(),
+  amountApplied: z.number(),
+});
+
+export const paymentSchema = z.object({
+  id: z.number().optional(),
+  supplieId: z.number(),
+  referenceNo: z.string().nullish(),
+  paymentDate: z.string(),
+  amount: z.string().optional(),
+  notes: z.string().nullish(),
+  changedBy: z.number().nullish(),
+  applications: z.array(paymentApplicationSchema).min(1, {
+    message: "At least one product is required.",
+  }),
 });

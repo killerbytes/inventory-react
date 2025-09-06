@@ -1,3 +1,4 @@
+// Add 'React' to the import for forwardRef and useImperativeHandle
 import {
   flexRender,
   getCoreRowModel,
@@ -10,9 +11,6 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { Trash2 } from "lucide-react";
-import * as React from "react";
-
 import {
   Table,
   TableBody,
@@ -22,8 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
+import * as React from "react"; // Ensure React is imported
 
 type DataTableProps<T> = {
   data: T[];
@@ -38,6 +36,8 @@ type DataTableProps<T> = {
   showHeader?: boolean;
   showFooter?: boolean;
   renderFooter?: (data: T[]) => React.ReactNode;
+  onSelectionChange?: (selectedItems: T[]) => void;
+  defaultSelected?: T[];
 };
 
 const defaultRenderFooter = (data: any[]) => {
@@ -60,7 +60,11 @@ const defaultRenderFooter = (data: any[]) => {
   );
 };
 
-function DataTable<T>(props) {
+// Wrap the component with React.forwardRef and add `ref` to the arguments
+const DataTable = React.forwardRef(function DataTable<T>(
+  props: DataTableProps<T>,
+  ref: React.ForwardedRef<any>, // Define the ref type
+) {
   const {
     data,
     columns,
@@ -74,7 +78,9 @@ function DataTable<T>(props) {
     showHeader = true,
     showFooter = false,
     renderFooter = defaultRenderFooter,
-  }: DataTableProps<T> = props;
+    onSelectionChange,
+    defaultSelected = [],
+  } = props;
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -82,13 +88,21 @@ function DataTable<T>(props) {
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [rowSelection, setRowSelection] = React.useState(() => {
+    const initialSelectedRows = defaultSelected?.reduce((acc, row) => {
+      acc[row.id] = true;
+      return acc;
+    }, {});
+    return initialSelectedRows;
+  });
 
   const table = useReactTable({
     data,
     columns,
     defaultColumn,
     meta,
+    getRowId: (row) => row.id,
+
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -106,26 +120,21 @@ function DataTable<T>(props) {
     manualPagination: true,
   });
 
-  const handleRemoveSelected = () => {
-    const filteredData = table
-      .getFilteredRowModel()
-      .rows.filter((row) => !row.getIsSelected())
-      .map((row) => row.original);
-    if (onUpdate) {
-      onUpdate(filteredData);
+  React.useEffect(() => {
+    // Only call the callback if it's provided as a prop
+    if (onSelectionChange) {
+      const selectedItems = table
+        .getFilteredSelectedRowModel()
+        .rows.map((row) => row.original);
+      onSelectionChange(selectedItems);
     }
-    setRowSelection({});
-  };
+  }, [onSelectionChange, rowSelection, table]); // A
+
+  // Use `useImperativeHandle` to expose the table instance
+  React.useImperativeHandle(ref, () => table, [table]);
 
   return (
     <div className={cx("w-full overflow-auto", className)}>
-      {table.getSelectedRowModel().rows.length !== 0 && (
-        <div className="flex items-center py-4">
-          <Button onClick={handleRemoveSelected} variant="outline">
-            <Trash2 />
-          </Button>
-        </div>
-      )}
       <div
         className={cx(
           "rounded-md border overflow-hidden",
@@ -198,6 +207,6 @@ function DataTable<T>(props) {
       </div>
     </div>
   );
-}
+});
 
 export { DataTable };

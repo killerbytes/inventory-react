@@ -1,17 +1,16 @@
 import {
-  MODE_OF_PAYMENT_COLOR,
-  ORDER_STATUS_OPTIONS,
-  PAGINATION,
-  ROUTES,
-  STATUS_COLOR,
-} from "@/utils/definitions";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  ORDER_STATUS_OPTIONS,
+  PAGINATION,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";

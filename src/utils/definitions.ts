@@ -19,6 +19,12 @@ export const ROUTES = {
   INVENTORY_MOVEMENTS: "/inventory/movements",
   STOCK_ADJUSTMENTS: "/stock-adjustments",
   BREAK_PACKS: "/break-packs",
+  INVOICES: "/invoices",
+  INVOICE_CREATE: "/invoices/new",
+  INVOICE_DETAILS: "/invoices/:id",
+  PAYMENTS: "/payments",
+  PAYMENT_CREATE: "/payments/new",
+  PAYMENT_DETAILS: "/payments/:id",
 };
 
 export const ORDER_TYPE = {
@@ -187,4 +193,11 @@ export const STOCK_ADJUSTMENT_TYPE_COLOR = {
   SUPPLIER_BONUS: "bg-green-500 text-white",
   RETURN_TO_STOCK: "bg-green-500 text-white",
   OTHER: "bg-gray-500 text-white",
+};
+
+export const INVOICE_STATUS = {
+  DRAFT: "DRAFT",
+  POSTED: "POSTED",
+  PARTIALLY_PAID: "PARTIALLY_PAID",
+  PAID: "PAID",
 };
