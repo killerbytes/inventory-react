@@ -19,6 +19,12 @@ export const ROUTES = {
   INVENTORY_MOVEMENTS: "/inventory/movements",
   STOCK_ADJUSTMENTS: "/stock-adjustments",
   BREAK_PACKS: "/break-packs",
+  INVOICES: "/invoices",
+  INVOICE_CREATE: "/invoices/new",
+  INVOICE_DETAILS: "/invoices/:id",
+  PAYMENTS: "/payments",
+  PAYMENT_CREATE: "/payments/new",
+  PAYMENT_DETAILS: "/payments/:id",
 };
 
 export const ORDER_TYPE = {
@@ -54,7 +60,10 @@ export const INVENTORY_MOVEMENT_TYPE_COLOR = {
 export const STATUS_COLOR = {
   DRAFT: "text-gray-600 border-gray-600 bg-gray-100",
   RECEIVED: "text-orange-600 border-orange-600 bg-orange-100",
+  POSTED: "text-orange-600 border-orange-600 bg-orange-100",
+  PARTIALLY_PAID: "text-orange-600 border-orange-600 bg-orange-100",
   COMPLETED: "text-green-600 border-green-600 bg-green-100",
+  PAID: "text-green-600 border-green-600 bg-green-100",
   CANCELLED: "text-red-600 border-red-600 bg-red-100",
   CASH: "text-green-400 border-green-400",
   CHECK: "text-yellow-500 border-yellow-500",
@@ -187,4 +196,11 @@ export const STOCK_ADJUSTMENT_TYPE_COLOR = {
   SUPPLIER_BONUS: "bg-green-500 text-white",
   RETURN_TO_STOCK: "bg-green-500 text-white",
   OTHER: "bg-gray-500 text-white",
+};
+
+export const INVOICE_STATUS = {
+  DRAFT: "DRAFT",
+  POSTED: "POSTED",
+  PARTIALLY_PAID: "PARTIALLY_PAID",
+  PAID: "PAID",
 };

@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import SalesDetails from "./pages/SalesOrders/Details";
 import BreakPacks from "./pages/Inventory/BreakPacks";
 import ProductDetails from "./pages/Products/Details";
+import InvoiceDetails from "./pages/Invoices/Details";
 import SalesCreate from "./pages/SalesOrders/Create";
 import Movements from "./pages/Inventory/Movements";
 import GoodReceipts from "./pages/GoodReceipts";
@@ -15,6 +16,8 @@ import Suppliers from "./pages/Suppliers";
 import Customers from "./pages/Customers";
 import Layout from "./components/Layout";
 import Products from "./pages/Products";
+import Payments from "./pages/Payments";
+import Invoices from "./pages/Invoices";
 import Users from "./pages/Users";
 import Login from "./pages/Login";
 import Test from "./pages/Test";
@@ -156,6 +159,30 @@ function App() {
             element={
               <Layout>
                 <SalesOrders />
+              </Layout>
+            }
+          />
+          <Route
+            path={`${ROUTES.INVOICE_DETAILS}`}
+            element={
+              <Layout>
+                <InvoiceDetails />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.INVOICES}
+            element={
+              <Layout>
+                <Invoices />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.PAYMENTS}
+            element={
+              <Layout>
+                <Payments />
               </Layout>
             }
           />

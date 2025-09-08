@@ -172,8 +172,8 @@ export const goodReceiptLineSchema = z.object({
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
-  purchasePrice: z.coerce.number().min(1, {
-    message: "Unit Price must be at least 1.",
+  purchasePrice: z.coerce.number().min(0, {
+    message: "Unit Price must be at least 0.",
   }),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),
@@ -209,61 +209,21 @@ const goodReceiptBaseSchema = z.object({
     .min(1, { message: "Supplier is required." }),
   internalNotes: z.string().nullish(),
   referenceNo: z.string().nullish(),
+  totalAmount: z.string().optional(),
   goodReceiptLines: z.array(goodReceiptLineSchema).min(1, {
     message: "At least one product is required.",
   }),
   receiptDate: z.string(),
   goodReceiptStatusHistory: z.array(statusHistorySchema).nullish(),
 });
-export const goodReceiptCreateSchema = goodReceiptBaseSchema.superRefine(() => {
-  // if (
-  //   data.status === ORDER_STATUS.DRAFT &&
-  //   data.goodReceiptLines?.length === 0
-  // ) {
-  //   ctx.addIssue({
-  //     path: ["goodReceiptLines"],
-  //     code: z.ZodIssueCode.custom,
-  //     message: "Purchase Order Items are required",
-  //   });
-  // }
-  // if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
-  //   ctx.addIssue({
-  //     path: ["checkNumber"],
-  //     code: z.ZodIssueCode.custom,
-  //     message: "Check number is required when payment is by check",
-  //   });
-  //   ctx.addIssue({
-  //     path: ["dueDate"],
-  //     code: z.ZodIssueCode.custom,
-  //     message: "Due date is required when payment is by check",
-  //   });
-  // }
-});
+export const goodReceiptCreateSchema = goodReceiptBaseSchema.superRefine(
+  () => {},
+);
 
 export const goodReceiptSchema = goodReceiptBaseSchema
   .extend({
-    // id: z.number().optional(),
-    // goodReceiptNumber: z
-    //   .string({
-    //     required_error: "PO number is required",
-    //   })
-    //   .min(2, { message: "PO number is required" }),
-    // supplierId: z.coerce
-    //   .number({
-    //     required_error: "Supplier is required",
-    //     invalid_type_error: "Supplier is required",
-    //   })
-    //   .min(1, { message: "Supplier is required." }),
-    // internalNotes: z.string().nullish(),
-    // notes: z.string().nullish(),
-    // goodReceiptLines: z
-    //   .array(goodReceiptItemSchema)
-    //   .min(1, {
-    //     message: "At least one product is required.",
-    //   })
-    //   .nullish(),
     status: z.string(),
-    totalAmount: z.string().optional(),
+
     supplier: z.any(),
     // deliveryDate: z.string(),
     // dueDate: z.string().nullish(),
@@ -433,4 +393,53 @@ export const stockAdjustmentSchema = z.object({
   notes: z.string().nullish(),
   createdAt: z.string().nullish(),
   createdBy: z.number().nullish(),
+});
+export const invoiceLineSchema = z.object({
+  amount: z.number(),
+  goodReceiptId: z.number(),
+  goodReceipt: goodReceiptSchema.nullish(),
+});
+
+export const invoiceSchema = z.object({
+  id: z.number().optional(),
+  supplierId: z.number(),
+  invoiceNumber: z.string(),
+  invoiceDate: z.string(),
+  dueDate: z.string(),
+  status: z.string(),
+  totalAmount: z.coerce.number().nullish(),
+  notes: z.string().nullish(),
+  invoiceLines: z.array(invoiceLineSchema),
+});
+
+export const invoiceFormSchema = z.object({
+  id: z.number().optional(),
+  supplierId: z.number().min(1, { message: "Supplier is required." }),
+  invoiceNumber: z.string().min(1, { message: "Invoice Number is required." }),
+  invoiceDate: z.string(),
+  dueDate: z.string(),
+  status: z.string(),
+  notes: z.string().nullish(),
+  gr: z.array(goodReceiptSchema).min(1, {
+    message: "At least one Good Receipt is required.",
+  }),
+});
+
+export const paymentApplicationSchema = z.object({
+  id: z.number().optional(),
+  invoiceId: z.number(),
+  amountApplied: z.coerce.number().nullish(),
+});
+
+export const paymentSchema = z.object({
+  id: z.number().optional(),
+  supplierId: z.number(),
+  referenceNo: z.string().nullish(),
+  paymentDate: z.string(),
+  amount: z.coerce.number().nullish(),
+  notes: z.string().nullish(),
+  changedBy: z.number().nullish(),
+  applications: z.array(paymentApplicationSchema).min(1, {
+    message: "At least one product is required.",
+  }),
 });

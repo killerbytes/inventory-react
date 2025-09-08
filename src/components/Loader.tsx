@@ -1,0 +1,16 @@
+import { cx } from "class-variance-authority";
+import { LoaderPinwheel } from "lucide-react";
+
+export default function Loader({ isLoading }: { isLoading: boolean }) {
+  return (
+    <div
+      className={cx(
+        "h-full w-full bg-white absolute left-0 top-0 opacity-90 items-center justify-center",
+        isLoading && "flex",
+        !isLoading && "hidden",
+      )}
+    >
+      <LoaderPinwheel className="animate-spin text-primary" size="30" />
+    </div>
+  );
+}

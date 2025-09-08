@@ -1,16 +1,4 @@
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "./ui/sidebar";
-import {
   BanknoteArrowDown,
   BanknoteArrowUp,
   Home,
@@ -24,7 +12,21 @@ import {
   BookType,
   PackageOpen,
   Diff,
+  Banknote,
+  CreditCard,
 } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "./ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,9 +58,19 @@ const items = [
     url: ROUTES.SALES_ORDERS,
     icon: BanknoteArrowUp,
   },
+  {
+    title: "Invoices",
+    url: ROUTES.INVOICES,
+    icon: CreditCard,
+  },
 ];
 
 const reports = [
+  {
+    title: "Payments",
+    url: ROUTES.PAYMENTS,
+    icon: Banknote,
+  },
   {
     title: "Inventory Movements",
     url: ROUTES.INVENTORY_MOVEMENTS,

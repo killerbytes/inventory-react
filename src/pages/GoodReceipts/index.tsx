@@ -1,17 +1,16 @@
 import {
-  MODE_OF_PAYMENT_COLOR,
-  ORDER_STATUS_OPTIONS,
-  PAGINATION,
-  ROUTES,
-  STATUS_COLOR,
-} from "@/utils/definitions";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  ORDER_STATUS_OPTIONS,
+  PAGINATION,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
@@ -232,7 +231,7 @@ export default function GoodReceipts() {
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
-            Purchase Orders
+            Good Receipts
           </CardTitle>
           <CardAction>
             <Link to={ROUTES.GOOD_RECEIPT_CREATE}>
