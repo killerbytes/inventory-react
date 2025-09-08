@@ -1,12 +1,4 @@
 import {
-  BUTTON_COLOR,
-  MODE_OF_PAYMENT,
-  MODE_OF_PAYMENT_COLOR,
-  ORDER_STATUS,
-  ROUTES,
-  STATUS_COLOR,
-} from "@/utils/definitions";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -25,6 +17,12 @@ import {
   GoodReceipt,
   GoodReceiptCreate,
 } from "@/types";
+import {
+  BUTTON_COLOR,
+  ORDER_STATUS,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
 import {
   Ban,
   ClipboardList,
@@ -116,22 +114,6 @@ export default function Create() {
     }
   }
 
-  async function onCompleteOrder(form: GoodReceipt) {
-    console.log(form);
-    try {
-      await goodReceiptServices.update(Number(id), {
-        ...form,
-        status: ORDER_STATUS.COMPLETED,
-      });
-
-      toast.success(`Purchase Order completed successfully`);
-      navigate(ROUTES.GOOD_RECEIPT);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Submission failed - " + apiError.message);
-    }
-  }
-
   const getData = useCallback(async () => {
     try {
       const data = await goodReceiptServices.get(Number(id));
@@ -158,20 +140,18 @@ export default function Create() {
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
-            {data?.goodReceiptNumber}
+            Good Receipt Details
           </CardTitle>
           <CardAction className="flex gap-2">
-            {data?.modeOfPayment === MODE_OF_PAYMENT.CHECK && (
-              <>
-                <ColorBadge colorMap={MODE_OF_PAYMENT_COLOR}>
-                  {String(data?.modeOfPayment)}
-                </ColorBadge>
-              </>
-            )}
             <ColorBadge colorMap={STATUS_COLOR}>
               {String(data?.status)}
             </ColorBadge>
-            <DropdownMenu open={toggle.dropdownMenu}>
+            <DropdownMenu
+              open={toggle.dropdownMenu}
+              onOpenChange={(open) => {
+                handleToggle({ dropdownMenu: open });
+              }}
+            >
               <DropdownMenuTrigger
                 asChild
                 onClick={() => handleToggle({ dropdownMenu: true })}
@@ -275,29 +255,6 @@ export default function Create() {
                   }}
                 />
               )}
-              <div className="flex justify-end">
-                {data?.status === ORDER_STATUS.RECEIVED && (
-                  <ConfirmDialog
-                    title="Complete Order"
-                    onConfirm={(e) => {
-                      e.preventDefault();
-                      console.log(form.formState.errors);
-                      form
-                        .handleSubmit(onCompleteOrder)(e)
-                        .catch((error) => {
-                          console.error("Form submission error:", error);
-                        });
-                    }}
-                  >
-                    <Button
-                      variant="outline"
-                      className={cx("shadow", BUTTON_COLOR["COMPLETED"])}
-                    >
-                      Complete Order
-                    </Button>
-                  </ConfirmDialog>
-                )}
-              </div>
             </>
           )}
         </CardContent>

@@ -25,6 +25,7 @@ import {
   paymentSchema,
   invoiceLineSchema,
   paymentApplicationSchema,
+  invoiceFormSchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -105,6 +106,7 @@ type InventoryMovement = z.infer<typeof inventoryMovementSchema>;
 type StockAdjustment = z.infer<typeof stockAdjustmentSchema>;
 type Invoice = z.infer<typeof invoiceSchema>;
 type InvoiceLine = z.infer<typeof invoiceLineSchema>;
+type invoiceForm = z.infer<typeof invoiceFormSchema>;
 type Payment = z.infer<typeof paymentSchema>;
 type PaymentApplication = z.infer<typeof paymentApplicationSchema>;
 
@@ -132,6 +134,7 @@ export type {
   InventoryMovement,
   StockAdjustment,
   Invoice,
+  invoiceForm,
   InvoiceLine,
   Payment,
   PaymentApplication,

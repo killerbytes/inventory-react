@@ -5,29 +5,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Customer,
+  Invoice,
+  PaginatedResponse,
+  Payment,
+  PaymentApplication,
+} from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { Customer, Invoice, PaginatedResponse } from "@/types";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
+import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { invoiceServices } from "@/services";
-import { useNavigate } from "react-router";
+import { paymentServices } from "@/services";
+import { PcCase, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
-import InvoiceModal from "./InvoiceModal";
 import Pager from "@/components/Pager";
-import { Plus } from "lucide-react";
 import React from "react";
 
-export default function Invoices() {
+export default function Payments() {
   const navigate = useNavigate();
-  const [toggle, handleToggle] = useToggle({
-    addInvoiceModal: false,
-  });
+  const [toggle, handleToggle] = useToggle({});
   const [selected, setSelected] = React.useState();
   const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
@@ -49,7 +52,7 @@ export default function Invoices() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const data = await invoiceServices.getAll(filter);
+      const data = await paymentServices.getAll(filter);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -72,40 +75,37 @@ export default function Invoices() {
   const columns: ColumnDef<Invoice>[] = React.useMemo(
     () => [
       {
-        accessorKey: "invoiceNumber",
+        accessorKey: "payment.referenceNo",
+        header: "Reference No",
+      },
+      {
+        accessorKey: "invoice",
         header: "Invoice Number",
-      },
-      {
-        accessorKey: "supplier.name",
-        header: "Supplier",
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
         cell: ({ row }) => {
-          const status = row.original.status;
+          const invoice = row.getValue("invoice") as Invoice;
           return (
-            <ColorBadge colorMap={STATUS_COLOR}>{String(status)}</ColorBadge>
+            <Link to={`${ROUTES.INVOICES}/${invoice.id}`}>
+              {invoice.invoiceNumber}
+            </Link>
           );
         },
       },
-
       {
-        accessorKey: "invoiceDate",
-        cell: ({ row }) => formatDate(row.getValue("invoiceDate")),
+        accessorKey: "payment.supplier.name",
+        header: "Supplier",
       },
       {
-        accessorKey: "dueDate",
-        cell: ({ row }) => formatDate(row.getValue("dueDate")),
+        accessorKey: "payment.user.username",
+        header: "Changed By",
       },
       {
-        accessorKey: "totalAmount",
-        header: () => "Total Amount",
+        accessorKey: "amountApplied",
+        header: () => "Amount",
         meta: {
           headerClassName: "text-right",
           className: "text-right",
         },
-        cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
+        cell: ({ row }) => formatCurrency(row.getValue("amountApplied")),
       },
     ],
     [],
@@ -117,7 +117,7 @@ export default function Invoices() {
         <CardTitle className="flex items-center gap-2">
           <SidebarTrigger />
           <div className="bg-border h-5 w-[1px]"></div>
-          Invoices
+          Payments
         </CardTitle>
         <CardAction>
           <Button
@@ -151,29 +151,19 @@ export default function Invoices() {
         ) : (
           <>
             <DataTable
-              onRowClick={(item: Invoice) => {
-                if (item.status === "DRAFT") {
-                  handleToggle({
-                    addInvoiceModal: true,
-                  });
-                  setSelected(item);
-                } else {
-                  navigate(`${ROUTES.INVOICES}/${item.id}`);
-                }
-              }}
               data={data.data || []}
               columns={columns}
               showFooter={true}
-              renderFooter={(rows: Invoice[]) => {
+              renderFooter={(rows: PaymentApplication[]) => {
                 return (
                   <TableRow>
-                    <TableCell className="font-medium text-right" colSpan={5}>
+                    <TableCell colSpan={4} className="font-semibold">
                       Total
                     </TableCell>
                     <TableCell className="text-right font-semibold">
                       {formatCurrency(
                         rows.reduce(
-                          (acc, curr) => acc + Number(curr.totalAmount),
+                          (sum, row) => sum + Number(row.amountApplied),
                           0,
                         ),
                       )}

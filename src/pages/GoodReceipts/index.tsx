@@ -231,7 +231,7 @@ export default function GoodReceipts() {
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
-            Purchase Orders
+            Good Receipts
           </CardTitle>
           <CardAction>
             <Link to={ROUTES.GOOD_RECEIPT_CREATE}>

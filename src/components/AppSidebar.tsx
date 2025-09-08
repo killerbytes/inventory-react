@@ -13,6 +13,7 @@ import {
   PackageOpen,
   Diff,
   Banknote,
+  CreditCard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -60,11 +61,16 @@ const items = [
   {
     title: "Invoices",
     url: ROUTES.INVOICES,
-    icon: Banknote,
+    icon: CreditCard,
   },
 ];
 
 const reports = [
+  {
+    title: "Payments",
+    url: ROUTES.PAYMENTS,
+    icon: Banknote,
+  },
   {
     title: "Inventory Movements",
     url: ROUTES.INVENTORY_MOVEMENTS,

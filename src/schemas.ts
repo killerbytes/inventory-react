@@ -408,19 +408,22 @@ export const invoiceSchema = z.object({
   dueDate: z.string(),
   status: z.string(),
   totalAmount: z.coerce.number().nullish(),
-
   notes: z.string().nullish(),
   invoiceLines: z.array(invoiceLineSchema),
 });
 
-export const invoiceFormSchema = invoiceSchema
-  .extend({
-    gr: z.array(goodReceiptBaseSchema.omit({ goodReceiptLines: true })),
-  })
-  .partial()
-  .omit({
-    invoiceLines: true,
-  });
+export const invoiceFormSchema = z.object({
+  id: z.number().optional(),
+  supplierId: z.number().min(1, { message: "Supplier is required." }),
+  invoiceNumber: z.string().min(1, { message: "Invoice Number is required." }),
+  invoiceDate: z.string(),
+  dueDate: z.string(),
+  status: z.string(),
+  notes: z.string().nullish(),
+  gr: z.array(goodReceiptSchema).min(1, {
+    message: "At least one Good Receipt is required.",
+  }),
+});
 
 export const paymentApplicationSchema = z.object({
   id: z.number().optional(),

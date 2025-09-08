@@ -21,22 +21,24 @@ import {
 } from "@/utils/definitions";
 import { Ban, EllipsisVertical, Save, Trash2 } from "lucide-react";
 import { ApiErrorResponse, Invoice, InvoiceLine } from "@/types";
+import { formatCurrency, formatDate } from "@/utils/formatters";
 import { invoiceFormSchema, invoiceSchema } from "@/schemas";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { Link, useNavigate, useParams } from "react-router";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useParams } from "react-router";
-import InvoiceLineTable from "./InvoiceLineTable";
+import { DataTable } from "@/components/DataTable";
+import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { invoiceServices } from "@/services";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import Loader from "@/components/Loader";
 import PaymentTab from "./PaymentTab";
 import { toast } from "sonner";
-import Static from "./Static";
-import Draft from "./Draft";
 import React from "react";
 import { z } from "zod";
 
@@ -60,13 +62,7 @@ export default function Details() {
   const getData = async (id: number) => {
     try {
       const data = await invoiceServices.get(id);
-      const gr = data.invoiceLines.map((item: InvoiceLine) => ({
-        ...item.goodReceipt,
-      }));
-      setData({
-        ...data,
-        gr,
-      });
+      setData(data);
       // form.reset({ ...data, invoiceLines });
     } catch (error) {
       const apiError = error as ApiErrorResponse;
@@ -121,6 +117,49 @@ export default function Details() {
     }
   };
 
+  const remainingBalance = data?.applications.reduce((acc, val) => {
+    return acc + parseFloat(val.amountApplied ?? "0");
+  }, 0);
+
+  const columns: ColumnDef<InvoiceLine>[] = React.useMemo(
+    () => [
+      {
+        accessorKey: "goodReceipt.referenceNo",
+        header: "Reference",
+        cell: ({ row }) => (
+          <Link to={`${ROUTES.GOOD_RECEIPT}/${row.original.goodReceipt?.id}`}>
+            {row.original.goodReceipt?.referenceNo}
+          </Link>
+        ),
+      },
+      // {
+      //   accessorKey: "goodReceipt.status",
+      //   header: "Status",
+      //   cell: ({ row }) => (
+      //     <ColorBadge colorMap={STATUS_COLOR}>
+      //       {String(row.original.goodReceipt?.status)}
+      //     </ColorBadge>
+      //   ),
+      // },
+
+      {
+        header: "Receipt Date",
+        accessorKey: "goodReceipt.receiptDate",
+        cell: ({ row }) =>
+          formatDate(String(row.original.goodReceipt?.receiptDate)),
+      },
+      {
+        accessorKey: "amount",
+        header: () => "Amount",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => formatCurrency(row.getValue("amount")),
+      },
+    ],
+    [],
+  );
   return (
     <div className="flex flex-col gap-4 relative">
       <Card>
@@ -204,18 +243,68 @@ export default function Details() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          {data?.status !== INVOICE_STATUS.DRAFT && <Static data={data} />}
+          <div className="flex flex-col gap-4">
+            <div className="flex">
+              <div className="w-1/3">
+                <Label>Invoice Number</Label>
+                <div className="font-semibold text-sm">
+                  {data?.invoiceNumber}
+                </div>
+              </div>
+              <div className="w-1/3">
+                <Label>Invoice Date</Label>
+                <div className="font-semibold text-sm">
+                  {data?.invoiceDate ? formatDate(data?.invoiceDate) : "-"}
+                </div>
+              </div>
+              <div className="w-1/3">
+                <Label>Due Date</Label>
+                <div className="font-semibold text-sm">
+                  {formatDate(data?.dueDate)}
+                </div>
+              </div>
+              <div className="w-1/3">
+                <Label>Remaining Balance</Label>
+                <div className="font-semibold text-sm">
+                  {formatCurrency(
+                    parseFloat(data?.totalAmount) - remainingBalance,
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="w-full">
+              <Label>Notes</Label>
+              <div className="font-semibold text-sm">{data?.notes}</div>
+            </div>
+          </div>
           <Tabs defaultValue="invoice">
             <TabsList>
               <TabsTrigger value="invoice">Invoice</TabsTrigger>
               <TabsTrigger value="payments">Payments</TabsTrigger>
             </TabsList>
             <TabsContent value="invoice">
-              {data?.status === INVOICE_STATUS.DRAFT ? (
-                <Draft form={form} onSubmit={onSubmit} />
-              ) : (
-                <InvoiceLineTable data={data?.invoiceLines} />
-              )}
+              <DataTable
+                data={data?.invoiceLines || []}
+                columns={columns}
+                showFooter
+                renderFooter={(rows: InvoiceLine[]) => {
+                  return (
+                    <TableRow>
+                      <TableCell className="font-semibold" colSpan={2}>
+                        Total:
+                      </TableCell>
+                      <TableCell className="font-semibold text-right">
+                        {formatCurrency(
+                          rows.reduce(
+                            (acc, val) => acc + Number(val.amount),
+                            0,
+                          ),
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }}
+              />
             </TabsContent>
             <TabsContent value="payments">
               <PaymentTab data={data} cb={getData} />

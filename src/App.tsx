@@ -16,6 +16,7 @@ import Suppliers from "./pages/Suppliers";
 import Customers from "./pages/Customers";
 import Layout from "./components/Layout";
 import Products from "./pages/Products";
+import Payments from "./pages/Payments";
 import Invoices from "./pages/Invoices";
 import Users from "./pages/Users";
 import Login from "./pages/Login";
@@ -174,6 +175,14 @@ function App() {
             element={
               <Layout>
                 <Invoices />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.PAYMENTS}
+            element={
+              <Layout>
+                <Payments />
               </Layout>
             }
           />
