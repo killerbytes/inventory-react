@@ -3,15 +3,17 @@ import { INVOICE_STATUS } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { GoodReceipt, Invoice } from "@/types";
+import { invoiceFormSchema } from "@/schemas";
 import { Form } from "@/components/ui/form";
 import InvoiceForm from "./InvoiceForm";
+import { z } from "zod";
 
 export default function Draft({
   form,
   onSubmit,
 }: {
-  form: UseFormReturn<Invoice>;
-  onSubmit: (data: Invoice) => Promise<void>;
+  form: UseFormReturn<z.infer<typeof invoiceFormSchema>>;
+  onSubmit: (data: z.infer<typeof invoiceFormSchema>) => Promise<void>;
 }) {
   const { status } = form.getValues();
   return (
@@ -22,13 +24,13 @@ export default function Draft({
           e.preventDefault();
           const { invoiceLines } = form.getValues();
           console.log(form.getValues(), form.formState.errors);
-          form.setValue(
-            "invoiceLines",
-            invoiceLines.map((item) => ({
-              goodReceiptId: item.id,
-              amount: Number(item.totalAmount),
-            })),
-          );
+          // form.setValue(
+          //   "gr",
+          //   invoiceLines.map((item) => ({
+          //     goodReceiptId: item.id,
+          //     amount: Number(item.totalAmount),
+          //   })),
+          // );
 
           form
             .handleSubmit(onSubmit)(e)

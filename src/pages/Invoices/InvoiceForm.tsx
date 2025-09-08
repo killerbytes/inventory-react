@@ -1,36 +1,33 @@
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { formatCurrency, formatDate } from "@/utils/formatters";
-import { useController, useFieldArray } from "react-hook-form";
+import { useController, useFieldArray, UseFormReturn } from "react-hook-form";
 import GoodReceiptPickerModal from "./GoodReceiptPickerModal";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DialogFooter } from "@/components/ui/dialog";
+import { GoodReceipt, Invoice, Supplier } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
-import { DataTable } from "@/components/DataTable";
-import { STATUS_COLOR } from "@/utils/definitions";
-import { ColumnDef } from "@tanstack/react-table";
 import InvoiceLineTable from "./InvoiceLineTable";
 import DatePicker from "@/components/DatePicker";
-import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { GoodReceipt, Invoice } from "@/types";
 import { Input } from "@/components/ui/input";
 import { supplierServices } from "@/services";
+import { invoiceFormSchema } from "@/schemas";
 import { useSupplierStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import { Plus } from "lucide-react";
 import React from "react";
+import { z } from "zod";
 
-export default function InvoiceForm({ form }) {
+export default function InvoiceForm({
+  form,
+}: {
+  form: UseFormReturn<z.infer<typeof invoiceFormSchema>>;
+}) {
   const { suppliers, setSuppliers } = useSupplierStore();
   const supplier = useController({
     name: "supplierId",
@@ -43,7 +40,7 @@ export default function InvoiceForm({ form }) {
 
   const { fields } = useFieldArray({
     control: form.control,
-    name: "invoiceLines",
+    name: "gr",
     keyName: "fieldId",
   });
 
@@ -59,7 +56,7 @@ export default function InvoiceForm({ form }) {
 
   const onPickerSubmit = (selected: GoodReceipt[]) => {
     handleToggle({ goodReceiptPickerModal: false });
-    form.setValue("invoiceLines", selected);
+    form.setValue("gr", selected);
   };
 
   return (
@@ -69,7 +66,7 @@ export default function InvoiceForm({ form }) {
           control={form.control}
           name="supplierId"
           render={({ field }) => (
-            <FormItem className="w-full">
+            <FormItem className="w-full md:w-1/2">
               <FormLabel>Supplier</FormLabel>
               <Autocomplete
                 value={
@@ -96,7 +93,7 @@ export default function InvoiceForm({ form }) {
             <FormItem className="w-full md:w-1/2">
               <FormLabel>Invoice Number</FormLabel>
               <FormControl>
-                <Input placeholder="Invoice No." {...field} />
+                <Input placeholder="Supplier Invoice No." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -147,6 +144,7 @@ export default function InvoiceForm({ form }) {
           className="shadow-sm"
           type="button"
           size="sm"
+          disabled={!supplier.field.value}
           onClick={() => handleToggle({ goodReceiptPickerModal: true })}
         >
           <Plus />
@@ -155,7 +153,7 @@ export default function InvoiceForm({ form }) {
 
       <FormField
         control={form.control}
-        name="invoiceLines"
+        name="gr"
         render={() => (
           <FormItem className="w-full">
             <FormControl>

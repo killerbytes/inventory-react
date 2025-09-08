@@ -54,7 +54,7 @@ export default function InvoiceLineTable({
       data={data}
       columns={columns}
       //   errors={form?.formState?.errors}
-      //   showFooter={true}
+      showFooter
       renderFooter={(rows: GoodReceipt[]) => {
         return (
           <TableRow className="font-bold">

@@ -81,7 +81,6 @@ const DataTable = React.forwardRef(function DataTable<T>(
     onSelectionChange,
     defaultSelected = [],
   } = props;
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],

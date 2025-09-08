@@ -60,7 +60,10 @@ export const INVENTORY_MOVEMENT_TYPE_COLOR = {
 export const STATUS_COLOR = {
   DRAFT: "text-gray-600 border-gray-600 bg-gray-100",
   RECEIVED: "text-orange-600 border-orange-600 bg-orange-100",
+  POSTED: "text-orange-600 border-orange-600 bg-orange-100",
+  PARTIALLY_PAID: "text-orange-600 border-orange-600 bg-orange-100",
   COMPLETED: "text-green-600 border-green-600 bg-green-100",
+  PAID: "text-green-600 border-green-600 bg-green-100",
   CANCELLED: "text-red-600 border-red-600 bg-red-100",
   CASH: "text-green-400 border-green-400",
   CHECK: "text-yellow-500 border-yellow-500",

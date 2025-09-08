@@ -10,8 +10,11 @@ export default class GoodReceiptService extends BaseService<GoodReceipt> {
     const response = await this.http.patch(`${this.url}/${id}/cancel`, payload);
     return response;
   };
-  getBySupplier = async (id: number) => {
-    const response = await this.http.get(`${this.url}/supplier/${id}`);
+  getBySupplier = async (id: number, payload?: any) => {
+    const response = await this.http.post(
+      `${this.url}/supplier/${id}`,
+      payload,
+    );
     return response;
   };
 }

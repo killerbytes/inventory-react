@@ -21,22 +21,24 @@ import {
 } from "@/utils/definitions";
 import { Ban, EllipsisVertical, Save, Trash2 } from "lucide-react";
 import { ApiErrorResponse, Invoice, InvoiceLine } from "@/types";
+import { invoiceFormSchema, invoiceSchema } from "@/schemas";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
+import InvoiceLineTable from "./InvoiceLineTable";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { invoiceServices } from "@/services";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
-import { invoiceSchema } from "@/schemas";
 import Loader from "@/components/Loader";
 import PaymentTab from "./PaymentTab";
 import { toast } from "sonner";
 import Static from "./Static";
 import Draft from "./Draft";
 import React from "react";
+import { z } from "zod";
 
 export default function Details() {
   const navigate = useNavigate();
@@ -48,7 +50,7 @@ export default function Details() {
     dropdownMenu: false,
   });
   const form = useForm({
-    resolver: zodResolver(invoiceSchema),
+    resolver: zodResolver(invoiceFormSchema),
   });
 
   React.useEffect(() => {
@@ -58,12 +60,12 @@ export default function Details() {
   const getData = async (id: number) => {
     try {
       const data = await invoiceServices.get(id);
-      const invoiceLines = data.invoiceLines.map((item: InvoiceLine) => ({
+      const gr = data.invoiceLines.map((item: InvoiceLine) => ({
         ...item.goodReceipt,
       }));
       setData({
         ...data,
-        invoiceLines,
+        gr,
       });
       // form.reset({ ...data, invoiceLines });
     } catch (error) {
@@ -74,7 +76,6 @@ export default function Details() {
       toast.error("Server Error - " + apiError.message);
     }
   };
-
   React.useEffect(() => {
     getData(Number(id));
   }, [id]);
@@ -83,23 +84,33 @@ export default function Details() {
     await invoiceServices.delete(Number(id));
     navigate(ROUTES.INVOICES);
   };
-  const onSave = async (values: Invoice) => {
+  const onSave = async (values: z.infer<typeof invoiceFormSchema>) => {
     try {
       setLoading(true);
-      await invoiceServices.update(Number(id), values);
+      const invoiceLines = values.gr.map((item) => ({
+        goodReceiptId: item.id,
+        amount: Number(item.totalAmount),
+      }));
+      await invoiceServices.update(Number(id), { ...values, invoiceLines });
       toast.success(`Invoice saved successfully`);
       await getData(Number(id));
-      setLoading(false);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       toast.error("Submission failed - " + apiError.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const onSubmit = async (values: Invoice) => {
+  const onSubmit = async (values: z.infer<typeof invoiceFormSchema>) => {
     try {
+      const invoiceLines = values.gr?.map((item) => ({
+        goodReceiptId: item.id,
+        amount: Number(item.totalAmount),
+      }));
       await invoiceServices.update(Number(id), {
         ...values,
+        invoiceLines,
         status: INVOICE_STATUS.POSTED,
       });
       toast.success(`Invoice saved successfully`);
@@ -123,7 +134,12 @@ export default function Details() {
             <ColorBadge colorMap={STATUS_COLOR}>
               {String(data?.status)}
             </ColorBadge>
-            <DropdownMenu open={toggle.dropdownMenu}>
+            <DropdownMenu
+              open={toggle.dropdownMenu}
+              onOpenChange={() => {
+                handleToggle({ dropdownMenu: false });
+              }}
+            >
               <DropdownMenuTrigger
                 asChild
                 onClick={() => handleToggle({ dropdownMenu: true })}
@@ -133,7 +149,7 @@ export default function Details() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {data?.status !== INVOICE_STATUS.DRAFT && (
+                {/* {data?.status !== INVOICE_STATUS.DRAFT && (
                   <DropdownMenuItem
                     onSelect={(e) => {
                       e.preventDefault();
@@ -143,13 +159,12 @@ export default function Details() {
                     <Ban color="red" />
                     Cancel Order
                   </DropdownMenuItem>
-                )}
+                )} */}
                 {data?.status === INVOICE_STATUS.DRAFT && (
                   <>
                     <DropdownMenuItem
                       onSelect={(e) => {
                         const { invoiceLines } = form.getValues();
-                        console.log(invoiceLines);
                         form.setValue(
                           "invoiceLines",
                           invoiceLines.map((item) => ({
@@ -189,6 +204,7 @@ export default function Details() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          {data?.status !== INVOICE_STATUS.DRAFT && <Static data={data} />}
           <Tabs defaultValue="invoice">
             <TabsList>
               <TabsTrigger value="invoice">Invoice</TabsTrigger>
@@ -198,11 +214,11 @@ export default function Details() {
               {data?.status === INVOICE_STATUS.DRAFT ? (
                 <Draft form={form} onSubmit={onSubmit} />
               ) : (
-                <Static data={data} />
+                <InvoiceLineTable data={data?.invoiceLines} />
               )}
             </TabsContent>
             <TabsContent value="payments">
-              <PaymentTab data={data} />
+              <PaymentTab data={data} cb={getData} />
             </TabsContent>
           </Tabs>
         </CardContent>

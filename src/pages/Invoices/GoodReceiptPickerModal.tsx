@@ -1,10 +1,10 @@
+import { ORDER_STATUS, STATUS_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable } from "@/components/DataTable";
-import { STATUS_COLOR } from "@/utils/definitions";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
@@ -30,7 +30,9 @@ export default function GoodReceiptPickerModal({
   const [goodReceipts, setGoodReceipts] = React.useState<GoodReceipt[]>([]);
   React.useEffect(() => {
     const getData = async (id: number) => {
-      const data: GoodReceipt[] = await goodReceiptServices.getBySupplier(id);
+      const data: GoodReceipt[] = await goodReceiptServices.getBySupplier(id, {
+        status: ORDER_STATUS.RECEIVED,
+      });
       setGoodReceipts(data.slice(0, 5));
     };
     if (supplierId) {

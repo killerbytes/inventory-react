@@ -10,7 +10,10 @@ interface NumberInputProps {
 }
 
 const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
-  ({ value, onChange, type = "number", ...props }, ref) => {
+  (
+    { value, onChange, type = "number", allowNegative = false, ...props },
+    ref,
+  ) => {
     const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       e.target.select();
     };
@@ -27,7 +30,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         }}
         style={{ textAlign: "inherit" }}
         customInput={Input}
-        allowNegative={false}
+        allowNegative={allowNegative}
         decimalScale={0}
         thousandSeparator=","
         {...(type === "currency" && {

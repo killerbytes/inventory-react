@@ -15,11 +15,11 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import AddInvoiceModal from "./AddInvoiceModal";
 import { Input } from "@/components/ui/input";
 import { invoiceServices } from "@/services";
 import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
+import InvoiceModal from "./InvoiceModal";
 import Pager from "@/components/Pager";
 import { Plus } from "lucide-react";
 
@@ -28,6 +28,7 @@ export default function Invoices() {
   const [toggle, handleToggle] = useToggle({
     addInvoiceModal: false,
   });
+  const [selected, setSelected] = React.useState();
   const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
     data: [],
@@ -40,7 +41,7 @@ export default function Invoices() {
   const [filter, setFilter] = React.useState({
     limit: 10,
     page: 1,
-    sort: "name",
+    sort: "createdAt",
     order: "asc",
     q: "",
   });
@@ -73,6 +74,10 @@ export default function Invoices() {
       {
         accessorKey: "invoiceNumber",
         header: "Invoice Number",
+      },
+      {
+        accessorKey: "supplier.name",
+        header: "Supplier",
       },
       {
         accessorKey: "status",
@@ -121,7 +126,7 @@ export default function Invoices() {
               handleToggle({ addInvoiceModal: true });
             }}
           >
-            <Plus /> Add Invoice
+            <Plus /> Create Invoice
           </Button>
         </CardAction>
       </CardHeader>
@@ -145,19 +150,24 @@ export default function Invoices() {
         ) : (
           <>
             <DataTable
-              onRowClick={(item: Invoice) =>
-                navigate(`${ROUTES.INVOICES}/${item.id}`)
-              }
+              onRowClick={(item: Invoice) => {
+                handleToggle({
+                  addInvoiceModal: true,
+                });
+                setSelected(item);
+                // navigate(`${ROUTES.INVOICES}/${item.id}`)
+              }}
               data={data.data || []}
               columns={columns}
-              showFooter
+              showFooter={true}
             />
             <Pager data={data} page={page} setPage={setPage} />
           </>
         )}
       </CardContent>
       {toggle.addInvoiceModal && (
-        <AddInvoiceModal
+        <InvoiceModal
+          data={selected}
           isOpen={true}
           onClose={(reload) => {
             handleToggle({ addInvoiceModal: false });

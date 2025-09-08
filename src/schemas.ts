@@ -209,61 +209,21 @@ const goodReceiptBaseSchema = z.object({
     .min(1, { message: "Supplier is required." }),
   internalNotes: z.string().nullish(),
   referenceNo: z.string().nullish(),
+  totalAmount: z.string().optional(),
   goodReceiptLines: z.array(goodReceiptLineSchema).min(1, {
     message: "At least one product is required.",
   }),
   receiptDate: z.string(),
   goodReceiptStatusHistory: z.array(statusHistorySchema).nullish(),
 });
-export const goodReceiptCreateSchema = goodReceiptBaseSchema.superRefine(() => {
-  // if (
-  //   data.status === ORDER_STATUS.DRAFT &&
-  //   data.goodReceiptLines?.length === 0
-  // ) {
-  //   ctx.addIssue({
-  //     path: ["goodReceiptLines"],
-  //     code: z.ZodIssueCode.custom,
-  //     message: "Purchase Order Items are required",
-  //   });
-  // }
-  // if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
-  //   ctx.addIssue({
-  //     path: ["checkNumber"],
-  //     code: z.ZodIssueCode.custom,
-  //     message: "Check number is required when payment is by check",
-  //   });
-  //   ctx.addIssue({
-  //     path: ["dueDate"],
-  //     code: z.ZodIssueCode.custom,
-  //     message: "Due date is required when payment is by check",
-  //   });
-  // }
-});
+export const goodReceiptCreateSchema = goodReceiptBaseSchema.superRefine(
+  () => {},
+);
 
 export const goodReceiptSchema = goodReceiptBaseSchema
   .extend({
-    // id: z.number().optional(),
-    // goodReceiptNumber: z
-    //   .string({
-    //     required_error: "PO number is required",
-    //   })
-    //   .min(2, { message: "PO number is required" }),
-    // supplierId: z.coerce
-    //   .number({
-    //     required_error: "Supplier is required",
-    //     invalid_type_error: "Supplier is required",
-    //   })
-    //   .min(1, { message: "Supplier is required." }),
-    // internalNotes: z.string().nullish(),
-    // notes: z.string().nullish(),
-    // goodReceiptLines: z
-    //   .array(goodReceiptItemSchema)
-    //   .min(1, {
-    //     message: "At least one product is required.",
-    //   })
-    //   .nullish(),
     status: z.string(),
-    totalAmount: z.string().optional(),
+
     supplier: z.any(),
     // deliveryDate: z.string(),
     // dueDate: z.string().nullish(),
@@ -447,23 +407,33 @@ export const invoiceSchema = z.object({
   invoiceDate: z.string(),
   dueDate: z.string(),
   status: z.string(),
-  totalAmount: z.string().optional(),
+  totalAmount: z.coerce.number().nullish(),
+
   notes: z.string().nullish(),
   invoiceLines: z.array(invoiceLineSchema),
 });
 
+export const invoiceFormSchema = invoiceSchema
+  .extend({
+    gr: z.array(goodReceiptBaseSchema.omit({ goodReceiptLines: true })),
+  })
+  .partial()
+  .omit({
+    invoiceLines: true,
+  });
+
 export const paymentApplicationSchema = z.object({
   id: z.number().optional(),
   invoiceId: z.number(),
-  amountApplied: z.number(),
+  amountApplied: z.coerce.number().nullish(),
 });
 
 export const paymentSchema = z.object({
   id: z.number().optional(),
-  supplieId: z.number(),
+  supplierId: z.number(),
   referenceNo: z.string().nullish(),
   paymentDate: z.string(),
-  amount: z.string().optional(),
+  amount: z.coerce.number().nullish(),
   notes: z.string().nullish(),
   changedBy: z.number().nullish(),
   applications: z.array(paymentApplicationSchema).min(1, {
