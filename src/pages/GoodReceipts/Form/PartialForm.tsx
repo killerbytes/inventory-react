@@ -10,6 +10,7 @@ import {
   GLOBAL_COLOR,
   MODE_OF_PAYMENT,
   ORDER_STATUS,
+  ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
 import GoodReceiptItemForm from "../../../components/forms/OrderItemForm";
@@ -24,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { cx } from "class-variance-authority";
+import { Link } from "react-router";
 import { useMemo } from "react";
 export default function PartialForm({
   form,
@@ -63,6 +65,16 @@ export default function PartialForm({
         header: "Product",
         meta: {
           className: GLOBAL_COLOR.PRODUCT,
+        },
+        cell: ({ row }) => {
+          return (
+            <Link
+              to={`${ROUTES.PRODUCTS}/${row.original.combinations?.productId}`}
+              className={cx("font-medium", GLOBAL_COLOR.PRODUCT)}
+            >
+              {row.original.nameSnapshot}
+            </Link>
+          );
         },
       },
       {

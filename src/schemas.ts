@@ -175,6 +175,7 @@ export const goodReceiptLineSchema = z.object({
   purchasePrice: z.coerce.number().min(0, {
     message: "Unit Price must be at least 0.",
   }),
+  combinations: productCombinationsSchema.nullish(),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),
   totalAmount: z.coerce.number().nullish(),
@@ -361,9 +362,6 @@ export const breakPackSchema = z.object({
   toCombination: productCombinationsSchema.nullish(),
   quantity: z.number().refine((val) => !isNaN(val), {
     message: "Number must not be NaN",
-  }),
-  conversionFactor: z.number().min(1, {
-    message: "Units per Pack must be at least 1.",
   }),
   user: z.any(),
   createdAt: z.string().nullish(),

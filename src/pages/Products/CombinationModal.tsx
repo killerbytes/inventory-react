@@ -136,7 +136,6 @@ export default function CombinationModal({
   }, [getData]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
     try {
       await productCombinationServices.updateByProductId(
         Number(product.id),
