@@ -39,17 +39,11 @@ import {
   ProductCombinations,
   VariantTypes,
 } from "@/types";
-import {
-  BREAK_PACK_UNITS,
-  ERROR,
-  ROUTES,
-  UNIT_COLOR,
-} from "@/utils/definitions";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
-import CloneToUnitModal from "../../components/modals/CloneToUnitModal";
 import { useCategoryStore, useProductCombinationStore } from "@/stores";
 import BreakPackModal from "@/components/modals/BreakPackModal";
+import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CreateProductModal from "./CreateProductModal";
@@ -69,10 +63,10 @@ import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
 import { toast } from "sonner";
 import {} from "@/lib/utils";
+import { get } from "lodash";
 
 export default function ProductEdit() {
   const { id } = useParams();
-  const [product, setProduct] = React.useState<Product>();
   const { categories, setCategories } = useCategoryStore();
   const productCombinationStore = useProductCombinationStore();
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
@@ -132,32 +126,12 @@ export default function ProductEdit() {
   const getData = React.useCallback(async () => {
     try {
       const product: Product = await productServices.get(Number(id));
-      setProduct(product);
       const { combinations, variants, ...rest }: Product = product;
       setCombinations(combinations ?? []);
       setVariants(variants ?? []);
-      // const updateCombo = (data: VariantValues[]) => {
-      //   const combo = [];
-      //   for (const entry of variants) {
-      //     const found = data.find((i) => i.variantTypeId === entry.id);
-      //     if (found) {
-      //       combo.push(found);
-      //     } else {
-      //       combo.push({ value: "", variantTypeId: entry.id });
-      //     }
-      //   }
-      //   return combo;
-      // };
 
       form.reset({
         ...rest,
-        // variants,
-        // combinations: combinations.map((i) => {
-        //   return {
-        //     ...i,
-        //     values: updateCombo(i.values),
-        //   };
-        // }),
       });
     } catch (error: unknown) {
       const apiError = error as ApiErrorResponse;
@@ -253,36 +227,6 @@ export default function ProductEdit() {
           className: "w-0 text-right",
         },
       },
-      ...(BREAK_PACK_UNITS.includes(String(product?.baseUnit))
-        ? [
-            {
-              accessorKey: "id",
-              header: "Break",
-              meta: {
-                className: "w-0",
-              },
-              cell: ({ row }: { row: Row<ProductCombinations> }) => (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="shadow-sm"
-                  disabled={
-                    row.original?.inventory?.quantity === 0 ||
-                    row.original?.inventory?.quantity === undefined
-                  }
-                  onClick={() => {
-                    setSelected(row.original);
-                    handleToggle({ breakPackModal: true });
-                  }}
-                >
-                  <PackageOpen />
-                </Button>
-              ),
-            },
-          ]
-        : []),
-
       {
         accessorKey: "stockAdjustment",
         header: "Stock Adjustment",
@@ -290,22 +234,40 @@ export default function ProductEdit() {
           className: "w-0",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => (
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="shadow-sm"
-            onClick={() => {
-              setSelected(row.original);
-              handleToggle({ stockAdjustmentModal: true });
-            }}
-          >
-            <Pencil />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shadow-sm"
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ stockAdjustmentModal: true });
+              }}
+            >
+              <Pencil />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shadow-sm"
+              disabled={
+                row.original?.inventory?.quantity === 0 ||
+                row.original?.inventory?.quantity === undefined
+              }
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ breakPackModal: true });
+              }}
+            >
+              <PackageOpen />
+            </Button>
+          </div>
         ),
       },
     ],
-    [handleToggle, product?.baseUnit, variants],
+    [handleToggle, variants],
   );
   return (
     <Fragment key={id}>
@@ -474,7 +436,7 @@ export default function ProductEdit() {
           }}
         />
       )}
-      {toggle.cloneModal && (
+      {/* {toggle.cloneModal && (
         <CloneToUnitModal
           isOpen={true}
           onSubmit={async (product) => {
@@ -486,17 +448,18 @@ export default function ProductEdit() {
           }}
           productId={Number(id)}
         />
-      )}
+      )} */}
       {toggle.breakPackModal && ( // && selected
         <BreakPackModal
           isOpen={true}
           onClose={() => {
             handleToggle({ breakPackModal: false });
           }}
-          combinationId={Number(selected?.id)}
-          onSubmit={async (productId) => {
+          combination={selected as ProductCombinations}
+          onSubmit={async () => {
+            getData();
+            productCombinationStore.invalidate();
             handleToggle({ breakPackModal: false });
-            navigate(`${ROUTES.PRODUCTS}/${productId}`);
           }}
         />
       )}

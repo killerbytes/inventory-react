@@ -5,3 +5,7 @@ input[readonly] {
 body {
   font-family: "Open Sans", sans-serif;
 }
+a,
+button {
+  cursor: pointer;
+}

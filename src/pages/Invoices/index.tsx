@@ -5,10 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PAGINATION, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { Customer, Invoice, PaginatedResponse } from "@/types";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -39,8 +39,8 @@ export default function Invoices() {
 
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
-    limit: 10,
-    page: 1,
+    limit: PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
     sort: "createdAt",
     order: "asc",
     q: "",

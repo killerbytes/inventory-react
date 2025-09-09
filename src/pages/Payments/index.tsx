@@ -9,29 +9,23 @@ import {
   Customer,
   Invoice,
   PaginatedResponse,
-  Payment,
   PaymentApplication,
 } from "@/types";
-import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import ColorBadge from "@/components/ColorBadge";
 import { Link, useNavigate } from "react-router";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ROUTES } from "@/utils/definitions";
 import { paymentServices } from "@/services";
-import { PcCase, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import Pager from "@/components/Pager";
 import React from "react";
 
 export default function Payments() {
-  const navigate = useNavigate();
   const [toggle, handleToggle] = useToggle({});
-  const [selected, setSelected] = React.useState();
   const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
     data: [],
@@ -120,7 +114,7 @@ export default function Payments() {
           Payments
         </CardTitle>
         <CardAction>
-          <Button
+          {/* <Button
             className="shadow-sm"
             onClick={() => {
               setSelected(undefined);
@@ -128,7 +122,7 @@ export default function Payments() {
             }}
           >
             <Plus /> Create Invoice
-          </Button>
+          </Button> */}
         </CardAction>
       </CardHeader>
       <CardContent>
@@ -176,18 +170,6 @@ export default function Payments() {
           </>
         )}
       </CardContent>
-      {toggle.addInvoiceModal && (
-        <InvoiceModal
-          data={selected}
-          isOpen={true}
-          onClose={(reload) => {
-            handleToggle({ addInvoiceModal: false });
-            if (reload) {
-              getData();
-            }
-          }}
-        />
-      )}
     </Card>
   );
 }

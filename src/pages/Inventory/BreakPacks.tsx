@@ -5,14 +5,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PAGINATION, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { BreakPack, PaginatedResponse } from "@/types";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
-import { UNIT_COLOR } from "@/utils/definitions";
 import { inventoryServices } from "@/services";
+import { Input } from "@/components/ui/input";
+import { Link } from "react-router";
 import React from "react";
 
 export default function BreakPacks() {
@@ -22,15 +25,26 @@ export default function BreakPacks() {
     totalPages: 0,
     currentPage: 0,
   });
+  const [filter, setFilter] = React.useState({
+    limit: PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
+    sort: "createdAt",
+    order: "ASC",
+    q: "",
+  });
 
   const getData = React.useCallback(async () => {
-    const data = await inventoryServices.getBreakPacks({});
+    const data = await inventoryServices.getBreakPacks(filter);
     setData(data);
-  }, []);
+  }, [filter]);
 
   React.useEffect(() => {
     getData();
   }, [getData]);
+
+  const handleFilterChange = React.useCallback((data) => {
+    setFilter((prevState) => ({ ...prevState, ...data }));
+  }, []);
 
   const columns = React.useMemo<ColumnDef<BreakPack>[]>(
     () => [
@@ -44,10 +58,11 @@ export default function BreakPacks() {
           return (
             <div className="flex gap-2 items-center">
               <ColorBadge colorMap={UNIT_COLOR}>
-                {String(fromCombination?.product?.unit)}
+                {String(fromCombination?.unit)}
               </ColorBadge>
-
-              {fromCombination?.name}
+              <Link to={`${ROUTES.PRODUCTS}/${fromCombination?.productId}`}>
+                {fromCombination?.name}
+              </Link>
             </div>
           );
         },
@@ -61,9 +76,8 @@ export default function BreakPacks() {
 
           return (
             <div className="flex gap-2 items-center">
-              {toCombination?.product?.name}{" "}
               <ColorBadge colorMap={UNIT_COLOR}>
-                {String(toCombination?.product?.unit)}
+                {String(toCombination?.unit)}
               </ColorBadge>
               {toCombination?.name}
             </div>
@@ -97,7 +111,26 @@ export default function BreakPacks() {
       },
       {
         accessorKey: "createdAt",
-        header: "Created At",
+        header: ({ column }) => {
+          return (
+            <span
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                handleFilterChange({
+                  order: filter.order === "ASC" ? "DESC" : "ASC",
+                  sort: column.id,
+                });
+              }}
+            >
+              Created
+              {filter.sort === column.id && filter.order === "ASC" ? (
+                <ChevronUp />
+              ) : (
+                filter.sort === column.id && <ChevronDown />
+              )}
+            </span>
+          );
+        },
         cell: ({ row }) => {
           return formatDateTime(String(row.original.createdAt));
         },
@@ -110,7 +143,7 @@ export default function BreakPacks() {
         },
       },
     ],
-    [],
+    [filter.order, filter.sort, handleFilterChange],
   );
   return (
     <Card>
@@ -123,6 +156,20 @@ export default function BreakPacks() {
         <CardAction></CardAction>
       </CardHeader>
       <CardContent>
+        <div>
+          <Input
+            placeholder="Search invoice"
+            className="w-full mb-4"
+            value={filter.q}
+            onChange={(e) => {
+              setFilter((prev) => ({
+                ...prev,
+                q: e.target.value,
+                page: 1,
+              }));
+            }}
+          />
+        </div>
         <DataTable data={data?.data || []} columns={columns} />
       </CardContent>
     </Card>
