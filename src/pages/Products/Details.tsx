@@ -13,6 +13,14 @@ import {
   PageHeaderTitle,
 } from "@/components/PageHeader";
 import {
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Copy,
   EllipsisVertical,
   PackageOpen,
@@ -21,13 +29,6 @@ import {
   Save,
   Search,
 } from "lucide-react";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   categoryServices,
   productCombinationServices,
@@ -39,9 +40,11 @@ import {
   ProductCombinations,
   VariantTypes,
 } from "@/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
 import { useCategoryStore, useProductCombinationStore } from "@/stores";
+import PriceHistoryTable from "@/pages/Products/PriceHistoryTable";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { ColumnDef, Row } from "@tanstack/react-table";
@@ -62,8 +65,6 @@ import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
 import { toast } from "sonner";
-import {} from "@/lib/utils";
-import { get } from "lodash";
 
 export default function ProductEdit() {
   const { id } = useParams();
@@ -360,53 +361,90 @@ export default function ProductEdit() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Variant Types</CardTitle>
-              <CardAction>
-                <Button
-                  onClick={() => handleToggle({ variantModal: true })}
-                  type="button"
-                  variant="outline"
-                  className="shadow-sm"
-                >
-                  <Pencil />
-                  Edit Variants
-                </Button>
-              </CardAction>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {variants.map((variant, idx) => {
-                  return (
-                    <Badge variant="secondary" key={idx} className="outline">
-                      {variant.name}
-                    </Badge>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Variations</CardTitle>
-              <CardAction>
-                <Button
-                  onClick={() => handleToggle({ combinationModal: true })}
-                  type="button"
-                  variant="outline"
-                  className="shadow-sm"
-                >
-                  <Pencil />
-                  Edit Combinations
-                </Button>
-              </CardAction>
-            </CardHeader>
 
-            <CardContent>
-              <DataTable data={combinations || []} columns={columns} />
-            </CardContent>
-          </Card>
+          <Tabs defaultValue="product_combination">
+            <TabsList>
+              <TabsTrigger value="product_combination">
+                Product Combinations
+              </TabsTrigger>
+              <TabsTrigger value="variants">Variants</TabsTrigger>
+              <TabsTrigger value="price_history">Price History</TabsTrigger>
+            </TabsList>
+            <TabsContent value="product_combination">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Product Variations</CardTitle>
+                  <CardAction>
+                    <Button
+                      onClick={() => handleToggle({ combinationModal: true })}
+                      type="button"
+                      variant="outline"
+                      className="shadow-sm"
+                    >
+                      <Pencil />
+                      Edit Combinations
+                    </Button>
+                  </CardAction>
+                </CardHeader>
+                <CardContent className="grid gap-6">
+                  <DataTable data={combinations || []} columns={columns} />
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button>Save changes</Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            <TabsContent value="variants">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Variants</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Variant Types</CardTitle>
+                      <CardAction>
+                        <Button
+                          onClick={() => handleToggle({ variantModal: true })}
+                          type="button"
+                          variant="outline"
+                          className="shadow-sm"
+                        >
+                          <Pencil />
+                          Edit Variants
+                        </Button>
+                      </CardAction>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {variants.map((variant, idx) => {
+                          return (
+                            <Badge
+                              variant="secondary"
+                              key={idx}
+                              className="outline"
+                            >
+                              {variant.name}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="price_history">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Price History</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-6">
+                  <PriceHistoryTable productId={id} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </form>
       </Form>
 
@@ -436,19 +474,7 @@ export default function ProductEdit() {
           }}
         />
       )}
-      {/* {toggle.cloneModal && (
-        <CloneToUnitModal
-          isOpen={true}
-          onSubmit={async (product) => {
-            navigate(`${ROUTES.PRODUCTS}/${product.id}`);
-            handleToggle({ cloneModal: false });
-          }}
-          onClose={() => {
-            handleToggle({ cloneModal: false });
-          }}
-          productId={Number(id)}
-        />
-      )} */}
+
       {toggle.breakPackModal && ( // && selected
         <BreakPackModal
           isOpen={true}

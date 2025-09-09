@@ -26,6 +26,7 @@ import {
   invoiceLineSchema,
   paymentApplicationSchema,
   invoiceFormSchema,
+  priceHistorySchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -109,6 +110,7 @@ type InvoiceLine = z.infer<typeof invoiceLineSchema>;
 type invoiceForm = z.infer<typeof invoiceFormSchema>;
 type Payment = z.infer<typeof paymentSchema>;
 type PaymentApplication = z.infer<typeof paymentApplicationSchema>;
+type priceHistory = z.infer<typeof priceHistorySchema>;
 
 export type {
   User,
@@ -138,4 +140,5 @@ export type {
   InvoiceLine,
   Payment,
   PaymentApplication,
+  priceHistory,
 };
