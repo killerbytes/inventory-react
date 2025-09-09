@@ -14,6 +14,7 @@ import {
   Diff,
   Banknote,
   CreditCard,
+  ChartCandlestick,
 } from "lucide-react";
 import {
   Sidebar,
@@ -85,6 +86,11 @@ const reports = [
     title: "Stock Adjustments",
     url: ROUTES.STOCK_ADJUSTMENTS,
     icon: Diff,
+  },
+  {
+    title: "Price History",
+    url: ROUTES.PRICE_HISTORY,
+    icon: ChartCandlestick,
   },
 ];
 

@@ -2,6 +2,7 @@ import StockAdjustments from "./pages/Inventory/StockAdjustments";
 import GoodReceiptDetails from "./pages/GoodReceipts/Details";
 import GoodReceiptCreate from "./pages/GoodReceipts/Create";
 import { BrowserRouter, Routes, Route } from "react-router";
+import PriceHistory from "./pages/Inventory/PriceHistory";
 import SalesDetails from "./pages/SalesOrders/Details";
 import BreakPacks from "./pages/Inventory/BreakPacks";
 import ProductDetails from "./pages/Products/Details";
@@ -183,6 +184,14 @@ function App() {
             element={
               <Layout>
                 <Payments />
+              </Layout>
+            }
+          />
+          <Route
+            path={ROUTES.PRICE_HISTORY}
+            element={
+              <Layout>
+                <PriceHistory />
               </Layout>
             }
           />

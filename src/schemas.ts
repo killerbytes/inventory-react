@@ -441,3 +441,14 @@ export const paymentSchema = z.object({
     message: "At least one product is required.",
   }),
 });
+
+export const priceHistorySchema = z.object({
+  id: z.number().optional(),
+  productId: z.number(),
+  combinations: productCombinationsSchema,
+  fromPrice: z.number(),
+  toPrice: z.number(),
+  changedBy: z.number(),
+  changedAt: z.string(),
+  user: z.any(),
+});
