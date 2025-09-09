@@ -246,7 +246,7 @@ export default function AppSidebar() {
           &copy; {new Date().getFullYear()} My Hardware
           <div className="text-xs uppercase">{build?.env}</div>
           <div className="text-xs">
-            {formatDateTime(String(build?.buildTime))}
+            {formatDateTime(String(build?.buildTime ?? ""))}
           </div>
         </footer>
       </SidebarFooter>
