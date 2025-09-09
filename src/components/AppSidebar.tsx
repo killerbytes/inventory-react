@@ -37,10 +37,10 @@ import { useGlobalStore, useUserStore } from "@/stores";
 import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
+import Http from "@/services/http";
 import Header from "./Header";
 import UserIcon from "./User";
 import React from "react";
-import axios from "axios";
 
 const items = [
   {
@@ -117,7 +117,10 @@ const menu = [
 ];
 
 export default function AppSidebar() {
-  const [build, setBuild] = React.useState("");
+  const [build, setBuild] = React.useState<{
+    env: string;
+    buildTime: string;
+  }>();
   const { logout } = useUserStore();
   const { setVariantTemplateModal } = useGlobalStore();
   const { setOpen, setOpenMobile } = useSidebar();
@@ -134,8 +137,9 @@ export default function AppSidebar() {
 
   React.useEffect(() => {
     const getData = async () => {
-      const res = await axios.get("/data.json");
-      setBuild(res.data.build);
+      const http = new Http();
+      const res = await http.get("/");
+      setBuild(res);
     };
     getData();
   }, []);
@@ -238,9 +242,12 @@ export default function AppSidebar() {
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
-        <footer className="text-center mt-auto border-t  py-2">
-          &copy; {new Date().getFullYear()} My Hardware.{" "}
-          <div className="text-xs">{formatDateTime(build)}</div>
+        <footer className="text-center mt-auto py-2 border-t gap-2 flex flex-col">
+          &copy; {new Date().getFullYear()} My Hardware
+          <div className="text-xs uppercase">{build?.env}</div>
+          <div className="text-xs">
+            {formatDateTime(String(build?.buildTime))}
+          </div>
         </footer>
       </SidebarFooter>
     </Sidebar>
