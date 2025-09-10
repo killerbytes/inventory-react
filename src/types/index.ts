@@ -55,12 +55,12 @@ export interface ApiError {
   message: string;
 }
 
-export interface Filter {
+export interface filterProps {
   limit: number;
   page: number;
   q?: string;
   sort?: string;
-  order?: "asc" | "desc";
+  order?: "ASC" | "DESC";
 }
 
 export interface CategorizedItemList<T> {

@@ -281,12 +281,12 @@ export default function GoodReceipts() {
                 renderFooter={(data: GoodReceipt[]) => {
                   return (
                     <TableRow className="font-bold">
-                      <TableCell colSpan={7}>Total Amount</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell>Total Amount</TableCell>
+                      <TableCell colSpan={10} className="text-right">
                         {formatCurrency(
                           data.reduce(
                             (acc: number, item: GoodReceipt) =>
-                              acc + parseFloat(item.totalAmount ?? "0"),
+                              acc + Number(item.totalAmount ?? "0"),
                             0,
                           ),
                         )}

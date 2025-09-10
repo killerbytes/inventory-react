@@ -20,12 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatCurrency } from "@/utils/formatters";
 import { cx } from "class-variance-authority";
 import * as React from "react"; // Ensure React is imported
 
 type DataTableProps<T> = {
-  data: T[];
   columns: ColumnDef<T>[];
+  data: T[];
   defaultColumn?: ColumnDef<T>;
   meta?: any;
   emptyText?: string;
@@ -40,31 +41,26 @@ type DataTableProps<T> = {
   defaultSelected?: T[];
 };
 
-const defaultRenderFooter = (data: any[]) => {
+const defaultRenderFooter = <T,>(data: T[]) => {
+  console.log(data);
   return (
     <TableRow>
-      <TableCell colSpan={3}>Total</TableCell>
-      <TableCell className="text-right">
-        {/* {formatCurrency(total?.amount)} */}
-      </TableCell>
-      <TableCell className="text-right"></TableCell>
-      <TableCell className="text-right"></TableCell>
-      <TableCell className="text-right ">
-        {/* {formatCurrency(total?.discount)} */}
-      </TableCell>
-      <TableCell className="text-right"></TableCell>
-      <TableCell className="text-right">
-        {/* {formatCurrency(total?.amount - total?.discount)} */}
+      <TableCell className="font-semibold">Total</TableCell>
+      <TableCell colSpan={99} className="font-semibold text-right">
+        {formatCurrency(
+          data.reduce(
+            (acc: number, item: T) =>
+              acc + Number((item as any).totalAmount ?? "0"),
+            0,
+          ),
+        )}
       </TableCell>
     </TableRow>
   );
 };
 
 // Wrap the component with React.forwardRef and add `ref` to the arguments
-const DataTable = React.forwardRef(function DataTable<T>(
-  props: DataTableProps<T>,
-  ref: React.ForwardedRef<any>, // Define the ref type
-) {
+const DataTable = <T,>(props: DataTableProps<T>) => {
   const {
     data,
     columns,
@@ -81,6 +77,7 @@ const DataTable = React.forwardRef(function DataTable<T>(
     onSelectionChange,
     defaultSelected = [],
   } = props;
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -88,7 +85,9 @@ const DataTable = React.forwardRef(function DataTable<T>(
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState(() => {
-    const initialSelectedRows = defaultSelected?.reduce((acc, row) => {
+    const initialSelectedRows = defaultSelected?.reduce<
+      Record<string, boolean>
+    >((acc, row: any) => {
       acc[row.id] = true;
       return acc;
     }, {});
@@ -100,8 +99,7 @@ const DataTable = React.forwardRef(function DataTable<T>(
     columns,
     defaultColumn,
     meta,
-    getRowId: (row) => row.id,
-
+    getRowId: (row: any) => row.id, // or customize if your type has a different id
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -120,17 +118,13 @@ const DataTable = React.forwardRef(function DataTable<T>(
   });
 
   React.useEffect(() => {
-    // Only call the callback if it's provided as a prop
     if (onSelectionChange) {
       const selectedItems = table
         .getFilteredSelectedRowModel()
         .rows.map((row) => row.original);
       onSelectionChange(selectedItems);
     }
-  }, [onSelectionChange, rowSelection, table]); // A
-
-  // Use `useImperativeHandle` to expose the table instance
-  React.useImperativeHandle(ref, () => table, [table]);
+  }, [onSelectionChange, rowSelection, table]);
 
   return (
     <div className={cx("w-full overflow-auto", className)}>
@@ -145,23 +139,21 @@ const DataTable = React.forwardRef(function DataTable<T>(
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead
-                        key={header.id}
-                        className={
-                          header.column.columnDef?.meta?.headerClassName ?? ""
-                        }
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
-                    );
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className={
+                        header.column.columnDef?.meta?.headerClassName ?? ""
+                      }
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
@@ -171,10 +163,10 @@ const DataTable = React.forwardRef(function DataTable<T>(
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   className={cx({ "cursor-pointer": onRowClick })}
-                  key={row.original.fieldId || row.original.id || row.original}
+                  key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
-                    onRowClick && onRowClick(row.original);
+                    onRowClick?.(row.original);
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -206,6 +198,6 @@ const DataTable = React.forwardRef(function DataTable<T>(
       </div>
     </div>
   );
-});
+};
 
 export { DataTable };
