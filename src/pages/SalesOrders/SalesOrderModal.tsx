@@ -18,18 +18,27 @@ import OrderItemForm, {
   UnitColumn,
 } from "../../components/forms/OrderItemForm";
 import {
-  Controller,
-  useFieldArray,
-  UseFormReturn,
-  useWatch,
-} from "react-hook-form";
-import { ProductCombinations, SalesOrderCreate, SalesOrderItem } from "@/types";
-import { MODE_OF_PAYMENT_OPTIONS, UNIT_COLOR } from "@/utils/definitions";
+  ApiError,
+  ProductCombinations,
+  SalesOrderForm,
+  SalesOrderItem,
+} from "@/types";
+import {
+  MODE_OF_PAYMENT_OPTIONS,
+  ORDER_STATUS,
+  UNIT_COLOR,
+} from "@/utils/definitions";
+import { Controller, useFieldArray, useWatch, useForm } from "react-hook-form";
 import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
-import { useCustomerStore } from "@/stores/customer.store";
+import { customerServices, salesOrderServices } from "@/services";
+import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
+import { BanknoteArrowUp, Save, Trash2 } from "lucide-react";
 import { productCombinationServices } from "@/services";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogFooter } from "@/components/ui/dialog";
 import { useProductCombinationStore } from "@/stores";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,21 +48,57 @@ import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
+import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import useDebounce from "@/hooks/useDebounce";
+import { ERROR } from "@/utils/definitions";
+import { useCustomerStore } from "@/stores";
 import Select from "@/components/Select";
-import { Trash2 } from "lucide-react";
+import Modal from "@/components/Modal";
+import { toast } from "sonner";
 import React from "react";
 
-export default function FullForm({
-  form,
+const salesOrderItemDefault = {
+  discountNote: "",
+};
+const salesOrderDefalt = {
+  deliveryDate: new Date().toISOString(),
+  customerId: 1,
+  modeOfPayment: "CASH",
+  status: "DRAFT",
+  salesOrderItems: Array.from({ length: 3 }, () => salesOrderItemDefault),
+  isDelivery: false,
+};
+
+export default function SalesOrderModal({
+  data,
+  isOpen,
+  onClose,
 }: {
-  form: UseFormReturn<SalesOrderCreate>;
+  data: SalesOrder;
+  isOpen: boolean;
+  onClose: (reload: boolean) => void;
 }) {
-  const { customers } = useCustomerStore();
+  const { customers, setCustomers } = useCustomerStore();
   const { productCombinations, setProductsCombinations } =
     useProductCombinationStore();
+
+  const defaultValues = localStorage.getItem(
+    `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+  )
+    ? JSON.parse(
+        localStorage.getItem(
+          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+        ) as string,
+      )
+    : salesOrderDefalt;
+
+  const form = useForm<SalesOrderForm>({
+    resolver: zodResolver(salesOrderFormSchema),
+    defaultValues,
+  });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -63,13 +108,106 @@ export default function FullForm({
 
   React.useEffect(() => {
     const getData = async () => {
+      const res = await salesOrderServices.get(Number(data.id));
+      form.reset(res);
+    };
+    if (data) {
+      getData();
+    }
+  }, [data, form]);
+
+  React.useEffect(() => {
+    const getData = async () => {
       const data = await productCombinationServices.list();
       setProductsCombinations(data);
     };
     getData();
   }, [setProductsCombinations]);
 
-  // const x = useWatch({ control: form.control, name: "salesOrderItems" });
+  React.useEffect(() => {
+    const getData = async () => {
+      const data: Customer[] = await customerServices.list();
+      setCustomers(data);
+    };
+    if (customers.length === 0) {
+      getData();
+    }
+  }, [customers.length, setCustomers]);
+
+  async function onSubmit(values: SalesOrderForm) {
+    console.log("submit", values);
+    try {
+      await salesOrderServices.create(values as SalesOrder);
+      localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
+      toast.success(`Sales Order submitted successfully`);
+      onClose(true);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field as keyof SalesOrderForm, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      } else {
+        toast.error("Submission failed: " + apiError.message);
+      }
+    }
+  }
+  async function onSave(values: SalesOrderForm) {
+    console.log("save", values);
+    try {
+      await salesOrderServices.update(Number(data.id), values as SalesOrder);
+      localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
+      toast.success(`Sales Order saved successfully`);
+      onClose(true);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors?.forEach((err: ApiError) => {
+          if (err.field) {
+            form.setError(err.field as keyof SalesOrderForm, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      } else {
+        toast.error("Submission failed - " + apiError.message);
+      }
+    }
+  }
+
+  const saveDraft = React.useCallback(() => {
+    const draft =
+      JSON.parse(
+        localStorage.getItem(
+          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+        ) as string,
+      ) || {};
+    const newDraft = { ...form.getValues() };
+
+    if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
+      localStorage.setItem(
+        `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+        JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v)),
+      );
+    }
+  }, [form]);
+  const formData = useWatch({ control: form.control });
+
+  const debouncedFormData = useDebounce(formData, 1000);
+
+  React.useEffect(() => {
+    if (!data) {
+      saveDraft();
+    }
+  }, [data, debouncedFormData, saveDraft]);
+
+  // const formData = useWatch({ control: form.control });
   const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
     () => [
       {
@@ -127,125 +265,74 @@ export default function FullForm({
               render={({ field }) => {
                 return (
                   <>
-                    <ProductLookupInput
-                      items={productCombinations as ProductCombinations[]}
-                      form={form}
-                      {...field}
-                      name="salesOrderItems"
-                      onChange={(value) => {
-                        field.onChange(value.id);
-                        form.setValue(
-                          `salesOrderItems.${row.index}.purchasePrice`,
-                          value.price,
-                        );
-
-                        setTimeout(() => {
-                          if (row.index + 1 === fields.length) {
-                            const button: HTMLButtonElement | null =
-                              document.querySelector(".append-btn");
-                            if (button) {
-                              button.focus();
-                            }
-                          } else {
-                            form.setFocus(
-                              `salesOrderItems.${row.index + 1}.quantity`,
+                    <FormItem>
+                      <FormControl>
+                        <ProductLookupInput
+                          ariaInvalid={Boolean(
+                            form.formState.errors?.salesOrderItems?.[row.index]
+                              ?.combinationId,
+                          )}
+                          items={productCombinations as ProductCombinations[]}
+                          form={form}
+                          {...field}
+                          name="salesOrderItems"
+                          onChange={(value) => {
+                            field.onChange(value.id);
+                            form.setValue(
+                              `salesOrderItems.${row.index}.purchasePrice`,
+                              value.price,
                             );
-                          }
-                        }, 0);
-                      }}
-                      renderOptions={({ items, open, setOpen, onSelect }) => {
-                        return (
-                          open &&
-                          items.map((item) => (
-                            <CommandGroup key={item.id}>
-                              <CommandItem
-                                value={String(item.name)}
-                                disabled={item.inventory.quantity < 1}
-                                key={item.id}
-                                onSelect={() => {
-                                  setOpen(false);
-                                  onSelect?.(item);
-                                }}
-                                className="flex items-center gap-2 justify-between"
-                              >
-                                {item.name}
-                                <div className="flex gap-2">
-                                  {item.inventory.quantity}
-                                  <span>{formatCurrency(item.price)}</span>
-                                  <ColorBadge colorMap={UNIT_COLOR}>
-                                    {item.unit}
-                                  </ColorBadge>
-                                </div>
-                              </CommandItem>
-                            </CommandGroup>
-                          ))
-                        );
-                      }}
-                    />
-                    {/* <ProductComboSearchCommand
-                      items={productCombinations}
-                      onSelect={(item) => {
-                        field.onChange(item.id);
-                      }}
-                      name="salesOrderItems"
-                      form={form}
-                      renderOptions={(items, open, setOpen, onSelect) => {
-                        return (
-                          open &&
-                          items.map((item) => (
-                            <CommandGroup key={item.id}>
-                              <CommandItem
-                                value={String(item.name)}
-                                disabled={item.inventory.quantity < 1}
-                                key={item.id}
-                                onSelect={() => {
-                                  setOpen(false);
-                                  onSelect?.(item);
-                                  form.setValue(
-                                    `salesOrderItems.${row.index}.purchasePrice`,
-                                    item.price,
-                                  );
 
-                                  setTimeout(() => {
-                                    if (row.index + 1 === fields.length) {
-                                      document
-                                        .querySelector(".append-btn")
-                                        ?.focus();
-                                    } else {
-                                      form.setFocus(
-                                        `salesOrderItems.${row.index + 1}.quantity`,
-                                      );
-                                    }
-                                  }, 0);
-                                }}
-                                className="flex items-center gap-2 justify-between"
-                              >
-                                {item.name}
-                                <div className="flex gap-2">
-                                  {item.inventory.quantity}
-                                  <span>{formatCurrency(item.price)}</span>
-                                  <ColorBadge colorMap={UNIT_COLOR}>
-                                    {item.unit}
-                                  </ColorBadge>
-                                </div>
-                              </CommandItem>
-                            </CommandGroup>
-                          ))
-                        );
-                      }}
-                    >
-                      <Button
-                        variant="outline"
-                        className="w-full flex justify-between h-9 min-w-[200px]"
-                        type="button"
-                      >
-                        {
-                          productCombinations.find((i) => i.id === field.value)
-                            ?.name
-                        }
-                        <ChevronsUpDown className="ml-auto" />
-                      </Button>
-                    </ProductComboSearchCommand> */}
+                            setTimeout(() => {
+                              if (row.index + 1 === fields.length) {
+                                const button: HTMLButtonElement | null =
+                                  document.querySelector(".append-btn");
+                                if (button) {
+                                  button.focus();
+                                }
+                              } else {
+                                form.setFocus(
+                                  `salesOrderItems.${row.index + 1}.quantity`,
+                                );
+                              }
+                            }, 0);
+                          }}
+                          renderOptions={({
+                            items,
+                            open,
+                            setOpen,
+                            onSelect,
+                          }) => {
+                            return (
+                              open &&
+                              items.map((item) => (
+                                <CommandGroup key={item.id}>
+                                  <CommandItem
+                                    value={String(item.name)}
+                                    disabled={item.inventory.quantity < 1}
+                                    key={item.id}
+                                    onSelect={() => {
+                                      setOpen(false);
+                                      onSelect?.(item);
+                                    }}
+                                    className="flex items-center gap-2 justify-between"
+                                  >
+                                    {item.name}
+                                    <div className="flex gap-2">
+                                      {item.inventory.quantity}
+                                      <span>{formatCurrency(item.price)}</span>
+                                      <ColorBadge colorMap={UNIT_COLOR}>
+                                        {item.unit}
+                                      </ColorBadge>
+                                    </div>
+                                  </CommandItem>
+                                </CommandGroup>
+                              ))
+                            );
+                          }}
+                        />
+                      </FormControl>
+                    </FormItem>
                   </>
                 );
               }}
@@ -257,7 +344,7 @@ export default function FullForm({
         accessorKey: "unit",
         header: "Unit",
         meta: {
-          className: "w-15",
+          className: "w-15 text-center",
           headerClassName: "text-center",
         },
         cell: ({ row }) => {
@@ -349,7 +436,12 @@ export default function FullForm({
 
   const isDelivery = useWatch({ control: form.control, name: "isDelivery" });
   return (
-    <>
+    <Modal
+      title="Create Sales Order"
+      isOpen={isOpen}
+      onOpenChange={() => onClose(false)}
+      size="xl"
+    >
       <Form {...form}>
         <form className="flex flex-col gap-4">
           <FormField
@@ -585,7 +677,47 @@ export default function FullForm({
           )}
         </form>
       </Form>
-      {/* {JSON.stringify(x)} */}
-    </>
+
+      <DialogFooter>
+        <Button
+          className="shadow-sm"
+          variant="secondary"
+          type="button"
+          onClick={(e) => {
+            console.log(form.formState.errors);
+            form.handleSubmit((props) =>
+              data
+                ? onSave({ ...props, status: ORDER_STATUS.DRAFT })
+                : onSubmit({ ...props, status: ORDER_STATUS.DRAFT }),
+            )(e);
+          }}
+        >
+          <Save /> Save as Draft
+        </Button>
+        <ConfirmDialog
+          title="Create Invoice"
+          description="Are you sure you want to create this invoice? This action cannot be undone."
+          onConfirm={(e) => {
+            e.preventDefault();
+            console.log(form.getValues(), form.formState.errors);
+            form
+              .handleSubmit((props) =>
+                data
+                  ? onSave({ ...props, status: ORDER_STATUS.RECEIVED })
+                  : onSubmit({ ...props, status: ORDER_STATUS.RECEIVED }),
+              )(e)
+              .catch((error) => {
+                console.error("Form submission error:", error);
+              });
+          }}
+        >
+          <Button className="shadow-sm">
+            <BanknoteArrowUp /> Create Order
+          </Button>
+        </ConfirmDialog>
+      </DialogFooter>
+
+      {/* {JSON.stringify(formData, null, 2)} */}
+    </Modal>
   );
 }

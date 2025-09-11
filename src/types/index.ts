@@ -11,7 +11,7 @@ import {
   goodReceiptCreateSchema,
   goodReceiptLineSchema,
   goodReceiptSchema,
-  salesOrderCreateSchema,
+  salesOrderFormSchema,
   salesOrderItemSchema,
   salesOrderSchema,
   signupSchema,
@@ -95,7 +95,7 @@ type GoodReceiptCreate = z.infer<typeof goodReceiptCreateSchema>;
 type GoodReceiptItem = z.infer<typeof goodReceiptLineSchema>;
 type CancelOrder = z.infer<typeof cancelOrderSchema>;
 type SalesOrder = z.infer<typeof salesOrderSchema>;
-type SalesOrderCreate = z.infer<typeof salesOrderCreateSchema>;
+type SalesOrderForm = z.infer<typeof salesOrderFormSchema>;
 type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
 type Inventory = z.infer<typeof inventorySchema>;
 type VariantTypes = z.infer<typeof variantTypesSchema>;
@@ -125,7 +125,7 @@ export type {
   GoodReceiptItem,
   CancelOrder,
   SalesOrder,
-  SalesOrderCreate,
+  SalesOrderForm,
   SalesOrderItem,
   Inventory,
   VariantTypes,

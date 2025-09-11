@@ -1,5 +1,6 @@
 import {
   BreakPack,
+  filterProps,
   Inventory,
   InventoryMovement,
   StockAdjustment,
@@ -12,7 +13,7 @@ export default class InventoryService extends BaseService<Inventory> {
     super({ ...props, url: "/inventory" });
   }
 
-  getMovements = async (data?: InventoryMovement) => {
+  getMovements = async (data?: filterProps) => {
     return await this.http.post(`${this.url}/movements`, data);
   };
 

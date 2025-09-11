@@ -14,7 +14,6 @@ export const ROUTES = {
   GOOD_RECEIPT_CREATE: "/good-receipt/new",
   GOOD_RECEIPT_DETAILS: "/good-receipt/:id",
   SALES_ORDERS: "/sales",
-  SALES_ORDERS_CREATE: "/sales/new",
   SALES_ORDERS_DETAILS: "/sales/:id",
   INVENTORY_MOVEMENTS: "/inventory/movements",
   STOCK_ADJUSTMENTS: "/stock-adjustments",

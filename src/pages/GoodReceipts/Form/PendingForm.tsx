@@ -93,10 +93,16 @@ export default function PendingForm({
           className: "text-right w-20",
         },
         cell: ({ row }) => (
-          <Controller
-            name={`goodReceiptLines.${row.index}.quantity`}
+          <FormField
             control={form.control}
-            render={({ field }) => <NumberInput {...field} />}
+            name={`goodReceiptLines.${row.index}.quantity`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <NumberInput {...field} />
+                </FormControl>
+              </FormItem>
+            )}
           />
         ),
       },

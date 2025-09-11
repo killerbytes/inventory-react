@@ -5,7 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { INVENTORY_MOVEMENT_TYPE_COLOR, ROUTES } from "@/utils/definitions";
+import {
+  INVENTORY_MOVEMENT_TYPE_COLOR,
+  PAGINATION,
+  ROUTES,
+} from "@/utils/definitions";
 import { InventoryMovement, PaginatedResponse } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatDateTime } from "@/utils/formatters";
@@ -13,24 +17,37 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
+import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
 export default function Movements() {
+  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
     data: [],
     total: 0,
     totalPages: 0,
     currentPage: 0,
   });
-  const getData = async () => {
-    const data = await inventoryServices.getMovements();
+  const [filter, setFilter] = React.useState({
+    limit: 100, // PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
+  });
+  const getData = React.useCallback(async () => {
+    const data = await inventoryServices.getMovements(filter);
     setData(data);
-  };
+  }, [filter]);
 
   React.useEffect(() => {
     getData();
-  }, []);
+  }, [getData]);
+
+  React.useEffect(() => {
+    setFilter((prev) => ({
+      ...prev,
+      page,
+    }));
+  }, [page]);
 
   const columns = React.useMemo<ColumnDef<InventoryMovement>[]>(
     () => [
@@ -40,9 +57,9 @@ export default function Movements() {
         cell: ({ row }) => {
           return (
             <Link
-              to={`${ROUTES.PRODUCTS}/${row.original.combination.productId}`}
+              to={`${ROUTES.PRODUCTS}/${row.original.combination?.productId}`}
             >
-              {row.original.combination.name}
+              {row.original.combination?.name}
             </Link>
           );
         },
@@ -126,6 +143,9 @@ export default function Movements() {
       </CardHeader>
       <CardContent>
         <DataTable data={data.data} columns={columns} showFooter={false} />
+        {data.totalPages > 1 && (
+          <Pager data={data} page={page} setPage={setPage} />
+        )}
       </CardContent>
     </Card>
   );
