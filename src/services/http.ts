@@ -1,9 +1,11 @@
 import { ROUTES } from "@/utils/definitions";
+import { ApiErrorResponse } from "@/types";
+import { toast } from "sonner";
 import axios from "axios";
 
 const baseURL = import.meta.env.VITE_API_URL;
 
-const errorParser = (error: any) => {
+const errorParser = (error) => {
   if (axios.isAxiosError(error) && error.response) {
     throw error.response.data;
   }
@@ -28,17 +30,26 @@ export default class Http {
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
-        const { status } = error.response;
+        try {
+          if (error.code === "ERR_NETWORK") {
+            throw error;
+          }
 
-        switch (status) {
-          case 401:
-          case 403:
-            localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
-            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+          const { status } = error.response || {};
+          switch (status) {
+            case 401:
+            case 403:
+              localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
 
-            return Promise.reject(error);
-          default:
-            return Promise.reject(error);
+              window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+
+              return Promise.reject(error);
+            default:
+              return Promise.reject(error);
+          }
+        } catch (error) {
+          const apiError = error as ApiErrorResponse;
+          toast.error(apiError.message);
         }
       },
     );

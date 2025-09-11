@@ -28,7 +28,7 @@ export default function Invoices() {
   const [toggle, handleToggle] = useToggle({
     addInvoiceModal: false,
   });
-  const [selected, setSelected] = React.useState();
+  const [selected, setSelected] = React.useState<Invoice>();
   const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
     data: [],
@@ -92,10 +92,12 @@ export default function Invoices() {
 
       {
         accessorKey: "invoiceDate",
+        header: "Invoice Date",
         cell: ({ row }) => formatDate(row.getValue("invoiceDate")),
       },
       {
         accessorKey: "dueDate",
+        header: "Due Date",
         cell: ({ row }) => formatDate(row.getValue("dueDate")),
       },
       {

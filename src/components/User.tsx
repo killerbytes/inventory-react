@@ -8,10 +8,10 @@ import {
 import { useGlobalStore } from "@/stores/global.store";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useUserStore } from "@/stores/user.store";
+import { ApiErrorResponse, User } from "@/types";
 import { ROUTES } from "@/utils/definitions";
 import { authServices } from "@/services";
 import { Link } from "react-router-dom";
-import { User } from "@/types";
 import React from "react";
 
 export default function UserIcon() {
@@ -29,8 +29,13 @@ export default function UserIcon() {
 
   React.useEffect(() => {
     const getData = async () => {
-      const user: User = await authServices.me();
-      setUser(user);
+      try {
+        const user: User = await authServices.me();
+        setUser(user);
+      } catch (error) {
+        // const apiError = error as ApiErrorResponse;
+        console.log(error);
+      }
     };
     if (localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`)) {
       getData();
