@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex-grow mx-auto flex flex-col h-screen bg-background m-2 rounded size-full">
+      <main className="flex-grow mx-auto flex flex-col h-screen bg-background m-2 rounded size-full relative">
         <div className="flex flex-col h-full m-2">
           {children}
 

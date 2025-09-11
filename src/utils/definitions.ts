@@ -38,6 +38,7 @@ export const GLOBAL_COLOR = {
 };
 
 export const INVENTORY_MOVEMENT_TYPE = {
+  ALL: "ALL",
   IN: "IN",
   OUT: "OUT",
   ADJUST: "ADJUST",
@@ -46,6 +47,13 @@ export const INVENTORY_MOVEMENT_TYPE = {
   BREAK_PACK: "BREAK_PACK",
   RE_PACK: "RE_PACK",
 };
+
+export const INVENTORY_MOVEMENT_TYPE_OPTIONS = Object.values(
+  INVENTORY_MOVEMENT_TYPE,
+).map((value) => ({
+  value,
+  label: formatLabel(value),
+}));
 
 export const INVENTORY_MOVEMENT_TYPE_COLOR = {
   IN: "bg-orange-500 text-white",

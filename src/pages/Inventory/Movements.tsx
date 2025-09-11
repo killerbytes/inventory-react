@@ -1,4 +1,10 @@
 import {
+  INVENTORY_MOVEMENT_TYPE_COLOR,
+  INVENTORY_MOVEMENT_TYPE_OPTIONS,
+  PAGINATION,
+  ROUTES,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
@@ -6,22 +12,32 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  INVENTORY_MOVEMENT_TYPE_COLOR,
-  PAGINATION,
-  ROUTES,
-} from "@/utils/definitions";
-import { InventoryMovement, PaginatedResponse } from "@/types";
+  ApiErrorResponse,
+  InventoryMovement,
+  PaginatedResponse,
+} from "@/types";
+import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatDateTime } from "@/utils/formatters";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
+import { Input } from "@/components/ui/input";
+import Select from "@/components/Select";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
 export default function Movements() {
+  const [range, setRange] = React.useState({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
+
+  const [loading, setLoading] = React.useState(true);
   const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
     data: [],
@@ -30,13 +46,31 @@ export default function Movements() {
     currentPage: 0,
   });
   const [filter, setFilter] = React.useState({
-    limit: 100, // PAGINATION.PAGE_SIZE,
+    limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
+    type: "ALL",
+    q: "",
   });
   const getData = React.useCallback(async () => {
-    const data = await inventoryServices.getMovements(filter);
-    setData(data);
-  }, [filter]);
+    setLoading(true);
+    try {
+      const payload = {
+        ...filter,
+        ...(range?.from && range?.to && { startDate: range.from }),
+        ...(range?.from && range?.to && { endDate: range.to }),
+        q: filter.q === "" ? undefined : filter.q,
+        type: filter.type === "ALL" ? undefined : filter.type,
+      };
+
+      const data = await inventoryServices.getMovements(payload);
+      setData(data);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      console.error("Error fetching data:", apiError.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [filter, range.from, range.to]);
 
   React.useEffect(() => {
     getData();
@@ -142,10 +176,42 @@ export default function Movements() {
         <CardAction></CardAction>
       </CardHeader>
       <CardContent>
-        <DataTable data={data.data} columns={columns} showFooter={false} />
-        {data.totalPages > 1 && (
-          <Pager data={data} page={page} setPage={setPage} />
-        )}
+        <div className="flex gap-2 justify-between">
+          <Input
+            placeholder="Search Product"
+            className="w-full mb-4"
+            value={filter.q}
+            onChange={(e) => {
+              setFilter((prev) => ({
+                ...prev,
+                q: e.target.value,
+                page: 1,
+              }));
+            }}
+          />
+          <DateRangePicker
+            className="mb-4"
+            value={range}
+            onChange={(e) => {
+              console.log(e);
+              setRange(e);
+            }}
+          />
+          <Select
+            options={INVENTORY_MOVEMENT_TYPE_OPTIONS}
+            value={filter.type}
+            onChange={(type) => {
+              setFilter(({ ...prev }) => ({ ...prev, type }));
+            }}
+          />
+        </div>
+        <>
+          <Loader isLoading={loading} />
+          <DataTable data={data.data} columns={columns} showFooter={false} />
+          {data.totalPages > 1 && (
+            <Pager data={data} page={page} setPage={setPage} />
+          )}
+        </>
       </CardContent>
     </Card>
   );
