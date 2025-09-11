@@ -1,5 +1,6 @@
 import {
   MODE_OF_PAYMENT_COLOR,
+  ORDER_STATUS,
   ORDER_STATUS_OPTIONS,
   PAGINATION,
   ROUTES,
@@ -17,14 +18,16 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { PaginatedResponse, SalesOrder } from "@/types";
-import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import SalesOrderModal from "./SalesOrderModal";
 import { salesOrderServices } from "@/services";
+import { useNavigate } from "react-router-dom";
+import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
 import { Plus } from "lucide-react";
@@ -39,7 +42,7 @@ export default function SalesOrders() {
     totalPages: 0,
     currentPage: 0,
   });
-
+  const [selected, setSelected] = React.useState<SalesOrder>();
   const [loading, setLoading] = React.useState(true);
   const [range, setRange] = React.useState({
     from: startOfMonth(new Date()),
@@ -50,6 +53,9 @@ export default function SalesOrders() {
     page: PAGINATION.PAGE,
     ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
     ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
+  });
+  const [toggle, handleToggle] = useToggle({
+    salesOrderModal: false,
   });
 
   React.useEffect(() => {
@@ -84,7 +90,7 @@ export default function SalesOrders() {
 
   React.useEffect(() => {
     getData();
-  }, []);
+  }, [getData]);
 
   React.useEffect(() => {
     setFilter((prev) => ({
@@ -173,11 +179,15 @@ export default function SalesOrders() {
             Sales Orders
           </CardTitle>
           <CardAction>
-            <Link to={`${ROUTES.SALES_ORDERS}/new`}>
-              <Button className="shadow-md">
-                <Plus /> Create Order
-              </Button>
-            </Link>
+            <Button
+              className="shadow-md"
+              onClick={() => {
+                setSelected(undefined);
+                handleToggle({ salesOrderModal: true });
+              }}
+            >
+              <Plus /> Create Order
+            </Button>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -210,9 +220,16 @@ export default function SalesOrders() {
               <DataTable
                 data={data.data || []}
                 columns={columns}
-                onRowClick={(item: SalesOrder) =>
-                  navigate(`${ROUTES.SALES_ORDERS}/${item.id}`)
-                }
+                onRowClick={(item: SalesOrder) => {
+                  if (item.status === ORDER_STATUS.DRAFT) {
+                    setSelected(item);
+                    handleToggle({
+                      salesOrderModal: true,
+                    });
+                  } else {
+                    navigate(`${ROUTES.SALES_ORDERS}/${item.id}`);
+                  }
+                }}
                 renderFooter={(data: SalesOrder[]) => {
                   return (
                     <TableRow>
@@ -237,6 +254,20 @@ export default function SalesOrders() {
           )}
         </CardContent>
       </Card>
+      {toggle.salesOrderModal && (
+        <SalesOrderModal
+          data={selected as SalesOrder}
+          isOpen={toggle.salesOrderModal}
+          onClose={(reload = false) => {
+            if (reload) {
+              getData();
+            }
+            handleToggle({
+              salesOrderModal: false,
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

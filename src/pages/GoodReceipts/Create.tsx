@@ -9,7 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ApiError, ApiErrorResponse, GoodReceiptCreate } from "@/types";
+import {
+  ApiError,
+  ApiErrorResponse,
+  GoodReceipt,
+  GoodReceiptCreate,
+} from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ERROR, ROUTES } from "@/utils/definitions";
 import { goodReceiptCreateSchema } from "@/schemas";
@@ -62,7 +67,7 @@ export default function Create() {
 
   async function onSubmit(values: GoodReceiptCreate) {
     try {
-      await goodReceiptServices.create(values);
+      await goodReceiptServices.create(values as GoodReceipt);
       toast.success(`Purchase Order created successfully`);
       localStorage.removeItem(
         `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
@@ -136,11 +141,15 @@ export default function Create() {
             <CardTitle className="flex items-center gap-2">
               <SidebarTrigger />
               <div className="bg-border h-5 w-[1px]"></div>
-              Create Purchase Order
+              Create Good Receipt
             </CardTitle>
             <CardAction>
               <Input
-                onChange={(e) => setJson(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setJson(e.currentTarget.value);
+                  }
+                }}
                 placeholder="Paste JSON here..."
               />
             </CardAction>

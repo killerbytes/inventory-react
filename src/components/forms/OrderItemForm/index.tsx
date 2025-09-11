@@ -46,15 +46,8 @@ function defaultRenderFooter(data: FooterValuesProps[], append: () => void) {
         </TableRow>
       )}
       <TableRow className="font-bold">
-        <TableCell colSpan={4}>Total</TableCell>
-        <TableCell className="text-right px-5">
-          {/* {total?.discount ? formatCurrency(total?.discount) : "-"} */}
-        </TableCell>
-        <TableCell></TableCell>
-        <TableCell className="text-right px-5 ">
-          {/* {formatCurrency(total?.purchasePrice)} */}
-        </TableCell>
-        <TableCell className="text-right">
+        <TableCell>Total</TableCell>
+        <TableCell colSpan={10} className="text-right">
           {formatCurrency(total?.amount - total?.discount)}
         </TableCell>
       </TableRow>

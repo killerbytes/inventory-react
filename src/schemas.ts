@@ -261,12 +261,10 @@ export const goodReceiptSchema = goodReceiptBaseSchema
 
 export const salesOrderItemSchema = z.object({
   id: z.coerce.number().nullish(),
-  combinationId: z.coerce
-    .number()
-    .min(1, {
-      message: "Product must be selected.",
-    })
-    .nullable(),
+  combinationId: z.coerce.number().min(1, {
+    message: "Product must be selected.",
+  }),
+
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
@@ -285,6 +283,7 @@ export const salesOrderItemSchema = z.object({
 
 const salesOrderBaseSchema = z.object({
   id: z.number().optional(),
+  status: z.string(),
   salesOrderNumber: z.string().nullish(),
   customerId: z.coerce.number().min(1, {
     message: "Customer is required.",
@@ -308,7 +307,7 @@ const salesOrderBaseSchema = z.object({
   }),
 });
 
-export const salesOrderCreateSchema = salesOrderBaseSchema.superRefine(
+export const salesOrderFormSchema = salesOrderBaseSchema.superRefine(
   (data, ctx) => {
     if (data.isDelivery && !data.deliveryDate) {
       ctx.addIssue({
@@ -329,7 +328,6 @@ export const salesOrderCreateSchema = salesOrderBaseSchema.superRefine(
 
 export const salesOrderSchema = salesOrderBaseSchema
   .extend({
-    status: z.string(),
     salesOrderStatusHistory: z.array(statusHistorySchema),
     totalAmount: z.string().optional(),
     customer: z.any(),

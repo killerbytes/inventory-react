@@ -7,7 +7,6 @@ import SalesDetails from "./pages/SalesOrders/Details";
 import BreakPacks from "./pages/Inventory/BreakPacks";
 import ProductDetails from "./pages/Products/Details";
 import InvoiceDetails from "./pages/Invoices/Details";
-import SalesCreate from "./pages/SalesOrders/Create";
 import Movements from "./pages/Inventory/Movements";
 import GoodReceipts from "./pages/GoodReceipts";
 import SalesOrders from "./pages/SalesOrders";
@@ -135,14 +134,6 @@ function App() {
             element={
               <Layout>
                 <Movements />
-              </Layout>
-            }
-          />
-          <Route
-            path={ROUTES.SALES_ORDERS_CREATE}
-            element={
-              <Layout>
-                <SalesCreate />
               </Layout>
             }
           />

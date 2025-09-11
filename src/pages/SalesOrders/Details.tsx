@@ -4,7 +4,7 @@ import {
   CategorizedProductList,
   Customer,
   SalesOrder,
-  SalesOrderCreate,
+  SalesOrderForm,
 } from "@/types";
 import {
   DropdownMenu,
@@ -48,15 +48,14 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { useForm, useWatch } from "react-hook-form";
-import { salesOrderCreateSchema } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
+import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import StaticDataTable from "./StaticDataTable";
 import { cx } from "class-variance-authority";
 import { useProductStore } from "@/stores";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
-import FullForm from "./FullForm";
 import { toast } from "sonner";
 import Static from "./Static";
 
@@ -71,8 +70,8 @@ export default function SalesOrderDetails() {
   const { setProducts } = useProductStore();
   const { customers, setCustomers } = useCustomerStore();
 
-  const form = useForm<SalesOrderCreate>({
-    resolver: zodResolver(salesOrderCreateSchema),
+  const form = useForm<SalesOrderForm>({
+    resolver: zodResolver(salesOrderFormSchema),
   });
 
   React.useEffect(() => {
@@ -111,7 +110,7 @@ export default function SalesOrderDetails() {
     }
   }, [customers.length, setCustomers]);
 
-  async function onReceiveOrder(values: SalesOrderCreate) {
+  async function onReceiveOrder(values: SalesOrderForm) {
     try {
       await salesOrderServices.update(Number(id), {
         ...values,
@@ -124,7 +123,7 @@ export default function SalesOrderDetails() {
       const apiError = error as ApiErrorResponse;
       apiError.errors.forEach((err) => {
         if (err.field) {
-          form.setError(err.field as keyof SalesOrderCreate, {
+          form.setError(err.field as keyof SalesOrderForm, {
             type: "server",
             message: err.message,
           });
@@ -166,9 +165,9 @@ export default function SalesOrderDetails() {
       toast.error("Submission failed - " + error?.response.data.error);
     }
   }
-  const data = useWatch<SalesOrder | SalesOrderCreate>({
+  const data = useWatch<SalesOrder | SalesOrderForm>({
     control: form.control,
-  }) as SalesOrder | SalesOrderCreate;
+  }) as SalesOrder | SalesOrderForm;
 
   return (
     <div className="flex flex-col gap-4">
@@ -259,7 +258,6 @@ export default function SalesOrderDetails() {
             <Static data={data} />
           ) : (
             <>
-              <FullForm form={form} />
               <div className="flex justify-end">
                 <ConfirmDialog
                   title={`Receive Order`}
