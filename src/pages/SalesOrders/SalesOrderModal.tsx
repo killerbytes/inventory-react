@@ -28,6 +28,7 @@ import {
   ORDER_STATUS,
   UNIT_COLOR,
 } from "@/utils/definitions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Controller, useFieldArray, useWatch, useForm } from "react-hook-form";
 import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
@@ -35,6 +36,7 @@ import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { customerServices, salesOrderServices } from "@/services";
 import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
 import { BanknoteArrowUp, Save, Trash2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -531,43 +533,52 @@ export default function SalesOrderModal({
               )}
             />
           </div>
-
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter some notes..."
-                    className="resize-none"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="internalNotes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Internal Notes</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter some internal notes not visible to customer..."
-                    className="resize-none"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <Tabs defaultValue="notes">
+            <TabsList>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="internalNotes">Internal Notes</TabsTrigger>
+            </TabsList>
+            <TabsContent value="notes">
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter some notes..."
+                        className="resize-none"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </TabsContent>
+            <TabsContent value="internalNotes">
+              <FormField
+                control={form.control}
+                name="internalNotes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Internal Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter some internal notes not visible to customer..."
+                        className="resize-none"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </TabsContent>
+          </Tabs>
           <FormField
             control={form.control}
             name="salesOrderItems"

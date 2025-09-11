@@ -37,7 +37,11 @@ export default function Modal({
       }}
     >
       <DialogContent
-        className={cx("w-full ", `${Modal.sizes[size]}`, className)}
+        className={cx(
+          "w-full max-h-[95%] overflow-auto",
+          `${Modal.sizes[size]}`,
+          className,
+        )}
         tabIndex={undefined}
       >
         <DialogHeader>
