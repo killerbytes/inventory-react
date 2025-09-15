@@ -411,7 +411,9 @@ export const stockAdjustmentSchema = z.object({
   referenceNo: z.string().nullish(),
   combinationId: z.number(),
   systemQuantity: z.number().nullish(),
-  newQuantity: z.number(),
+  newQuantity: z.number().min(0, {
+    message: "New Quantity must be at least 0.",
+  }),
   difference: z.number().nullish(),
   reason: z.string(),
   notes: z.string().nullish(),

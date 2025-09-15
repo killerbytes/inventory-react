@@ -212,7 +212,7 @@ export default function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <SidebarMenuItem key="Variant Templates">
+              {/* <SidebarMenuItem key="Variant Templates">
                 <SidebarMenuButton
                   asChild
                   // isActive={item.url === location.pathname}
@@ -222,7 +222,7 @@ export default function AppSidebar() {
                     <span>Variant Templates</span>
                   </Link>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
+              </SidebarMenuItem> */}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

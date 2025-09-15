@@ -106,7 +106,7 @@ export default function VariantTypesForm({
                       />
                     </div>
 
-                    {selected && variantTypes.includes(selected) && (
+                    {selected && variantTypes?.includes(selected) && (
                       <>
                         <ConfirmDialog
                           title={`Delete Variant`}
