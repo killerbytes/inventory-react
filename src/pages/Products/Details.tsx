@@ -373,7 +373,7 @@ export default function ProductEdit() {
             <TabsContent value="product_combination">
               <Card>
                 <CardHeader>
-                  <CardTitle>Product Variations</CardTitle>
+                  <CardTitle>Product Combinations</CardTitle>
                   <CardAction>
                     <Button
                       onClick={() => handleToggle({ combinationModal: true })}

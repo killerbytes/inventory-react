@@ -217,9 +217,37 @@ const goodReceiptBaseSchema = z.object({
   receiptDate: z.string(),
   goodReceiptStatusHistory: z.array(statusHistorySchema).nullish(),
 });
-export const goodReceiptCreateSchema = goodReceiptBaseSchema.superRefine(
-  () => {},
-);
+export const goodReceiptFormSchema = z.object({
+  supplierId: z.number(),
+  receiptDate: z.string(),
+  internalNotes: z.string().nullish(),
+  referenceNo: z.string().nullish(),
+  totalAmount: z.string().optional(),
+  goodReceiptLines: z.array(
+    z.object({
+      combinationId: z.number().min(1, { message: "Product is required." }),
+      quantity: z.number().min(1, { message: "Quantity is required." }),
+      purchasePrice: z.coerce
+        .number()
+        .superRefine((val, ctx) => {
+          if (isNaN(val)) {
+            ctx.addIssue({ code: "custom", message: "Amount is required" });
+          } else {
+            const decimalPlaces = (val.toString().split(".")[1] || "").length;
+            if (decimalPlaces > 2) {
+              ctx.addIssue({
+                code: "custom",
+                message: "Max 2 decimal places allowed",
+              });
+            }
+          }
+        })
+        .pipe(z.number().min(0)),
+      discount: z.coerce.number().nullish(),
+      discountNote: z.string().nullish(),
+    }),
+  ),
+});
 
 export const goodReceiptSchema = goodReceiptBaseSchema
   .extend({
@@ -383,7 +411,9 @@ export const stockAdjustmentSchema = z.object({
   referenceNo: z.string().nullish(),
   combinationId: z.number(),
   systemQuantity: z.number().nullish(),
-  newQuantity: z.number(),
+  newQuantity: z.number().min(0, {
+    message: "New Quantity must be at least 0.",
+  }),
   difference: z.number().nullish(),
   reason: z.string(),
   notes: z.string().nullish(),

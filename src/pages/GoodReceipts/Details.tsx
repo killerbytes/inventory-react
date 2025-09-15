@@ -37,8 +37,8 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { useForm, useWatch } from "react-hook-form";
-import { goodReceiptCreateSchema } from "@/schemas";
 import PendingOrderForm from "./Form/PendingForm";
+import { goodReceiptFormSchema } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
@@ -58,7 +58,7 @@ export default function Create() {
   });
 
   const form = useForm<GoodReceiptCreate>({
-    resolver: zodResolver(goodReceiptCreateSchema),
+    resolver: zodResolver(goodReceiptFormSchema),
   });
 
   async function onSaveOrder(form: GoodReceiptCreate) {

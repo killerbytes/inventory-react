@@ -17,8 +17,8 @@ import {
 } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ERROR, ROUTES } from "@/utils/definitions";
-import { goodReceiptCreateSchema } from "@/schemas";
 import PendingOrderForm from "./Form/PendingForm";
+import { goodReceiptFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
@@ -54,7 +54,7 @@ export default function Create() {
     : goodReceiptDefault;
 
   const form = useForm<GoodReceiptCreate>({
-    resolver: zodResolver(goodReceiptCreateSchema),
+    resolver: zodResolver(goodReceiptFormSchema),
     defaultValues,
   });
 

@@ -19,6 +19,7 @@ import {
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { stockAdjustmentSchema } from "@/schemas";
+import ConfirmDialog from "../ConfirmDialog";
 import { DialogFooter } from "../ui/dialog";
 import { useForm } from "react-hook-form";
 import { Textarea } from "../ui/textarea";
@@ -35,12 +36,18 @@ export default function StockAdjustmentModal({
   onClose,
   combinationId,
   onSubmit,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  combinationId: number;
+  onSubmit: (values: StockAdjustment) => Promise<void>;
 }) {
   const [data, setData] = React.useState<ProductCombinations>();
   const form = useForm<StockAdjustment>({
     resolver: zodResolver(stockAdjustmentSchema),
     defaultValues: {
       combinationId,
+      newQuantity: 0,
     },
   });
 
@@ -48,6 +55,7 @@ export default function StockAdjustmentModal({
     try {
       const data = await productCombinationServices.get(combinationId);
       setData(data);
+      form.setValue("newQuantity", data.inventory?.quantity);
     } catch (error: unknown) {
       const apiError = error as ApiErrorResponse;
       toast.error(apiError.message);
@@ -59,11 +67,10 @@ export default function StockAdjustmentModal({
   }, []);
 
   const handleSubmit = async (values: StockAdjustment) => {
-    console.log(values);
     try {
-      const res = await productCombinationServices.stockAdjustment(values);
-      console.log(res);
+      await productCombinationServices.stockAdjustment(values);
       toast.success("Stock Adjustment successful");
+      onClose();
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
@@ -84,14 +91,19 @@ export default function StockAdjustmentModal({
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} title="Stock Adjustment">
       <div className="flex flex-col gap-2">
-        <div className="flex gap-2 font-semibold">
-          {data?.name}
-          <span className="text-primary">
-            {data && data.inventory?.quantity}
-          </span>
-          <ColorBadge colorMap={UNIT_COLOR}>
-            {String(data?.product?.unit)}
-          </ColorBadge>
+        <div className="flex font-semibold items-center justify-between">
+          <div className="flex gap-2">
+            {data?.name}
+            <ColorBadge colorMap={UNIT_COLOR}>
+              {String(data?.product?.baseUnit)}
+            </ColorBadge>
+          </div>
+          <div className="flex gap-2">
+            Stock:
+            <span className="text-primary">
+              {data && data.inventory?.quantity}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -147,20 +159,22 @@ export default function StockAdjustmentModal({
           />
 
           <DialogFooter>
-            <Button
-              type="button"
-              onClick={(e) => {
+            <ConfirmDialog
+              title="Stock Adjustment"
+              onConfirm={(e) => {
                 e.preventDefault();
-                console.log(form.getValues(), form.formState.errors);
                 form
                   .handleSubmit(handleSubmit)(e)
                   .catch((error) => {
-                    console.error("Form submission error:", error);
+                    const apiError = error as ApiErrorResponse;
+                    console.error("Form submission error:", apiError.message);
                   });
               }}
             >
-              Submit Adjustment
-            </Button>
+              <Button type="button" className="shadow-sm">
+                Submit Adjustment
+              </Button>
+            </ConfirmDialog>
           </DialogFooter>
         </form>
       </Form>

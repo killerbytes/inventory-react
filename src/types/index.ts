@@ -8,7 +8,7 @@ import {
   loginSchema,
   productCombinationsSchema,
   productSchema,
-  goodReceiptCreateSchema,
+  goodReceiptFormSchema,
   goodReceiptLineSchema,
   goodReceiptSchema,
   salesOrderFormSchema,
@@ -91,7 +91,7 @@ type Product = z.infer<typeof productSchema>;
 type Supplier = z.infer<typeof supplierSchema>;
 type Customer = z.infer<typeof customerSchema>;
 type GoodReceipt = z.infer<typeof goodReceiptSchema>;
-type GoodReceiptCreate = z.infer<typeof goodReceiptCreateSchema>;
+type GoodReceiptCreate = z.infer<typeof goodReceiptFormSchema>;
 type GoodReceiptItem = z.infer<typeof goodReceiptLineSchema>;
 type CancelOrder = z.infer<typeof cancelOrderSchema>;
 type SalesOrder = z.infer<typeof salesOrderSchema>;

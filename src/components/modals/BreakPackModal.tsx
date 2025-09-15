@@ -122,8 +122,7 @@ export default function BreakPackModal({
                     No other units found with the same variation.
                   </AlertTitle>
                   <AlertDescription>
-                    Please add a new variation to the product or use the Clone
-                    to Unit function.
+                    Please add a new combination to the product
                   </AlertDescription>
                 </Alert>
               </>
@@ -131,44 +130,33 @@ export default function BreakPackModal({
 
             <div>
               <div className="flex gap-2 justify-between items-center">
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem className="mb-4">
-                      <FormLabel>Quantity</FormLabel>
-                      <NumberInput {...field} type="number" />
-                      {/* <FormDescription className="flex gap-1">
-                        {quantity.field.value}
-                        <ColorBadge colorMap={UNIT_COLOR}>
-                          {String(combination.unit)}
-                        </ColorBadge>
-                        <span>x</span>
-                        {combination.conversionFactor}
-                        <span>=</span>
-                        {quantity.field.value * combination.conversionFactor}
-                        <ColorBadge colorMap={UNIT_COLOR}>
-                          {String(selected.unit)}
-                        </ColorBadge>
-                      </FormDescription> */}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 {selected && (
-                  <div className="flex gap-2 items-center">
-                    {quantity.field.value}
-                    <ColorBadge colorMap={UNIT_COLOR}>
-                      {String(combination.unit)}
-                    </ColorBadge>
-                    <X size={18} />
-                    {combination.conversionFactor}
-                    <Equal size={18} />
-                    {quantity.field.value * combination.conversionFactor}
-                    <ColorBadge colorMap={UNIT_COLOR}>
-                      {String(selected.unit)}
-                    </ColorBadge>
-                  </div>
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="quantity"
+                      render={({ field }) => (
+                        <FormItem className="mb-4">
+                          <FormLabel>Quantity</FormLabel>
+                          <NumberInput {...field} type="number" />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex gap-2 items-center">
+                      {quantity.field.value}
+                      <ColorBadge colorMap={UNIT_COLOR}>
+                        {String(combination.unit)}
+                      </ColorBadge>
+                      <X size={18} />
+                      {combination.conversionFactor}
+                      <Equal size={18} />
+                      {quantity.field.value * combination.conversionFactor}
+                      <ColorBadge colorMap={UNIT_COLOR}>
+                        {String(selected.unit)}
+                      </ColorBadge>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -176,6 +164,7 @@ export default function BreakPackModal({
             <DialogFooter>
               <Button
                 type="button"
+                disabled={!selected}
                 onClick={(e) => {
                   e.preventDefault();
                   console.log(form.getValues(), form.formState.errors);
