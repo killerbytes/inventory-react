@@ -6,6 +6,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ApiError, ApiErrorResponse, Supplier } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import { supplierServices } from "@/services";
 import { supplierSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { Supplier } from "@/types";
 import { toast } from "sonner";
 
 export default function AddModal({
@@ -28,9 +28,6 @@ export default function AddModal({
 }) {
   const form = useForm<Supplier>({
     resolver: zodResolver(supplierSchema),
-    defaultValues: {
-      name: "aaaaakillerbytes",
-    },
   });
 
   async function onSubmit(values: Supplier) {
@@ -47,19 +44,20 @@ export default function AddModal({
       form.reset();
       onClose();
     } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(err.field as keyof Supplier, {
-            type: "server",
-            message: err.message,
-          });
-        }
-      });
-
-      toast.error("Submission failed");
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors?.forEach((err: ApiError) => {
+          if (err.field) {
+            console.log(err.field);
+            form.setError(err.field as keyof Supplier, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      } else {
+        toast.error("Submission failed");
+      }
     } finally {
       cb();
     }

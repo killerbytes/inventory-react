@@ -9,12 +9,12 @@ import {
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { userServices, type ApiError, type Signup } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ERROR } from "@/utils/definitions";
+import { userServices } from "@/services";
 import { ApiErrorResponse } from "@/types";
 import { signupSchema } from "@/schemas";
 import Modal from "@/components/Modal";
@@ -30,13 +30,6 @@ export default function AddModal({
 }) {
   const form = useForm<Signup>({
     resolver: zodResolver(signupSchema),
-    defaultValues: {
-      username: "killerbytes",
-      email: "joelcarlos02@gmail.com",
-      password: "1234",
-      confirmPassword: "1234",
-      name: "Joel Carlos",
-    },
   });
 
   async function onSubmit(values: Signup) {
