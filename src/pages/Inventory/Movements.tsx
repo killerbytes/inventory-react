@@ -3,6 +3,7 @@ import {
   INVENTORY_MOVEMENT_TYPE_OPTIONS,
   PAGINATION,
   ROUTES,
+  UNIT_COLOR,
 } from "@/utils/definitions";
 import {
   Card,
@@ -91,9 +92,13 @@ export default function Movements() {
         cell: ({ row }) => {
           return (
             <Link
+              className="flex gap-2 items-center"
               to={`${ROUTES.PRODUCTS}/${row.original.combination?.productId}`}
             >
               {row.original.combination?.name}
+              <ColorBadge colorMap={UNIT_COLOR}>
+                {String(row.original.combination?.unit)}
+              </ColorBadge>
             </Link>
           );
         },
@@ -116,37 +121,25 @@ export default function Movements() {
         },
       },
       {
-        accessorKey: "previous",
-        header: "Initial",
-        meta: {
-          headerClassName: "text-right",
-          className: "w-0 text-right",
-        },
+        accessorKey: "quantity",
       },
       {
-        accessorKey: "quantity",
-        header: "Movement",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right w-0",
+        accessorKey: "costPerUnit",
+      },
+      {
+        accessorKey: "totalCost",
+      },
+      {
+        accessorKey: "referenceId",
+        cell: ({ row }) => {
+          return (
+            <Link to={`${ROUTES.GOOD_RECEIPT}/${row.original.referenceId}`}>
+              {row.original.referenceType}
+            </Link>
+          );
         },
       },
 
-      {
-        accessorKey: "new", // "inventory.quantity",
-        header: "Inventory",
-        meta: {
-          headerClassName: "text-right",
-          className: "w-0 text-right",
-        },
-      },
-      {
-        accessorKey: "reason",
-        header: "Reason",
-        meta: {
-          className: "w",
-        },
-      },
       {
         accessorKey: "updatedAt",
         header: "Updated At",

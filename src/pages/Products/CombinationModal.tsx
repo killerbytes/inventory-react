@@ -41,9 +41,7 @@ const formSchema = z.object({
   conversionFactor: z.coerce.number().min(1, {
     message: "Conversion Factor must be at least 1.",
   }),
-  price: z.coerce.number().min(0.01, {
-    message: "Price must be at least 0.01.",
-  }),
+  price: z.coerce.number().nullish(),
   reorderLevel: z.coerce.number(),
   values: z.array(
     z
@@ -136,6 +134,7 @@ export default function CombinationModal({
   }, [getData]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log(values);
     try {
       await productCombinationServices.updateByProductId(
         Number(product.id),

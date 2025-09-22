@@ -34,6 +34,7 @@ const goodReceiptDefault = {
   // goodReceiptNumber: randomInt(1000000, 9999999).toString(),
   // supplierId: randomInt(1, 100),
   // modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
+  referenceNo: "",
   receiptDate: new Date().toISOString(),
   // dueDate: addWeeks(new Date(), 1).toISOString(),
   goodReceiptLines: Array.from({ length: 3 }, () => goodReceiptItemDefault),

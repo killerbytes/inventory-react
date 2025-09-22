@@ -86,6 +86,10 @@ export default function PendingForm({
         ),
       },
       {
+        header: "id",
+        accessorKey: "id",
+      },
+      {
         accessorKey: "quantity",
         header: "Quantity",
         meta: {
@@ -272,6 +276,16 @@ export default function PendingForm({
         ),
       },
       {
+        header: "Average Price",
+        cell: ({ row }) => {
+          const { quantity, purchasePrice, discount } = row.original;
+          const priceAfterDiscount =
+            (quantity * purchasePrice - discount) / quantity;
+
+          return formatCurrency(priceAfterDiscount);
+        },
+      },
+      {
         accessorKey: "amount",
         header: () => <div className="text-right">Amount</div>,
         meta: {
@@ -367,7 +381,6 @@ export default function PendingForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="goodReceiptLines"

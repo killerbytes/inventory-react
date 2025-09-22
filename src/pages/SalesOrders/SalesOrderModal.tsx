@@ -36,7 +36,6 @@ import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { customerServices, salesOrderServices } from "@/services";
 import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
 import { BanknoteArrowUp, Save, Trash2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";

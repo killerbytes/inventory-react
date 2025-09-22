@@ -25,6 +25,7 @@ import { mappedStatusHistory } from "@/lib/utils";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
 import React from "react";
@@ -47,6 +48,7 @@ export default function GoodReceipts() {
     status: "ALL",
     sort: "id",
     order: "DESC",
+    q: "",
     // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
     // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
@@ -243,29 +245,37 @@ export default function GoodReceipts() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-2 justify-between">
-            <div>
-              <DateRangePicker
-                className="mb-4"
-                value={range}
-                onChange={(e) => {
-                  console.log(e);
-                  setRange(e);
-                }}
-              />
-            </div>
-            <div className="w-1/4">
-              <Select
-                options={ORDER_STATUS_OPTIONS}
-                value={filter.status}
-                onChange={(selected) => {
-                  if (selected === "ALL") {
-                    setFilter(({ ...prev }) => ({ ...prev, status: "ALL" }));
-                  } else {
-                    setFilter((prev) => ({ ...prev, status: selected }));
-                  }
-                }}
-              />
-            </div>
+            <DateRangePicker
+              className="mb-4"
+              value={range}
+              onChange={(e) => {
+                console.log(e);
+                setRange(e);
+              }}
+            />
+            <Input
+              placeholder="Search Reference"
+              className="w-full mb-4"
+              value={filter.q}
+              onChange={(e) => {
+                setFilter((prev) => ({
+                  ...prev,
+                  q: e.target.value,
+                }));
+                setTableFilters((prev) => ({ ...prev, page: 1 }));
+              }}
+            />
+            <Select
+              options={ORDER_STATUS_OPTIONS}
+              value={filter.status}
+              onChange={(selected) => {
+                if (selected === "ALL") {
+                  setFilter(({ ...prev }) => ({ ...prev, status: "ALL" }));
+                } else {
+                  setFilter((prev) => ({ ...prev, status: selected }));
+                }
+              }}
+            />
           </div>
           {loading ? (
             <p>Loading...</p>

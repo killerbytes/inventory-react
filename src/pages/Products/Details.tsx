@@ -205,6 +205,13 @@ export default function ProductEdit() {
         },
       },
       {
+        accessorKey: "averagePrice",
+        header: "Average Price",
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return formatCurrency(row.original.inventory.averagePrice);
+        },
+      },
+      {
         header: "Quantity",
         accessorKey: "inventory.quantity",
         meta: {

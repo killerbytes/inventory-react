@@ -113,6 +113,20 @@ export default function PartialForm({
           return formatCurrency(row.original.purchasePrice);
         },
       },
+      {
+        header: "Average Price",
+        accessorKey: "averagePrice",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          const { quantity, purchasePrice, discount } = row.original;
+          const priceAfterDiscount =
+            (quantity * purchasePrice - discount) / quantity;
+          return formatCurrency(priceAfterDiscount);
+        },
+      },
 
       {
         header: "Amount",
@@ -136,25 +150,18 @@ export default function PartialForm({
           </div>
           <div className="mb-4 text-sm">
             <div>
-              {data?.modeOfPayment === MODE_OF_PAYMENT.CHECK && (
-                <>
-                  <div className="flex justify-between">
-                    <div className="font-medium w-[150px]">Check Number</div>
-                    {data?.checkNumber}
-                  </div>
-                  <div className="flex">
-                    <div className="font-medium w-[150px]">Due Date</div>
-                    <span className={cx("text-red-500 font-semibold")}>
-                      {data?.dueDate ? formatDate(data.dueDate) : "-"}
-                    </span>
-                  </div>
-                </>
-              )}
-
-              <div className="flex">
-                <div className="font-medium w-[150px]">Delivery Date</div>
-                {data?.deliveryDate ? formatDate(data.deliveryDate) : "-"}
-              </div>
+              <>
+                <div className="flex">
+                  <div className="font-medium w-[150px]">Reference No</div>
+                  <span>{data.referenceNo}</span>
+                </div>
+                <div className="flex">
+                  <div className="font-medium w-[150px]">Receipt Date</div>
+                  {data.receiptDate && (
+                    <span>{formatDate(data.receiptDate)}</span>
+                  )}
+                </div>
+              </>
             </div>
           </div>
         </div>
@@ -206,13 +213,10 @@ export default function PartialForm({
               return (
                 <TableRow>
                   <TableCell colSpan={4}>Total</TableCell>
-                  <TableCell className="text-right font-bold">
-                    {total?.discount ? formatCurrency(total?.discount) : "-"}
-                  </TableCell>
+                  <TableCell className="text-right font-bold"></TableCell>
                   <TableCell></TableCell>
-                  <TableCell className="text-right font-bold">
-                    {formatCurrency(total?.purchasePrice)}
-                  </TableCell>
+                  <TableCell className="text-right font-bold"></TableCell>
+                  <TableCell></TableCell>
                   <TableCell className="text-right font-bold">
                     {formatCurrency(total?.amount - total?.discount)}
                   </TableCell>

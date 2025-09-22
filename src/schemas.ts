@@ -201,7 +201,6 @@ export const statusHistorySchema = z.object({
 
 const goodReceiptBaseSchema = z.object({
   id: z.number().optional(),
-  goodReceiptNumber: z.string().nullish(),
   supplierId: z.coerce
     .number({
       required_error: "Supplier is required",
@@ -219,12 +218,12 @@ const goodReceiptBaseSchema = z.object({
 });
 export const goodReceiptFormSchema = z.object({
   supplierId: z.number(),
-  receiptDate: z.string(),
   internalNotes: z.string().nullish(),
-  referenceNo: z.string().nullish(),
+  referenceNo: z.string().min(1, { message: "Reference Number is required." }),
   totalAmount: z.string().optional(),
   goodReceiptLines: z.array(
     z.object({
+      id: z.number().nullish(),
       combinationId: z.number().min(1, { message: "Product is required." }),
       quantity: z.number().min(1, { message: "Quantity is required." }),
       purchasePrice: z.coerce
@@ -247,6 +246,7 @@ export const goodReceiptFormSchema = z.object({
       discountNote: z.string().nullish(),
     }),
   ),
+  receiptDate: z.string(),
 });
 
 export const goodReceiptSchema = goodReceiptBaseSchema
@@ -416,7 +416,9 @@ export const stockAdjustmentSchema = z.object({
   }),
   difference: z.number().nullish(),
   reason: z.string(),
-  notes: z.string().nullish(),
+  notes: z.string().min(1, {
+    message: "Notes is required.",
+  }),
   createdAt: z.string().nullish(),
   createdBy: z.number().nullish(),
 });

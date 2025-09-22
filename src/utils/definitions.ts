@@ -58,9 +58,9 @@ export const INVENTORY_MOVEMENT_TYPE_OPTIONS = Object.values(
 export const INVENTORY_MOVEMENT_TYPE_COLOR = {
   IN: "bg-orange-500 text-white",
   OUT: "bg-green-500 text-white",
-  ADJUST: "ADJUST",
+  ADJUSTMENT: "ADJUST",
   RETURN: "RETURN",
-  CANCEL_PURCHASE: "text-red-500 border-red-500 bg-red-100",
+  CANCELLATION: "text-red-500 border-red-500 bg-red-100",
   BREAK_PACK: "text-gray-500 border-gray-500 bg-gray-100",
   RE_PACK: "text-gray-100 border-gray-100 bg-gray-500",
 };
