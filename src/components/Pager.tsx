@@ -7,14 +7,26 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { PAGINATION } from "@/utils/definitions";
+import Select from "./Select";
+
+interface FilterProps {
+  limit: number;
+  page: number;
+}
 
 interface PagerProps {
   data: { totalPages: number };
-  page: number;
-  setPage: (newPage: number) => void;
+  filter: FilterProps;
+  setFilter: React.Dispatch<React.SetStateAction<FilterProps>>;
 }
 
-export default function Pager({ data, page, setPage }: PagerProps) {
+export default function Pager({ data, filter, setFilter }: PagerProps) {
+  const { page, limit } = filter;
+  const paginationLimits = PAGINATION.PAGE_SIZE_OPTIONS.map((i) => ({
+    label: i,
+    value: i,
+  }));
   const getVisiblePages = () => {
     const visiblePages = [];
     const maxVisible = 5; // Maximum visible page numbers
@@ -50,32 +62,59 @@ export default function Pager({ data, page, setPage }: PagerProps) {
 
     return visiblePages;
   };
-
   return (
-    <Pagination className="pt-4">
+    <Pagination className="pt-4 relative">
+      <div className="absolute left-0">
+        <Select
+          onChange={(e) => {
+            setFilter({
+              limit: Number(e),
+              page: 1,
+            });
+          }}
+          value={String(limit)}
+          options={paginationLimits}
+        />
+      </div>
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => setPage(Math.max(page - 1, 1))}
+            onClick={() =>
+              setFilter((prev) => ({
+                ...prev,
+                page: Math.max(filter.page - 1, 1),
+              }))
+            }
             isActive={page !== 1}
           />
         </PaginationItem>
-
         {getVisiblePages().map((p, index) => (
           <PaginationItem key={index}>
             {p === -1 ? (
               <PaginationEllipsis />
             ) : (
-              <PaginationLink onClick={() => setPage(p)} isActive={p === page}>
+              <PaginationLink
+                onClick={() =>
+                  setFilter((prev) => ({
+                    ...prev,
+                    page: p,
+                  }))
+                }
+                isActive={p === page}
+              >
                 {p}
               </PaginationLink>
             )}
           </PaginationItem>
         ))}
-
         <PaginationItem>
           <PaginationNext
-            onClick={() => setPage(Math.min(page + 1, data.totalPages))}
+            onClick={() =>
+              setFilter((prev) => ({
+                ...prev,
+                page: Math.min(filter.page + 1, data.totalPages),
+              }))
+            }
             isActive={page !== data.totalPages}
           />
         </PaginationItem>

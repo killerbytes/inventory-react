@@ -83,8 +83,8 @@ export const BUTTON_COLOR = {
 };
 export const PAGINATION = {
   PAGE: 1,
-  PAGE_SIZE: 15,
-  PAGE_SIZE_OPTIONS: [10, 20, 30],
+  PAGE_SIZE: 25,
+  PAGE_SIZE_OPTIONS: [25, 50, 100],
 };
 
 export const DATE_FORMAT = "MMM-dd-yy";

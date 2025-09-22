@@ -39,7 +39,6 @@ export default function Movements() {
   });
 
   const [loading, setLoading] = React.useState(true);
-  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
     data: [],
     total: 0,
@@ -76,13 +75,6 @@ export default function Movements() {
   React.useEffect(() => {
     getData();
   }, [getData]);
-
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
 
   const columns = React.useMemo<ColumnDef<InventoryMovement>[]>(
     () => [
@@ -202,7 +194,7 @@ export default function Movements() {
           <Loader isLoading={loading} />
           <DataTable data={data.data} columns={columns} showFooter={false} />
           {data.totalPages > 1 && (
-            <Pager data={data} page={page} setPage={setPage} />
+            <Pager data={data} filter={filter} setFilter={setFilter} />
           )}
         </>
       </CardContent>

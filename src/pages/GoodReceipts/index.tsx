@@ -305,13 +305,11 @@ export default function GoodReceipts() {
                   );
                 }}
               />
-              {data.totalPages > 1 && (
-                <Pager
-                  data={data}
-                  page={tableFilters.page}
-                  setPage={(page) => setTableFilters({ ...tableFilters, page })}
-                />
-              )}
+              <Pager
+                data={data}
+                filter={tableFilters}
+                setFilter={setTableFilters}
+              />
             </>
           )}
         </CardContent>
