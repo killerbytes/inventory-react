@@ -61,10 +61,10 @@ export default function Create() {
     resolver: zodResolver(goodReceiptFormSchema),
   });
 
-  async function onSaveOrder(form: GoodReceiptCreate) {
+  async function onSaveOrder(values: GoodReceiptCreate) {
     try {
       await goodReceiptServices.update(Number(id), {
-        ...form,
+        ...values,
         status: data.status,
       });
       toast.success(`Purchase Order saved successfully`);
@@ -140,7 +140,7 @@ export default function Create() {
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
-            Good Receipt Details
+            {data?.referenceNo}
           </CardTitle>
           <CardAction className="flex gap-2">
             <ColorBadge colorMap={STATUS_COLOR}>
