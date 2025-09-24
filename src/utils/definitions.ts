@@ -65,6 +65,13 @@ export const INVENTORY_MOVEMENT_TYPE_COLOR = {
   RE_PACK: "text-gray-100 border-gray-100 bg-gray-500",
 };
 
+export const INVENTORY_MOVEMENT_REFERENCE_TYPE = {
+  GOOD_RECEIPT: "GOOD_RECEIPT",
+  SALES_ORDER: "SALES_ORDER",
+  STOCK_ADJUSTMENT: "STOCK_ADJUSTMENT",
+  BREAK_PACK: "BREAK_PACK",
+};
+
 export const STATUS_COLOR = {
   DRAFT: "text-gray-600 border-gray-600 bg-gray-100",
   RECEIVED: "text-orange-600 border-orange-600 bg-orange-100",

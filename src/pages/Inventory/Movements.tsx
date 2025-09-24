@@ -1,4 +1,5 @@
 import {
+  INVENTORY_MOVEMENT_REFERENCE_TYPE,
   INVENTORY_MOVEMENT_TYPE_COLOR,
   INVENTORY_MOVEMENT_TYPE_OPTIONS,
   PAGINATION,
@@ -14,12 +15,13 @@ import {
 } from "@/components/ui/card";
 import {
   ApiErrorResponse,
+  filterProps,
   InventoryMovement,
   PaginatedResponse,
 } from "@/types";
+import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { formatDateTime } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -45,7 +47,7 @@ export default function Movements() {
     totalPages: 0,
     currentPage: 0,
   });
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     type: "ALL",
@@ -117,16 +119,33 @@ export default function Movements() {
       },
       {
         accessorKey: "costPerUnit",
+        cell: ({ row }) => {
+          return formatCurrency(row.original.costPerUnit);
+        },
       },
       {
         accessorKey: "totalCost",
+        cell: ({ row }) => {
+          return formatCurrency(row.original.totalCost);
+        },
       },
       {
         accessorKey: "referenceId",
         cell: ({ row }) => {
+          let route;
+          switch (row.original.referenceType) {
+            case INVENTORY_MOVEMENT_REFERENCE_TYPE.GOOD_RECEIPT:
+              route = ROUTES.GOOD_RECEIPT;
+              break;
+            case INVENTORY_MOVEMENT_REFERENCE_TYPE.STOCK_ADJUSTMENT:
+              route = ROUTES.GOOD_RECEIPT;
+              break;
+            default:
+              route = ROUTES.GOOD_RECEIPT;
+          }
           return (
-            <Link to={`${ROUTES.GOOD_RECEIPT}/${row.original.referenceId}`}>
-              {row.original.referenceType}
+            <Link to={`${route}/${row.original.referenceId}`}>
+              {row.original.referenceType}:{row.original.referenceId}
             </Link>
           );
         },

@@ -25,6 +25,7 @@ import { mappedStatusHistory } from "@/lib/utils";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
+import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
@@ -148,35 +149,7 @@ export default function GoodReceipts() {
           );
         },
       },
-      {
-        accessorKey: "createdAt",
-        header: ({ column }) => {
-          return (
-            <span
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                handleFilterChange({
-                  order: filter.order === "ASC" ? "DESC" : "ASC",
-                  sort: column.id,
-                });
-              }}
-            >
-              Date
-              {filter.sort === column.id && filter.order === "ASC" ? (
-                <ChevronUp />
-              ) : (
-                filter.sort === column.id && <ChevronDown />
-              )}
-            </span>
-          );
-        },
-        cell: ({ row }) => {
-          const statusHistoryMap = mappedStatusHistory(
-            row.original.goodReceiptStatusHistory ?? [],
-          );
-          return formatDate(statusHistoryMap[row.original.status]?.changedAt);
-        },
-      },
+
       {
         header: "User",
         cell: ({ row }) => {
@@ -188,7 +161,26 @@ export default function GoodReceipts() {
       },
       {
         accessorKey: "receiptDate",
-        header: "Delivery Date",
+        header: ({ column }) => {
+          return (
+            <span
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                handleFilterChange({
+                  order: filter.order === "ASC" ? "DESC" : "ASC",
+                  sort: column.id,
+                });
+              }}
+            >
+              Receipt Date
+              {filter.sort === column.id && filter.order === "ASC" ? (
+                <ChevronUp />
+              ) : (
+                filter.sort === column.id && <ChevronDown />
+              )}
+            </span>
+          );
+        },
         cell: ({ row }) => formatDate(row.getValue("receiptDate")),
       },
       {
@@ -216,9 +208,32 @@ export default function GoodReceipts() {
       },
       {
         accessorKey: "totalAmount",
-        header: () => "Total Amount",
+        header: ({ column }) => {
+          console.log(column.columnDef.meta?.headerClassName);
+          return (
+            <span
+              className={cx(
+                "flex items-center gap-2 cursor-pointer",
+                column.columnDef.meta?.headerClassName,
+              )}
+              onClick={() => {
+                handleFilterChange({
+                  order: filter.order === "ASC" ? "DESC" : "ASC",
+                  sort: column.id,
+                });
+              }}
+            >
+              Total Amount
+              {filter.sort === column.id && filter.order === "ASC" ? (
+                <ChevronUp />
+              ) : (
+                filter.sort === column.id && <ChevronDown />
+              )}
+            </span>
+          );
+        },
         meta: {
-          headerClassName: "text-right",
+          headerClassName: "justify-end",
           className: "text-right",
         },
         cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),

@@ -1,32 +1,30 @@
 import {
+  Customer,
+  filterProps,
+  Invoice,
+  PaginatedResponse,
+  PaymentApplication,
+} from "@/types";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Customer,
-  Invoice,
-  PaginatedResponse,
-  PaymentApplication,
-} from "@/types";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { Link, useNavigate } from "react-router";
 import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/utils/definitions";
 import { paymentServices } from "@/services";
-import useToggle from "@/hooks/useToggle";
 import Pager from "@/components/Pager";
+import { Link } from "react-router";
 import React from "react";
 
 export default function Payments() {
-  const [toggle, handleToggle] = useToggle({});
-  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
     data: [],
     total: 0,
@@ -35,11 +33,11 @@ export default function Payments() {
   });
 
   const [loading, setLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: 10,
     page: 1,
     sort: "createdAt",
-    order: "asc",
+    order: "ASC",
     q: "",
   });
 
@@ -58,13 +56,6 @@ export default function Payments() {
   React.useEffect(() => {
     getData();
   }, [filter, getData]);
-
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
 
   const columns: ColumnDef<Invoice>[] = React.useMemo(
     () => [
@@ -166,7 +157,7 @@ export default function Payments() {
                 );
               }}
             />
-            <Pager data={data} page={page} setPage={setPage} />
+            <Pager data={data} filter={filter} setFilter={setFilter} />
           </>
         )}
       </CardContent>

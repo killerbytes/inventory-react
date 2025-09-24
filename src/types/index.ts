@@ -44,7 +44,7 @@ export interface ApiErrorResponse {
 }
 
 export type PaginatedResponse<T extends object> = {
-  data: T;
+  data: T[];
   total: number;
   totalPages: number;
   currentPage: number;
@@ -59,8 +59,15 @@ export interface filterProps {
   limit: number;
   page: number;
   q?: string;
+  type?: string;
   sort?: string;
   order?: "ASC" | "DESC";
+}
+
+export interface pagerProps {
+  data: { totalPages: number };
+  filter: filterProps;
+  setFilter: React.Dispatch<React.SetStateAction<filterProps>>;
 }
 
 export interface CategorizedItemList<T> {

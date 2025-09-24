@@ -5,9 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Customer, filterProps, Invoice, PaginatedResponse } from "@/types";
 import { PAGINATION, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { Customer, Invoice, PaginatedResponse } from "@/types";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
@@ -29,7 +29,6 @@ export default function Invoices() {
     addInvoiceModal: false,
   });
   const [selected, setSelected] = React.useState<Invoice>();
-  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
     data: [],
     total: 0,
@@ -38,11 +37,11 @@ export default function Invoices() {
   });
 
   const [loading, setLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "createdAt",
-    order: "asc",
+    order: "DESC",
     q: "",
   });
 
@@ -61,13 +60,6 @@ export default function Invoices() {
   React.useEffect(() => {
     getData();
   }, [filter, getData]);
-
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
 
   const columns: ColumnDef<Invoice>[] = React.useMemo(
     () => [
@@ -184,7 +176,7 @@ export default function Invoices() {
                 );
               }}
             />
-            <Pager data={data} page={page} setPage={setPage} />
+            <Pager data={data} filter={filter} setFilter={setFilter} />
           </>
         )}
       </CardContent>

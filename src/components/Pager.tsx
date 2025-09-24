@@ -8,20 +8,10 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { PAGINATION } from "@/utils/definitions";
+import { pagerProps } from "@/types";
 import Select from "./Select";
 
-interface FilterProps {
-  limit: number;
-  page: number;
-}
-
-interface PagerProps {
-  data: { totalPages: number };
-  filter: FilterProps;
-  setFilter: React.Dispatch<React.SetStateAction<FilterProps>>;
-}
-
-export default function Pager({ data, filter, setFilter }: PagerProps) {
+export default function Pager({ data, filter, setFilter }: pagerProps) {
   const { page, limit } = filter;
   const paginationLimits = PAGINATION.PAGE_SIZE_OPTIONS.map((i) => ({
     label: i,
