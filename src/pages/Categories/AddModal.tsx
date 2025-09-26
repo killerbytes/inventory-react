@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
 import { ApiError, Category } from "@/types";
+import { useCategoryStore } from "@/stores";
 import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
@@ -29,7 +30,7 @@ export default function AddModal({
   cb: () => void;
   selected?: Category;
 }) {
-  console.log(selected);
+  const { invalidate } = useCategoryStore();
   const form = useForm<Category>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -44,6 +45,7 @@ export default function AddModal({
       await categoryServices.create({ ...values, parentId: selected?.id });
       toast.success(`Submitted: ${values.name} (${values.description})`);
       form.reset();
+      invalidate();
       onClose();
     } catch (error) {
       const { errors } = getErrorMessage(error);

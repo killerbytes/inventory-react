@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
+import { useCategoryStore } from "@/stores";
 import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
@@ -31,6 +32,7 @@ export default function EditModal({
   cb: () => void;
   data: Category;
 }) {
+  const { invalidate } = useCategoryStore();
   const form = useForm<Category>({
     resolver: zodResolver(categorySchema),
     defaultValues: { ...data },
@@ -39,9 +41,10 @@ export default function EditModal({
   async function onSubmit(values: Category) {
     try {
       const { name, description } = values;
-      await categoryServices.update(String(data.id), { name, description });
+      await categoryServices.update(Number(data.id), { name, description });
       toast.success(`Submitted: ${values.name}`);
       form.reset();
+      invalidate();
       onClose();
     } catch (error) {
       const { errors } = getErrorMessage(error as ApiErrorResponse);
@@ -61,7 +64,7 @@ export default function EditModal({
 
   async function handleRemove() {
     try {
-      await categoryServices.delete(data.id);
+      await categoryServices.delete(Number(data.id));
       toast.success(`Deleted: ${data.name}`);
       onClose();
     } catch {

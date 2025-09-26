@@ -7,10 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { filterProps, PaginatedResponse, User } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { PaginatedResponse, User } from "@/types";
 import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,6 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 
 export default function Users() {
-  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<User[]>>({
     data: [],
     total: 0,
@@ -32,11 +31,11 @@ export default function Users() {
   });
   const [selectedUser, setSelectedUser] = React.useState<User | null>();
   const [loading, setLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "id",
-    order: "asc",
+    order: "ASC",
     q: "",
   });
   const [toggle, handleToggle] = useToggle({
@@ -59,13 +58,6 @@ export default function Users() {
   React.useEffect(() => {
     getData();
   }, [filter, getData]);
-
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
 
   const columns = React.useMemo<ColumnDef<User>[]>(
     () => [
@@ -166,7 +158,7 @@ export default function Users() {
             <>
               <DataTable data={data?.data || []} columns={columns} />
 
-              <Pager data={data} page={page} setPage={setPage} />
+              <Pager data={data} filter={filter} setFilter={setFilter} />
             </>
           )}
         </CardContent>

@@ -15,8 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Customer, filterProps, PaginatedResponse } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Customer, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { customerServices } from "@/services";
@@ -27,7 +27,6 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 
 export default function Customers() {
-  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
     data: [],
     total: 0,
@@ -37,11 +36,11 @@ export default function Customers() {
 
   const [selected, setSelected] = React.useState<Customer | null>();
   const [loading, setLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: 10,
     page: 1,
     sort: "name",
-    order: "asc",
+    order: "ASC",
     q: "",
   });
   const [toggle, handleToggle] = useToggle({
@@ -65,18 +64,11 @@ export default function Customers() {
     getData();
   }, [filter, getData]);
 
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
-
   const requestSort = (sort: string) => {
     setFilter((prev) => ({
       ...prev,
       sort,
-      order: prev.sort === sort && prev.order === "asc" ? "desc" : "asc",
+      order: prev.sort === sort && prev.order === "ASC" ? "DESC" : "ASC",
     }));
   };
   const columns = [
@@ -151,7 +143,7 @@ export default function Customers() {
                         {column.title}
                         {filter.sort === column.key && (
                           <span className="ml-2 text-xs text-muted-foreground">
-                            {filter.order === "asc" ? "↑" : "↓"}
+                            {filter.order === "ASC" ? "↑" : "↓"}
                           </span>
                         )}
                       </TableHead>
@@ -189,7 +181,7 @@ export default function Customers() {
                   ))}
                 </TableBody>
               </Table>
-              <Pager data={data} page={page} setPage={setPage} />
+              <Pager data={data} filter={filter} setFilter={setFilter} />
             </>
           )}
         </CardContent>

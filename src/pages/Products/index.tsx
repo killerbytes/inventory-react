@@ -17,10 +17,10 @@ import {
   productServices,
 } from "@/services";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
+import { CategorizedProductList, PaginatedResponse, Product } from "@/types";
 import { useCategoryStore, useProductCombinationStore } from "@/stores";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
-import { CategorizedProductList, PaginatedResponse } from "@/types";
 import { formatCurrency, getScore } from "@/utils/formatters";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
@@ -39,10 +39,16 @@ import React, { Fragment } from "react";
 
 export default function Products() {
   const navigate = useNavigate();
-  const [category, setCategory] = React.useState<number>();
-  const { categories, setCategories } = useCategoryStore();
-  const { productCombinations, setProductsCombinations } =
-    useProductCombinationStore();
+  const {
+    hasLoaded: categoryHasLoaded,
+    categories,
+    setCategories,
+  } = useCategoryStore();
+  const {
+    hasLoaded: productCombinationsHasLoaded,
+    productCombinations,
+    setProductsCombinations,
+  } = useProductCombinationStore();
   const [query, setQuery] = React.useState("");
   const [data, setData] = React.useState<
     PaginatedResponse<CategorizedProductList[]>
@@ -91,22 +97,24 @@ export default function Products() {
   }, [getData]);
 
   React.useEffect(() => {
-    // if (categories?.length === 0) {
     const getData = async () => {
-      const res = await categoryServices.list();
-      setCategories(res);
+      if (!categoryHasLoaded) {
+        const res = await categoryServices.list();
+        setCategories(res);
+      }
     };
     getData();
-    // }
-  }, []);
+  }, [categoryHasLoaded, setCategories]);
 
   React.useEffect(() => {
     const getData = async () => {
-      const data = await productCombinationServices.list();
-      setProductsCombinations(data);
+      if (!productCombinationsHasLoaded) {
+        const data = await productCombinationServices.list();
+        setProductsCombinations(data);
+      }
     };
     getData();
-  }, [setProductsCombinations]);
+  }, [productCombinationsHasLoaded, setProductsCombinations]);
 
   return (
     <>
@@ -280,7 +288,7 @@ export default function Products() {
                           </div>
 
                           <div className="flex gap-2 justify-start items-center">
-                            {i.products.map((product) => (
+                            {i.products.map((product: Product) => (
                               <ProductItem item={product} />
                             ))}
                           </div>
@@ -321,7 +329,7 @@ export default function Products() {
       </Card>
       {toggle.createProductModal && (
         <CreateProductModal
-          categoryId={category}
+          // categoryId={category}
           isOpen={true}
           onClose={() => {
             handleToggle({ createProductModal: false });

@@ -18,13 +18,14 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useProductCombinationStore } from "@/stores";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SelectItem } from "@/components/ui/select";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { variantValuesSchema } from "@/schemas";
 import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
@@ -43,6 +44,8 @@ const formSchema = z.object({
   }),
   price: z.coerce.number().nullish(),
   reorderLevel: z.coerce.number(),
+  isBreakPack: z.boolean(),
+  isActive: z.boolean(),
   values: z.array(
     z
       .object({
@@ -64,6 +67,7 @@ export default function CombinationModal({
   onClose: () => void;
   isOpen: boolean;
 }) {
+  const { invalidate } = useProductCombinationStore();
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const form = useForm<{
     combinations: z.infer<typeof formSchema>[];
@@ -134,12 +138,12 @@ export default function CombinationModal({
   }, [getData]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
     try {
       await productCombinationServices.updateByProductId(
         Number(product.id),
         values as ProductCombinations[],
       );
+      invalidate();
       toast.success("Variants saved successfully");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
@@ -311,6 +315,68 @@ export default function CombinationModal({
           );
         },
       },
+      {
+        accessorKey: "isBreakPack",
+        header: "isBreakPack",
+        meta: {
+          className: "text-right w-0",
+        },
+
+        cell: ({ row }) => {
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.isBreakPack`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Checkbox
+                      {...field}
+                      tabIndex={-1}
+                      checked={field.value}
+                      onCheckedChange={(value) => {
+                        field.onChange(value);
+                      }}
+                      value={String(field.value)}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "isActive",
+        header: "isActive",
+        meta: {
+          className: "text-right w-0",
+        },
+
+        cell: ({ row }) => {
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.isActive`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Checkbox
+                      {...field}
+                      tabIndex={-1}
+                      checked={field.value}
+                      onCheckedChange={(value) => {
+                        field.onChange(value);
+                      }}
+                      value={String(field.value)}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
       // {
       //   header: () => <div className="text-center">Qty</div>,
       //   accessorKey: "inventory.quantity",
@@ -348,7 +414,7 @@ export default function CombinationModal({
               <FormItem className="mb-2">
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
-                  <ScrollArea className="h-[280px]  rounded-md border">
+                  <ScrollArea className="rounded-md border">
                     <DataTable
                       data={fields}
                       columns={columns}

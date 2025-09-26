@@ -28,7 +28,9 @@ type DataTableProps<T> = {
   columns: ColumnDef<T>[];
   data: T[];
   defaultColumn?: ColumnDef<T>;
-  meta?: any;
+  meta?: {
+    disabledRow?: string;
+  };
   emptyText?: string;
   tableClassname?: string;
   className?: string;
@@ -162,7 +164,16 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  className={cx({ "cursor-pointer": onRowClick })}
+                  className={cx(
+                    { "cursor-pointer": onRowClick },
+                    meta?.disabledRow
+                      ? {
+                          "opacity-50 pointer-events-none bg-gray-100":
+                            meta?.disabledRow &&
+                            !row.original[meta.disabledRow as keyof T],
+                        }
+                      : {},
+                  )}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
