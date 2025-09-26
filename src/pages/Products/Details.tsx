@@ -13,14 +13,6 @@ import {
   PageHeaderTitle,
 } from "@/components/PageHeader";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Copy,
   EllipsisVertical,
   PackageOpen,
@@ -29,6 +21,13 @@ import {
   Save,
   Search,
 } from "lucide-react";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   categoryServices,
   productCombinationServices,
@@ -44,14 +43,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
 import { useCategoryStore, useProductCombinationStore } from "@/stores";
+import { CommandGroup, CommandItem } from "@/components/ui/command";
 import PriceHistoryTable from "@/pages/Products/PriceHistoryTable";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import { formatCurrency, getScore } from "@/utils/formatters";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
-import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
 import ColorBadge from "@/components/ColorBadge";
@@ -212,7 +212,7 @@ export default function ProductEdit() {
         accessorKey: "averagePrice",
         header: "Average Price",
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return formatCurrency(row.original.inventory.averagePrice);
+          return formatCurrency(Number(row.original.inventory.averagePrice));
         },
       },
       {
@@ -296,6 +296,40 @@ export default function ProductEdit() {
             onSelect={(item) =>
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`)
             }
+            renderOptions={({ items, open, setOpen, onSelect, search }) => {
+              return (
+                open &&
+                items
+                  .map((item) => ({
+                    item,
+                    score: getScore(item.name, search),
+                  }))
+                  .filter(({ score }) => score > 0)
+                  .sort((a, b) => b.score - a.score)
+                  .map(({ item }) => (
+                    <CommandGroup key={item.id}>
+                      <CommandItem
+                        value={String(item.name + item.unit)}
+                        key={item.id}
+                        onSelect={() => {
+                          setOpen(false);
+                          onSelect?.(item);
+                        }}
+                        className="flex items-center gap-2 "
+                      >
+                        <ColorBadge colorMap={UNIT_COLOR}>
+                          {item.unit}
+                        </ColorBadge>
+
+                        {item.name}
+                        <div className="flex gap-2 ml-auto">
+                          <span>{formatCurrency(item.price)}</span>
+                        </div>
+                      </CommandItem>
+                    </CommandGroup>
+                  ))
+              );
+            }}
           >
             <Button variant="outline" size="sm">
               <Search />
