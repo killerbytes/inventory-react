@@ -68,7 +68,11 @@ import { toast } from "sonner";
 
 export default function ProductEdit() {
   const { id } = useParams();
-  const { categories, setCategories } = useCategoryStore();
+  const {
+    hasLoaded: categoryHasLoaded,
+    categories,
+    setCategories,
+  } = useCategoryStore();
   const productCombinationStore = useProductCombinationStore();
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
     [],
@@ -92,11 +96,11 @@ export default function ProductEdit() {
     stockAdjustmentModal: false,
     createProductModal: false,
   });
-
   async function onSubmit(values: Product) {
     try {
       await productServices.update(Number(id), values);
       getData();
+      productCombinationStore.invalidate();
       toast.success("Product updated successfully");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
@@ -149,13 +153,13 @@ export default function ProductEdit() {
 
   React.useEffect(() => {
     const getData = async () => {
-      const data = await categoryServices.list();
-      setCategories(data);
+      if (!categoryHasLoaded) {
+        const data = await categoryServices.list();
+        setCategories(data);
+      }
     };
-    if (categories.length === 0) {
-      getData();
-    }
-  }, [categories.length, setCategories]);
+    getData();
+  }, [categories.length, categoryHasLoaded, setCategories]);
 
   React.useEffect(() => {
     const getData = async () => {
@@ -394,11 +398,14 @@ export default function ProductEdit() {
                   </CardAction>
                 </CardHeader>
                 <CardContent className="grid gap-6">
-                  <DataTable data={combinations || []} columns={columns} />
+                  <DataTable
+                    data={combinations || []}
+                    columns={columns}
+                    meta={{
+                      disabledRow: "isActive",
+                    }}
+                  />
                 </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button>Save changes</Button>
-                </CardFooter>
               </Card>
             </TabsContent>
             <TabsContent value="variants">

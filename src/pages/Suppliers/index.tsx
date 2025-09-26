@@ -13,8 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { filterProps, PaginatedResponse, Supplier } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { PaginatedResponse, Supplier } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supplierServices } from "@/services";
@@ -26,7 +26,6 @@ import AddModal from "./AddModal";
 import React from "react";
 
 export default function Suppliers() {
-  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<Supplier[]>>({
     data: [],
     total: 0,
@@ -36,11 +35,11 @@ export default function Suppliers() {
 
   const [selected, setSelected] = React.useState<Supplier | null>();
   const [loading, setLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: 10,
     page: 1,
     sort: "name",
-    order: "asc",
+    order: "ASC",
     q: "",
   });
   const [toggle, handleToggle] = useToggle({
@@ -64,18 +63,11 @@ export default function Suppliers() {
     getData();
   }, [filter, getData]);
 
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
-
   const requestSort = (sort: string) => {
     setFilter((prev) => ({
       ...prev,
       sort,
-      order: prev.sort === sort && prev.order === "asc" ? "desc" : "asc",
+      order: prev.sort === sort && prev.order === "ASC" ? "DESC" : "ASC",
     }));
   };
   const columns = [
@@ -188,7 +180,7 @@ export default function Suppliers() {
                   ))}
                 </TableBody>
               </Table>
-              <Pager data={data} page={page} setPage={setPage} />
+              <Pager data={data} filter={filter} setFilter={setFilter} />
             </>
           )}
         </CardContent>

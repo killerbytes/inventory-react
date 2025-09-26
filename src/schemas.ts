@@ -82,6 +82,7 @@ export const inventorySchema = z.object({
   quantity: z.coerce.number(),
   parentId: z.number().nullish(),
   updatedAt: z.string().nullish(),
+  averagePrice: z.coerce.number().nullish(),
 });
 
 export const variantValuesSchema = z.object({
@@ -125,6 +126,8 @@ export const productCombinationsSchema = z.object({
     message: "Price must be at least 0.01.",
   }),
   reorderLevel: z.coerce.number(),
+  isBreakPack: z.boolean().nullish(),
+  isActive: z.boolean().nullish(),
   values: z.array(variantValuesSchema),
   inventory: inventorySchema,
   product: productBaseSchema,
