@@ -13,6 +13,7 @@ import Select from "./Select";
 
 export default function Pager({ data, filter, setFilter }: pagerProps) {
   const { page, limit } = filter;
+  const pageCount = data.totalPages;
   const paginationLimits = PAGINATION.PAGE_SIZE_OPTIONS.map((i) => ({
     label: i,
     value: i,
@@ -21,12 +22,12 @@ export default function Pager({ data, filter, setFilter }: pagerProps) {
     const visiblePages = [];
     const maxVisible = 5; // Maximum visible page numbers
 
-    if (data.totalPages <= maxVisible) {
-      return Array.from({ length: data.totalPages }, (_, i) => i + 1);
+    if (pageCount <= maxVisible) {
+      return Array.from({ length: pageCount }, (_, i) => i + 1);
     }
 
     let start = Math.max(1, page - Math.floor(maxVisible / 2));
-    const end = Math.min(data.totalPages, start + maxVisible - 1);
+    const end = Math.min(pageCount, start + maxVisible - 1);
 
     if (end - start + 1 < maxVisible) {
       start = Math.max(1, end - maxVisible + 1);
@@ -43,11 +44,11 @@ export default function Pager({ data, filter, setFilter }: pagerProps) {
       visiblePages.push(i);
     }
 
-    if (end < data.totalPages) {
-      if (end < data.totalPages - 1) {
+    if (end < pageCount) {
+      if (end < pageCount - 1) {
         visiblePages.push(-1); // -1 represents ellipsis
       }
-      visiblePages.push(data.totalPages);
+      visiblePages.push(pageCount);
     }
 
     return visiblePages;
@@ -69,6 +70,9 @@ export default function Pager({ data, filter, setFilter }: pagerProps) {
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
+            href="#"
+            aria-disabled={page === 1}
+            className={page === 1 ? "pointer-events-none opacity-50" : ""}
             onClick={() =>
               setFilter((prev) => ({
                 ...prev,
@@ -99,13 +103,18 @@ export default function Pager({ data, filter, setFilter }: pagerProps) {
         ))}
         <PaginationItem>
           <PaginationNext
+            href="#"
+            aria-disabled={page === pageCount}
+            className={
+              page === pageCount ? "pointer-events-none opacity-50" : ""
+            }
             onClick={() =>
               setFilter((prev) => ({
                 ...prev,
-                page: Math.min(filter.page + 1, data.totalPages),
+                page: Math.min(filter.page + 1, pageCount),
               }))
             }
-            isActive={page !== data.totalPages}
+            isActive={page !== pageCount}
           />
         </PaginationItem>
       </PaginationContent>
