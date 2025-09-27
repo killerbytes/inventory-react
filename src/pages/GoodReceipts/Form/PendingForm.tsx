@@ -150,10 +150,10 @@ export default function PendingForm({
                       name="goodReceiptLines"
                       onChange={(value) => {
                         field.onChange(value.id);
-                        form.setValue(
-                          `goodReceiptLines.${row.index}.purchasePrice`,
-                          value.price,
-                        );
+                        // form.setValue(
+                        //   `goodReceiptLines.${row.index}.purchasePrice`,
+                        //   value.price,
+                        // );
 
                         setTimeout(() => {
                           if (row.index + 1 === fields.length) {
