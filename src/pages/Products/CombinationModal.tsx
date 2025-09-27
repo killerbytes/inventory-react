@@ -44,8 +44,8 @@ const formSchema = z.object({
   }),
   price: z.coerce.number().nullish(),
   reorderLevel: z.coerce.number(),
-  isBreakPack: z.boolean(),
-  isActive: z.boolean(),
+  isBreakPack: z.boolean().nullish(),
+  isActive: z.boolean().nullish(),
   values: z.array(
     z
       .object({
@@ -445,7 +445,7 @@ export default function CombinationModal({
                   ...productCombinationDefaultValue,
                   unit,
                 });
-                form.setFocus("combinations.3.values");
+                // form.setFocus("combinations.3.values");
               }}
             >
               <Plus />

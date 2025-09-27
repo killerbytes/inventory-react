@@ -158,6 +158,7 @@ export default function Payments() {
               }}
             />
             <Pager data={data} filter={filter} setFilter={setFilter} />
+            <Pager data={data} filter={filter} setFilter={setFilter} />
           </>
         )}
       </CardContent>

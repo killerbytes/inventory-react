@@ -160,6 +160,15 @@ export default function GoodReceipts() {
         },
       },
       {
+        header: "User",
+        cell: ({ row }) => {
+          const statusHistoryMap = mappedStatusHistory(
+            row.original.goodReceiptStatusHistory ?? [],
+          );
+          return statusHistoryMap[row.original.status]?.user.username;
+        },
+      },
+      {
         accessorKey: "receiptDate",
         header: ({ column }) => {
           return (
@@ -181,6 +190,7 @@ export default function GoodReceipts() {
             </span>
           );
         },
+
         cell: ({ row }) => formatDate(row.getValue("receiptDate")),
       },
       {
@@ -260,14 +270,6 @@ export default function GoodReceipts() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-2 justify-between">
-            <DateRangePicker
-              className="mb-4"
-              value={range}
-              onChange={(e) => {
-                console.log(e);
-                setRange(e);
-              }}
-            />
             <Input
               placeholder="Search Reference"
               className="w-full mb-4"
@@ -289,6 +291,14 @@ export default function GoodReceipts() {
                 } else {
                   setFilter((prev) => ({ ...prev, status: selected }));
                 }
+              }}
+            />
+            <DateRangePicker
+              className="mb-4"
+              value={range}
+              onChange={(e) => {
+                console.log(e);
+                setRange(e);
               }}
             />
           </div>

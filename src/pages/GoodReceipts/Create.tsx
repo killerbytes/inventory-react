@@ -124,10 +124,10 @@ export default function Create() {
         "goodReceiptLines",
         data.map((item) => {
           return {
-            quantity: item.QTY,
-            purchasePrice: item.Price,
-            discount: item.Discount,
-            discountNote: item.Net === "Net" ? null : item.Net,
+            quantity: item.quantity,
+            purchasePrice: item.price,
+            discount: item.discount,
+            discountNote: item.discountNote,
           };
         }),
       );
