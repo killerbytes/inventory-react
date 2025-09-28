@@ -16,4 +16,8 @@ export default class UserService extends BaseService<User> {
     const response = await this.http.get(`${this.url}/me`);
     return response;
   };
+  changePassword = async (data: User) => {
+    const response = await this.http.post(`${this.url}/changePassword`, data);
+    return response;
+  };
 }
