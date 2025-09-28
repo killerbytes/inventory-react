@@ -48,6 +48,15 @@ export const loginSchema = z.object({
   password: z.string(),
 });
 
+export const formChangePasswordSchema = z
+  .object({
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords must match.",
+  });
 //  export const loginSchema = z
 //   .object({
 //     password: z.string().min(1, "Password is required"),

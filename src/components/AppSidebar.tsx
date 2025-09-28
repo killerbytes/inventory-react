@@ -9,7 +9,6 @@ import {
   Boxes,
   BookUser,
   Container,
-  BookType,
   PackageOpen,
   Diff,
   Banknote,
@@ -34,10 +33,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import ChangePasswordModal from "./modals/ChangePassword";
 import { useGlobalStore, useUserStore } from "@/stores";
 import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
+import useToggle from "@/hooks/useToggle";
 import Http from "@/services/http";
 import Header from "./Header";
 import UserIcon from "./User";
@@ -132,6 +133,9 @@ export default function AppSidebar() {
   const { setOpen, setOpenMobile } = useSidebar();
   const location = useLocation();
   const pathRef = React.useRef(location.pathname);
+  const { toggle, handleToggle } = useToggle({
+    changePasswordModal: false,
+  });
 
   React.useEffect(() => {
     if (location.pathname !== pathRef.current) {
@@ -241,6 +245,11 @@ export default function AppSidebar() {
                 side="top"
                 className="w-[--radix-popper-anchor-width]"
               >
+                <DropdownMenuItem
+                  onClick={() => handleToggle({ changePasswordModal: true })}
+                >
+                  Change Password
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>
                   <span>Sign out</span>
                 </DropdownMenuItem>
@@ -256,6 +265,14 @@ export default function AppSidebar() {
           </div>
         </footer>
       </SidebarFooter>
+      {toggle.changePasswordModal && (
+        <ChangePasswordModal
+          isOpen={true}
+          onClose={() => {
+            handleToggle({ changePasswordModal: false });
+          }}
+        />
+      )}
     </Sidebar>
   );
 }
