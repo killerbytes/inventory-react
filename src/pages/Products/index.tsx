@@ -233,11 +233,11 @@ export default function Products() {
               type="multiple"
               className="w-full"
               // defaultValue={data.data?.map((item) => item.categoryId)}
-              defaultValue={data.data
+              defaultValue={data?.data
                 ?.filter((i) => i.products.length > 0)
                 .map((i) => i.categoryId)}
             >
-              {data.data.map((item) => (
+              {data?.data?.map((item) => (
                 <AccordionItem value={item.categoryId} key={item.categoryId}>
                   <AccordionTrigger
                     className={cx(
