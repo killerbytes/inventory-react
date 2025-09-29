@@ -37,6 +37,11 @@ import Select from "@/components/Select";
 import ProductItem from "./ProductItem";
 import React, { Fragment } from "react";
 
+interface filterProps {
+  q?: string;
+  categoryId?: string;
+}
+
 export default function Products() {
   const navigate = useNavigate();
   const {
@@ -59,8 +64,7 @@ export default function Products() {
     currentPage: 0,
   });
   const [loading, setLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState({
-    q: "",
+  const [filter, setFilter] = React.useState<filterProps>({
     categoryId: "ALL",
   });
   const [toggle, handleToggle] = useToggle({
@@ -80,10 +84,14 @@ export default function Products() {
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
+      if (!filter.q) {
+        delete filter.q;
+      }
       const data = await productServices.getAll({
         ...filter,
         ...(filter.categoryId === "ALL" && { categoryId: null }),
       });
+      console.log(data);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -98,22 +106,22 @@ export default function Products() {
 
   React.useEffect(() => {
     const getData = async () => {
-      if (!categoryHasLoaded) {
-        const res = await categoryServices.list();
-        setCategories(res);
-      }
+      const res = await categoryServices.list();
+      setCategories(res);
     };
-    getData();
+    if (!categoryHasLoaded) {
+      getData();
+    }
   }, [categoryHasLoaded, setCategories]);
 
   React.useEffect(() => {
     const getData = async () => {
-      if (!productCombinationsHasLoaded) {
-        const data = await productCombinationServices.list();
-        setProductsCombinations(data);
-      }
+      const data = await productCombinationServices.list();
+      setProductsCombinations(data);
     };
-    getData();
+    if (!productCombinationsHasLoaded) {
+      getData();
+    }
   }, [productCombinationsHasLoaded, setProductsCombinations]);
 
   return (
@@ -225,11 +233,11 @@ export default function Products() {
               type="multiple"
               className="w-full"
               // defaultValue={data.data?.map((item) => item.categoryId)}
-              defaultValue={data.data
-                .filter((i) => i.products.length > 0)
+              defaultValue={data
+                ?.filter((i) => i.products.length > 0)
                 .map((i) => i.categoryId)}
             >
-              {data.data?.map((item) => (
+              {data.map((item) => (
                 <AccordionItem value={item.categoryId} key={item.categoryId}>
                   <AccordionTrigger
                     className={cx(

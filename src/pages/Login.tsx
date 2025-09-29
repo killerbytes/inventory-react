@@ -33,10 +33,6 @@ export default function Login() {
   const { callbackUrl } = qs.parse(window.location.search);
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "admin",
-      password: "1234",
-    },
   });
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {

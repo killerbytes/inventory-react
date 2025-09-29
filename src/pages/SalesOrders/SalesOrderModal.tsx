@@ -82,9 +82,16 @@ export default function SalesOrderModal({
   isOpen: boolean;
   onClose: (reload: boolean) => void;
 }) {
-  const { customers, setCustomers } = useCustomerStore();
-  const { productCombinations, setProductsCombinations } =
-    useProductCombinationStore();
+  const {
+    hasLoaded: hasLoadedCustomers,
+    customers,
+    setCustomers,
+  } = useCustomerStore();
+  const {
+    hasLoaded: hasLoadedProducts,
+    productCombinations,
+    setProductsCombinations,
+  } = useProductCombinationStore();
 
   const defaultValues = localStorage.getItem(
     `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
@@ -122,21 +129,22 @@ export default function SalesOrderModal({
       const data = await productCombinationServices.list();
       setProductsCombinations(data);
     };
-    getData();
-  }, [setProductsCombinations]);
+    if (!hasLoadedProducts) {
+      getData();
+    }
+  }, [hasLoadedProducts, setProductsCombinations]);
 
   React.useEffect(() => {
     const getData = async () => {
       const data: Customer[] = await customerServices.list();
       setCustomers(data);
     };
-    if (customers.length === 0) {
+    if (!hasLoadedCustomers) {
       getData();
     }
-  }, [customers.length, setCustomers]);
+  }, [customers.length, hasLoadedCustomers, setCustomers]);
 
   async function onSubmit(values: SalesOrderForm) {
-    console.log("submit", values);
     try {
       await salesOrderServices.create(values as SalesOrder);
       localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
@@ -159,7 +167,6 @@ export default function SalesOrderModal({
     }
   }
   async function onSave(values: SalesOrderForm) {
-    console.log("save", values);
     try {
       await salesOrderServices.update(Number(data.id), values as SalesOrder);
       localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);

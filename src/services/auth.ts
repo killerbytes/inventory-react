@@ -1,5 +1,5 @@
+import { Login, User } from "@/types";
 import BaseService from "./base";
-import { User } from "@/types";
 import type Http from "./http";
 
 export default class UserService extends BaseService<User> {
@@ -7,7 +7,7 @@ export default class UserService extends BaseService<User> {
     super({ ...props, url: "/auth" });
   }
 
-  login = async (data: User) => {
+  login = async (data: Login) => {
     const response = await this.http.post(`${this.url}/login`, data);
     return response;
   };
