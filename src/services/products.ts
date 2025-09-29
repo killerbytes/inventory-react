@@ -19,4 +19,8 @@ export default class ProductService extends BaseService<Product> {
     );
     return response;
   };
+  updateSheet = async () => {
+    const response = await this.http.post(`${this.url}/updateSheet`, {});
+    return response;
+  };
 }

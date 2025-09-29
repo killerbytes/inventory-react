@@ -38,7 +38,9 @@ import { useGlobalStore, useUserStore } from "@/stores";
 import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
+import { productServices } from "@/services";
 import useToggle from "@/hooks/useToggle";
+import { Button } from "./ui/button";
 import Http from "@/services/http";
 import Header from "./Header";
 import UserIcon from "./User";
@@ -216,6 +218,15 @@ export default function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  productServices.updateSheet();
+                }}
+              >
+                Update GSheet
+              </Button>
               {/* <SidebarMenuItem key="Variant Templates">
                 <SidebarMenuButton
                   asChild
@@ -257,12 +268,10 @@ export default function AppSidebar() {
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
-        <footer className="text-center mt-auto py-2 border-t gap-2 flex flex-col">
-          &copy; {new Date().getFullYear()} My Hardware
-          <div className="text-xs uppercase">{build?.env}</div>
-          <div className="text-xs">
-            {formatDateTime(String(build?.buildTime ?? ""))}
-          </div>
+        <footer className="text-center mt-auto py-2 border-t gap-2 flex flex-col text-xs">
+          <div className="">&copy; {new Date().getFullYear()} My Hardware</div>
+          <div className="uppercase">{build?.env}</div>
+          <div>{formatDateTime(String(build?.buildTime ?? ""))}</div>
         </footer>
       </SidebarFooter>
       {toggle.changePasswordModal && (
