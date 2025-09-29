@@ -22,6 +22,7 @@ import { useCategoryStore, useProductCombinationStore } from "@/stores";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { formatCurrency, getScore } from "@/utils/formatters";
+import HighlightMatch from "@/components/HighlightMatch";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
@@ -152,7 +153,8 @@ export default function Products() {
                   .map(({ item }) => (
                     <CommandGroup key={item.id}>
                       <CommandItem
-                        value={String(item.name + item.unit)}
+                        // value={String(item.name + item.unit)}
+                        value={item.name}
                         key={item.id}
                         onSelect={() => {
                           setOpen(false);
@@ -163,8 +165,11 @@ export default function Products() {
                         <ColorBadge colorMap={UNIT_COLOR}>
                           {item.unit}
                         </ColorBadge>
+                        <div>
+                          <HighlightMatch text={item.name} query={search} />
+                        </div>
 
-                        {item.name}
+                        {/* {item.name} */}
                         <div className="flex gap-2 ml-auto">
                           <span>{formatCurrency(item.price)}</span>
                         </div>
