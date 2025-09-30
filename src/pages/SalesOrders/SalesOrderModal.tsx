@@ -36,6 +36,7 @@ import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { customerServices, salesOrderServices } from "@/services";
 import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
 import { BanknoteArrowUp, Save, Trash2 } from "lucide-react";
+import HighlightMatch from "@/components/HighlightMatch";
 import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -310,7 +311,9 @@ export default function SalesOrderModal({
                             open,
                             setOpen,
                             onSelect,
+                            search,
                           }) => {
+                            console.log(search);
                             return (
                               open &&
                               items.map((item) => (
@@ -325,6 +328,10 @@ export default function SalesOrderModal({
                                     }}
                                     className="flex items-center gap-2 justify-between"
                                   >
+                                    {/* <HighlightMatch
+                                      text={item.name}
+                                      // query={search}
+                                    /> */}
                                     {item.name}
                                     <div className="flex gap-2">
                                       {item.inventory.quantity}
