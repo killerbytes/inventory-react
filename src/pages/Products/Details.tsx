@@ -56,6 +56,7 @@ import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
@@ -205,7 +206,11 @@ export default function ProductEdit() {
         accessorKey: "price",
         header: "Price",
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return formatCurrency(row.original.price);
+          return (
+            <div className={cx({ "text-red-500": row.original.price == 0 })}>
+              {formatCurrency(row.original.price)}
+            </div>
+          );
         },
       },
       {
