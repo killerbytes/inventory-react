@@ -48,8 +48,7 @@ export default function BreakPackModal({
         );
 
         const options = combinations.filter(
-          (c: ProductCombinations) =>
-            c.name === combination.name && c.unit !== combination.unit,
+          (c: ProductCombinations) => c.id != combination.id,
         );
         setOptions(options);
       } catch (error) {
