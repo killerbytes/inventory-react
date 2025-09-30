@@ -33,7 +33,7 @@ export default function GoodReceiptPickerModal({
       const data: GoodReceipt[] = await goodReceiptServices.getBySupplier(id, {
         status: ORDER_STATUS.RECEIVED,
       });
-      setGoodReceipts(data.slice(0, 5));
+      setGoodReceipts(data);
     };
     if (supplierId) {
       getData(supplierId);
