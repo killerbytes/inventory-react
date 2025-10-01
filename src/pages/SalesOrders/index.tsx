@@ -182,7 +182,7 @@ export default function SalesOrders() {
           </CardTitle>
           <CardAction>
             <Button
-              className="shadow-md"
+              className="shadow-md bg-green-500"
               onClick={() => {
                 setSelected(undefined);
                 handleToggle({ salesOrderModal: true });

@@ -15,6 +15,7 @@ import {
 import {
   Copy,
   EllipsisVertical,
+  Loader2Icon,
   PackageOpen,
   Pencil,
   PlusIcon,
@@ -74,6 +75,7 @@ export default function ProductEdit() {
     categories,
     setCategories,
   } = useCategoryStore();
+  const [loading, setLoading] = React.useState(false);
   const productCombinationStore = useProductCombinationStore();
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
     [],
@@ -99,6 +101,7 @@ export default function ProductEdit() {
   });
   async function onSubmit(values: Product) {
     try {
+      setLoading(true);
       await productServices.update(Number(id), values);
       getData();
       productCombinationStore.invalidate();
@@ -127,6 +130,8 @@ export default function ProductEdit() {
         // }
         // toast.error("Submission failed: " + message);
       }
+    } finally {
+      setLoading(false);
     }
   }
   const getData = React.useCallback(async () => {
@@ -365,7 +370,7 @@ export default function ProductEdit() {
           }}
         >
           <Card>
-            <CardHeader>
+            {/* <CardHeader>
               <CardAction>
                 <div className="flex gap-2">
                   <div className="ml-auto">
@@ -396,7 +401,7 @@ export default function ProductEdit() {
                   </div>
                 </div>
               </CardAction>
-            </CardHeader>
+            </CardHeader> */}
             <CardContent>
               <ProductForm
                 form={form}
@@ -404,8 +409,12 @@ export default function ProductEdit() {
                 categories={categories}
               />
               <div className="flex justify-end">
-                <Button className="shadow-sm" type="submit">
-                  <Save />
+                <Button className="shadow-sm" type="submit" disabled={loading}>
+                  {loading ? (
+                    <Loader2Icon className="animate-spin" />
+                  ) : (
+                    <Save />
+                  )}
                   Save changes
                 </Button>
               </div>

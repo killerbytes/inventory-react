@@ -16,6 +16,7 @@ import {
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2Icon, Plus, Trash2 } from "lucide-react";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useProductCombinationStore } from "@/stores";
@@ -26,7 +27,6 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
 import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
 import Modal from "@/components/Modal";
@@ -67,6 +67,7 @@ export default function CombinationModal({
   onClose: () => void;
   isOpen: boolean;
 }) {
+  const [loading, setLoading] = React.useState(false);
   const { invalidate } = useProductCombinationStore();
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const form = useForm<{
@@ -139,6 +140,7 @@ export default function CombinationModal({
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setLoading(true);
       await productCombinationServices.updateByProductId(
         Number(product.id),
         values as ProductCombinations[],
@@ -156,6 +158,8 @@ export default function CombinationModal({
       } else {
         toast.error("Submission failed: " + apiError.message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -450,7 +454,8 @@ export default function CombinationModal({
             >
               <Plus />
             </Button>
-            <Button className="shadow-sm" type="submit">
+            <Button className="shadow-sm" type="submit" disabled={loading}>
+              {loading && <Loader2Icon className="animate-spin" />}
               Save changes
             </Button>
           </div>

@@ -219,7 +219,6 @@ export default function GoodReceipts() {
       {
         accessorKey: "totalAmount",
         header: ({ column }) => {
-          console.log(column.columnDef.meta?.headerClassName);
           return (
             <span
               className={cx(
@@ -262,7 +261,7 @@ export default function GoodReceipts() {
           </CardTitle>
           <CardAction>
             <Link to={ROUTES.GOOD_RECEIPT_CREATE}>
-              <Button className="shadow-md">
+              <Button className="shadow-md bg-orange-500">
                 <Plus /> Create Order
               </Button>
             </Link>

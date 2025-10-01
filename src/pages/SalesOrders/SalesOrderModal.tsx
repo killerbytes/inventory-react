@@ -35,6 +35,7 @@ import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { customerServices, salesOrderServices } from "@/services";
 import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
+import { formatCurrency, getScore } from "@/utils/formatters";
 import { BanknoteArrowUp, Save, Trash2 } from "lucide-react";
 import HighlightMatch from "@/components/HighlightMatch";
 import { productCombinationServices } from "@/services";
@@ -45,7 +46,6 @@ import { useProductCombinationStore } from "@/stores";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
-import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
@@ -60,6 +60,7 @@ import { useCustomerStore } from "@/stores";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
 import { toast } from "sonner";
+import { set } from "lodash";
 import React from "react";
 
 const salesOrderItemDefault = {
@@ -83,6 +84,7 @@ export default function SalesOrderModal({
   isOpen: boolean;
   onClose: (reload: boolean) => void;
 }) {
+  const [loading, setLoading] = React.useState(false);
   const {
     hasLoaded: hasLoadedCustomers,
     customers,
@@ -147,6 +149,7 @@ export default function SalesOrderModal({
 
   async function onSubmit(values: SalesOrderForm) {
     try {
+      setLoading(true);
       await salesOrderServices.create(values as SalesOrder);
       localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
       toast.success(`Sales Order submitted successfully`);
@@ -165,10 +168,13 @@ export default function SalesOrderModal({
       } else {
         toast.error("Submission failed: " + apiError.message);
       }
+    } finally {
+      setLoading(false);
     }
   }
   async function onSave(values: SalesOrderForm) {
     try {
+      setLoading(true);
       await salesOrderServices.update(Number(data.id), values as SalesOrder);
       localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
       toast.success(`Sales Order saved successfully`);
@@ -187,6 +193,8 @@ export default function SalesOrderModal({
       } else {
         toast.error("Submission failed - " + apiError.message);
       }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -313,36 +321,44 @@ export default function SalesOrderModal({
                             onSelect,
                             search,
                           }) => {
-                            console.log(search);
                             return (
                               open &&
-                              items.map((item) => (
-                                <CommandGroup key={item.id}>
-                                  <CommandItem
-                                    value={String(item.name)}
-                                    disabled={item.inventory.quantity < 1}
-                                    key={item.id}
-                                    onSelect={() => {
-                                      setOpen(false);
-                                      onSelect?.(item);
-                                    }}
-                                    className="flex items-center gap-2 justify-between"
-                                  >
-                                    {/* <HighlightMatch
-                                      text={item.name}
-                                      // query={search}
-                                    /> */}
-                                    {item.name}
-                                    <div className="flex gap-2">
-                                      {item.inventory.quantity}
-                                      <span>{formatCurrency(item.price)}</span>
+                              items
+                                .map((item) => ({
+                                  item,
+                                  score: getScore(item.name, search),
+                                }))
+                                .filter(({ score }) => score > 0)
+                                .sort((a, b) => b.score - a.score)
+                                .map(({ item }) => (
+                                  <CommandGroup key={item.id}>
+                                    <CommandItem
+                                      value={String(item.name)}
+                                      disabled={item.inventory?.quantity < 1}
+                                      key={item.id}
+                                      onSelect={() => {
+                                        setOpen(false);
+                                        onSelect?.(item);
+                                      }}
+                                    >
                                       <ColorBadge colorMap={UNIT_COLOR}>
                                         {item.unit}
                                       </ColorBadge>
-                                    </div>
-                                  </CommandItem>
-                                </CommandGroup>
-                              ))
+                                      <div>
+                                        <HighlightMatch
+                                          text={item.name}
+                                          query={search}
+                                        />
+                                      </div>
+                                      <div className="ml-auto flex gap-2">
+                                        {item.inventory?.quantity}
+                                        <span>
+                                          {formatCurrency(item.price)}
+                                        </span>
+                                      </div>
+                                    </CommandItem>
+                                  </CommandGroup>
+                                ))
                             );
                           }}
                         />
@@ -707,6 +723,7 @@ export default function SalesOrderModal({
           className="shadow-sm"
           variant="secondary"
           type="button"
+          // disabled={loading}
           onClick={(e) => {
             console.log(form.formState.errors);
             form.handleSubmit((props) =>
@@ -721,6 +738,7 @@ export default function SalesOrderModal({
         <ConfirmDialog
           title="Create Invoice"
           description="Are you sure you want to create this invoice? This action cannot be undone."
+          isLoading={loading}
           onConfirm={(e) => {
             e.preventDefault();
             console.log(form.getValues(), form.formState.errors);
@@ -735,7 +753,7 @@ export default function SalesOrderModal({
               });
           }}
         >
-          <Button className="shadow-sm">
+          <Button className="shadow-sm bg-green-500">
             <BanknoteArrowUp /> Create Order
           </Button>
         </ConfirmDialog>

@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { stockAdjustmentSchema } from "@/schemas";
 import ConfirmDialog from "../ConfirmDialog";
 import { DialogFooter } from "../ui/dialog";
+import { Loader2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Textarea } from "../ui/textarea";
 import NumberInput from "../NumberInput";
@@ -42,6 +43,7 @@ export default function StockAdjustmentModal({
   combinationId: number;
   onSubmit: (values: StockAdjustment) => Promise<void>;
 }) {
+  const [loading, setLoading] = React.useState(false);
   const [data, setData] = React.useState<ProductCombinations>();
   const form = useForm<StockAdjustment>({
     resolver: zodResolver(stockAdjustmentSchema),
@@ -68,6 +70,7 @@ export default function StockAdjustmentModal({
 
   const handleSubmit = async (values: StockAdjustment) => {
     try {
+      setLoading(true);
       await productCombinationServices.stockAdjustment(values);
       toast.success("Stock Adjustment successful");
       onClose();
@@ -85,6 +88,8 @@ export default function StockAdjustmentModal({
       } else {
         toast.error("Stock Adjustment failed: " + apiError.message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -160,10 +165,11 @@ export default function StockAdjustmentModal({
 
           <DialogFooter>
             <ConfirmDialog
+              isLoading={loading}
               title="Stock Adjustment"
-              onConfirm={(e) => {
+              onConfirm={async (e) => {
                 e.preventDefault();
-                form
+                await form
                   .handleSubmit(handleSubmit)(e)
                   .catch((error) => {
                     const apiError = error as ApiErrorResponse;

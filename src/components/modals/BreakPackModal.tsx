@@ -1,7 +1,13 @@
+import {
+  AlertCircleIcon,
+  Equal,
+  Loader2Icon,
+  PackageOpen,
+  X,
+} from "lucide-react";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { ApiErrorResponse, BreakPack, ProductCombinations } from "@/types";
 import { productCombinationServices, productServices } from "@/services";
-import { AlertCircleIcon, Equal, PackageOpen, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useController, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +36,7 @@ export default function BreakPackModal({
 }) {
   const [options, setOptions] = React.useState<ProductCombinations[]>([]);
   const [selected, setSelected] = React.useState<ProductCombinations>();
+  const [loading, setLoading] = React.useState(false);
   const form = useForm<BreakPack>({
     resolver: zodResolver(breakPackSchema),
     defaultValues: {
@@ -64,12 +71,15 @@ export default function BreakPackModal({
 
   const handleBreakPack = async (values: BreakPack) => {
     try {
+      setLoading(true);
       await productCombinationServices.breakPack(values);
       onSubmit();
       toast.success("Break Pack successful");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError) toast.error("Break Pack failed: " + apiError.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -163,7 +173,7 @@ export default function BreakPackModal({
             <DialogFooter>
               <Button
                 type="button"
-                disabled={!selected}
+                disabled={!selected || loading}
                 onClick={(e) => {
                   e.preventDefault();
                   console.log(form.getValues(), form.formState.errors);
@@ -174,7 +184,11 @@ export default function BreakPackModal({
                     });
                 }}
               >
-                <PackageOpen />
+                {loading ? (
+                  <Loader2Icon className="animate-spin" />
+                ) : (
+                  <PackageOpen />
+                )}
                 Break Pack
               </Button>
             </DialogFooter>

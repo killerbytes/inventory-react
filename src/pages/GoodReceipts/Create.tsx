@@ -159,6 +159,7 @@ export default function Create() {
             <PendingOrderForm form={form} />
             <div className="flex justify-end mt-auto">
               <Button
+                className="bg-orange-500"
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();

@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Loader2Icon } from "lucide-react";
 import React from "react";
 
 export default function ConfirmDialog({
@@ -17,19 +18,21 @@ export default function ConfirmDialog({
   title = "Confirm",
   description = `Are you sure you want to continue?`,
   confirmText = "Confirm",
+  isLoading,
 }: {
   children: React.ReactNode;
   onConfirm: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   title?: string;
   description?: string;
   confirmText?: string;
+  isLoading?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
-  const handleConfirm = (
+  const handleConfirm = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
+    await onConfirm(e);
     setOpen(false);
-    onConfirm(e);
   };
 
   return (
@@ -42,7 +45,12 @@ export default function ConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm} autoFocus>
+          <AlertDialogAction
+            disabled={isLoading}
+            onClick={handleConfirm}
+            autoFocus
+          >
+            {isLoading && <Loader2Icon className="animate-spin" />}
             {confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
