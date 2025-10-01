@@ -490,7 +490,7 @@ export default function SalesOrderModal({
               name="deliveryDate"
               render={({ field }) => (
                 <FormItem className="w-full md:w-1/4">
-                  <FormLabel>Delivery Date</FormLabel>
+                  <FormLabel>Order Date</FormLabel>
                   <DatePicker {...field} />
                   <FormMessage />
                 </FormItem>
@@ -643,7 +643,7 @@ export default function SalesOrderModal({
             <Card>
               <CardHeader>
                 <CardTitle>Delivery Details</CardTitle>
-                <CardAction>
+                {/* <CardAction>
                   <FormField
                     control={form.control}
                     name="deliveryDate"
@@ -655,7 +655,7 @@ export default function SalesOrderModal({
                       </FormItem>
                     )}
                   />
-                </CardAction>
+                </CardAction> */}
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-4">

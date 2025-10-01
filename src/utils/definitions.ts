@@ -121,7 +121,7 @@ export const MODE_OF_PAYMENT = {
 } as const;
 
 export const MODE_OF_PAYMENT_COLOR = {
-  CASH: "bg-green-400 text-black",
+  CASH: "bg-green-400 text-white",
   CHECK: "bg-yellow-400 text-black",
 };
 

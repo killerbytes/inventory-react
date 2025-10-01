@@ -13,11 +13,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { filterProps, PaginatedResponse, SalesOrder } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { PaginatedResponse, SalesOrder } from "@/types";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -35,7 +35,6 @@ import React from "react";
 
 export default function SalesOrders() {
   const navigate = useNavigate();
-  const [page, setPage] = React.useState(1);
   const [data, setData] = React.useState<PaginatedResponse<SalesOrder[]>>({
     data: [],
     total: 0,
@@ -45,64 +44,71 @@ export default function SalesOrders() {
   const [selected, setSelected] = React.useState<SalesOrder>();
   const [loading, setLoading] = React.useState(true);
   const [range, setRange] = React.useState({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
+    // from: startOfMonth(new Date()),
+    // to: endOfMonth(new Date()),
   });
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
-    ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
+    order: "DESC",
+    sort: "deliveryDate",
+    // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
+    // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
   const [toggle, handleToggle] = useToggle({
     salesOrderModal: false,
   });
-
-  React.useEffect(() => {
-    const { from, to } = range || {};
-    if (from && to) {
-      setFilter((prev) => ({
-        ...prev,
-        startDate: from.toISOString(),
-        endDate: to.toISOString(),
-      }));
-    } else {
-      setFilter((prev) => ({
-        ...prev,
-        startDate: "",
-        endDate: "",
-      }));
-    }
-  }, [range]);
+  // React.useEffect(() => {
+  //   const { from, to } = range || {};
+  //   if (from && to) {
+  //     setFilter((prev) => ({
+  //       ...prev,
+  //       startDate: from.toISOString(),
+  //       endDate: to.toISOString(),
+  //     }));
+  //   } else {
+  //     setFilter((prev) => ({
+  //       ...prev,
+  //       startDate: "",
+  //       endDate: "",
+  //     }));
+  //   }
+  // }, [range]);
 
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
+      const payload = {
+        ...filter,
+        ...(range?.from && range?.to && { startDate: range.from }),
+        ...(range?.from && range?.to && { endDate: range.to }),
+
+        status: filter.status === "ALL" ? undefined : filter.status,
+      };
+
       const data: PaginatedResponse<SalesOrder[]> =
-        await salesOrderServices.getAll(filter);
+        await salesOrderServices.getAll(payload);
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, range.from, range.to]);
 
   React.useEffect(() => {
     getData();
   }, [getData]);
 
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, [page]);
-
   const columns: ColumnDef<SalesOrder>[] = [
     {
       accessorKey: "salesOrderNumber",
       header: "PO #",
+    },
+    {
+      accessorKey: "deliveryDate",
+      header: "Order Date",
+      cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
     },
     {
       accessorKey: "customer.name",
@@ -118,31 +124,17 @@ export default function SalesOrders() {
         );
       },
     },
-    {
-      accessorKey: "statusHistory",
-      header: "Date",
-      cell: ({ row }) => {
-        const statusHistoryMap = mappedStatusHistory(
-          row.original.salesOrderStatusHistory ?? [],
-        );
-        return formatDate(statusHistoryMap[row.original.status]?.changedAt);
-      },
-    },
-    {
-      accessorKey: "user.username",
-      header: "User",
-      cell: ({ row }) => {
-        const statusHistoryMap = mappedStatusHistory(
-          row.original.salesOrderStatusHistory ?? [],
-        );
-        return statusHistoryMap[row.original.status]?.user.username;
-      },
-    },
-    {
-      accessorKey: "deliveryDate",
-      header: "For Delivery",
-      cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
-    },
+    // {
+    //   accessorKey: "statusHistory",
+    //   header: "Date",
+    //   cell: ({ row }) => {
+    //     const statusHistoryMap = mappedStatusHistory(
+    //       row.original.salesOrderStatusHistory ?? [],
+    //     );
+    //     return formatDate(statusHistoryMap[row.original.status]?.changedAt);
+    //   },
+    // },
+
     {
       accessorKey: "modeOfPayment",
       header: "Payment Mode",
@@ -156,6 +148,16 @@ export default function SalesOrders() {
             {String(row.original.modeOfPayment)}
           </ColorBadge>
         );
+      },
+    },
+    {
+      accessorKey: "user.username",
+      header: "User",
+      cell: ({ row }) => {
+        const statusHistoryMap = mappedStatusHistory(
+          row.original.salesOrderStatusHistory ?? [],
+        );
+        return statusHistoryMap[row.original.status]?.user.username;
       },
     },
     {
@@ -230,11 +232,12 @@ export default function SalesOrders() {
                     navigate(`${ROUTES.SALES_ORDERS}/${item.id}`);
                   }
                 }}
+                showFooter
                 renderFooter={(data: SalesOrder[]) => {
                   return (
                     <TableRow>
-                      <TableCell colSpan={7}>Total Amount</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell>Total Amount</TableCell>
+                      <TableCell colSpan={7} className="text-right">
                         {formatCurrency(
                           data.reduce(
                             (acc: number, item: SalesOrder) =>
@@ -248,7 +251,7 @@ export default function SalesOrders() {
                 }}
               />
               {data.totalPages > 1 && (
-                <Pager data={data} page={page} setPage={setPage} />
+                <Pager data={data} filter={filter} setFilter={setFilter} />
               )}
             </>
           )}
