@@ -73,7 +73,8 @@ export const INVENTORY_MOVEMENT_REFERENCE_TYPE = {
 };
 
 export const STATUS_COLOR = {
-  DRAFT: "text-gray-600 border-gray-600 bg-gray-100",
+  VOID: "text-gray-400 border-gray-400 bg-gray-200",
+  DRAFT: "text-white border-gray-600 bg-gray-500",
   RECEIVED: "text-orange-600 border-orange-600 bg-orange-100",
   POSTED: "text-orange-600 border-orange-600 bg-orange-100",
   PARTIALLY_PAID: "text-orange-600 border-orange-600 bg-orange-100",
