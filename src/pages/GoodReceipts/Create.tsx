@@ -15,8 +15,8 @@ import {
   GoodReceipt,
   GoodReceiptCreate,
 } from "@/types";
+import { ERROR, goodReceiptItemDefault, ROUTES } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ERROR, ROUTES } from "@/utils/definitions";
 import PendingOrderForm from "./Form/PendingForm";
 import { goodReceiptFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
@@ -25,10 +25,6 @@ import useDebounce from "@/hooks/useDebounce";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import React from "react";
-
-const goodReceiptItemDefault = {
-  discountNote: "",
-};
 
 const goodReceiptDefault = {
   // goodReceiptNumber: randomInt(1000000, 9999999).toString(),

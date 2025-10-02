@@ -10,6 +10,7 @@ import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { ProductCombinations, GoodReceiptCreate, Supplier } from "@/types";
 import { productCombinationServices, supplierServices } from "@/services";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
+import { goodReceiptItemDefault, UNIT_COLOR } from "@/utils/definitions";
 import { useProductCombinationStore, useSupplierStore } from "@/stores";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
@@ -22,7 +23,6 @@ import NumberInput from "@/components/NumberInput";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
-import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GoodReceiptItem } from "@/types";
@@ -276,16 +276,6 @@ export default function PendingForm({
         ),
       },
       {
-        header: "Average Price",
-        cell: ({ row }) => {
-          const { quantity, purchasePrice, discount } = row.original;
-          const priceAfterDiscount =
-            (quantity * purchasePrice - discount) / quantity;
-
-          return formatCurrency(priceAfterDiscount);
-        },
-      },
-      {
         accessorKey: "amount",
         header: () => <div className="text-right">Amount</div>,
         meta: {
@@ -392,15 +382,7 @@ export default function PendingForm({
                   form={form}
                   columns={columns}
                   name="goodReceiptLines"
-                  append={() =>
-                    append({
-                      combinationId: null,
-                      quantity: 0,
-                      purchasePrice: 0,
-                      discount: null,
-                      discountNote: "",
-                    })
-                  }
+                  append={() => append(goodReceiptItemDefault)}
                 />
               </FormControl>
               <FormMessage />

@@ -219,3 +219,10 @@ export const INVOICE_STATUS = {
   PARTIALLY_PAID: "PARTIALLY_PAID",
   PAID: "PAID",
 };
+
+export const goodReceiptItemDefault = {
+  discountNote: "",
+  discount: 0,
+  purchasePrice: 0,
+  quantity: 0,
+};
