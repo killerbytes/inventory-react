@@ -106,9 +106,9 @@ export default function SalesOrders() {
       header: "PO #",
     },
     {
-      accessorKey: "deliveryDate",
+      accessorKey: "orderDate",
       header: "Order Date",
-      cell: ({ row }) => formatDate(row.getValue("deliveryDate")),
+      cell: ({ row }) => formatDate(row.getValue("orderDate")),
     },
     {
       accessorKey: "customer.name",
@@ -222,6 +222,7 @@ export default function SalesOrders() {
               <DataTable
                 data={data.data || []}
                 columns={columns}
+                meta={{ disabledRow: "status" }}
                 onRowClick={(item: SalesOrder) => {
                   if (item.status === ORDER_STATUS.DRAFT) {
                     setSelected(item);

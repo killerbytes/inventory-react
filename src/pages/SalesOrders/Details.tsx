@@ -27,20 +27,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Ban,
-  Car,
-  ClipboardList,
-  EllipsisVertical,
-  Save,
-  Trash2,
-} from "lucide-react";
-import {
   customerServices,
   productServices,
   salesOrderServices,
 } from "@/services";
 import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
-import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
+import { Ban, Car, EllipsisVertical, Save, Trash2 } from "lucide-react";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { useCustomerStore } from "@/stores/customer.store";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -63,7 +55,6 @@ export default function SalesOrderDetails() {
   const [toggle, handleToggle] = useToggle({
     confirmModal: false,
     deliveryDetailsModal: false,
-    orderHistoryModal: false,
   });
   const navigate = useNavigate();
   const { id } = useParams();
@@ -161,13 +152,14 @@ export default function SalesOrderDetails() {
       await salesOrderServices.delete(Number(id));
       toast.success(`Sales Order deleted successfully`);
       navigate(ROUTES.SALES_ORDERS);
-    } catch (error: any) {
-      toast.error("Submission failed - " + error?.response.data.error);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      toast.error("Submission failed - " + apiError.message);
     }
   }
-  const data = useWatch<SalesOrder | SalesOrderForm>({
+  const data = useWatch<SalesOrder>({
     control: form.control,
-  }) as SalesOrder | SalesOrderForm;
+  }) as SalesOrder;
 
   return (
     <div className="flex flex-col gap-4">
@@ -192,16 +184,6 @@ export default function SalesOrderDetails() {
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
-                    handleToggle({ orderHistoryModal: true });
-                  }}
-                >
-                  <ClipboardList />
-                  Order History
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
                     handleToggle({ deliveryDetailsModal: true });
                   }}
                 >
@@ -221,89 +203,24 @@ export default function SalesOrderDetails() {
                     Cancel Order
                   </DropdownMenuItem>
                 )}
-                {data?.status === ORDER_STATUS.DRAFT && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.preventDefault();
-                        console.log(form.formState.errors);
-                        form
-                          .handleSubmit(onSaveOrder)(e)
-                          .catch((error) => {
-                            console.error("Form submission error:", error);
-                          });
-                      }}
-                    >
-                      <Save color="green" />
-                      Save
-                    </DropdownMenuItem>
-                    <ConfirmDialog
-                      title={`Void order`}
-                      onConfirm={onDeleteOrder}
-                    >
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <Trash2 color="red" />
-                        Void
-                      </DropdownMenuItem>
-                    </ConfirmDialog>
-                  </>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </CardAction>
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          {"status" in data && data.status === ORDER_STATUS.RECEIVED ? (
-            <Static data={data} />
-          ) : (
-            <>
-              <div className="flex justify-end">
-                <ConfirmDialog
-                  title={`Receive Order`}
-                  onConfirm={(e) => {
-                    e.preventDefault();
-                    console.log(form.getValues(), form.formState.errors);
-                    form
-                      .handleSubmit(onReceiveOrder)(e)
-                      .catch((error) => {
-                        console.error("Form submission error:", error);
-                      });
-                  }}
-                >
-                  <Button
-                    variant="outline"
-                    className={cx("shadow", BUTTON_COLOR["RECEIVED"])}
-                  >
-                    Receive Order
-                  </Button>
-                </ConfirmDialog>
-              </div>
-            </>
-          )}
+          <Static data={data} />
         </CardContent>
       </Card>
-      {"status" in data && data.status === ORDER_STATUS.RECEIVED && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Order Items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StaticDataTable data={data} />
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Items</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StaticDataTable data={data} />
+        </CardContent>
+      </Card>
 
-      {toggle.orderHistoryModal && (
-        <OrderHistoryModal
-          data={
-            "salesOrderStatusHistory" in data
-              ? data?.salesOrderStatusHistory
-              : []
-          }
-          onClose={() => handleToggle({ orderHistoryModal: false })}
-        />
-      )}
       {toggle.cancelModal && (
         <CancelModal
           isOpen={true}

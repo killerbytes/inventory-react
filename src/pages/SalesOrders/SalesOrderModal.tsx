@@ -7,6 +7,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  MODE_OF_PAYMENT_OPTIONS,
+  ORDER_STATUS,
+  ROUTES,
+  UNIT_COLOR,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
@@ -23,11 +29,6 @@ import {
   SalesOrderForm,
   SalesOrderItem,
 } from "@/types";
-import {
-  MODE_OF_PAYMENT_OPTIONS,
-  ORDER_STATUS,
-  UNIT_COLOR,
-} from "@/utils/definitions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Controller, useFieldArray, useWatch, useForm } from "react-hook-form";
 import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
@@ -60,14 +61,14 @@ import { useCustomerStore } from "@/stores";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
 import { toast } from "sonner";
-import { set } from "lodash";
 import React from "react";
 
 const salesOrderItemDefault = {
   discountNote: "",
 };
 const salesOrderDefalt = {
-  deliveryDate: new Date().toISOString(),
+  // deliveryDate: new Date().toISOString(),
+  orderDate: new Date().toISOString(),
   customerId: 1,
   modeOfPayment: "CASH",
   status: "DRAFT",
@@ -223,6 +224,17 @@ export default function SalesOrderModal({
       saveDraft();
     }
   }, [data, debouncedFormData, saveDraft]);
+
+  async function onDeleteOrder() {
+    try {
+      await salesOrderServices.delete(Number(data.id));
+      toast.success(`Sales Order deleted successfully`);
+      onClose(true);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      toast.error("Submission failed - " + apiError.message);
+    }
+  }
 
   // const formData = useWatch({ control: form.control });
   const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
@@ -503,7 +515,7 @@ export default function SalesOrderModal({
           <div className="w-full flex flex-col gap-4 items-start md:flex-row">
             <FormField
               control={form.control}
-              name="deliveryDate"
+              name="orderDate"
               render={({ field }) => (
                 <FormItem className="w-full md:w-1/4">
                   <FormLabel>Order Date</FormLabel>
@@ -659,7 +671,7 @@ export default function SalesOrderModal({
             <Card>
               <CardHeader>
                 <CardTitle>Delivery Details</CardTitle>
-                {/* <CardAction>
+                <CardAction>
                   <FormField
                     control={form.control}
                     name="deliveryDate"
@@ -671,7 +683,7 @@ export default function SalesOrderModal({
                       </FormItem>
                     )}
                   />
-                </CardAction> */}
+                </CardAction>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-4">
@@ -719,6 +731,20 @@ export default function SalesOrderModal({
       </Form>
 
       <DialogFooter>
+        {data && (
+          <div className="mr-auto">
+            <ConfirmDialog title={`Void order`} onConfirm={onDeleteOrder}>
+              <Button
+                variant="outline"
+                className="text-red-500 shadow-sm"
+                tabIndex={-1}
+              >
+                <Trash2 />
+              </Button>
+            </ConfirmDialog>
+          </div>
+        )}
+
         <Button
           className="shadow-sm"
           variant="secondary"
