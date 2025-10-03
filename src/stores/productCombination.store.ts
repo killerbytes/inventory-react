@@ -2,20 +2,38 @@ import { ProductCombinations } from "@/types";
 import { create } from "zustand";
 
 type ProductCombinationStore = {
-  hasLoaded: boolean;
+  productCombinationsHasLoaded: boolean;
+  productCombinationsNoBreakPackHasLoaded: boolean;
   invalidate: () => void;
   productCombinations: ProductCombinations[];
+  productCombinationsNoBreakPack: ProductCombinations[];
   setProductsCombinations: (
     productsCombinations: ProductCombinations[],
+  ) => void;
+  setProductCombinationsNoBreakPack: (
+    productCombinationsNoBreakPack: ProductCombinations[],
   ) => void;
 };
 
 export const useProductCombinationStore = create<ProductCombinationStore>(
   (set) => ({
     productCombinations: [],
-    hasLoaded: false,
+    productCombinationsHasLoaded: false,
+    productCombinationsNoBreakPack: [],
+    productCombinationsNoBreakPackHasLoaded: false,
     setProductsCombinations: (productCombinations: ProductCombinations[]) =>
-      set({ productCombinations, hasLoaded: true }),
-    invalidate: () => set({ hasLoaded: false }),
+      set({ productCombinations, productCombinationsHasLoaded: true }),
+    setProductCombinationsNoBreakPack: (
+      productCombinationsNoBreakPack: ProductCombinations[],
+    ) =>
+      set({
+        productCombinationsNoBreakPack,
+        productCombinationsNoBreakPackHasLoaded: true,
+      }),
+    invalidate: () =>
+      set({
+        productCombinationsHasLoaded: false,
+        productCombinationsNoBreakPackHasLoaded: false,
+      }),
   }),
 );

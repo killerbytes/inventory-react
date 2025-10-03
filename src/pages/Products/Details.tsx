@@ -169,7 +169,7 @@ export default function ProductEdit() {
 
   React.useEffect(() => {
     const getData = async () => {
-      if (!productCombinationStore.hasLoaded) {
+      if (!productCombinationStore.productCombinationsHasLoaded) {
         const data = await productCombinationServices.list();
         productCombinationStore.setProductsCombinations(data);
       }

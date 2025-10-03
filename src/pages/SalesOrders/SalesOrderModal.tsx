@@ -92,7 +92,7 @@ export default function SalesOrderModal({
     setCustomers,
   } = useCustomerStore();
   const {
-    hasLoaded: hasLoadedProducts,
+    productCombinationsHasLoaded,
     productCombinations,
     setProductsCombinations,
   } = useProductCombinationStore();
@@ -133,10 +133,10 @@ export default function SalesOrderModal({
       const data = await productCombinationServices.list();
       setProductsCombinations(data);
     };
-    if (!hasLoadedProducts) {
+    if (!productCombinationsHasLoaded) {
       getData();
     }
-  }, [hasLoadedProducts, setProductsCombinations]);
+  }, [productCombinationsHasLoaded, setProductsCombinations]);
 
   React.useEffect(() => {
     const getData = async () => {

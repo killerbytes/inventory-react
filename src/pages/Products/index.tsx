@@ -51,7 +51,7 @@ export default function Products() {
     setCategories,
   } = useCategoryStore();
   const {
-    hasLoaded: productCombinationsHasLoaded,
+    productCombinationsHasLoaded,
     productCombinations,
     setProductsCombinations,
   } = useProductCombinationStore();

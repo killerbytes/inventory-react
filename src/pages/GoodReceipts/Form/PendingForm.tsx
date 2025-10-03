@@ -35,7 +35,11 @@ export default function PendingForm({
   form: UseFormReturn<GoodReceiptCreate>;
 }) {
   const { suppliers, setSuppliers } = useSupplierStore();
-  const productCombinationStore = useProductCombinationStore();
+  const {
+    productCombinationsNoBreakPack,
+    setProductCombinationsNoBreakPack,
+    productCombinationsNoBreakPackHasLoaded,
+  } = useProductCombinationStore();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -59,13 +63,18 @@ export default function PendingForm({
 
   React.useEffect(() => {
     const getData = async () => {
-      if (!productCombinationStore.hasLoaded) {
+      if (!productCombinationsNoBreakPackHasLoaded) {
         const data = await productCombinationServices.list();
-        productCombinationStore.setProductsCombinations(data);
+        setProductCombinationsNoBreakPack(
+          data.filter((i: ProductCombinations) => i.isBreakPack === false),
+        );
       }
     };
     getData();
-  }, [productCombinationStore]);
+  }, [
+    productCombinationsNoBreakPackHasLoaded,
+    setProductCombinationsNoBreakPack,
+  ]);
   const columns = React.useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
       {
@@ -84,10 +93,6 @@ export default function PendingForm({
             <Trash2 />
           </Button>
         ),
-      },
-      {
-        header: "id",
-        accessorKey: "id",
       },
       {
         accessorKey: "quantity",
@@ -143,7 +148,7 @@ export default function PendingForm({
                           ?.combinationId,
                       )}
                       items={
-                        productCombinationStore.productCombinations as ProductCombinations[]
+                        productCombinationsNoBreakPack as ProductCombinations[]
                       }
                       form={form}
                       {...field}
@@ -291,7 +296,7 @@ export default function PendingForm({
         ),
       },
     ],
-    [fields.length, form, productCombinationStore.productCombinations, remove],
+    [fields.length, form, productCombinationsNoBreakPack, remove],
   );
 
   return (
