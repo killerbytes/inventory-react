@@ -15,6 +15,7 @@ import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
 import Customers from "./pages/Customers";
 import Layout from "./components/Layout";
+import Settings from "./pages/Settings";
 import Products from "./pages/Products";
 import Payments from "./pages/Payments";
 import Invoices from "./pages/Invoices";
@@ -183,6 +184,14 @@ function App() {
             element={
               <Layout>
                 <PriceHistory />
+              </Layout>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <Layout>
+                <Settings />
               </Layout>
             }
           />
