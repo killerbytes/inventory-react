@@ -61,6 +61,7 @@ import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
+import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import { productSchema } from "@/schemas";
@@ -269,22 +270,38 @@ export default function ProductEdit() {
             >
               <Pencil />
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="shadow-sm"
-              disabled={
-                row.original?.inventory?.quantity === 0 ||
-                row.original?.inventory?.quantity === undefined
-              }
-              onClick={() => {
-                setSelected(row.original);
-                handleToggle({ breakPackModal: true });
-              }}
-            >
-              <PackageOpen />
-            </Button>
+            {row.original?.conversionFactor <= 1 ||
+            row.original?.inventory?.quantity === 0 ||
+            row.original?.inventory?.quantity === undefined ? (
+              <Tooltip content="Conversion Factor and Quantity must be more than 1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shadow-sm"
+                  disabled
+                  onClick={() => {
+                    setSelected(row.original);
+                    handleToggle({ breakPackModal: true });
+                  }}
+                >
+                  <PackageOpen />
+                </Button>
+              </Tooltip>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shadow-sm"
+                onClick={() => {
+                  setSelected(row.original);
+                  handleToggle({ breakPackModal: true });
+                }}
+              >
+                <PackageOpen />
+              </Button>
+            )}
           </div>
         ),
       },
