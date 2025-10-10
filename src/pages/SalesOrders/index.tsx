@@ -51,29 +51,13 @@ export default function SalesOrders() {
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     order: "DESC",
-    sort: "deliveryDate",
+    sort: "salesOrderNumber",
     // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
     // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
   const [toggle, handleToggle] = useToggle({
     salesOrderModal: false,
   });
-  // React.useEffect(() => {
-  //   const { from, to } = range || {};
-  //   if (from && to) {
-  //     setFilter((prev) => ({
-  //       ...prev,
-  //       startDate: from.toISOString(),
-  //       endDate: to.toISOString(),
-  //     }));
-  //   } else {
-  //     setFilter((prev) => ({
-  //       ...prev,
-  //       startDate: "",
-  //       endDate: "",
-  //     }));
-  //   }
-  // }, [range]);
 
   const getData = React.useCallback(async () => {
     setLoading(true);
@@ -103,7 +87,7 @@ export default function SalesOrders() {
   const columns: ColumnDef<SalesOrder>[] = [
     {
       accessorKey: "salesOrderNumber",
-      header: "PO #",
+      header: "Order #",
     },
     {
       accessorKey: "orderDate",
@@ -124,16 +108,6 @@ export default function SalesOrders() {
         );
       },
     },
-    // {
-    //   accessorKey: "statusHistory",
-    //   header: "Date",
-    //   cell: ({ row }) => {
-    //     const statusHistoryMap = mappedStatusHistory(
-    //       row.original.salesOrderStatusHistory ?? [],
-    //     );
-    //     return formatDate(statusHistoryMap[row.original.status]?.changedAt);
-    //   },
-    // },
 
     {
       accessorKey: "modeOfPayment",

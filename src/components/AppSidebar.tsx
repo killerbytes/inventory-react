@@ -39,9 +39,11 @@ import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
 import { productServices } from "@/services";
+import { ApiErrorResponse } from "@/types";
 import useToggle from "@/hooks/useToggle";
 import { Button } from "./ui/button";
 import Http from "@/services/http";
+import { toast } from "sonner";
 import Header from "./Header";
 import UserIcon from "./User";
 import React from "react";
@@ -156,6 +158,16 @@ export default function AppSidebar() {
     getData();
   }, []);
 
+  const onUpdateGSheet = async () => {
+    try {
+      await productServices.updateSheet();
+      toast.success("GSheet updated successfully");
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      toast.error("Failed to update GSheet", apiError.message);
+    }
+  };
+
   return (
     <Sidebar variant="inset">
       <SidebarContent>
@@ -218,13 +230,7 @@ export default function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  productServices.updateSheet();
-                }}
-              >
+              <Button size="sm" variant="outline" onClick={onUpdateGSheet}>
                 Update GSheet
               </Button>
               {/* <SidebarMenuItem key="Variant Templates">
