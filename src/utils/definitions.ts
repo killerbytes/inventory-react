@@ -150,7 +150,15 @@ export const UNIT = {
   DOZ: "DOZ",
 };
 
-export const BREAK_PACK_UNITS = [UNIT.BOX, UNIT.BAG, UNIT.GAL, UNIT.PCK];
+export const WHOLESALE_UNITS = {
+  RLS: "RLS",
+  BOX: "BOX",
+  BAG: "BAG",
+  GAL: "GAL",
+  PCK: "PCK",
+  SET: "SET",
+  DOZ: "DOZ",
+};
 
 export const UNIT_COLOR = {
   undefined: "text-black",

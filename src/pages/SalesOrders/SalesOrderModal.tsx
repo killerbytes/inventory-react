@@ -1,4 +1,11 @@
 import {
+  MODE_OF_PAYMENT_OPTIONS,
+  ORDER_STATUS,
+  ROUTES,
+  UNIT_COLOR,
+  WHOLESALE_UNITS,
+} from "@/utils/definitions";
+import {
   Form,
   FormControl,
   FormField,
@@ -6,12 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  MODE_OF_PAYMENT_OPTIONS,
-  ORDER_STATUS,
-  ROUTES,
-  UNIT_COLOR,
-} from "@/utils/definitions";
 import {
   Card,
   CardAction,
@@ -236,7 +237,6 @@ export default function SalesOrderModal({
     }
   }
 
-  // const formData = useWatch({ control: form.control });
   const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
     () => [
       {
@@ -345,7 +345,7 @@ export default function SalesOrderModal({
                                 .map(({ item }) => (
                                   <CommandGroup key={item.id}>
                                     <CommandItem
-                                      value={String(item.name)}
+                                      value={String(item.id)}
                                       disabled={item.inventory?.quantity < 1}
                                       key={item.id}
                                       onSelect={() => {
@@ -444,7 +444,14 @@ export default function SalesOrderModal({
             control={form.control}
             name={`salesOrderItems.${row.index}.purchasePrice`}
             render={() => (
-              <FormItem>
+              <FormItem
+                className={cx({
+                  "text-red-500 font-bold": Boolean(
+                    form.formState.errors?.salesOrderItems?.[row.index]
+                      ?.purchasePrice,
+                  ),
+                })}
+              >
                 <FormControl>
                   <PriceColumn
                     index={row.index}
@@ -765,6 +772,19 @@ export default function SalesOrderModal({
           title="Create Invoice"
           description="Are you sure you want to create this invoice? This action cannot be undone."
           isLoading={loading}
+          shouldConfirm={() => {
+            return (
+              formData.salesOrderItems
+                ?.map((i) => {
+                  return productCombinations.find(
+                    (p) => p.id === i.combinationId,
+                  )?.unit;
+                })
+                .some((unit) =>
+                  Object.values(WHOLESALE_UNITS).includes(unit ?? ""),
+                ) ?? false
+            );
+          }}
           onConfirm={(e) => {
             e.preventDefault();
             console.log(form.getValues(), form.formState.errors);

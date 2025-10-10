@@ -9,7 +9,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Loader2Icon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { CircleAlert, Loader2Icon } from "lucide-react";
+import { Checkbox } from "./ui/checkbox";
+import { Label } from "./ui/label";
 import React from "react";
 
 export default function ConfirmDialog({
@@ -19,6 +22,7 @@ export default function ConfirmDialog({
   description = `Are you sure you want to continue?`,
   confirmText = "Confirm",
   isLoading,
+  shouldConfirm,
 }: {
   children: React.ReactNode;
   onConfirm: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -26,8 +30,19 @@ export default function ConfirmDialog({
   description?: string;
   confirmText?: string;
   isLoading?: boolean;
+  shouldConfirm?: () => boolean;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [requiresConfirm, setRequiresConfirm] = React.useState(false);
+  const [confirmed, setConfirmed] = React.useState(true);
+  React.useEffect(() => {
+    if (shouldConfirm && open) {
+      const result: boolean = shouldConfirm();
+      setRequiresConfirm(result);
+      setConfirmed(!result);
+    }
+  }, [open, shouldConfirm]);
+
   const handleConfirm = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
@@ -41,12 +56,33 @@ export default function ConfirmDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogDescription className="flex flex-col gap-4">
+            <p>{description}</p>
+            {requiresConfirm && (
+              <Alert variant="destructive">
+                <CircleAlert />
+                <AlertTitle>Wholesale items</AlertTitle>
+                <AlertDescription>
+                  This order includes wholesale items. Please confirm that you
+                  intend to resell these products.
+                  <Label>
+                    <Checkbox
+                      onCheckedChange={(checked) =>
+                        setConfirmed(checked === true)
+                      }
+                      checked={confirmed}
+                    />{" "}
+                    Check to confirm
+                  </Label>
+                </AlertDescription>
+              </Alert>
+            )}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            disabled={isLoading}
+            disabled={isLoading || !confirmed}
             onClick={handleConfirm}
             autoFocus
           >

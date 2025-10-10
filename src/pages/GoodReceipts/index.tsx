@@ -160,15 +160,6 @@ export default function GoodReceipts() {
         },
       },
       {
-        header: "User",
-        cell: ({ row }) => {
-          const statusHistoryMap = mappedStatusHistory(
-            row.original.goodReceiptStatusHistory ?? [],
-          );
-          return statusHistoryMap[row.original.status]?.user.username;
-        },
-      },
-      {
         accessorKey: "receiptDate",
         header: ({ column }) => {
           return (

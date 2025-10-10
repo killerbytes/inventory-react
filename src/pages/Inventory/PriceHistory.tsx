@@ -30,7 +30,7 @@ export default function PriceHistory() {
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "createdAt",
-    order: "ASC",
+    order: "DESC",
     q: "",
   });
 
