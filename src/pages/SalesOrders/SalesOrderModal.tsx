@@ -345,7 +345,7 @@ export default function SalesOrderModal({
                                 .map(({ item }) => (
                                   <CommandGroup key={item.id}>
                                     <CommandItem
-                                      value={String(item.id)}
+                                      value={String(item.name + item.unit)}
                                       disabled={item.inventory?.quantity < 1}
                                       key={item.id}
                                       onSelect={() => {
