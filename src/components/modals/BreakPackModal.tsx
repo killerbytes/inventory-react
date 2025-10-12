@@ -1,4 +1,10 @@
 import {
+  ApiErrorResponse,
+  BreakPack,
+  ProductCombinations,
+  VariantTypes,
+} from "@/types";
+import {
   AlertCircleIcon,
   Equal,
   Loader2Icon,
@@ -6,7 +12,6 @@ import {
   X,
 } from "lucide-react";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { ApiErrorResponse, BreakPack, ProductCombinations } from "@/types";
 import { productCombinationServices, productServices } from "@/services";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useController, useForm } from "react-hook-form";
@@ -50,14 +55,24 @@ export default function BreakPackModal({
   React.useEffect(() => {
     const getData = async () => {
       try {
-        const { combinations } = await productServices.get(
+        const { combinations, variants } = await productServices.get(
           combination?.productId,
         );
-
         const options = combinations.filter(
-          (c: ProductCombinations) => c.id != combination.id,
+          (c: ProductCombinations) => c.id != combination.id && c.isBreakPack,
         );
-        setOptions(options);
+        const result = variants.find((item) => /^\[.*\]$/.test(item.name));
+
+        if (result?.id) {
+          const variant = combination.values.find(
+            (i) => i.variantTypeId === result.id,
+          )?.value;
+          setOptions(
+            options.filter((o) => o.values.some((v) => v.value === variant)),
+          );
+        } else {
+          setOptions(options);
+        }
       } catch (error) {
         const apiError = error as ApiErrorResponse;
         toast.error("Error fetching products: " + apiError.message);
