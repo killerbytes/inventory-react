@@ -16,6 +16,7 @@ import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
@@ -48,100 +49,6 @@ export default function PriceHistory() {
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
 
-  // const columns = React.useMemo<ColumnDef<priceHistory>[]>(
-  //   () => [
-  //     {
-  //       accessorKey: "combinations.name",
-  //       header: "Name",
-  //       meta: {},
-  //       cell: ({ row }) => {
-  //         const { combinations } = row.original;
-
-  //         return (
-  //           <Link
-  //             to={`${ROUTES.PRODUCTS}/${combinations.productId}`}
-  //             className="flex gap-2 items-center"
-  //           >
-  //             <ColorBadge colorMap={UNIT_COLOR}>
-  //               {String(combinations.unit)}
-  //             </ColorBadge>
-  //             {combinations.name}
-  //           </Link>
-  //         );
-  //       },
-  //     },
-  //     {
-  //       accessorKey: "fromPrice",
-  //       header: "From",
-  //       meta: {
-  //         headerClassName: "text-right",
-  //         className: "text-right",
-  //       },
-  //       cell: ({ row }) => {
-  //         const { fromPrice } = row.original;
-  //         return formatCurrency(fromPrice);
-  //       },
-  //     },
-  //     {
-  //       accessorKey: "toPrice",
-  //       header: "To",
-  //       meta: {
-  //         headerClassName: "text-right",
-  //         className: "text-right",
-  //       },
-  //       cell: ({ row }) => {
-  //         const { fromPrice, toPrice } = row.original;
-  //         const positive =
-  //           parseFloat(String(fromPrice)) > parseFloat(String(toPrice));
-  //         return (
-  //           <div
-  //             className={cx("flex items-center justify-end gap-1", {
-  //               "text-red-500": positive,
-  //               "text-green-500": !positive,
-  //             })}
-  //           >
-  //             {formatCurrency(toPrice)}
-  //           </div>
-  //         );
-  //       },
-  //     },
-
-  //     {
-  //       accessorKey: "createdAt",
-  //       header: ({ column }) => {
-  //         return (
-  //           <span
-  //             className="flex items-center gap-2 cursor-pointer"
-  //             onClick={() => {
-  //               onFilterChange({
-  //                 order: filter.order === "ASC" ? "DESC" : "ASC",
-  //                 sort: column.id,
-  //               });
-  //             }}
-  //           >
-  //             Created
-  //             {filter.sort === column.id && filter.order === "ASC" ? (
-  //               <ChevronUp size={16} />
-  //             ) : (
-  //               filter.sort === column.id && <ChevronDown size={16} />
-  //             )}
-  //           </span>
-  //         );
-  //       },
-  //       cell: ({ row }) => {
-  //         return formatDateTime(String(row.original.changedAt));
-  //       },
-  //     },
-  //     {
-  //       accessorKey: "user",
-  //       header: "User",
-  //       cell: ({ row }) => {
-  //         return row.original.user?.username;
-  //       },
-  //     },
-  //   ],
-  //   [filter.order, filter.sort, onFilterChange],
-  // );
   const columns = React.useMemo<ColumnDef<priceHistory>[]>(
     () => [
       {
@@ -262,6 +169,7 @@ export default function PriceHistory() {
           />
         </div>
         <DataTable data={data.data || []} columns={columns} />
+        <Pager data={data} filter={filter} setFilter={setFilter} />
       </CardContent>
     </Card>
   );

@@ -56,8 +56,8 @@ export interface ApiError {
 }
 
 export interface filterProps {
-  limit: number;
-  page: number;
+  limit?: number;
+  page?: number;
   q?: string;
   type?: string;
   sort?: string;
