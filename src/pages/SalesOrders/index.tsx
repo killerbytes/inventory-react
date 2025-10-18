@@ -13,8 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
 import { filterProps, PaginatedResponse, SalesOrder } from "@/types";
-import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import SalesOrderModal from "./SalesOrderModal";
 import { salesOrderServices } from "@/services";
 import { useNavigate } from "react-router-dom";
+import { DateRange } from "react-day-picker";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
@@ -43,9 +44,9 @@ export default function SalesOrders() {
   });
   const [selected, setSelected] = React.useState<SalesOrder>();
   const [loading, setLoading] = React.useState(true);
-  const [range, setRange] = React.useState({
-    // from: startOfMonth(new Date()),
-    // to: endOfMonth(new Date()),
+  const [range, setRange] = React.useState<DateRange>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
   });
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
@@ -58,6 +59,7 @@ export default function SalesOrders() {
   const [toggle, handleToggle] = useToggle({
     salesOrderModal: false,
   });
+  console.log(range);
 
   const getData = React.useCallback(async () => {
     setLoading(true);
@@ -92,7 +94,7 @@ export default function SalesOrders() {
     {
       accessorKey: "orderDate",
       header: "Order Date",
-      cell: ({ row }) => formatDate(row.getValue("orderDate")),
+      cell: ({ row }) => formatDateTime(row.getValue("orderDate")),
     },
     {
       accessorKey: "customer.name",

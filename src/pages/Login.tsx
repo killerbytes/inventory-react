@@ -33,19 +33,26 @@ export default function Login() {
   const { callbackUrl } = qs.parse(window.location.search);
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username:
+        localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_USER`) || "",
+    },
   });
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
       const data = await authServices.login(values);
       const { token } = data;
-
       await localStorage.setItem(
         `${import.meta.env.VITE_APP_NAME}_TOKEN`,
         token,
       );
       toast.success(`Logging in... ${values.username}`);
       form.reset();
+      localStorage.setItem(
+        `${import.meta.env.VITE_APP_NAME}_USER`,
+        values.username,
+      );
       navigate(typeof callbackUrl === "string" ? callbackUrl : "/");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
@@ -80,7 +87,11 @@ export default function Login() {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input placeholder="Username" {...field} />
+                      <Input
+                        placeholder="Username"
+                        {...field}
+                        autoComplete="off"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -97,6 +108,7 @@ export default function Login() {
                         type="password"
                         placeholder="********"
                         {...field}
+                        autoFocus
                       />
                     </FormControl>
                     <FormMessage />

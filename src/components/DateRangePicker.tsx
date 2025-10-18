@@ -16,11 +16,6 @@ interface DateRangePickerProps {
   numberOfMonths?: number;
 }
 
-function normalizeToDay(date: Date | undefined) {
-  if (!date) return undefined;
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()); // midnight local
-}
-
 export default function DateRangePicker({
   value,
   onChange,
@@ -38,8 +33,8 @@ export default function DateRangePicker({
     }
     const { from, to } = selectedRange;
     onChange({
-      from: from.toLocaleString(),
-      to: to.toLocaleString(),
+      from: from,
+      to: to,
     });
     // Close the popover only when both dates are selected
     if (selectedRange.from && selectedRange.to) {

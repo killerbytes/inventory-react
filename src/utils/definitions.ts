@@ -25,6 +25,7 @@ export const ROUTES = {
   PAYMENT_CREATE: "/payments/new",
   PAYMENT_DETAILS: "/payments/:id",
   PRICE_HISTORY: "/price-history",
+  REORDERS: "/reorders",
 };
 
 export const ORDER_TYPE = {

@@ -12,9 +12,9 @@ interface SelectOption {
   [key: string]: string | number | null;
 }
 
-interface SelectProps<T> {
+interface SelectProps<SelectOption> {
   onChange: (value: string) => void;
-  options: T[];
+  options: SelectOption[];
   className?: string;
   value?: string;
   valueKey?: string;
@@ -41,9 +41,9 @@ function Select<T>(props: SelectProps<T>) {
     value,
     tabIndex,
     autoFocus = false,
-    renderOption = defaultRenderOption,
+    renderOption = defaultRenderOption as (option: T) => React.ReactNode,
   } = props;
-  const [selectOptions, setSelectOptions] = React.useState<SelectOption[]>([]);
+  const [selectOptions, setSelectOptions] = React.useState<T[]>([]);
   React.useEffect(() => {
     if (autoFocus) {
       setTimeout(() => {

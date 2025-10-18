@@ -12,7 +12,7 @@ import { pagerProps } from "@/types";
 import Select from "./Select";
 
 export default function Pager({ data, filter, setFilter }: pagerProps) {
-  const { page, limit } = filter;
+  const { page = 0, limit } = filter;
   const pageCount = data.totalPages;
   const paginationLimits = PAGINATION.PAGE_SIZE_OPTIONS.map((i) => ({
     label: i,
@@ -76,7 +76,7 @@ export default function Pager({ data, filter, setFilter }: pagerProps) {
             onClick={() =>
               setFilter((prev) => ({
                 ...prev,
-                page: Math.max(filter.page - 1, 1),
+                page: Math.max(page - 1, 1),
               }))
             }
             isActive={page !== 1}
@@ -111,7 +111,7 @@ export default function Pager({ data, filter, setFilter }: pagerProps) {
             onClick={() =>
               setFilter((prev) => ({
                 ...prev,
-                page: Math.min(filter.page + 1, pageCount),
+                page: Math.min(page + 1, pageCount),
               }))
             }
             isActive={page !== pageCount}

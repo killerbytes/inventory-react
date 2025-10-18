@@ -289,7 +289,7 @@ export default function CombinationModal({
               render={({ field }) => (
                 <FormItem className="">
                   <FormControl>
-                    <NumberInput {...field} tabIndex={-1} />
+                    <NumberInput {...field} decimalScale={1} tabIndex={-1} />
                   </FormControl>
                 </FormItem>
               )}
