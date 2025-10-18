@@ -8,6 +8,7 @@ import BreakPacks from "./pages/Inventory/BreakPacks";
 import ProductDetails from "./pages/Products/Details";
 import InvoiceDetails from "./pages/Invoices/Details";
 import Movements from "./pages/Inventory/Movements";
+import Reorders from "./pages/Inventory/Reorders";
 import GoodReceipts from "./pages/GoodReceipts";
 import SalesOrders from "./pages/SalesOrders";
 import { ROUTES } from "./utils/definitions";
@@ -187,6 +188,15 @@ function App() {
               </Layout>
             }
           />
+          <Route
+            path={ROUTES.REORDERS}
+            element={
+              <Layout>
+                <Reorders />
+              </Layout>
+            }
+          />
+
           <Route
             path="settings"
             element={

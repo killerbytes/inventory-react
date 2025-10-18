@@ -14,6 +14,7 @@ import {
   Banknote,
   CreditCard,
   ChartCandlestick,
+  Gauge,
 } from "lucide-react";
 import {
   Sidebar,
@@ -97,6 +98,11 @@ const reports = [
     url: ROUTES.PRICE_HISTORY,
     icon: ChartCandlestick,
   },
+  {
+    title: "Reorder Levels",
+    url: ROUTES.REORDERS,
+    icon: Gauge,
+  },
 ];
 
 const menu = [
@@ -164,7 +170,7 @@ export default function AppSidebar() {
       toast.success("GSheet updated successfully");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
-      toast.error("Failed to update GSheet", apiError.message);
+      toast.error("Failed to update GSheet: " + apiError.message);
     }
   };
 

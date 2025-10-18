@@ -1,10 +1,4 @@
-import {
-  BreakPack,
-  filterProps,
-  Inventory,
-  InventoryMovement,
-  StockAdjustment,
-} from "@/types";
+import { filterProps, Inventory, StockAdjustment } from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 
@@ -27,5 +21,8 @@ export default class InventoryService extends BaseService<Inventory> {
 
   getPriceHistory = async (data?: any) => {
     return await this.http.post(`${this.url}/priceHistory`, data);
+  };
+  getReorderLevels = async (data?: any) => {
+    return await this.http.get(`${this.url}/reorderLevels`, { params: data });
   };
 }

@@ -61,6 +61,7 @@ export interface filterProps {
   q?: string;
   type?: string;
   sort?: string;
+  status?: string;
   order?: "ASC" | "DESC";
 }
 

@@ -137,6 +137,9 @@ export default function Movements() {
             case INVENTORY_MOVEMENT_REFERENCE_TYPE.GOOD_RECEIPT:
               route = ROUTES.GOOD_RECEIPT;
               break;
+            case INVENTORY_MOVEMENT_REFERENCE_TYPE.SALES_ORDER:
+              route = ROUTES.SALES_ORDERS;
+              break;
             case INVENTORY_MOVEMENT_REFERENCE_TYPE.STOCK_ADJUSTMENT:
               route = ROUTES.GOOD_RECEIPT;
               break;

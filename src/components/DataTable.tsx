@@ -26,7 +26,7 @@ import * as React from "react"; // Ensure React is imported
 
 type DataTableProps<T> = {
   columns: ColumnDef<T>[];
-  data: T[];
+  data: object[];
   defaultColumn?: ColumnDef<T>;
   meta?: {
     disabledRow?: string;
@@ -162,37 +162,41 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
           )}
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  className={cx(
-                    { "cursor-pointer": onRowClick },
-                    meta?.disabledRow
-                      ? {
-                          "opacity-50 pointer-events-none bg-gray-100":
-                            meta?.disabledRow &&
-                            !row.original[meta.disabledRow as keyof T],
-                        }
-                      : {},
-                  )}
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    onRowClick?.(row.original);
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cell.column.columnDef.meta?.className}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                return (
+                  <TableRow
+                    className={cx(
+                      { "cursor-pointer": onRowClick },
+                      meta?.disabledRow
+                        ? {
+                            "opacity-50  bg-gray-100":
+                              meta?.disabledRow &&
+                              !meta.disabledRow
+                                .split(".")
+                                .reduce((acc, key) => acc?.[key], row.original),
+                          }
+                        : {},
+                    )}
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => {
+                      onRowClick?.(row.original);
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className={cell.column.columnDef.meta?.className}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
