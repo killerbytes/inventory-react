@@ -233,6 +233,9 @@ export default function ProductEdit() {
           headerClassName: "text-right",
           className: "w-0 text-right",
         },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => (
+          <div>{parseFloat(row.original.inventory.quantity + "")}</div>
+        ),
       },
       {
         accessorKey: "conversionFactor",
@@ -241,6 +244,9 @@ export default function ProductEdit() {
           headerClassName: "text-right",
           className: "w-0 text-right",
         },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => (
+          <div>{parseFloat(row.original.conversionFactor + "")}</div>
+        ),
       },
       {
         header: "Re-order Level",

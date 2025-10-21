@@ -162,7 +162,12 @@ export default function BreakPackModal({
                       render={({ field }) => (
                         <FormItem className="mb-4">
                           <FormLabel>Quantity</FormLabel>
-                          <NumberInput {...field} type="number" />
+                          <NumberInput
+                            {...field}
+                            type="number"
+                            decimalScale={2}
+                            value={parseFloat(field.value)}
+                          />
                           <FormMessage />
                         </FormItem>
                       )}
