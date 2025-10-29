@@ -29,7 +29,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       <NumericFormat
         {...props}
         getInputRef={ref} // ✅ forward the ref to RHF
-        value={value}
+        value={value ?? ""}
         onFocus={onFocus}
         onValueChange={(values) => {
           const { floatValue } = values;

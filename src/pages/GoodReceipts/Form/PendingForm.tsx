@@ -108,7 +108,7 @@ export default function PendingForm({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <NumberInput {...field} />
+                  <NumberInput {...field} value={Number(field.value)} />
                 </FormControl>
               </FormItem>
             )}

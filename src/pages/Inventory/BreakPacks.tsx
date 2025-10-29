@@ -29,7 +29,7 @@ export default function BreakPacks() {
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "createdAt",
-    order: "ASC",
+    order: "DESC",
     q: "",
   });
 

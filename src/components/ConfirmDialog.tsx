@@ -57,7 +57,7 @@ export default function ConfirmDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription className="flex flex-col gap-4">
-            <p>{description}</p>
+            {description}
             {requiresConfirm && (
               <Alert variant="destructive">
                 <CircleAlert />
