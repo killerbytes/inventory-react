@@ -2,9 +2,11 @@ import {
   AlertCircleIcon,
   Equal,
   Loader2Icon,
+  Merge,
   MoveRight,
   PackageOpen,
-  X,
+  PackagePlus,
+  Split,
 } from "lucide-react";
 import {
   ApiErrorResponse,
@@ -16,8 +18,9 @@ import { Form, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { productCombinationServices, productServices } from "@/services";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useController, useForm } from "react-hook-form";
+import { SelectItemText } from "@radix-ui/react-select";
+import { ERROR, UNIT_COLOR } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UNIT_COLOR } from "@/utils/definitions";
 import { DialogFooter } from "../ui/dialog";
 import { breakPackSchema } from "@/schemas";
 import { SelectItem } from "../ui/select";
@@ -53,11 +56,16 @@ export default function BreakPackModal({
 
   const quantity = useController({ control: form.control, name: "quantity" });
 
-  const isBreakPack = combination.conversionFactor > selected?.conversionFactor;
-  const totalQuantity =
-    Number(quantity.field.value) / isBreakPack
-      ? Number(combination.conversionFactor)
-      : Number(selected?.conversionFactor);
+  const packType = getPackRelationType(combination, selected || {});
+
+  let totalQuantity;
+  if (packType === "BREAK_PACK") {
+    totalQuantity =
+      Number(quantity.field.value) * Number(combination.conversionFactor);
+  } else if (packType === "RE_PACK") {
+    totalQuantity =
+      Number(quantity.field.value) / Number(selected?.conversionFactor);
+  }
 
   const filterOptionsByVariant = (
     options: ProductCombinations[],
@@ -74,8 +82,12 @@ export default function BreakPackModal({
         combination?.productId,
       );
       const options = combinations.filter(
-        (c: ProductCombinations) => c.id != combination.id,
+        (c: ProductCombinations) =>
+          c.id != combination.id &&
+          (c.isBreakPackOfId === combination.id ||
+            combination.isBreakPackOfId === c.id),
       );
+
       const result = variants.find((item: VariantTypes) =>
         /^\[.*\]$/.test(item.name),
       );
@@ -111,7 +123,18 @@ export default function BreakPackModal({
       toast.success("Break Pack successful");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
-      if (apiError) toast.error("Break Pack failed: " + apiError.message);
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field as keyof BreakPack, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      } else {
+        toast.error("Break Pack failed: " + apiError.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -121,46 +144,33 @@ export default function BreakPackModal({
     const selected = options.find((o) => o.id === Number(value));
     setSelected(selected);
     form.setValue("toCombinationId", Number(value));
-    form.setValue("quantity", Number(selected?.conversionFactor));
   };
 
   const renderSelectOption = (option: ProductCombinations) => (
-    <SelectItem key={option.id} value={String(option.id)}>
-      <ColorBadge colorMap={UNIT_COLOR}>{String(option.unit)}</ColorBadge>
-      {option.name}
+    <SelectItem
+      key={option.id}
+      value={String(option.id)}
+      className="w-full flex items-center justify-between gap-2 min-w-0 [&>span:last-of-type]:w-full"
+    >
+      <div className="flex items-center gap-2 w-full min-w-0">
+        <ColorBadge colorMap={UNIT_COLOR}>{String(option.unit)}</ColorBadge>
+        {option.name}
+        <span className="ml-auto ">
+          {getPackRelationType(combination, option) === "BREAK_PACK" && (
+            <PackageOpen color="red" />
+          )}
+          {getPackRelationType(combination, option) === "RE_PACK" && (
+            <PackagePlus color="green" />
+          )}
+        </span>
+      </div>
     </SelectItem>
-  );
-
-  const renderQuantityField = ({
-    field,
-  }: {
-    field: {
-      value: string | number;
-      onChange: (value: string | number) => void;
-      onBlur: () => void;
-      name: string;
-      ref: React.Ref<HTMLInputElement>;
-    };
-  }) => (
-    <FormItem className="mb-4">
-      <FormLabel>Quantity</FormLabel>
-      <NumberInput
-        {...field}
-        type="number"
-        value={Number.parseFloat(String(field.value))}
-      />
-      <FormMessage />
-    </FormItem>
   );
 
   const handleFormSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log(form.getValues(), form.formState.errors);
-    form
-      .handleSubmit(handleBreakPack)(e)
-      .catch((error) => {
-        console.error("Form submission error:", error);
-      });
+    form.handleSubmit(handleBreakPack)(e);
   };
   return (
     <Modal
@@ -210,40 +220,87 @@ export default function BreakPackModal({
                   <FormField
                     control={form.control}
                     name="quantity"
-                    render={renderQuantityField}
+                    render={({ field }) => (
+                      <FormItem className="mb-4">
+                        <FormLabel>Quantity</FormLabel>
+                        <NumberInput
+                          {...field}
+                          // type="number"
+                          thousandSeparator={false}
+                          decimalScale={1}
+                          value={Number.parseFloat(String(field.value))}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <div className="flex gap-2 items-center">
-                    {quantity.field.value}
-                    <ColorBadge colorMap={UNIT_COLOR}>
-                      {String(combination.unit)}
-                    </ColorBadge>
-                    <MoveRight size={18} />
-                    {totalQuantity}
-                    <ColorBadge colorMap={UNIT_COLOR}>
-                      {String(selected.unit)}
-                    </ColorBadge>
+                  <div className="flex flex-col gap-2 ">
+                    <div className="flex gap-2 items-center font-bold">
+                      {quantity.field.value}
+                      <ColorBadge colorMap={UNIT_COLOR}>
+                        {String(combination.unit)}
+                      </ColorBadge>
+                      <MoveRight size={18} />
+
+                      {totalQuantity}
+                      <ColorBadge colorMap={UNIT_COLOR}>
+                        {String(selected.unit)}
+                      </ColorBadge>
+                    </div>
                   </div>
                 </>
               )}
             </div>
           </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              disabled={!selected || loading}
-              onClick={handleFormSubmit}
-            >
-              {loading ? (
-                <Loader2Icon className="animate-spin" />
-              ) : (
-                <PackageOpen />
-              )}
-              {isBreakPack ? "Break Pack" : "Re-Pack"}
-            </Button>
+          <DialogFooter className="flex justify-between">
+            {selected && (
+              <>
+                <div className="flex gap-1 items-center border rounded-md bg-secondary px-2 py-1 text-sm">
+                  {packType === "BREAK_PACK" && 1}
+                  {packType === "RE_PACK" && Number(selected?.conversionFactor)}
+                  <ColorBadge colorMap={UNIT_COLOR}>
+                    {combination.unit}
+                  </ColorBadge>
+                  <Equal />
+                  {packType === "BREAK_PACK" &&
+                    Number(combination.conversionFactor)}
+                  {packType === "RE_PACK" && 1}
+                  <ColorBadge colorMap={UNIT_COLOR}>
+                    {String(selected?.unit)}
+                  </ColorBadge>
+                </div>
+                <Button
+                  className="ml-auto"
+                  type="button"
+                  disabled={!selected || loading}
+                  onClick={handleFormSubmit}
+                >
+                  {loading && <Loader2Icon className="animate-spin" />}
+                  {packType === "BREAK_PACK" ? (
+                    <>
+                      <PackageOpen /> Break Pack
+                    </>
+                  ) : (
+                    packType === "RE_PACK" && (
+                      <>
+                        <PackagePlus />
+                        Re-Pack
+                      </>
+                    )
+                  )}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </form>
       </Form>
     </Modal>
   );
+}
+
+function getPackRelationType(fromCombo, toCombo) {
+  if (toCombo.isBreakPackOfId === fromCombo.id) return "BREAK_PACK";
+  if (fromCombo.isBreakPackOfId === toCombo.id) return "RE_PACK";
+  return null;
 }

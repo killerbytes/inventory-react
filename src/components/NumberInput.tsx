@@ -17,6 +17,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       type = "number",
       decimalScale = 0,
       allowNegative = false,
+      thousandSeparator = ",",
       ...props
     },
     ref,
@@ -39,7 +40,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         customInput={Input}
         allowNegative={allowNegative}
         decimalScale={decimalScale}
-        thousandSeparator=","
+        thousandSeparator={thousandSeparator}
         {...(type === "currency" && {
           prefix: "₱",
           decimalScale: 2,

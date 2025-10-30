@@ -64,6 +64,9 @@ export default function ProductItem({ item }: { item: Product }) {
           headerClassName: "h-0",
           className: "w-20",
         },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return Number(row.original.inventory?.quantity);
+        },
       },
       {
         header: "Unit",

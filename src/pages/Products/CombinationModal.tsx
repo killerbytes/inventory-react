@@ -46,6 +46,7 @@ const formSchema = z.object({
   reorderLevel: z.coerce.number(),
   isBreakPack: z.boolean().nullish(),
   isActive: z.boolean().nullish(),
+  isBreakPackOfId: z.number().nullish(),
   values: z.array(
     z
       .object({
@@ -182,6 +183,9 @@ export default function CombinationModal({
             <Trash2 />
           </Button>
         ),
+      },
+      {
+        accessorKey: "id",
       },
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
@@ -386,6 +390,29 @@ export default function CombinationModal({
           );
         },
       },
+      {
+        accessorKey: "isBreakPackOfId",
+        cell: ({ row }) => {
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.isBreakPackOfId`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput
+                      {...field}
+                      type="number"
+                      thousandSeparator={false}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
+
       // {
       //   header: () => <div className="text-center">Qty</div>,
       //   accessorKey: "inventory.quantity",

@@ -161,6 +161,9 @@ export default function ProductEdit() {
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
       {
+        accessorKey: "id",
+      },
+      {
         accessorKey: "name",
         header: "Name",
       },
@@ -231,6 +234,9 @@ export default function ProductEdit() {
           headerClassName: "text-right",
           className: "w-0 text-right",
         },
+      },
+      {
+        accessorKey: "isBreakPackOfId",
       },
       {
         accessorKey: "stockAdjustment",
