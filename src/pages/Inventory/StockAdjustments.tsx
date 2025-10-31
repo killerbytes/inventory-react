@@ -1,18 +1,12 @@
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  PageHeader,
-  PageHeaderDescription,
-  PageHeaderTitle,
-} from "@/components/PageHeader";
+  ROUTES,
+  STOCK_ADJUSTMENT_TYPE_COLOR,
+  UNIT_COLOR,
+} from "@/utils/definitions";
 import { InventoryMovement, PaginatedResponse, StockAdjustment } from "@/types";
-import { ROUTES, STOCK_ADJUSTMENT_TYPE_COLOR } from "@/utils/definitions";
+import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -53,6 +47,17 @@ export default function StockAdjustments() {
         },
       },
       {
+        header: "Unit",
+        accessorKey: "combination.product.unit",
+        cell: ({ row }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>
+              {String(row.original.combination?.unit)}
+            </ColorBadge>
+          );
+        },
+      },
+      {
         accessorKey: "reason",
         header: "Type",
         meta: {
@@ -71,18 +76,24 @@ export default function StockAdjustments() {
       },
       {
         accessorKey: "systemQuantity",
-        header: "Original Inventory",
+        header: "Original",
         meta: {
           headerClassName: "text-right",
           className: "w-0 text-right",
         },
+        cell: ({ row }) => {
+          return Number(row.original.systemQuantity);
+        },
       },
       {
         accessorKey: "newQuantity",
-        header: "New Inventory",
+        header: "New",
         meta: {
           headerClassName: "text-right",
-          className: "text-right w-0",
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          return Number(row.original.newQuantity);
         },
       },
 
@@ -90,7 +101,8 @@ export default function StockAdjustments() {
         accessorKey: "notes",
         header: "Notes",
         meta: {
-          className: "w",
+          headerClassName: "w-[100px]",
+          className: "w-0 text-ellipsis w-[100px]",
         },
       },
       {
