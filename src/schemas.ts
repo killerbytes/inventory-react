@@ -140,7 +140,7 @@ export const productCombinationsSchema = z.object({
   values: z.array(variantValuesSchema),
   inventory: inventorySchema,
   product: productBaseSchema,
-  isBreakPackOfId: z.number().nullish(),
+  isBreakPackOfId: z.coerce.number().nullish(),
 });
 
 export const productSchema = productBaseSchema.extend({

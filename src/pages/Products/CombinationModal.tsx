@@ -46,7 +46,7 @@ const formSchema = z.object({
   reorderLevel: z.coerce.number(),
   isBreakPack: z.boolean().nullish(),
   isActive: z.boolean().nullish(),
-  isBreakPackOfId: z.number().nullish(),
+  isBreakPackOfId: z.coerce.number().nullish(),
   values: z.array(
     z
       .object({
@@ -170,7 +170,7 @@ export default function CombinationModal({
         accessorKey: "id",
         header: "#",
         meta: {
-          className: "w-0",
+          className: "text-right w-0",
         },
         cell: ({ row }) => (
           <Button
@@ -183,9 +183,6 @@ export default function CombinationModal({
             <Trash2 />
           </Button>
         ),
-      },
-      {
-        accessorKey: "id",
       },
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
@@ -214,29 +211,7 @@ export default function CombinationModal({
           );
         },
       })),
-      {
-        accessorKey: "price",
-        header: "Price",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right w-30 min-w-[100px]",
-        },
-        cell: ({ row }) => {
-          return (
-            <FormField
-              control={form.control}
-              name={`combinations.${row.index}.price`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <NumberInput {...field} type="currency" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          );
-        },
-      },
+
       {
         accessorKey: "unit",
         header: "Unit",
@@ -278,6 +253,43 @@ export default function CombinationModal({
         },
       },
 
+      {
+        accessorKey: "price",
+        header: "Price",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right w-30 min-w-[100px]",
+        },
+        cell: ({ row }) => {
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.price`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput {...field} type="currency" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "inventory.quantity",
+        header: "Qty",
+        meta: {
+          className: "text-left w-[50px]",
+        },
+        cell: ({ row }) => {
+          return (
+            <div className="text-center">
+              {Number(row.original.inventory?.quantity)}
+            </div>
+          );
+        },
+      },
       {
         accessorKey: "conversionFactor",
         header: "Conversion Factor",
@@ -334,7 +346,6 @@ export default function CombinationModal({
         meta: {
           className: "text-right w-0",
         },
-
         cell: ({ row }) => {
           return (
             <FormField
@@ -392,18 +403,43 @@ export default function CombinationModal({
       },
       {
         accessorKey: "isBreakPackOfId",
+        meta: {
+          className: "text-right w-0",
+        },
+
         cell: ({ row }) => {
+          const type = variants.find((item: VariantTypes) =>
+            /^\[.*\]$/.test(item.name),
+          );
+          let options = [];
+          if (type) {
+            const f = row.original.values.find(
+              (v) => v.variantTypeId === type.id,
+            );
+            options = x.filter((i) => i.values.find((v) => v.id === f.id));
+          }
+
           return (
             <FormField
               control={form.control}
               name={`combinations.${row.index}.isBreakPackOfId`}
               render={({ field }) => (
                 <FormItem>
+                  {console.log(field.value)}
                   <FormControl>
-                    <NumberInput
+                    <Select
                       {...field}
-                      type="number"
-                      thousandSeparator={false}
+                      tabIndex={-1}
+                      value={String(field.value)}
+                      options={options.filter((o) => o.id !== row.original.id)}
+                      renderOption={(option) => (
+                        <SelectItem key={option.id} value={String(option.id)}>
+                          {option.values[1]?.value}
+                          <ColorBadge colorMap={UNIT_COLOR}>
+                            {String(option.unit)}
+                          </ColorBadge>
+                        </SelectItem>
+                      )}
                     />
                   </FormControl>
                 </FormItem>
@@ -423,6 +459,7 @@ export default function CombinationModal({
     ],
     [form, remove, variants],
   );
+
   return (
     <Modal
       isOpen={isOpen}
