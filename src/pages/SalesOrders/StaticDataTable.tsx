@@ -58,6 +58,9 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
           headerClassName: "text-right",
           className: "text-right",
         },
+        cell: ({ row }) => {
+          return Number(row.original.quantity);
+        },
       },
       {
         header: "Unit",

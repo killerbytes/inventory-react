@@ -13,13 +13,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
-  BUTTON_COLOR,
-  ERROR,
-  ORDER_STATUS,
-  ROUTES,
-  STATUS_COLOR,
-} from "@/utils/definitions";
-import {
   Card,
   CardAction,
   CardContent,
@@ -31,12 +24,12 @@ import {
   productServices,
   salesOrderServices,
 } from "@/services";
+import { ERROR, ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
-import { Ban, Car, EllipsisVertical, Save, Trash2 } from "lucide-react";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { useCustomerStore } from "@/stores/customer.store";
+import { Ban, Car, EllipsisVertical } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { useForm, useWatch } from "react-hook-form";
@@ -44,7 +37,6 @@ import ColorBadge from "@/components/ColorBadge";
 import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import StaticDataTable from "./StaticDataTable";
-import { cx } from "class-variance-authority";
 import { useProductStore } from "@/stores";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
@@ -101,40 +93,6 @@ export default function SalesOrderDetails() {
     }
   }, [customers.length, setCustomers]);
 
-  async function onReceiveOrder(values: SalesOrderForm) {
-    try {
-      await salesOrderServices.update(Number(id), {
-        ...values,
-        status: ORDER_STATUS.RECEIVED,
-      });
-
-      toast.success(`Sales Order received`);
-      navigate(ROUTES.SALES_ORDERS);
-    } catch (error: any) {
-      const apiError = error as ApiErrorResponse;
-      apiError.errors.forEach((err) => {
-        if (err.field) {
-          form.setError(err.field as keyof SalesOrderForm, {
-            type: "server",
-            message: err.message,
-          });
-        }
-      });
-    }
-  }
-  async function onSaveOrder(form: SalesOrder) {
-    try {
-      await salesOrderServices.update(Number(id), {
-        ...form,
-        status: data.status,
-      });
-      toast.success(`Purchase Order saved successfully`);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Submission failed - " + apiError.message);
-    }
-  }
-
   async function onCancelOrder(form: CancelOrder) {
     try {
       await salesOrderServices.cancelOrder(Number(id), {
@@ -145,16 +103,6 @@ export default function SalesOrderDetails() {
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       toast.error(`Submission failed, ${apiError.message}`);
-    }
-  }
-  async function onDeleteOrder() {
-    try {
-      await salesOrderServices.delete(Number(id));
-      toast.success(`Sales Order deleted successfully`);
-      navigate(ROUTES.SALES_ORDERS);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Submission failed - " + apiError.message);
     }
   }
   const data = useWatch<SalesOrder>({
