@@ -59,6 +59,9 @@ export default function PartialForm({
           headerClassName: "text-right w-10",
           className: "text-right",
         },
+        cell: ({ row }) => {
+          return Number(row.original.quantity);
+        },
       },
       {
         accessorKey: "nameSnapshot",

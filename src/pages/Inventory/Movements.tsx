@@ -116,6 +116,9 @@ export default function Movements() {
       },
       {
         accessorKey: "quantity",
+        cell: ({ row }) => {
+          return Number(row.original.quantity);
+        },
       },
       {
         accessorKey: "costPerUnit",

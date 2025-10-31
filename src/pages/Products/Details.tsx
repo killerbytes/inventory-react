@@ -1,11 +1,4 @@
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   PageHeader,
   PageHeaderActions,
   PageHeaderContent,
@@ -13,8 +6,13 @@ import {
   PageHeaderTitle,
 } from "@/components/PageHeader";
 import {
-  Copy,
-  EllipsisVertical,
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Loader2Icon,
   PackageOpen,
   Pencil,
@@ -22,13 +20,6 @@ import {
   Save,
   Search,
 } from "lucide-react";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   categoryServices,
   productCombinationServices,
@@ -119,17 +110,6 @@ export default function ProductEdit() {
             });
           }
         });
-        // if (form.formState.errors["products_name_unit"]) {
-        //   form.setError("name", {
-        //     type: "server",
-        //     message: "Product with the same unit already exists",
-        //   });
-        //   form.setError("unit", {
-        //     type: "server",
-        //     message: "Unit with same product already exists",
-        //   });
-        // }
-        // toast.error("Submission failed: " + message);
       }
     } finally {
       setLoading(false);
@@ -177,10 +157,6 @@ export default function ProductEdit() {
     };
     getData();
   }, [productCombinationStore]);
-
-  // const x = useWatch<Product>({
-  //   control: form.control,
-  // });
 
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
@@ -233,6 +209,9 @@ export default function ProductEdit() {
           headerClassName: "text-right",
           className: "w-0 text-right",
         },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => (
+          <div>{Number(row.original.inventory.quantity)}</div>
+        ),
       },
       {
         accessorKey: "conversionFactor",
@@ -241,6 +220,9 @@ export default function ProductEdit() {
           headerClassName: "text-right",
           className: "w-0 text-right",
         },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => (
+          <div>{Number(row.original.conversionFactor)}</div>
+        ),
       },
       {
         header: "Re-order Level",
@@ -270,10 +252,9 @@ export default function ProductEdit() {
             >
               <Pencil />
             </Button>
-            {row.original?.conversionFactor <= 1 ||
-            row.original?.inventory?.quantity === 0 ||
+            {Number(row.original?.inventory?.quantity) === 0 ||
             row.original?.inventory?.quantity === undefined ? (
-              <Tooltip content="Conversion Factor and Quantity must be more than 1">
+              <Tooltip content="Quantity must be more than 1">
                 <Button
                   type="button"
                   variant="outline"
@@ -387,38 +368,6 @@ export default function ProductEdit() {
           }}
         >
           <Card>
-            {/* <CardHeader>
-              <CardAction>
-                <div className="flex gap-2">
-                  <div className="ml-auto">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="size-8 shadow-sm"
-                        >
-                          <EllipsisVertical />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              handleToggle({ cloneModal: true });
-                            }}
-                          >
-                            <Copy />
-                            Clone to Unit
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </CardAction>
-            </CardHeader> */}
             <CardContent>
               <ProductForm
                 form={form}

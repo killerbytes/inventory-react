@@ -54,3 +54,9 @@ export const getScore = (value: string, search: string) => {
 
   return 0;
 };
+
+export function convertNumericStrings(obj) {
+  return JSON.parse(JSON.stringify(obj), (_, value) =>
+    typeof value === "string" && !isNaN(value) ? parseFloat(value) : value,
+  );
+}

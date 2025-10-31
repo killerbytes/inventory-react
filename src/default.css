@@ -9,3 +9,7 @@ a,
 button {
   cursor: pointer;
 }
+
+[data-slot="select-value"] {
+  @apply w-full;
+}

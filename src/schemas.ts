@@ -140,6 +140,7 @@ export const productCombinationsSchema = z.object({
   values: z.array(variantValuesSchema),
   inventory: inventorySchema,
   product: productBaseSchema,
+  isBreakPackOfId: z.coerce.number().nullish(),
 });
 
 export const productSchema = productBaseSchema.extend({
@@ -237,7 +238,7 @@ export const goodReceiptFormSchema = z.object({
     z.object({
       id: z.number().nullish(),
       combinationId: z.number().min(1, { message: "Product is required." }),
-      quantity: z.number().min(1, { message: "Quantity is required." }),
+      quantity: z.coerce.number().min(1, { message: "Quantity is required." }),
       purchasePrice: z.coerce
         .number()
         .superRefine((val, ctx) => {
@@ -264,15 +265,8 @@ export const goodReceiptFormSchema = z.object({
 export const goodReceiptSchema = goodReceiptBaseSchema
   .extend({
     status: z.string(),
-
     supplier: z.any(),
-    // deliveryDate: z.string(),
-    // dueDate: z.string().nullish(),
     cancellationReason: z.string().nullish(),
-    // modeOfPayment: z.enum(
-    //   Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
-    // ),
-    // checkNumber: z.string().nullish(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -285,18 +279,6 @@ export const goodReceiptSchema = goodReceiptBaseSchema
         message: "Purchase Order Items are required",
       });
     }
-    // if (data.modeOfPayment === MODE_OF_PAYMENT.CHECK && !data.checkNumber) {
-    //   ctx.addIssue({
-    //     path: ["checkNumber"],
-    //     code: z.ZodIssueCode.custom,
-    //     message: "Check number is required when payment is by check",
-    //   });
-    //   // ctx.addIssue({
-    //   //   path: ["dueDate"],
-    //   //   code: z.ZodIssueCode.custom,
-    //   //   message: "Due date is required when payment is by check",
-    //   // });
-    // }
   });
 
 export const salesOrderItemSchema = z.object({
