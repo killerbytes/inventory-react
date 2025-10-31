@@ -434,7 +434,7 @@ export default function CombinationModal({
                       options={options.filter((o) => o.id !== row.original.id)}
                       renderOption={(option) => (
                         <SelectItem key={option.id} value={String(option.id)}>
-                          {option.values[1]?.value}
+                          {option.values[0]?.value} {option.values[1]?.value}
                           <ColorBadge colorMap={UNIT_COLOR}>
                             {String(option.unit)}
                           </ColorBadge>
