@@ -62,6 +62,7 @@ import { toast } from "sonner";
 
 export default function ProductEdit() {
   const { id } = useParams();
+  const [activeTab, setActiveTab] = React.useState("product_combination");
   const {
     hasLoaded: categoryHasLoaded,
     categories,
@@ -167,6 +168,11 @@ export default function ProductEdit() {
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
         header: variant.name,
+        meta: {
+          headerClassName: cx({
+            "italic underline font-bold": variant.isBreakpackFilter,
+          }),
+        },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
           const x = row.original.values.findIndex(
             (i) => i.variantTypeId === variants[idx].id,
@@ -387,7 +393,7 @@ export default function ProductEdit() {
             </CardContent>
           </Card>
 
-          <Tabs defaultValue="product_combination">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="product_combination">
                 Product Combinations
@@ -444,16 +450,27 @@ export default function ProductEdit() {
                       </CardAction>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex gap-4">
                         {variants.map((variant, idx) => {
                           return (
-                            <Badge
-                              variant="secondary"
-                              key={idx}
-                              className="outline"
-                            >
-                              {variant.name}
-                            </Badge>
+                            <div className="flex flex-col gap-2">
+                              <Badge
+                                variant="secondary"
+                                key={idx}
+                                className={cx("outline", {
+                                  "font-bold italic underline":
+                                    variant.isBreakpackFilter,
+                                })}
+                              >
+                                {variant.name}
+                              </Badge>
+
+                              <ul className="text-sm flex gap-1 flex-col">
+                                {variant.values.map((i) => (
+                                  <li>{i.value}</li>
+                                ))}
+                              </ul>
+                            </div>
                           );
                         })}
                       </div>
@@ -499,6 +516,7 @@ export default function ProductEdit() {
             getData();
             productCombinationStore.invalidate();
             handleToggle({ combinationModal: false });
+            setActiveTab("product_combination");
           }}
         />
       )}
