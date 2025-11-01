@@ -104,6 +104,7 @@ export const variantTypesSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
   productId: z.number().nullish(),
   isTemplate: z.boolean().nullish(),
+  isBreakpackFilter: z.boolean().nullish(),
   values: z
     .array(variantValuesSchema)
     .min(1, { message: "At least one value" }),

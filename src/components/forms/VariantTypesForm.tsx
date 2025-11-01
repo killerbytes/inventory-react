@@ -8,11 +8,11 @@ import {
 } from "@/components/ui/form";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { ColumnDef } from "@tanstack/react-table";
-import { TableCell, TableRow } from "../ui/table";
 import { ScrollArea } from "../ui/scroll-area";
 import { Plus, Trash2, X } from "lucide-react";
 import ConfirmDialog from "../ConfirmDialog";
 import { DialogFooter } from "../ui/dialog";
+import { Checkbox } from "../ui/checkbox";
 import { DataTable } from "../DataTable";
 import { VariantTypes } from "@/types";
 import { Button } from "../ui/button";
@@ -132,6 +132,25 @@ export default function VariantTypesForm({
             )}
           />
           <FormField
+            name="isBreakpackFilter"
+            render={({ field }) => (
+              <FormItem className="flex items-center">
+                <FormControl>
+                  <Checkbox
+                    {...field}
+                    checked={field.value}
+                    onCheckedChange={(value) => {
+                      field.onChange(value);
+                    }}
+                    value={String(field.value)}
+                  />
+                </FormControl>
+                <FormLabel>Breakpack Filter</FormLabel>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
             name="values"
             render={() => (
               <FormItem>
@@ -148,45 +167,6 @@ export default function VariantTypesForm({
                       emptyText="Add values..."
                       showHeader={false}
                       showFooter={false}
-                      xrenderFooter={() => (
-                        <TableRow>
-                          <TableCell>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="shadow-sm"
-                              onClick={() =>
-                                append({ value: "", variantTypeId: undefined })
-                              }
-                            >
-                              <Plus />
-                            </Button>
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              value={values}
-                              onChange={(e) => setValues(e.target.value)}
-                              onKeyDown={(
-                                e: React.KeyboardEvent<HTMLInputElement>,
-                              ) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  const inputTarget =
-                                    e.target as HTMLInputElement;
-                                  const values = inputTarget.value.split(",");
-                                  values.forEach((value) => {
-                                    append({
-                                      value: value.trim(),
-                                      variantTypeId: undefined,
-                                    });
-                                  });
-                                  setValues("");
-                                }
-                              }}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      )}
                     />
                   </ScrollArea>
                 </FormControl>
@@ -227,21 +207,6 @@ export default function VariantTypesForm({
           />
 
           <DialogFooter>
-            {/* <Button
-              type="submit"
-              className="shadow-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                console.log(form.getValues(), form.formState.errors);
-                form
-                  .handleSubmit(onSubmit)(e)
-                  .catch((error) => {
-                    console.error("Form submission error:", error);
-                  });
-              }}
-            >
-              {selected?.id ? "Update Variant" : "Add Variant"}
-            </Button> */}
             <ConfirmDialog
               title="Notice"
               description="You need to update the combinations to reflect the changes"
@@ -255,19 +220,7 @@ export default function VariantTypesForm({
                   });
               }}
             >
-              <Button
-                type="button"
-                className="shadow-sm"
-                // onClick={(e) => {
-                //   e.preventDefault();
-                //   console.log(form.getValues(), form.formState.errors);
-                //   form
-                //     .handleSubmit(onSubmit)(e)
-                //     .catch((error) => {
-                //       console.error("Form submission error:", error);
-                //     });
-                // }}
-              >
+              <Button type="button" className="shadow-sm">
                 {selected?.id ? "Update Variant" : "Add Variant"}
               </Button>
             </ConfirmDialog>

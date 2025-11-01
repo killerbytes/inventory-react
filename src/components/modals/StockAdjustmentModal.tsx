@@ -106,7 +106,7 @@ export default function StockAdjustmentModal({
           <div className="flex gap-2">
             Stock:
             <span className="text-primary">
-              {data && data.inventory?.quantity}
+              {data && Number(data.inventory?.quantity)}
             </span>
           </div>
         </div>

@@ -60,13 +60,13 @@ export default function PriceHistory() {
 
           return (
             <Link
-              to={`${ROUTES.PRODUCTS}/${combinations.productId}`}
+              to={`${ROUTES.PRODUCTS}/${combinations?.productId}`}
               className="flex gap-2 items-center"
             >
               <ColorBadge colorMap={UNIT_COLOR}>
-                {String(combinations.unit)}
+                {String(combinations?.unit)}
               </ColorBadge>
-              {combinations.name}
+              {combinations?.name}
             </Link>
           );
         },

@@ -114,6 +114,7 @@ export default function VariantsModal({
               variant="secondary"
               className={cx("cursor-pointer outline", {
                 "bg-orange-500 text-white": selected?.id === v.id,
+                "font-bold underline italic ": v.isBreakpackFilter,
               })}
               key={index}
               onClick={() => {
@@ -188,6 +189,7 @@ export default function VariantsModal({
           onClose={() => handleToggle({ saveTemplateModal: false })}
         />
       )}
+      <p>¼ ½ ¾</p>
     </Modal>
   );
 }

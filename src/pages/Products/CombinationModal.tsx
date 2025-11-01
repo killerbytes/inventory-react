@@ -27,6 +27,8 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { variantValuesSchema } from "@/schemas";
+import { cx } from "class-variance-authority";
 import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
 import Modal from "@/components/Modal";
@@ -47,15 +49,7 @@ const formSchema = z.object({
   isBreakPack: z.boolean().nullish(),
   isActive: z.boolean().nullish(),
   isBreakPackOfId: z.coerce.number().nullish(),
-  values: z.array(
-    z
-      .object({
-        id: z.number().nullish(),
-        value: z.string().nullish(),
-        variantTypeId: z.number().nullish(),
-      })
-      .required(),
-  ),
+  values: z.array(variantValuesSchema),
 });
 
 export default function CombinationModal({
@@ -90,7 +84,7 @@ export default function CombinationModal({
     keyName: "fieldId",
   });
 
-  const x = useWatch({
+  const x: z.infer<typeof formSchema>[] = useWatch({
     control: form.control,
     name: "combinations",
   });
@@ -101,6 +95,7 @@ export default function CombinationModal({
     unit: product.baseUnit,
     price: 0,
     conversionFactor: 1,
+    isActive: false,
     values: variants.map((i) => ({
       variantTypeId: i.id,
     })),
@@ -188,6 +183,9 @@ export default function CombinationModal({
         accessorKey: "values.values." + variant.name,
         header: variant.name,
         meta: {
+          headerClassName: cx({
+            "italic underline font-bold": variant.isBreakpackFilter,
+          }),
           className: "w-0",
         },
         cell: ({
@@ -252,7 +250,62 @@ export default function CombinationModal({
           );
         },
       },
+      {
+        accessorKey: "isBreakPackOfId",
+        meta: {
+          className: "text-right w-0",
+        },
 
+        cell: ({ row }) => {
+          const type = variants.find(
+            (item: VariantTypes) => item.isBreakpackFilter,
+          );
+          let options: z.infer<typeof formSchema>[] = [];
+          if (type) {
+            const f = row.original.values.find(
+              (v) => v.variantTypeId === type.id,
+            );
+
+            const exists = x
+              .filter((i) => i.isBreakPackOfId)
+              .map((i) => i.isBreakPackOfId);
+
+            options = x.filter((i) => i.values.find((v) => v.id === f?.id));
+            options = options.filter(
+              (o) =>
+                !exists.includes(o.id!) ||
+                o.id === row.original.isBreakPackOfId,
+            );
+          }
+
+          return (
+            <FormField
+              control={form.control}
+              name={`combinations.${row.index}.isBreakPackOfId`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      {...field}
+                      tabIndex={-1}
+                      value={String(field.value)}
+                      options={options.filter((o) => o.id !== row.original.id)}
+                      renderOption={(option) => (
+                        <SelectItem key={option.id} value={String(option.id)}>
+                          {option.values[0]?.value} {option.values[1]?.value}
+                          <ColorBadge colorMap={UNIT_COLOR}>
+                            {String(option.unit)}
+                          </ColorBadge>
+                        </SelectItem>
+                      )}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          );
+        },
+      },
       {
         accessorKey: "price",
         header: "Price",
@@ -401,53 +454,6 @@ export default function CombinationModal({
           );
         },
       },
-      {
-        accessorKey: "isBreakPackOfId",
-        meta: {
-          className: "text-right w-0",
-        },
-
-        cell: ({ row }) => {
-          const type = variants.find((item: VariantTypes) =>
-            /^\[.*\]$/.test(item.name),
-          );
-          let options = [];
-          if (type) {
-            const f = row.original.values.find(
-              (v) => v.variantTypeId === type.id,
-            );
-            options = x.filter((i) => i.values.find((v) => v.id === f.id));
-          }
-
-          return (
-            <FormField
-              control={form.control}
-              name={`combinations.${row.index}.isBreakPackOfId`}
-              render={({ field }) => (
-                <FormItem>
-                  {console.log(field.value)}
-                  <FormControl>
-                    <Select
-                      {...field}
-                      tabIndex={-1}
-                      value={String(field.value)}
-                      options={options.filter((o) => o.id !== row.original.id)}
-                      renderOption={(option) => (
-                        <SelectItem key={option.id} value={String(option.id)}>
-                          {option.values[0]?.value} {option.values[1]?.value}
-                          <ColorBadge colorMap={UNIT_COLOR}>
-                            {String(option.unit)}
-                          </ColorBadge>
-                        </SelectItem>
-                      )}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          );
-        },
-      },
 
       // {
       //   header: () => <div className="text-center">Qty</div>,
@@ -457,7 +463,7 @@ export default function CombinationModal({
       //   },
       // },
     ],
-    [form, remove, variants],
+    [form, remove, variants, x],
   );
 
   return (
