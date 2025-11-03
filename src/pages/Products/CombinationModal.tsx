@@ -266,16 +266,16 @@ export default function CombinationModal({
               (v) => v.variantTypeId === type.id,
             );
 
-            const exists = x
-              .filter((i) => i.isBreakPackOfId)
-              .map((i) => i.isBreakPackOfId);
+            // const exists = x
+            //   .filter((i) => i.isBreakPackOfId)
+            //   .map((i) => i.isBreakPackOfId);
 
             options = x.filter((i) => i.values.find((v) => v.id === f?.id));
-            options = options.filter(
-              (o) =>
-                !exists.includes(o.id!) ||
-                o.id === row.original.isBreakPackOfId,
-            );
+            // options = options.filter(
+            //   (o) =>
+            //     !exists.includes(o.id!) ||
+            //     o.id === row.original.isBreakPackOfId,
+            // );
           }
 
           return (
@@ -362,7 +362,7 @@ export default function CombinationModal({
                       {...field}
                       decimalScale={2}
                       tabIndex={-1}
-                      value={parseFloat(field.value)}
+                      value={Number(field.value)}
                     />
                   </FormControl>
                 </FormItem>
@@ -454,16 +454,8 @@ export default function CombinationModal({
           );
         },
       },
-
-      // {
-      //   header: () => <div className="text-center">Qty</div>,
-      //   accessorKey: "inventory.quantity",
-      //   meta: {
-      //     className: "text-center",
-      //   },
-      // },
     ],
-    [form, remove, variants, x],
+    [form, remove, variants],
   );
 
   return (

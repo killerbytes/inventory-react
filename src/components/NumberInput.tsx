@@ -1,5 +1,6 @@
 import { NumericFormat } from "react-number-format";
 import { Input } from "./ui/input";
+import { debounce } from "lodash";
 import React from "react";
 
 interface NumberInputProps {
@@ -7,12 +8,15 @@ interface NumberInputProps {
   value: number | null | undefined;
   onChange: (value: number) => void;
   type?: "number" | "currency";
+  decimalScale?: number;
+  allowNegative?: boolean;
+  thousandSeparator?: string;
 }
 
 const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
   (
     {
-      value,
+      value: _value,
       onChange,
       type = "number",
       decimalScale = 0,
@@ -22,19 +26,29 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     },
     ref,
   ) => {
+    const [displayValue, setDisplayValue] = React.useState("");
     const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       e.target.select();
     };
+
+    const debouncedUpdate = React.useMemo(
+      () =>
+        debounce((val) => {
+          onChange(val);
+        }, 400),
+      [onChange],
+    );
 
     return (
       <NumericFormat
         {...props}
         getInputRef={ref} // ✅ forward the ref to RHF
-        value={value ?? ""}
+        value={displayValue || _value}
         onFocus={onFocus}
         onValueChange={(values) => {
-          const { floatValue } = values;
-          onChange(floatValue ?? 0);
+          const { floatValue, formattedValue } = values;
+          setDisplayValue(formattedValue);
+          debouncedUpdate(floatValue ?? 0);
         }}
         style={{ textAlign: "inherit" }}
         customInput={Input}
