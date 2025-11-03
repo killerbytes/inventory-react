@@ -363,7 +363,7 @@ export default function SalesOrderModal({
                                         />
                                       </div>
                                       <div className="ml-auto flex gap-2">
-                                        {item.inventory?.quantity}
+                                        {Number(item.inventory?.quantity)}
                                         <span>
                                           {formatCurrency(item.price)}
                                         </span>
