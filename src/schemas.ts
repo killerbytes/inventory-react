@@ -479,3 +479,24 @@ export const priceHistorySchema = z.object({
   changedAt: z.string(),
   user: z.any(),
 });
+
+export const returnItemSchema = z.object({
+  combinationId: z.number(),
+  returnQuantity: z.coerce.number(),
+  purchasePrice: z.coerce.number(),
+  discount: z.coerce.number(),
+  quantity: z.coerce.number(),
+});
+
+export const exchangeItemSchema = z.object({
+  combinationId: z.number(),
+  purchasePrice: z.coerce.number(),
+  discount: z.coerce.number(),
+  quantity: z.coerce.number(),
+});
+
+export const returnSchema = z.object({
+  returns: z.array(returnItemSchema),
+  exchanges: z.array(exchangeItemSchema).optional(),
+  reason: z.string(),
+});

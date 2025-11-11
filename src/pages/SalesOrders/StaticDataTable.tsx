@@ -1,10 +1,16 @@
+import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
+import { ReturnItem, SalesOrder, SalesOrderItem } from "@/types";
 import { GLOBAL_COLOR, UNIT_COLOR } from "@/utils/definitions";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { SalesOrder, SalesOrderItem } from "@/types";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
+import { Button } from "@/components/ui/button";
+import { inventoryServices } from "@/services";
+import useToggle from "@/hooks/useToggle";
+import { useParams } from "react-router";
 import React from "react";
 
 const renderFooter = (data: SalesOrder) => {
@@ -21,8 +27,56 @@ const renderFooter = (data: SalesOrder) => {
 };
 
 export default function StaticDataTable({ data }: { data: SalesOrder }) {
+  const { id } = useParams();
+  const [toggle, handleToggle] = useToggle({ returnExchangeModal: false });
+  const [returns, setReturns] = React.useState<ReturnItem[]>();
+  const [returnItems, setReturnItems] = React.useState<ReturnItem[]>([]);
+  React.useEffect(() => {
+    const getReturns = async () => {
+      try {
+        const returns = await inventoryServices.getReturnTransaction(
+          Number(id),
+        );
+        if (returns) {
+          // setReturnTransaction(returns);
+          const returnItems = await inventoryServices.getReturnItems(
+            Number(returns.id),
+          );
+
+          setReturnItems(returnItems);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getReturns();
+  }, [id]);
+
   const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
     () => [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+      },
       {
         accessorKey: "nameSnapshot",
         header: "Product",
@@ -96,12 +150,112 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
     ],
     [],
   );
+
+  const returnItemsColumns = React.useMemo<ColumnDef<ReturnItem>[]>(
+    () => [
+      {
+        header: "Quantity",
+        accessorKey: "quantity",
+        meta: {
+          headerClassName: "text-right w-10",
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          return Number(row.original.quantity);
+        },
+      },
+      {
+        accessorKey: "combination.name",
+        header: "Product",
+      },
+      {
+        header: "Unit",
+        accessorKey: "combination.unit",
+        cell: ({ row }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>
+              {String(row.original.combination.unit)}
+            </ColorBadge>
+          );
+        },
+      },
+      {
+        header: "Note",
+        accessorKey: "discountNote",
+      },
+      {
+        header: "Price",
+        accessorKey: "unitPrice",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          return formatCurrency(row.original.unitPrice);
+        },
+      },
+
+      {
+        header: "Amount",
+        accessorKey: "totalAmount",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => formatCurrency(row.original.totalAmount ?? 0),
+      },
+    ],
+    [],
+  );
   return (
-    <DataTable
-      data={data.salesOrderItems || []}
-      columns={columns}
-      renderFooter={() => renderFooter(data)}
-      showFooter
-    />
+    <>
+      <DataTable
+        data={data.salesOrderItems || []}
+        columns={columns}
+        renderFooter={() => renderFooter(data)}
+        showFooter
+        onSelectionChange={(selectedItems) => {
+          setReturns(selectedItems as ReturnItem[]);
+        }}
+      />
+      <Button
+        type="button"
+        onClick={() => handleToggle({ returnExchangeModal: true })}
+      >
+        Supplier Returns
+      </Button>
+
+      <DataTable
+        data={returnItems}
+        columns={returnItemsColumns}
+        showFooter
+        renderFooter={(data) => {
+          const total = data.reduce(
+            (acc, item) => (acc += Number(item.totalAmount)),
+            0,
+          );
+          return (
+            <TableRow>
+              <TableCell>Total</TableCell>
+              <TableCell className="text-right font-bold"></TableCell>
+              <TableCell></TableCell>
+              <TableCell className="text-right font-bold"></TableCell>
+              <TableCell></TableCell>
+              <TableCell colSpan={10} className="text-right font-bold">
+                {formatCurrency(total)}
+              </TableCell>
+            </TableRow>
+          );
+        }}
+      />
+      {toggle.returnExchangeModal && (
+        <ReturnExchangeModal
+          onClose={() => handleToggle({ returnExchangeModal: false })}
+          returns={returns}
+          referenceId={Number(data.id)}
+          salesOrder
+        />
+      )}
+    </>
   );
 }

@@ -31,6 +31,7 @@ import {
   Trash2,
 } from "lucide-react";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
+import { goodReceiptServices, inventoryServices } from "@/services";
 import { CancelModal } from "../../components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -40,9 +41,9 @@ import { useForm, useWatch } from "react-hook-form";
 import PendingOrderForm from "./Form/PendingForm";
 import { goodReceiptFormSchema } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
-import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
+import { Badge } from "@/components/ui/badge";
 import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
 import React, { useCallback } from "react";

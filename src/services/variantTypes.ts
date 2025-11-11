@@ -4,6 +4,6 @@ import type Http from "./http";
 
 export default class VariantService extends BaseService<VariantTypes> {
   constructor(props: { http: Http }) {
-    super({ ...props, url: "/variantTypes" });
+    super({ ...props, url: "/variant-types" });
   }
 }

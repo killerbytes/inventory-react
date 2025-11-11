@@ -25,4 +25,11 @@ export default class InventoryService extends BaseService<Inventory> {
   getReorderLevels = async (data?: any) => {
     return await this.http.get(`${this.url}/reorderLevels`, { params: data });
   };
+  getReturnTransaction = async (id: number) => {
+    return await this.http.get(`${this.url}/${id}/return-transaction`);
+  };
+
+  getReturnItems = async (id: number) => {
+    return await this.http.get(`${this.url}/${id}/return-items`);
+  };
 }

@@ -36,6 +36,7 @@ export default function Login() {
     defaultValues: {
       username:
         localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_USER`) || "",
+      password: "",
     },
   });
 

@@ -120,13 +120,14 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
   });
 
   React.useEffect(() => {
-    if (onSelectionChange) {
-      const selectedItems = table
-        .getFilteredSelectedRowModel()
-        .rows.map((row) => row.original);
-      onSelectionChange(selectedItems);
-    }
-  }, [onSelectionChange, rowSelection, table]);
+    if (!onSelectionChange) return;
+
+    const selectedItems = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original);
+
+    onSelectionChange(selectedItems);
+  }, [rowSelection]);
 
   return (
     <div className={cx("w-full overflow-auto", className)}>

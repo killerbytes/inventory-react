@@ -4,7 +4,7 @@ import type Http from "./http";
 
 export default class ProductCombinationService extends BaseService<ProductCombinations> {
   constructor(props: { http: Http }) {
-    super({ ...props, url: "/productCombinations" });
+    super({ ...props, url: "/product-combinations" });
   }
 
   getByProductId = async (id: number) => {
