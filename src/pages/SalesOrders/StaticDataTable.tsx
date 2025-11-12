@@ -37,13 +37,20 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         const returns = await inventoryServices.getReturnTransaction(
           Number(id),
         );
-        if (returns) {
+        if (returns.length > 0) {
           // setReturnTransaction(returns);
-          const returnItems = await inventoryServices.getReturnItems(
-            Number(returns.id),
+          const returnItems = await Promise.all(
+            returns.map(async (i) => {
+              const returnItems = await inventoryServices.getReturnItems(
+                Number(i.id),
+              );
+              return returnItems;
+            }),
           );
 
-          setReturnItems(returnItems);
+          console.log(returnItems);
+
+          // setReturnItems(returnItems);
         }
       } catch (error) {
         console.log(error);
