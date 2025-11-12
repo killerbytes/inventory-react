@@ -598,7 +598,6 @@ function AmountColumn<T extends FieldValues>({
     const p =
       Number(purchasePrice.field.value) -
       discount.field.value / quantity.field.value;
-    console.log(q, p);
 
     const total = q * p;
     setValue(total);

@@ -1,9 +1,9 @@
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
 import { ReturnItem, SalesOrder, SalesOrderItem } from "@/types";
+import { formatCurrency, formatDate } from "@/utils/formatters";
 import { GLOBAL_COLOR, UNIT_COLOR } from "@/utils/definitions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
@@ -26,31 +26,38 @@ const renderFooter = (data: SalesOrder) => {
   );
 };
 
-export default function StaticDataTable({ data }: { data: SalesOrder }) {
+export default function StaticDataTable({
+  data,
+  returnEnabled,
+}: {
+  data: SalesOrder;
+}) {
   const { id } = useParams();
   const [toggle, handleToggle] = useToggle({ returnExchangeModal: false });
   const [returns, setReturns] = React.useState<ReturnItem[]>();
   const [returnItems, setReturnItems] = React.useState<ReturnItem[]>([]);
+  const [hasReturnItems, setHasReturnItems] = React.useState<boolean>(false);
+  const [returnTransactions, setReturnTransactions] =
+    React.useState<ReturnTransaction | null>(null);
   React.useEffect(() => {
     const getReturns = async () => {
       try {
         const returns = await inventoryServices.getReturnTransaction(
           Number(id),
         );
-        if (returns.length > 0) {
-          // setReturnTransaction(returns);
+        if (returns) {
+          setReturnTransactions(returns);
+          setHasReturnItems(true);
+
           const returnItems = await Promise.all(
             returns.map(async (i) => {
-              const returnItems = await inventoryServices.getReturnItems(
-                Number(i.id),
-              );
+              const returnItems = await inventoryServices.getReturnItems(i.id);
               return returnItems;
             }),
           );
-
           console.log(returnItems);
 
-          // setReturnItems(returnItems);
+          setReturnItems(returnItems.flat());
         }
       } catch (error) {
         console.log(error);
@@ -62,28 +69,32 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
 
   const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
     () => [
-      {
-        id: "select",
-        header: ({ table }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
-      },
+      ...(returnEnabled
+        ? [
+            {
+              id: "select",
+              header: ({ table }) => (
+                <Checkbox
+                  checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                  }
+                  onCheckedChange={(value) =>
+                    table.toggleAllPageRowsSelected(!!value)
+                  }
+                  aria-label="Select all"
+                />
+              ),
+              cell: ({ row }) => (
+                <Checkbox
+                  checked={row.getIsSelected()}
+                  onCheckedChange={(value) => row.toggleSelected(!!value)}
+                  aria-label="Select row"
+                />
+              ),
+            },
+          ]
+        : []),
       {
         accessorKey: "nameSnapshot",
         header: "Product",
@@ -155,6 +166,36 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         cell: ({ row }) => formatCurrency(row.original.totalAmount ?? 0),
       },
     ],
+    [returnEnabled],
+  );
+
+  const returnTransactionsColumns = React.useMemo(
+    () => [
+      {
+        header: "Id",
+        accessorKey: "id",
+      },
+
+      {
+        accessorKey: "totalReturnAmount",
+        header: "Return Amount",
+        cell: ({ row }) => {
+          return formatCurrency(row.original.totalReturnAmount);
+        },
+      },
+
+      {
+        header: "Date",
+        accessorKey: "updatedAt",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          return formatDate(row.original.updatedAt);
+        },
+      },
+    ],
     [],
   );
 
@@ -222,39 +263,69 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         renderFooter={() => renderFooter(data)}
         showFooter
         onSelectionChange={(selectedItems) => {
-          setReturns(selectedItems as ReturnItem[]);
+          setReturns(
+            selectedItems.map((i) => ({
+              ...i,
+              returnQuantity: i.quantity,
+            })) as ReturnItem[],
+          );
         }}
       />
-      <Button
-        type="button"
-        onClick={() => handleToggle({ returnExchangeModal: true })}
-      >
-        Supplier Returns
-      </Button>
+      {returnEnabled && (
+        <Button
+          type="button"
+          onClick={() => handleToggle({ returnExchangeModal: true })}
+        >
+          Returns/Exchange
+        </Button>
+      )}
+      {hasReturnItems && (
+        <>
+          <DataTable
+            data={returnTransactions || []}
+            columns={returnTransactionsColumns}
+            showFooter
+            renderFooter={(data) => {
+              const total = data.reduce(
+                (acc, item) => (acc += Number(item.totalReturnAmount)),
+                0,
+              );
+              return (
+                <TableRow>
+                  <TableCell>Total</TableCell>
+                  <TableCell colSpan={10} className="text-right font-bold">
+                    {formatCurrency(total)}
+                  </TableCell>
+                </TableRow>
+              );
+            }}
+          />
 
-      <DataTable
-        data={returnItems}
-        columns={returnItemsColumns}
-        showFooter
-        renderFooter={(data) => {
-          const total = data.reduce(
-            (acc, item) => (acc += Number(item.totalAmount)),
-            0,
-          );
-          return (
-            <TableRow>
-              <TableCell>Total</TableCell>
-              <TableCell className="text-right font-bold"></TableCell>
-              <TableCell></TableCell>
-              <TableCell className="text-right font-bold"></TableCell>
-              <TableCell></TableCell>
-              <TableCell colSpan={10} className="text-right font-bold">
-                {formatCurrency(total)}
-              </TableCell>
-            </TableRow>
-          );
-        }}
-      />
+          <DataTable
+            data={returnItems}
+            columns={returnItemsColumns}
+            showFooter
+            renderFooter={(data) => {
+              const total = data.reduce(
+                (acc, item) => (acc += Number(item.totalAmount)),
+                0,
+              );
+              return (
+                <TableRow>
+                  <TableCell>Total</TableCell>
+                  <TableCell className="text-right font-bold"></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell className="text-right font-bold"></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell colSpan={10} className="text-right font-bold">
+                    {formatCurrency(total)}
+                  </TableCell>
+                </TableRow>
+              );
+            }}
+          />
+        </>
+      )}
       {toggle.returnExchangeModal && (
         <ReturnExchangeModal
           onClose={() => handleToggle({ returnExchangeModal: false })}

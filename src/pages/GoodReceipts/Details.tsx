@@ -213,6 +213,17 @@ export default function Create() {
                     </ConfirmDialog>
                   </>
                 )}
+                <DropdownMenuItem
+                  onSelect={() => {
+                    handleToggle({
+                      returnEnabled: !toggle.returnEnabled,
+                      dropdownMenu: false,
+                    });
+                  }}
+                >
+                  <Trash2 color="red" />
+                  Returns
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </CardAction>
@@ -245,7 +256,7 @@ export default function Create() {
             </>
           ) : (
             <>
-              <PartialForm form={form} />
+              <PartialForm form={form} returnEnabled={toggle.returnEnabled} />
               {toggle.cancelModal && (
                 <CancelModal
                   isOpen={true}

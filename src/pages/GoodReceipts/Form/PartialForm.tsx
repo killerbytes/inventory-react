@@ -30,7 +30,14 @@ import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
 import useToggle from "@/hooks/useToggle";
 import React, { useMemo } from "react";
-export default function PartialForm({ form }: { form: UseFormReturn }) {
+import { format } from "path";
+export default function PartialForm({
+  form,
+  returnEnabled,
+}: {
+  form: UseFormReturn;
+  returnEnabled: boolean;
+}) {
   const { id } = useParams();
   const { control } = form;
   const { fields } = useFieldArray({
@@ -38,10 +45,11 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
     name: "goodReceiptLines",
   });
   const [toggle, handleToggle] = useToggle({ supplierReturnsModal: false });
+  const [hasReturns, setHasReturns] = React.useState(false);
   const [returns, setReturns] = React.useState<ReturnItem[]>([]);
   const [returnItems, setReturnItems] = React.useState<ReturnItem[]>([]);
-  // const [returnTransaction, setReturnTransaction] =
-  //   React.useState<ReturnTransaction>(null);
+  const [returnTransactions, setReturnTransactions] =
+    React.useState<ReturnTransaction[]>(null);
 
   const data = form.getValues();
 
@@ -51,12 +59,16 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
         const returns = await inventoryServices.getReturnTransaction(
           Number(id),
         );
-        if (returns) {
-          // setReturnTransaction(returns);
-          const returnItems = await inventoryServices.getReturnItems(
-            Number(id),
+        if (returns.length > 0) {
+          setHasReturns(true);
+          setReturnTransactions(returns);
+          const returnItems = await Promise.all(
+            returns.map(async (i) => {
+              const returnItems = await inventoryServices.getReturnItems(i.id);
+              return returnItems;
+            }),
           );
-          setReturnItems(returnItems);
+          setReturnItems(returnItems.flat());
         }
       } catch (error) {
         console.log(error);
@@ -68,30 +80,34 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
 
   const columns = useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
-      {
-        id: "select",
-        header: ({ table }) => (
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-      },
+      ...(returnEnabled
+        ? [
+            {
+              id: "select",
+              header: ({ table }) => (
+                <Checkbox
+                  checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                  }
+                  onCheckedChange={(value) =>
+                    table.toggleAllPageRowsSelected(!!value)
+                  }
+                  aria-label="Select all"
+                />
+              ),
+              cell: ({ row }) => (
+                <Checkbox
+                  checked={row.getIsSelected()}
+                  onCheckedChange={(value) => row.toggleSelected(!!value)}
+                  aria-label="Select row"
+                />
+              ),
+              enableSorting: false,
+              enableHiding: false,
+            },
+          ]
+        : []),
       {
         accessorKey: "index",
         header: "#",
@@ -188,11 +204,15 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
         cell: ({ row }) => formatCurrency(row.original.totalAmount ?? 0),
       },
     ],
-    [],
+    [returnEnabled],
   );
 
   const returnItemsColumns = useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
+      {
+        header: "Id",
+        accessorKey: "returnTransactionId",
+      },
       {
         header: "Quantity",
         accessorKey: "quantity",
@@ -220,8 +240,8 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
         },
       },
       {
-        header: "Note",
-        accessorKey: "discountNote",
+        header: "Reason",
+        accessorKey: "reason",
       },
       {
         header: "Price",
@@ -243,6 +263,36 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
           className: "text-right",
         },
         cell: ({ row }) => formatCurrency(row.original.totalAmount ?? 0),
+      },
+    ],
+    [],
+  );
+
+  const returnTransactionsColumns = useMemo(
+    () => [
+      {
+        header: "Id",
+        accessorKey: "id",
+      },
+
+      {
+        accessorKey: "totalReturnAmount",
+        header: "Return Amount",
+        cell: ({ row }) => {
+          return formatCurrency(row.original.totalReturnAmount);
+        },
+      },
+
+      {
+        header: "Date",
+        accessorKey: "updatedAt",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          return formatDate(row.original.updatedAt);
+        },
       },
     ],
     [],
@@ -291,12 +341,19 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
           )}
         />
 
-        <div>
+        <div className="flex flex-col gap-4">
           <DataTable
             data={fields}
             columns={columns}
             onSelectionChange={(selectedItems) => {
-              setReturns(selectedItems as ReturnItem[]);
+              console.log(selectedItems);
+
+              setReturns(
+                selectedItems.map((i) => ({
+                  ...i,
+                  returnQuantity: i.quantity,
+                })) as ReturnItem[],
+              );
             }}
             showFooter
             renderFooter={(data) => {
@@ -315,38 +372,60 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
               );
             }}
           />
-          <Button
-            type="button"
-            onClick={() => handleToggle({ supplierReturnsModal: true })}
-          >
-            Supplier Returns
-          </Button>
-
-          <DataTable
-            data={returnItems}
-            columns={returnItemsColumns}
-            showFooter
-            renderFooter={(data) => {
-              console.log(data);
-
-              const total = data.reduce(
-                (acc, item) => (acc += Number(item.totalAmount)),
-                0,
-              );
-              return (
-                <TableRow>
-                  <TableCell>Total</TableCell>
-                  <TableCell className="text-right font-bold"></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell className="text-right font-bold"></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell colSpan={10} className="text-right font-bold">
-                    {formatCurrency(total)}
-                  </TableCell>
-                </TableRow>
-              );
-            }}
-          />
+          {returnEnabled && (
+            <Button
+              type="button"
+              onClick={() => handleToggle({ supplierReturnsModal: true })}
+            >
+              Supplier Returns
+            </Button>
+          )}
+          {hasReturns && (
+            <>
+              <DataTable
+                data={returnTransactions || []}
+                columns={returnTransactionsColumns}
+                showFooter
+                renderFooter={(data) => {
+                  const total = data.reduce(
+                    (acc, item) => (acc += Number(item.totalReturnAmount)),
+                    0,
+                  );
+                  return (
+                    <TableRow>
+                      <TableCell>Total</TableCell>
+                      <TableCell colSpan={10} className="text-right font-bold">
+                        {formatCurrency(total)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }}
+              />
+              <DataTable
+                data={returnItems}
+                columns={returnItemsColumns}
+                showFooter
+                renderFooter={(data) => {
+                  const total = data.reduce(
+                    (acc, item) => (acc += Number(item.totalAmount)),
+                    0,
+                  );
+                  return (
+                    <TableRow>
+                      <TableCell>Total</TableCell>
+                      <TableCell className="text-right font-bold"></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell className="text-right font-bold"></TableCell>
+                      <TableCell></TableCell>
+                      <TableCell colSpan={10} className="text-right font-bold">
+                        {formatCurrency(total)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }}
+              />
+            </>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           {data?.status === ORDER_STATUS.CANCELLED && (
@@ -368,7 +447,6 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
       </form>
       {toggle.supplierReturnsModal && (
         <ReturnExchangeModal
-          isOpen
           onClose={() => handleToggle({ supplierReturnsModal: false })}
           returns={returns}
           referenceId={Number(id)}

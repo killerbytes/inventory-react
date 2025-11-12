@@ -47,6 +47,7 @@ export default function SalesOrderDetails() {
   const [toggle, handleToggle] = useToggle({
     confirmModal: false,
     deliveryDetailsModal: false,
+    returnEnabled: false,
   });
   const navigate = useNavigate();
   const { id } = useParams();
@@ -108,6 +109,7 @@ export default function SalesOrderDetails() {
   const data = useWatch<SalesOrder>({
     control: form.control,
   }) as SalesOrder;
+  console.log(toggle);
 
   return (
     <div className="flex flex-col gap-4">
@@ -122,7 +124,12 @@ export default function SalesOrderDetails() {
             <ColorBadge colorMap={STATUS_COLOR}>
               {String(data?.status)}
             </ColorBadge>
-            <DropdownMenu>
+            <DropdownMenu
+              open={toggle.dropdownMenu}
+              onOpenChange={(open) => {
+                handleToggle({ dropdownMenu: open });
+              }}
+            >
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="size-8">
                   <EllipsisVertical />
@@ -132,7 +139,10 @@ export default function SalesOrderDetails() {
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
-                    handleToggle({ deliveryDetailsModal: true });
+                    handleToggle({
+                      deliveryDetailsModal: true,
+                      dropdownMenu: false,
+                    });
                   }}
                 >
                   <Car />
@@ -144,13 +154,24 @@ export default function SalesOrderDetails() {
                   <DropdownMenuItem
                     onSelect={(e) => {
                       e.preventDefault();
-                      handleToggle({ cancelModal: true });
+                      handleToggle({ cancelModal: true, dropdownMenu: false });
                     }}
                   >
                     <Ban color="red" />
                     Cancel Order
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    handleToggle({
+                      returnEnabled: !toggle.returnEnabled,
+                      dropdownMenu: false,
+                    });
+                  }}
+                >
+                  Return/Exchange
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </CardAction>
@@ -165,7 +186,7 @@ export default function SalesOrderDetails() {
           <CardTitle>Order Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <StaticDataTable data={data} />
+          <StaticDataTable data={data} returnEnabled={toggle.returnEnabled} />
         </CardContent>
       </Card>
 
