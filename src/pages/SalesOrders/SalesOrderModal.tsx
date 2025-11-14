@@ -1,11 +1,4 @@
 import {
-  MODE_OF_PAYMENT_OPTIONS,
-  ORDER_STATUS,
-  ROUTES,
-  UNIT_COLOR,
-  WHOLESALE_UNITS,
-} from "@/utils/definitions";
-import {
   Form,
   FormControl,
   FormField,
@@ -14,16 +7,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  MODE_OF_PAYMENT_OPTIONS,
+  ORDER_STATUS,
+  UNIT_COLOR,
+  WHOLESALE_UNITS,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import OrderItemForm, {
-  AmountColumn,
-  UnitColumn,
-} from "../../components/forms/OrderItemForm";
 import {
   ApiError,
   ProductCombinations,
@@ -32,14 +27,18 @@ import {
 } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Controller, useFieldArray, useWatch, useForm } from "react-hook-form";
+import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
 import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
+import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
+import { BanknoteArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { customerServices, salesOrderServices } from "@/services";
 import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
 import { formatCurrency, getScore } from "@/utils/formatters";
-import { BanknoteArrowUp, Save, Trash2 } from "lucide-react";
+import { TableCell, TableRow } from "@/components/ui/table";
 import HighlightMatch from "@/components/HighlightMatch";
+import { getTotalAmountTableFooter } from "@/lib/utils";
 import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,6 +48,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
 import NumberInput from "@/components/NumberInput";
+import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
@@ -557,7 +557,11 @@ export default function SalesOrderModal({
                   >
                     <FormLabel>Check Number</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={modeOfPayment !== "CHECK"} />
+                      <Input
+                        {...field}
+                        disabled={modeOfPayment !== "CHECK"}
+                        value={field.value ?? ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -633,20 +637,45 @@ export default function SalesOrderModal({
             render={() => (
               <FormItem className="w-full mb-4">
                 <FormControl>
-                  <OrderItemForm
-                    fields={fields}
-                    form={form}
+                  <DataTable
+                    data={fields}
                     columns={columns}
-                    name="salesOrderItems"
-                    append={() =>
-                      append({
-                        quantity: 1,
-                        purchasePrice: 0,
-                        discount: 0,
-                        discountNote: "",
-                        combinationId: null,
-                      })
-                    }
+                    showFooter
+                    renderFooter={() => {
+                      const total = getTotalAmountTableFooter(
+                        formData.salesOrderItems,
+                      );
+                      return (
+                        <>
+                          <TableRow>
+                            <TableCell colSpan={8}>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="shadow-sm append-btn"
+                                onClick={() =>
+                                  append({
+                                    quantity: 1,
+                                    purchasePrice: 0,
+                                    discount: 0,
+                                    discountNote: "",
+                                    combinationId: -1,
+                                  })
+                                }
+                              >
+                                <Plus />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow className="font-bold">
+                            <TableCell>Total</TableCell>
+                            <TableCell colSpan={10} className="text-right">
+                              {formatCurrency(total?.amount - total?.discount)}
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      );
+                    }}
                   />
                 </FormControl>
                 <FormMessage />

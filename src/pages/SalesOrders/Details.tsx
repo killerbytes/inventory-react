@@ -26,18 +26,18 @@ import {
 } from "@/services";
 import { ERROR, ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
+import { Ban, Car, EllipsisVertical, Undo } from "lucide-react";
+import { useProductStore, useSalesOrderStore } from "@/stores";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { useCustomerStore } from "@/stores/customer.store";
-import { Ban, Car, EllipsisVertical } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
-import { useForm, useWatch } from "react-hook-form";
 import ColorBadge from "@/components/ColorBadge";
 import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import StaticDataTable from "./StaticDataTable";
-import { useProductStore } from "@/stores";
+import { useForm } from "react-hook-form";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
 import { toast } from "sonner";
@@ -47,10 +47,12 @@ export default function SalesOrderDetails() {
   const [toggle, handleToggle] = useToggle({
     confirmModal: false,
     deliveryDetailsModal: false,
+    returnEnabled: false,
   });
   const navigate = useNavigate();
   const { id } = useParams();
   const { setProducts } = useProductStore();
+  const { returnEnabled, setReturnEnabled } = useSalesOrderStore();
   const { customers, setCustomers } = useCustomerStore();
 
   const form = useForm<SalesOrderForm>({
@@ -63,7 +65,7 @@ export default function SalesOrderDetails() {
       setProducts(data);
     };
     getData();
-  }, [setProducts]);
+  }, [setProducts, returnEnabled]);
 
   const getData = useCallback(async () => {
     try {
@@ -71,7 +73,6 @@ export default function SalesOrderDetails() {
       form.reset(data);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
-      console.log(apiError);
       if (apiError.code === ERROR.NOT_FOUND) {
         navigate(ROUTES.SALES_ORDERS);
       }
@@ -105,9 +106,7 @@ export default function SalesOrderDetails() {
       toast.error(`Submission failed, ${apiError.message}`);
     }
   }
-  const data = useWatch<SalesOrder>({
-    control: form.control,
-  }) as SalesOrder;
+  const data: SalesOrder = form.getValues();
 
   return (
     <div className="flex flex-col gap-4">
@@ -122,7 +121,12 @@ export default function SalesOrderDetails() {
             <ColorBadge colorMap={STATUS_COLOR}>
               {String(data?.status)}
             </ColorBadge>
-            <DropdownMenu>
+            <DropdownMenu
+              open={toggle.dropdownMenu}
+              onOpenChange={(open) => {
+                handleToggle({ dropdownMenu: open });
+              }}
+            >
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="size-8">
                   <EllipsisVertical />
@@ -132,7 +136,10 @@ export default function SalesOrderDetails() {
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
-                    handleToggle({ deliveryDetailsModal: true });
+                    handleToggle({
+                      deliveryDetailsModal: true,
+                      dropdownMenu: false,
+                    });
                   }}
                 >
                   <Car />
@@ -144,13 +151,25 @@ export default function SalesOrderDetails() {
                   <DropdownMenuItem
                     onSelect={(e) => {
                       e.preventDefault();
-                      handleToggle({ cancelModal: true });
+                      handleToggle({ cancelModal: true, dropdownMenu: false });
                     }}
                   >
                     <Ban color="red" />
                     Cancel Order
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setReturnEnabled(!returnEnabled);
+                    handleToggle({
+                      dropdownMenu: false,
+                    });
+                  }}
+                >
+                  <Undo />
+                  Return/Exchange
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </CardAction>
@@ -182,7 +201,6 @@ export default function SalesOrderDetails() {
       {toggle.deliveryDetailsModal && (
         <DeliveryDetailsModal
           data={data}
-          isOpen={toggle.deliveryDetailsModal}
           onClose={() => handleToggle({ deliveryDetailsModal: false })}
         />
       )}

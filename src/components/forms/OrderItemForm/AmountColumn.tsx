@@ -28,9 +28,10 @@ export default function AmountColumn<T extends FieldValues>({
   });
 
   React.useEffect(() => {
-    const q = Number(quantity.field.value) || 0;
-    const p = Number(purchasePrice.field.value) || 0;
-    setValue(q * p - (discount.field.value || 0));
+    const q = Number(quantity.field.value);
+    const p = Number(purchasePrice.field.value) - discount.field.value / q;
+    const total = q * p;
+    setValue(total);
   }, [discount.field.value, purchasePrice.field.value, quantity.field.value]);
 
   return formatCurrency(value);

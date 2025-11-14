@@ -351,7 +351,6 @@ export const salesOrderFormSchema = salesOrderBaseSchema.superRefine(
 
 export const salesOrderSchema = salesOrderBaseSchema
   .extend({
-    salesOrderStatusHistory: z.array(statusHistorySchema),
     totalAmount: z.string().optional(),
     customer: z.any(),
     cancellationReason: z.string().nullish(),
@@ -478,4 +477,29 @@ export const priceHistorySchema = z.object({
   changedBy: z.number(),
   changedAt: z.string(),
   user: z.any(),
+});
+
+export const returnItemSchema = z.object({
+  combinationId: z.number(),
+  combination: productCombinationsSchema.optional(),
+  returnQuantity: z.coerce.number(),
+  purchasePrice: z.coerce.number(),
+  discount: z.coerce.number(),
+  quantity: z.coerce.number(),
+  unitPrice: z.coerce.number().optional(),
+  totalAmount: z.coerce.number(),
+  unit: z.string(),
+  type: z.string().optional(),
+});
+
+export const exchangeItemSchema = returnItemSchema.omit({
+  returnQuantity: true,
+  totalAmount: true,
+  unit: true,
+});
+
+export const returnSchema = z.object({
+  returns: z.array(returnItemSchema),
+  exchanges: z.array(exchangeItemSchema).optional(),
+  reason: z.string(),
 });

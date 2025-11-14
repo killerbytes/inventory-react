@@ -55,8 +55,8 @@ export default function Modal({
 }
 
 Modal.sizes = {
-  sm: "sm:max-w-[350px]",
-  md: "sm:max-w-[500px]",
-  lg: "sm:max-w-[800px]",
+  sm: "sm:max-w-[500px]",
+  md: "sm:max-w-[800px]",
+  lg: "sm:max-w-[70%]",
   xl: "sm:max-w-[90%]",
 };

@@ -1,4 +1,6 @@
 import { useProductCombinationStore } from "./productCombination.store";
+import { useGoodReceiptStore } from "./goodReceipt.store";
+import { useSalesOrderStore } from "./salesOrder.store";
 import { useSupplierStore } from "./supplier.store";
 import { useCustomerStore } from "./customer.store";
 import { useCategoryStore } from "./category.store";
@@ -16,4 +18,6 @@ export {
   useUserStore,
   useVariantStore,
   useProductCombinationStore,
+  useGoodReceiptStore,
+  useSalesOrderStore,
 };

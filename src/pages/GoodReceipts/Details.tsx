@@ -12,6 +12,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Ban,
+  ClipboardList,
+  EllipsisVertical,
+  Save,
+  Trash2,
+  Undo,
+} from "lucide-react";
+import {
   ApiErrorResponse,
   CancelOrder,
   GoodReceipt,
@@ -23,15 +31,8 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import {
-  Ban,
-  ClipboardList,
-  EllipsisVertical,
-  Save,
-  Trash2,
-} from "lucide-react";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
-import { CancelModal } from "../../components/modals/CancelModal";
+import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,6 +43,7 @@ import { goodReceiptFormSchema } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
+import { useGoodReceiptStore } from "@/stores";
 import { cx } from "class-variance-authority";
 import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
@@ -56,6 +58,7 @@ export default function Create() {
     cancelModal: false,
     dropdownMenu: false,
   });
+  const { returnEnabled, setReturnEnabled } = useGoodReceiptStore();
 
   const form = useForm<GoodReceiptCreate>({
     resolver: zodResolver(goodReceiptFormSchema),
@@ -127,7 +130,7 @@ export default function Create() {
 
   React.useEffect(() => {
     getData();
-  }, [getData]);
+  }, [getData, returnEnabled]);
 
   const data = useWatch<GoodReceipt>({
     control: form.control,
@@ -212,6 +215,17 @@ export default function Create() {
                     </ConfirmDialog>
                   </>
                 )}
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setReturnEnabled(!returnEnabled);
+                    handleToggle({
+                      dropdownMenu: false,
+                    });
+                  }}
+                >
+                  <Undo />
+                  Returns
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </CardAction>

@@ -6,7 +6,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import {
+  Controller,
+  useFieldArray,
+  UseFormReturn,
+  useWatch,
+} from "react-hook-form";
 import { ProductCombinations, GoodReceiptCreate, Supplier } from "@/types";
 import { productCombinationServices, supplierServices } from "@/services";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
@@ -16,17 +21,19 @@ import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
 import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { formatCurrency, getScore } from "@/utils/formatters";
-import OrderItemForm from "@/components/forms/OrderItemForm";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { getTotalAmountTableFooter } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
 import NumberInput from "@/components/NumberInput";
+import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Plus, Trash2 } from "lucide-react";
 import { GoodReceiptItem } from "@/types";
-import { Trash2 } from "lucide-react";
 import React from "react";
 
 export default function PendingForm({
@@ -45,6 +52,11 @@ export default function PendingForm({
     control: form.control,
     name: "goodReceiptLines",
     keyName: "fieldId",
+  });
+
+  const footerValues = useWatch({
+    control: form?.control,
+    name: "goodReceiptLines",
   });
 
   React.useEffect(() => {
@@ -382,12 +394,35 @@ export default function PendingForm({
           render={() => (
             <FormItem className="w-full">
               <FormControl>
-                <OrderItemForm
-                  fields={fields}
-                  form={form}
+                <DataTable
+                  data={fields}
                   columns={columns}
-                  name="goodReceiptLines"
-                  append={() => append(goodReceiptItemDefault)}
+                  showFooter
+                  renderFooter={() => {
+                    const total = getTotalAmountTableFooter(footerValues);
+                    return (
+                      <>
+                        <TableRow>
+                          <TableCell colSpan={8}>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="shadow-sm append-btn"
+                              onClick={() => append(goodReceiptItemDefault)}
+                            >
+                              <Plus />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="font-bold">
+                          <TableCell>Total</TableCell>
+                          <TableCell colSpan={10} className="text-right">
+                            {formatCurrency(total?.amount - total?.discount)}
+                          </TableCell>
+                        </TableRow>
+                      </>
+                    );
+                  }}
                 />
               </FormControl>
               <FormMessage />
