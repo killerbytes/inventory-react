@@ -94,6 +94,12 @@ export interface CategorizedInventoryList {
   inventories: Inventory[];
 }
 
+export type ReturnTransaction = {
+  id: number;
+  totalReturnAmount: number;
+  updatedAt: string;
+};
+
 type User = z.infer<typeof userSchema>;
 type Signup = z.infer<typeof signupSchema>;
 type Login = z.infer<typeof loginSchema>;

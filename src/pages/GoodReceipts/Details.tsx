@@ -12,6 +12,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Ban,
+  ClipboardList,
+  EllipsisVertical,
+  Save,
+  Trash2,
+  Undo,
+} from "lucide-react";
+import {
   ApiErrorResponse,
   CancelOrder,
   GoodReceipt,
@@ -23,16 +31,8 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import {
-  Ban,
-  ClipboardList,
-  EllipsisVertical,
-  Save,
-  Trash2,
-} from "lucide-react";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
-import { goodReceiptServices, inventoryServices } from "@/services";
-import { CancelModal } from "../../components/modals/CancelModal";
+import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,9 +41,10 @@ import { useForm, useWatch } from "react-hook-form";
 import PendingOrderForm from "./Form/PendingForm";
 import { goodReceiptFormSchema } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
+import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
+import { useGoodReceiptStore } from "@/stores";
 import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
 import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
 import React, { useCallback } from "react";
@@ -57,6 +58,7 @@ export default function Create() {
     cancelModal: false,
     dropdownMenu: false,
   });
+  const { returnEnabled, setReturnEnabled } = useGoodReceiptStore();
 
   const form = useForm<GoodReceiptCreate>({
     resolver: zodResolver(goodReceiptFormSchema),
@@ -128,7 +130,7 @@ export default function Create() {
 
   React.useEffect(() => {
     getData();
-  }, [getData]);
+  }, [getData, returnEnabled]);
 
   const data = useWatch<GoodReceipt>({
     control: form.control,
@@ -215,13 +217,13 @@ export default function Create() {
                 )}
                 <DropdownMenuItem
                   onSelect={() => {
+                    setReturnEnabled(!returnEnabled);
                     handleToggle({
-                      returnEnabled: !toggle.returnEnabled,
                       dropdownMenu: false,
                     });
                   }}
                 >
-                  <Trash2 color="red" />
+                  <Undo />
                   Returns
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -256,7 +258,7 @@ export default function Create() {
             </>
           ) : (
             <>
-              <PartialForm form={form} returnEnabled={toggle.returnEnabled} />
+              <PartialForm form={form} />
               {toggle.cancelModal && (
                 <CancelModal
                   isOpen={true}

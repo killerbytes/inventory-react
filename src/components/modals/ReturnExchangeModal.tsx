@@ -56,16 +56,15 @@ export default function ReturnExchangeModal({
   salesOrder = false,
 }: {
   onClose: () => void;
-  returns: ReturnItem[];
+  returns: ReturnItem[] | undefined;
   referenceId: number;
-  salesOrder: boolean;
+  salesOrder?: boolean;
 }) {
   const form = useForm<Return>({
     resolver: zodResolver(returnSchema),
     defaultValues: {
       returns,
-      exchange: [],
-      reason: "xcxxx",
+      exchanges: [],
     },
   });
   const returnsFieldArray = useFieldArray({
@@ -79,17 +78,15 @@ export default function ReturnExchangeModal({
     name: "exchanges",
   });
 
-  const fieldData = useWatch({ control: form.control, name: "returns" });
-  const xxx = useWatch({ control: form.control, name: "exchanges" });
-  console.log(xxx);
+  const fieldReturns = useWatch({ control: form.control, name: "returns" });
+  const fieldExchanges = useWatch({ control: form.control, name: "exchanges" });
 
   const handleReturn = async (values: Return) => {
     try {
       const returns = values.returns.map((i) => ({
         combinationId: i.combinationId,
         quantity: i.returnQuantity,
-      }));
-      console.log(values);
+      })) as ReturnItem[];
 
       if (salesOrder) {
         await salesOrderServices.returnExchange(referenceId, {
@@ -103,18 +100,13 @@ export default function ReturnExchangeModal({
         });
       }
       toast.success("Supplier Returns submitted successfully");
+      onClose();
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       toast.error("Submission failed - " + apiError.message);
     }
   };
-  const {
-    productCombinationsHasLoaded,
-    productCombinations,
-    setProductsCombinations,
-  } = useProductCombinationStore();
-
-  const formData = useWatch({ control: form.control });
+  const { productCombinations } = useProductCombinationStore();
 
   const returnColumns = React.useMemo<ColumnDef<ReturnItem>[]>(
     () => [
@@ -449,7 +441,7 @@ export default function ReturnExchangeModal({
                     columns={returnColumns}
                     showFooter
                     renderFooter={() => {
-                      const total = fieldData.reduce(
+                      const total = fieldReturns.reduce(
                         (acc, item) => {
                           const total =
                             acc.amount +
@@ -484,7 +476,7 @@ export default function ReturnExchangeModal({
           {salesOrder && (
             <FormField
               control={form.control}
-              name="exchange"
+              name="exchanges"
               render={() => (
                 <FormItem className="w-full mb-4">
                   <FormControl>
@@ -493,9 +485,8 @@ export default function ReturnExchangeModal({
                       columns={exchangeColumns}
                       showFooter
                       renderFooter={() => {
-                        const total = getTotalAmountTableFooter(
-                          formData.exchange,
-                        );
+                        const total = getTotalAmountTableFooter(fieldExchanges);
+
                         return (
                           <>
                             <TableRow>
@@ -509,7 +500,6 @@ export default function ReturnExchangeModal({
                                       quantity: 1,
                                       purchasePrice: 0,
                                       discount: 0,
-                                      discountNote: "",
                                       combinationId: -1,
                                     })
                                   }
@@ -536,7 +526,6 @@ export default function ReturnExchangeModal({
               )}
             />
           )}
-          {JSON.stringify(exchange.fields)}
           <FormField
             control={form.control}
             name="reason"

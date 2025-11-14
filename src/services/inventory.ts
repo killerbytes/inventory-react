@@ -1,4 +1,9 @@
-import { filterProps, Inventory, StockAdjustment } from "@/types";
+import {
+  filterProps,
+  Inventory,
+  ReturnTransaction,
+  StockAdjustment,
+} from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 
@@ -25,7 +30,7 @@ export default class InventoryService extends BaseService<Inventory> {
   getReorderLevels = async (data?: any) => {
     return await this.http.get(`${this.url}/reorderLevels`, { params: data });
   };
-  getReturnTransaction = async (id: number) => {
+  getReturnTransaction = async (id: number): Promise<ReturnTransaction[]> => {
     return await this.http.get(`${this.url}/${id}/return-transaction`);
   };
 

@@ -12,7 +12,9 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
+import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
+import { useGoodReceiptStore } from "@/stores/goodReceipt.store";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -28,16 +30,10 @@ import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
 import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
+import { Label } from "@/components/ui/label";
 import useToggle from "@/hooks/useToggle";
 import React, { useMemo } from "react";
-import { format } from "path";
-export default function PartialForm({
-  form,
-  returnEnabled,
-}: {
-  form: UseFormReturn;
-  returnEnabled: boolean;
-}) {
+export default function PartialForm({ form }: { form: UseFormReturn }) {
   const { id } = useParams();
   const { control } = form;
   const { fields } = useFieldArray({
@@ -48,35 +44,33 @@ export default function PartialForm({
   const [hasReturns, setHasReturns] = React.useState(false);
   const [returns, setReturns] = React.useState<ReturnItem[]>([]);
   const [returnItems, setReturnItems] = React.useState<ReturnItem[]>([]);
-  const [returnTransactions, setReturnTransactions] =
-    React.useState<ReturnTransaction[]>(null);
-
+  const [returnTransactions, setReturnTransactions] = React.useState(null);
+  const { returnEnabled, setReturnEnabled } = useGoodReceiptStore();
   const data = form.getValues();
 
-  React.useEffect(() => {
-    const getReturns = async () => {
-      try {
-        const returns = await inventoryServices.getReturnTransaction(
-          Number(id),
+  const getReturns = React.useCallback(async () => {
+    try {
+      setHasReturns(false);
+      const returns = await inventoryServices.getReturnTransaction(Number(id));
+      if (returns.length > 0) {
+        setHasReturns(true);
+        setReturnTransactions(returns);
+        const returnItems = await Promise.all(
+          returns.map(async (i) => {
+            const returnItems = await inventoryServices.getReturnItems(i.id);
+            return returnItems;
+          }),
         );
-        if (returns.length > 0) {
-          setHasReturns(true);
-          setReturnTransactions(returns);
-          const returnItems = await Promise.all(
-            returns.map(async (i) => {
-              const returnItems = await inventoryServices.getReturnItems(i.id);
-              return returnItems;
-            }),
-          );
-          setReturnItems(returnItems.flat());
-        }
-      } catch (error) {
-        console.log(error);
+        setReturnItems(returnItems.flat());
       }
-    };
-
-    getReturns();
+    } catch (error) {
+      console.log(error);
+    }
   }, [id]);
+
+  React.useEffect(() => {
+    getReturns();
+  }, [getReturns]);
 
   const columns = useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
@@ -119,7 +113,7 @@ export default function PartialForm({
         header: () => "Quantity",
         accessorKey: "quantity",
         meta: {
-          headerClassName: "text-right w-10",
+          headerClassName: "text-right w-0",
           className: "text-right",
         },
         cell: ({ row }) => {
@@ -217,7 +211,7 @@ export default function PartialForm({
         header: "Quantity",
         accessorKey: "quantity",
         meta: {
-          headerClassName: "text-right w-10",
+          headerClassName: "text-right w-0",
           className: "text-right",
         },
         cell: ({ row }) => {
@@ -263,36 +257,6 @@ export default function PartialForm({
           className: "text-right",
         },
         cell: ({ row }) => formatCurrency(row.original.totalAmount ?? 0),
-      },
-    ],
-    [],
-  );
-
-  const returnTransactionsColumns = useMemo(
-    () => [
-      {
-        header: "Id",
-        accessorKey: "id",
-      },
-
-      {
-        accessorKey: "totalReturnAmount",
-        header: "Return Amount",
-        cell: ({ row }) => {
-          return formatCurrency(row.original.totalReturnAmount);
-        },
-      },
-
-      {
-        header: "Date",
-        accessorKey: "updatedAt",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return formatDate(row.original.updatedAt);
-        },
       },
     ],
     [],
@@ -346,8 +310,6 @@ export default function PartialForm({
             data={fields}
             columns={columns}
             onSelectionChange={(selectedItems) => {
-              console.log(selectedItems);
-
               setReturns(
                 selectedItems.map((i) => ({
                   ...i,
@@ -373,34 +335,20 @@ export default function PartialForm({
             }}
           />
           {returnEnabled && (
-            <Button
-              type="button"
-              onClick={() => handleToggle({ supplierReturnsModal: true })}
-            >
-              Supplier Returns
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                onClick={() => handleToggle({ supplierReturnsModal: true })}
+              >
+                Supplier Returns
+              </Button>
+            </div>
           )}
           {hasReturns && (
             <>
-              <DataTable
-                data={returnTransactions || []}
-                columns={returnTransactionsColumns}
-                showFooter
-                renderFooter={(data) => {
-                  const total = data.reduce(
-                    (acc, item) => (acc += Number(item.totalReturnAmount)),
-                    0,
-                  );
-                  return (
-                    <TableRow>
-                      <TableCell>Total</TableCell>
-                      <TableCell colSpan={10} className="text-right font-bold">
-                        {formatCurrency(total)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                }}
-              />
+              <Label className="font-bold">Return Transactions</Label>
+              <ReturnTransactionsTable data={returnTransactions} />
+              <Label className="font-bold">Return Items</Label>
               <DataTable
                 data={returnItems}
                 columns={returnItemsColumns}
@@ -447,7 +395,12 @@ export default function PartialForm({
       </form>
       {toggle.supplierReturnsModal && (
         <ReturnExchangeModal
-          onClose={() => handleToggle({ supplierReturnsModal: false })}
+          onClose={() => {
+            handleToggle({ supplierReturnsModal: false });
+            setReturnEnabled(false);
+            setReturns([]);
+            getReturns();
+          }}
           returns={returns}
           referenceId={Number(id)}
         />
