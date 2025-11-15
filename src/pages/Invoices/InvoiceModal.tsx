@@ -44,6 +44,7 @@ import { Supplier } from "@/types";
 import { toast } from "sonner";
 import React from "react";
 import { z } from "zod";
+
 export default function InvoiceModal({
   data,
   isOpen,
@@ -110,21 +111,16 @@ export default function InvoiceModal({
     form.setValue("gr", selected);
   };
 
-  // console.log(form.getValues());
-
-  // const onSave = async (values) => {
-  //   console.log(values);
-  //   invoiceServices.update(data.id, values);
-  // };
-
   const onSubmit = async (values: z.infer<typeof invoiceFormSchema>) => {
     try {
-      const invoiceLines = values.gr.map((item) => ({
+      const { gr, ...rest } = values;
+      const invoiceLines = gr.map((item) => ({
         goodReceiptId: Number(item.id),
         amount: Number(item.totalAmount),
       }));
+
       await invoiceServices.create({
-        ...values,
+        ...rest,
         status: INVOICE_STATUS.POSTED,
         invoiceLines,
         applications: [],
@@ -191,33 +187,7 @@ export default function InvoiceModal({
       size="lg"
     >
       <Form {...form}>
-        <form
-          className="flex flex-col gap-4"
-          // onSubmit={(e) => {
-          //   e.preventDefault();
-          //   // const { invoiceLines } = form.getValues();
-          //   console.log(form.getValues(), form.formState.errors);
-          //   // const totalAmount = invoiceLines.reduce(
-          //   //   (acc: number, item: GoodReceipt) =>
-          //   //     acc + parseFloat(item.totalAmount ?? "0"),
-          //   //   0,
-          //   // );
-          //   // form.setValue("totalAmount", String(totalAmount));
-          //   // form.setValue(
-          //   //   "invoiceLines",
-          //   //   invoiceLines.map((item) => ({
-          //   //     goodReceiptId: item.id,
-          //   //     amount: Number(item.totalAmount),
-          //   //   })),
-          //   // );
-
-          //   form
-          //     .handleSubmit(onSubmit)(e)
-          //     .catch((error) => {
-          //       console.error("Form submission error:", error);
-          //     });
-          // }}
-        >
+        <form className="flex flex-col gap-4">
           <div className="flex gap-2">
             <FormField
               control={form.control}
