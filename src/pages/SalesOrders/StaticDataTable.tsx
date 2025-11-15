@@ -4,6 +4,7 @@ import {
   SalesOrder,
   SalesOrderItem,
 } from "@/types";
+import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
 import { GLOBAL_COLOR, UNIT_COLOR } from "@/utils/definitions";
@@ -11,7 +12,6 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
-import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { inventoryServices } from "@/services";
@@ -80,7 +80,7 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
                 headerClassName: "w-auto",
                 className: "w-0",
               },
-              header: ({ table }) => (
+              header: ({ table }: HeaderContext<SalesOrderItem, unknown>) => (
                 <Checkbox
                   checked={
                     table.getIsAllPageRowsSelected() ||
@@ -92,7 +92,7 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
                   aria-label="Select all"
                 />
               ),
-              cell: ({ row }) => (
+              cell: ({ row }: CellContext<SalesOrderItem, unknown>) => (
                 <Checkbox
                   checked={row.getIsSelected()}
                   onCheckedChange={(value) => row.toggleSelected(!!value)}

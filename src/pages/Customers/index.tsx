@@ -27,7 +27,7 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 
 export default function Customers() {
-  const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<Customer>>({
     data: [],
     total: 0,
     totalPages: 0,

@@ -61,8 +61,7 @@ export default function InvoiceModal({
   const form = useForm({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
-      // invoiceNumber: "INV001",
-      // supplierId: 1,
+      invoiceNumber: "",
       status: INVOICE_STATUS.DRAFT,
       invoiceDate: new Date().toISOString(),
       dueDate: addWeeks(new Date(), 2).toISOString(),
@@ -128,6 +127,7 @@ export default function InvoiceModal({
         ...values,
         status: INVOICE_STATUS.POSTED,
         invoiceLines,
+        applications: [],
       });
 
       toast.success(`Good Receipt created successfully`);
@@ -322,13 +322,12 @@ export default function InvoiceModal({
                     <DataTable
                       data={fields}
                       columns={columns}
-                      errors={form?.formState?.errors}
                       showFooter
                       renderFooter={(rows: GoodReceipt[]) => {
                         return (
                           <TableRow className="font-bold">
-                            <TableCell colSpan={3}>Total Amount</TableCell>
-                            <TableCell className="text-right">
+                            <TableCell>Total Amount</TableCell>
+                            <TableCell colSpan={10} className="text-right">
                               {formatCurrency(
                                 rows?.reduce(
                                   (acc: number, item: GoodReceipt) =>
@@ -361,9 +360,6 @@ export default function InvoiceModal({
             />
           )}
           <DialogFooter>
-            {/* <Button className="shadow-sm" variant="secondary">
-              Save as Draft
-            </Button> */}
             <ConfirmDialog
               title="Create Invoice"
               description="Are you sure you want to create this invoice? This action cannot be undone."

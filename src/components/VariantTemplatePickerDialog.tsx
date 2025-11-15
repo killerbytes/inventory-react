@@ -20,7 +20,6 @@ export default function VariantTemplatePickerDialog({
   onSelect: (variantType: VariantTypes) => void;
   onClose: () => void;
 }) {
-  const [selected, setSelected] = React.useState<VariantTypes>();
   const loadingState = React.useState(false);
   const [variantTypes, setVariantTypes] = React.useState<VariantTypes[]>([]);
   const getData = React.useCallback(async () => {

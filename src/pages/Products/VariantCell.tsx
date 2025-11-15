@@ -1,21 +1,20 @@
+import { Controller, UseFormReturn } from "react-hook-form";
 import { SelectItem } from "@/components/ui/select";
 import { cx } from "class-variance-authority";
-import { Controller } from "react-hook-form";
 import Select from "@/components/Select";
+import { VariantTypes } from "@/types";
 import React from "react";
 
 export default function VariantCell({
-  control,
   form,
   index,
   idx,
   variant,
 }: {
-  control: any;
-  form: any;
+  form: UseFormReturn;
   index: number;
   idx: number;
-  variant: any;
+  variant: VariantTypes;
 }) {
   // Focus when this cell is the first one (row 0, variant 0)
   React.useEffect(() => {
@@ -27,7 +26,7 @@ export default function VariantCell({
   return (
     <Controller
       name={`combinations.${index}.values.${idx}`}
-      control={control}
+      control={form.control}
       render={({ field }) => {
         const error =
           form.formState.errors?.combinations?.[index]?.values?.[idx]?.value;
@@ -39,13 +38,13 @@ export default function VariantCell({
             value={String(
               variant.values.find((i) => i.id === field.value?.id)?.id ?? "",
             )}
-            options={variant.values}
+            options={variant.values as { id: number; value: string }[]}
             onChange={(value) => {
               field.onChange(
                 variant.values.find((v) => v.id === Number(value)),
               );
             }}
-            renderOption={(option) => (
+            renderOption={(option: { id: number; value: string }) => (
               <SelectItem key={option.id} value={String(option.id)}>
                 {option.value}
               </SelectItem>

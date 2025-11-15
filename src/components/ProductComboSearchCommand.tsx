@@ -22,7 +22,6 @@ const RenderOptionsDefault = React.memo(function RenderOptionsDefault<
   open,
   setOpen,
   onSelect,
-  search,
 }: {
   items: T[];
   open: boolean;

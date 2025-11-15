@@ -11,10 +11,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { userServices, type ApiError, type User } from "@/services";
 import { DialogFooter } from "@/components/ui/dialog";
+import { ApiErrorResponse, User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ERROR } from "@/utils/definitions";
+import { userServices } from "@/services";
 import Modal from "@/components/Modal";
 import { userSchema } from "@/schemas";
 
@@ -37,23 +39,24 @@ export default function EditModal({
   async function onSubmit(values: User) {
     try {
       const { name, email, isActive } = values;
-      await userServices.update(data.id, { name, email, isActive });
+      await userServices.update(data.id ?? 0, { name, email, isActive });
       toast.success(`Submitted: ${values.name} (${values.email})`);
       form.reset();
       onClose();
     } catch (error) {
-      const { errors } = (
-        error as { response: { data: { errors: ApiError[] } } }
-      ).response.data;
-      errors.forEach((err: ApiError) => {
-        if (err.field) {
-          form.setError(err.field as keyof User, {
-            type: "server",
-            message: err.message,
-          });
-        }
-      });
-      toast.error("Submission failed");
+      const apiError = error as ApiErrorResponse;
+      if (apiError.code === ERROR.VALIDATION_ERROR) {
+        apiError.errors.forEach((err) => {
+          if (err.field) {
+            form.setError(err.field as keyof User, {
+              type: "server",
+              message: err.message,
+            });
+          }
+        });
+      } else {
+        toast.error("Submission failed");
+      }
     } finally {
       cb();
     }

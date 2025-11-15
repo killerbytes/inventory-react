@@ -6,8 +6,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PAGINATION, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import { BreakPack, filterProps, PaginatedResponse } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { BreakPack, PaginatedResponse } from "@/types";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -25,7 +25,7 @@ export default function BreakPacks() {
     totalPages: 0,
     currentPage: 0,
   });
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "createdAt",
@@ -42,7 +42,7 @@ export default function BreakPacks() {
     getData();
   }, [getData]);
 
-  const handleFilterChange = React.useCallback((data) => {
+  const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
 

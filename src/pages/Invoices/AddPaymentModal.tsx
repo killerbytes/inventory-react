@@ -6,10 +6,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ApiErrorResponse, Invoice, Payment } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { ApiErrorResponse, Payment } from "@/types";
 import NumberInput from "@/components/NumberInput";
 import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
@@ -35,17 +35,17 @@ export default function AddPaymentModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  data: Invoice;
+  data: Payment;
 }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       paymentDate: new Date().toISOString().split("T")[0],
-      // referenceNo: "CHK002",
+      referenceNo: "",
       //   amount: 0,
     },
   });
-  const onSubmit = async (values: Payment) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await paymentServices.create({
         ...values,
@@ -63,7 +63,7 @@ export default function AddPaymentModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof Payment, {
+            form.setError(err.field as keyof z.infer<typeof formSchema>, {
               type: "server",
               message: err.message,
             });
@@ -83,7 +83,6 @@ export default function AddPaymentModal({
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            const { paymentDate, referenceNo, amount } = form.getValues();
             console.log(form.getValues(), form.formState.errors);
             form
               .handleSubmit(onSubmit)(e)
@@ -149,7 +148,6 @@ export default function AddPaymentModal({
                     {...field}
                     type="currency"
                     allowNegative={true}
-                    value={String(field.value)}
                   />
                 </FormControl>
                 <FormMessage />

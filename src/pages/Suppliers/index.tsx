@@ -26,7 +26,7 @@ import AddModal from "./AddModal";
 import React from "react";
 
 export default function Suppliers() {
-  const [data, setData] = React.useState<PaginatedResponse<Supplier[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<Supplier>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -142,7 +142,7 @@ export default function Suppliers() {
                         {column.title}
                         {filter.sort === column.key && (
                           <span className="ml-2 text-xs text-muted-foreground">
-                            {filter.order === "asc" ? "↑" : "↓"}
+                            {filter.order === "ASC" ? "↑" : "↓"}
                           </span>
                         )}
                       </TableHead>

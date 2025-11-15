@@ -11,11 +11,11 @@ import { toast } from "sonner";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { ApiErrorResponse, Signup } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ERROR } from "@/utils/definitions";
 import { userServices } from "@/services";
-import { ApiErrorResponse } from "@/types";
 import { signupSchema } from "@/schemas";
 import Modal from "@/components/Modal";
 

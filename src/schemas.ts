@@ -2,17 +2,20 @@ import { MODE_OF_PAYMENT, ORDER_STATUS } from "./utils/definitions";
 import * as z from "zod";
 
 export const userSchema = z.object({
-  id: z.number().optional(),
+  id: z.coerce.number().optional(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  username: z
+    .string()
+    .min(2, {
+      message: "Username must be at least 2 characters.",
+    })
+    .optional(),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  isActive: z.boolean().optional(),
+  isActive: z.boolean(),
   // .min(8, {
   //   message: "Password must be at least 8 characters.",
   // })
@@ -173,7 +176,7 @@ export const supplierSchema = z.object({
     .email({
       message: "Please enter a valid email address.",
     })
-    .nullish(),
+    .optional(),
 });
 
 export const customerSchema = supplierSchema;
@@ -406,6 +409,7 @@ export const inventoryMovementSchema = z.object({
 export const stockAdjustmentSchema = z.object({
   referenceNo: z.string().nullish(),
   combinationId: z.number(),
+  combination: productCombinationsSchema.optional(),
   systemQuantity: z.number().nullish(),
   newQuantity: z.number().min(0, {
     message: "New Quantity must be at least 0.",
@@ -422,18 +426,6 @@ export const invoiceLineSchema = z.object({
   amount: z.number(),
   goodReceiptId: z.number(),
   goodReceipt: goodReceiptSchema.nullish(),
-});
-
-export const invoiceSchema = z.object({
-  id: z.number().optional(),
-  supplierId: z.number(),
-  invoiceNumber: z.string(),
-  invoiceDate: z.string(),
-  dueDate: z.string(),
-  status: z.string(),
-  totalAmount: z.coerce.number().nullish(),
-  notes: z.string().nullish(),
-  invoiceLines: z.array(invoiceLineSchema),
 });
 
 export const invoiceFormSchema = z.object({
@@ -453,6 +445,19 @@ export const paymentApplicationSchema = z.object({
   id: z.number().optional(),
   invoiceId: z.number(),
   amountApplied: z.coerce.number().nullish(),
+});
+
+export const invoiceSchema = z.object({
+  id: z.number().optional(),
+  supplierId: z.number(),
+  invoiceNumber: z.string(),
+  invoiceDate: z.string(),
+  dueDate: z.string(),
+  status: z.string(),
+  totalAmount: z.coerce.number().nullish(),
+  notes: z.string().nullish(),
+  invoiceLines: z.array(invoiceLineSchema),
+  applications: z.array(paymentApplicationSchema),
 });
 
 export const paymentSchema = z.object({
@@ -477,6 +482,7 @@ export const priceHistorySchema = z.object({
   changedBy: z.number(),
   changedAt: z.string(),
   user: z.any(),
+  quantity: z.coerce.number(),
 });
 
 export const returnItemSchema = z.object({

@@ -35,14 +35,11 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
-// needed for row & cell level scope DnD setup
 import { useSortable } from "@dnd-kit/sortable";
 import { GripHorizontal } from "lucide-react";
-import { categoryServices } from "@/services";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "./ui/button";
 
-// Cell Component
 const RowDragHandleCell = ({ rowId }: { rowId: string }) => {
   const { attributes, listeners } = useSortable({
     id: rowId,
@@ -54,13 +51,12 @@ const RowDragHandleCell = ({ rowId }: { rowId: string }) => {
   );
 };
 
-// Row Component
 const DraggableRow = ({ row }: { row: Row<T> }) => {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.id,
   });
 
-  const style: CSSProperties = {
+  const style = {
     transform: CSS.Transform.toString(transform), //let dnd-kit do its thing
     transition: transition,
     opacity: isDragging ? 0.8 : 1,
@@ -83,12 +79,18 @@ const DraggableRow = ({ row }: { row: Row<T> }) => {
 };
 
 // Table Component
-export default function DnDTable({
+export default function DnDTable<T>({
   className,
   tableClassname,
   columns: _columns,
   data: _data,
   onSubmit,
+}: {
+  className?: string;
+  tableClassname?: string;
+  columns: ColumnDef<T>[];
+  data: T[];
+  onSubmit: (data: T[]) => void;
 }) {
   const columns = React.useMemo<ColumnDef<T>[]>(
     () => [

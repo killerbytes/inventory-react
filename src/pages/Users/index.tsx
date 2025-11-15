@@ -23,13 +23,13 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 
 export default function Users() {
-  const [data, setData] = React.useState<PaginatedResponse<User[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<User>>({
     data: [],
     total: 0,
     totalPages: 0,
     currentPage: 0,
   });
-  const [selectedUser, setSelectedUser] = React.useState<User | null>();
+  const [selectedUser, setSelectedUser] = React.useState<User>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,

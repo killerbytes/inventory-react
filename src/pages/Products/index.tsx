@@ -57,7 +57,7 @@ export default function Products() {
   } = useProductCombinationStore();
   const [query, setQuery] = React.useState("");
   const [data, setData] = React.useState<
-    PaginatedResponse<CategorizedProductList[]>
+    PaginatedResponse<CategorizedProductList>
   >({
     data: [],
     total: 0,

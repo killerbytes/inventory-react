@@ -182,7 +182,7 @@ export default function Invoices() {
       </CardContent>
       {toggle.addInvoiceModal && (
         <InvoiceModal
-          data={selected}
+          data={selected as Invoice}
           isOpen={true}
           onClose={(reload) => {
             handleToggle({ addInvoiceModal: false });

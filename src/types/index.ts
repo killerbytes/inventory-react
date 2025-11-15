@@ -81,6 +81,7 @@ export interface CategorizedItemList<T> {
 }
 
 export interface CategorizedProductList {
+  id: number;
   categoryId: string;
   categoryName: string;
   categoryOrder: number;

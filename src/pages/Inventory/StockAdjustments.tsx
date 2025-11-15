@@ -23,7 +23,7 @@ export default function StockAdjustments() {
     currentPage: 0,
   });
   const getData = async () => {
-    const data = await inventoryServices.getStockAdjustments({});
+    const data = await inventoryServices.getStockAdjustments();
     setData(data);
   };
 
@@ -66,11 +66,9 @@ export default function StockAdjustments() {
         },
         cell: ({ row }) => {
           return (
-            <Link to={`${ROUTES.GOOD_RECEIPT}/${row.original.reference}`}>
-              <ColorBadge colorMap={STOCK_ADJUSTMENT_TYPE_COLOR}>
-                {String(row.original.reason)}
-              </ColorBadge>
-            </Link>
+            <ColorBadge colorMap={STOCK_ADJUSTMENT_TYPE_COLOR}>
+              {String(row.original.reason)}
+            </ColorBadge>
           );
         },
       },

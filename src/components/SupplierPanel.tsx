@@ -1,3 +1,5 @@
+import { Supplier } from "@/types";
+
 export default function SupplierPanel({
   supplier,
 }: {

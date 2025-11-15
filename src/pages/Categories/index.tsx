@@ -29,7 +29,7 @@ export default function Categories() {
     currentPage: 0,
   });
 
-  const [selected, setSelected] = React.useState<Category | null>();
+  const [selected, setSelected] = React.useState<Category>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState({
     limit: 10,

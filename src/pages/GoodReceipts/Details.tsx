@@ -20,24 +20,18 @@ import {
   Undo,
 } from "lucide-react";
 import {
-  ApiErrorResponse,
-  CancelOrder,
-  GoodReceipt,
-  GoodReceiptCreate,
-} from "@/types";
-import {
   BUTTON_COLOR,
   ORDER_STATUS,
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
+import { ApiErrorResponse, CancelOrder, GoodReceiptCreate } from "@/types";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
-import { useForm, useWatch } from "react-hook-form";
 import PendingOrderForm from "./Form/PendingForm";
 import { goodReceiptFormSchema } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
@@ -47,6 +41,7 @@ import { useGoodReceiptStore } from "@/stores";
 import { cx } from "class-variance-authority";
 import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
+import { useForm } from "react-hook-form";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
 import { toast } from "sonner";
@@ -132,9 +127,7 @@ export default function Create() {
     getData();
   }, [getData, returnEnabled]);
 
-  const data = useWatch<GoodReceipt>({
-    control: form.control,
-  }) as GoodReceipt;
+  const data = form.getValues();
 
   return (
     <div className="flex flex-col gap-4">

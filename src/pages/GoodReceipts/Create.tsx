@@ -27,18 +27,14 @@ import { toast } from "sonner";
 import React from "react";
 
 const goodReceiptDefault = {
-  // goodReceiptNumber: randomInt(1000000, 9999999).toString(),
-  // supplierId: randomInt(1, 100),
-  // modeOfPayment: MODE_OF_PAYMENT_OPTIONS[randomInt(0, 1)].value,
   referenceNo: "",
   receiptDate: new Date().toISOString(),
-  // dueDate: addWeeks(new Date(), 1).toISOString(),
   goodReceiptLines: Array.from({ length: 3 }, () => goodReceiptItemDefault),
 };
 
 export default function Create() {
   const navigate = useNavigate();
-  const [json, setJson] = React.useState(null);
+  const [json, setJson] = React.useState<string | null>(null);
 
   const defaultValues = localStorage.getItem(
     `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
@@ -55,7 +51,6 @@ export default function Create() {
     defaultValues,
   });
 
-  // const data = useWatch({ control: form.control, name: "goodReceiptLines" });
   React.useEffect(() => {
     setTimeout(() => {
       form.setFocus("supplierId");
@@ -118,14 +113,21 @@ export default function Create() {
 
       form.setValue(
         "goodReceiptLines",
-        data.map((item) => {
-          return {
-            quantity: item.quantity,
-            purchasePrice: item.price,
-            discount: item.discount,
-            discountNote: item.discountNote,
-          };
-        }),
+        data.map(
+          (item: {
+            quantity: number;
+            price: number;
+            discount: number;
+            discountNote: string;
+          }) => {
+            return {
+              quantity: item.quantity,
+              purchasePrice: item.price,
+              discount: item.discount,
+              discountNote: item.discountNote,
+            };
+          },
+        ),
       );
     }
   }, [form, json]);
@@ -159,18 +161,7 @@ export default function Create() {
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  const { goodReceiptLines, ...rest } = form.getValues();
-                  const valid = goodReceiptLines.filter(
-                    (item) =>
-                      item.combinationId || item.quantity || item.purchasePrice,
-                  );
                   console.log(form.getValues(), form.formState.errors);
-                  // form.reset({
-                  //   ...rest,
-                  //   goodReceiptLines: valid.length
-                  //     ? valid
-                  //     : [goodReceiptItemDefault],
-                  // });
                   form
                     .handleSubmit(onSubmit)(e)
                     .catch((error) => {

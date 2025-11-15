@@ -1,11 +1,10 @@
 import { formatCurrency, formatDate } from "@/utils/formatters";
+import { Payment, PaymentApplication } from "@/types";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import AddPaymentModal from "./AddPaymentModal";
-import { paymentServices } from "@/services";
 import useToggle from "@/hooks/useToggle";
-import { GoodReceipt } from "@/types";
 import { Plus } from "lucide-react";
 import React from "react";
 
@@ -13,30 +12,14 @@ export default function PaymentTab({
   data,
   cb,
 }: {
-  data: GoodReceipt;
+  data: Payment;
   cb: () => void;
 }) {
   const { toggle, handleToggle } = useToggle({
     addPaymentModal: false,
   });
 
-  console.log(data);
-  const onSubmit = () => {
-    const { supplierId } = data;
-    paymentServices.create({
-      paymentDate: new Date(),
-      referenceNo: "CHECK001",
-      amount: 263990.0,
-      supplierId,
-      applications: [
-        {
-          invoiceId: data.id,
-          amountApplied: 263990.0,
-        },
-      ],
-    });
-  };
-  const columns: ColumnDef<GoodReceipt>[] = React.useMemo(
+  const columns: ColumnDef<PaymentApplication>[] = React.useMemo(
     () => [
       {
         accessorKey: "payment.referenceNo",
@@ -77,8 +60,6 @@ export default function PaymentTab({
   );
   return (
     <div className="flex flex-col gap-4">
-      {/* PaymentTab */}
-      {/* <Button onClick={onSubmit}>Pay</Button> */}
       <div className="flex justify-end">
         <Button
           onClick={() => {

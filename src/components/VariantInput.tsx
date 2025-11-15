@@ -1,4 +1,3 @@
-import VariantsModal from "@/pages/Products/VariantsModal";
 import { Badge } from "@/components/ui/badge";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";

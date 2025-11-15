@@ -47,12 +47,10 @@ export default function GoodReceiptPickerModal({
         header: ({ table }) => {
           return (
             <Checkbox
-              // The `checked` prop handles the "checked" and "indeterminate" states
               checked={
                 table.getIsAllPageRowsSelected() ||
                 (table.getIsSomePageRowsSelected() && "indeterminate")
               }
-              // The `onCheckedChange` handler is provided by Tanstack Table
               onCheckedChange={(value) =>
                 table.getToggleAllPageRowsSelectedHandler()({
                   target: { checked: !!value },
@@ -145,6 +143,7 @@ export default function GoodReceiptPickerModal({
         <Button
           className="shadow-sm"
           type="submit"
+          disabled={!selected.length}
           onClick={() => onSubmit(selected)}
         >
           Select

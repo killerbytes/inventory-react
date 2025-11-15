@@ -13,8 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import { filterProps, PaginatedResponse, SalesOrder } from "@/types";
+import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -59,7 +59,6 @@ export default function SalesOrders() {
   const [toggle, handleToggle] = useToggle({
     salesOrderModal: false,
   });
-  console.log(range);
 
   const getData = React.useCallback(async () => {
     setLoading(true);
@@ -74,6 +73,7 @@ export default function SalesOrders() {
 
       const data: PaginatedResponse<SalesOrder[]> =
         await salesOrderServices.getAll(payload);
+
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -168,15 +168,12 @@ export default function SalesOrders() {
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-2 justify-between">
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex gap-2 justify-between items-center">
             <div>
-              <DateRangePicker
-                className="mb-4"
-                value={range}
-                onChange={setRange}
-              />
+              <DateRangePicker value={range} onChange={setRange} />
             </div>
+            <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
             <div className="w-1/4">
               <Select
                 options={ORDER_STATUS_OPTIONS}

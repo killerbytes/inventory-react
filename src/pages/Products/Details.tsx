@@ -485,7 +485,7 @@ export default function ProductEdit() {
                   <CardTitle>Price History</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-6">
-                  <PriceHistoryTable productId={id} />
+                  <PriceHistoryTable productId={id ?? ""} />
                 </CardContent>
               </Card>
             </TabsContent>

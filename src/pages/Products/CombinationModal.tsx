@@ -139,7 +139,7 @@ export default function CombinationModal({
       setLoading(true);
       await productCombinationServices.updateByProductId(
         Number(product.id),
-        values as ProductCombinations[],
+        values,
       );
       invalidate();
       toast.success("Variants saved successfully");
@@ -200,7 +200,6 @@ export default function CombinationModal({
         }) => {
           return (
             <VariantCell
-              control={form.control}
               form={form}
               index={index}
               idx={idx}

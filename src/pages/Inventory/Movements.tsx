@@ -28,6 +28,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
+import { DateRange } from "react-day-picker";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
@@ -35,7 +36,7 @@ import { Link } from "react-router";
 import React from "react";
 
 export default function Movements() {
-  const [range, setRange] = React.useState({
+  const [range, setRange] = React.useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
@@ -185,11 +186,11 @@ export default function Movements() {
         </CardTitle>
         <CardAction></CardAction>
       </CardHeader>
-      <CardContent>
-        <div className="flex gap-2 justify-between">
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex gap-2 justify-between items-center">
           <Input
             placeholder="Search Product"
-            className="w-full mb-4"
+            className="w-full"
             value={filter.q}
             onChange={(e) => {
               setFilter((prev) => ({
@@ -199,14 +200,7 @@ export default function Movements() {
               }));
             }}
           />
-          <DateRangePicker
-            className="mb-4"
-            value={range}
-            onChange={(e) => {
-              console.log(e);
-              setRange(e);
-            }}
-          />
+          <DateRangePicker value={range} onChange={setRange} />
           <Select
             options={INVENTORY_MOVEMENT_TYPE_OPTIONS}
             value={filter.type}
@@ -214,6 +208,7 @@ export default function Movements() {
               setFilter(({ ...prev }) => ({ ...prev, type }));
             }}
           />
+          <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
         </div>
         <>
           <Loader isLoading={loading} />

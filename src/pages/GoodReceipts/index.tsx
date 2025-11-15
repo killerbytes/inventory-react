@@ -11,12 +11,12 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
+import { PaginatedResponse, GoodReceipt, filterProps } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { PaginatedResponse, GoodReceipt } from "@/types";
 import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
@@ -27,6 +27,7 @@ import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import { DateRange } from "react-day-picker";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
 import React from "react";
@@ -41,11 +42,13 @@ export default function GoodReceipts() {
   });
 
   const [loading, setLoading] = React.useState(true);
-  const [range, setRange] = React.useState({
+  const [range, setRange] = React.useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
+    limit: PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
     status: "ALL",
     sort: "id",
     order: "DESC",
@@ -53,33 +56,12 @@ export default function GoodReceipts() {
     // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
     // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
-  const [tableFilters, setTableFilters] = React.useState({
-    limit: PAGINATION.PAGE_SIZE,
-    page: PAGINATION.PAGE,
-  });
-  // React.useEffect(() => {
-  //   const { from, to } = range || {};
-  //   if (from && to) {
-  //     setFilter((prev) => ({
-  //       ...prev,
-  //       startDate: from.toISOString(),
-  //       endDate: to.toISOString(),
-  //     }));
-  //   } else {
-  //     setFilter((prev) => ({
-  //       ...prev,
-  //       startDate: "",
-  //       endDate: "",
-  //     }));
-  //   }
-  // }, [range]);
 
   const getData = React.useCallback(async () => {
     setLoading(true);
     try {
       const payload = {
         ...filter,
-        ...tableFilters,
         ...(range?.from && range?.to && { startDate: range.from }),
         ...(range?.from && range?.to && { endDate: range.to }),
 
@@ -93,22 +75,15 @@ export default function GoodReceipts() {
     } finally {
       setLoading(false);
     }
-  }, [filter, range.from, range.to, tableFilters]);
+  }, [filter, range.from, range.to]);
 
   React.useEffect(() => {
     getData();
   }, [getData]);
 
-  const handleFilterChange = React.useCallback((data) => {
+  const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
-
-  // React.useEffect(() => {
-  //   setFilter((prev) => ({
-  //     ...prev,
-  //     page,
-  //   }));
-  // }, [page]);
 
   const columns: ColumnDef<GoodReceipt>[] = React.useMemo(
     () => [
@@ -239,7 +214,7 @@ export default function GoodReceipts() {
         cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
       },
     ],
-    [filter.order, handleFilterChange],
+    [filter.order, filter.sort, handleFilterChange],
   );
   return (
     <div>
@@ -258,18 +233,18 @@ export default function GoodReceipts() {
             </Link>
           </CardAction>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-2 justify-between">
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex gap-2 justify-between items-center">
             <Input
               placeholder="Search Reference"
-              className="w-full mb-4"
+              className="w-full"
               value={filter.q}
               onChange={(e) => {
                 setFilter((prev) => ({
                   ...prev,
                   q: e.target.value,
                 }));
-                setTableFilters((prev) => ({ ...prev, page: 1 }));
+                setFilter((prev) => ({ ...prev, page: 1 }));
               }}
             />
             <Select
@@ -283,14 +258,8 @@ export default function GoodReceipts() {
                 }
               }}
             />
-            <DateRangePicker
-              className="mb-4"
-              value={range}
-              onChange={(e) => {
-                console.log(e);
-                setRange(e);
-              }}
-            />
+            <DateRangePicker value={range} onChange={setRange} />
+            <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
           </div>
           {loading ? (
             <p>Loading...</p>
@@ -320,11 +289,9 @@ export default function GoodReceipts() {
                   );
                 }}
               />
-              <Pager
-                data={data}
-                filter={tableFilters}
-                setFilter={setTableFilters}
-              />
+              {data.totalPages > 1 && (
+                <Pager data={data} filter={filter} setFilter={setFilter} />
+              )}
             </>
           )}
         </CardContent>

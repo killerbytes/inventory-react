@@ -5,9 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { filterProps, PaginatedResponse, priceHistory } from "@/types";
 import { PAGINATION, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
-import { PaginatedResponse, priceHistory } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
@@ -26,7 +26,7 @@ export default function PriceHistoryTab({ productId }: { productId: string }) {
     totalPages: 0,
     currentPage: 0,
   });
-  const [filter, setFilter] = React.useState({
+  const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "createdAt",
@@ -44,7 +44,7 @@ export default function PriceHistoryTab({ productId }: { productId: string }) {
     getData();
   }, [getData]);
 
-  const onFilterChange = React.useCallback((data) => {
+  const onFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
 

@@ -71,11 +71,14 @@ export default function Reorders() {
         },
       },
       {
-        accessorKey: "quantity",
+        accessorKey: "combinations.inventory.quantity",
         header: "Stock",
         meta: {
           headerClassName: "text-right",
           className: "text-right",
+        },
+        cell: ({ row }) => {
+          return Number(row.original.quantity);
         },
       },
     ],

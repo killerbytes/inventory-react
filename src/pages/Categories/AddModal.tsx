@@ -6,13 +6,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ApiError, ApiErrorResponse, Category } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
-import { ApiError, Category } from "@/types";
 import { useCategoryStore } from "@/stores";
 import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
@@ -48,12 +48,10 @@ export default function AddModal({
       invalidate();
       onClose();
     } catch (error) {
-      const { errors } = getErrorMessage(error);
-      // const { errors, message } = error.response.data;
-      // console.log(errors);
+      const { errors } = getErrorMessage(error as ApiErrorResponse);
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          const field = err.field;
+          const field = err.field as keyof Category;
           form.setError(field, {
             type: "server",
             message: err.message,

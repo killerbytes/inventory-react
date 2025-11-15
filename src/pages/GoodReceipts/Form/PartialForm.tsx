@@ -12,19 +12,19 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
+import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
+import { GoodReceiptItem, ReturnItem, ReturnTransaction } from "@/types";
 import { useGoodReceiptStore } from "@/stores/goodReceipt.store";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import SupplierPanel from "@/components/SupplierPanel";
-import { GoodReceiptItem, ReturnItem } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable } from "@/components/DataTable";
-import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
@@ -44,7 +44,8 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
   const [hasReturns, setHasReturns] = React.useState(false);
   const [returns, setReturns] = React.useState<ReturnItem[]>([]);
   const [returnItems, setReturnItems] = React.useState<ReturnItem[]>([]);
-  const [returnTransactions, setReturnTransactions] = React.useState(null);
+  const [returnTransactions, setReturnTransactions] =
+    React.useState<ReturnTransaction[]>();
   const { returnEnabled, setReturnEnabled } = useGoodReceiptStore();
   const data = form.getValues();
 
@@ -78,7 +79,7 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
         ? [
             {
               id: "select",
-              header: ({ table }) => (
+              header: ({ table }: HeaderContext<GoodReceiptItem, unknown>) => (
                 <Checkbox
                   checked={
                     table.getIsAllPageRowsSelected() ||
@@ -90,7 +91,7 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
                   aria-label="Select all"
                 />
               ),
-              cell: ({ row }) => (
+              cell: ({ row }: CellContext<GoodReceiptItem, unknown>) => (
                 <Checkbox
                   checked={row.getIsSelected()}
                   onCheckedChange={(value) => row.toggleSelected(!!value)}
