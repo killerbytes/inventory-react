@@ -30,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { DateRange } from "react-day-picker";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import { Plus } from "lucide-react";
 import React from "react";
@@ -189,7 +190,7 @@ export default function SalesOrders() {
             </div>
           </div>
           {loading ? (
-            <p>Loading...</p>
+            <Loader />
           ) : (
             <>
               <DataTable

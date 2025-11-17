@@ -81,16 +81,14 @@ export interface CategorizedItemList<T> {
 }
 
 export interface CategorizedProductList {
-  id: number;
-  categoryId: string;
+  categoryId: number;
   categoryName: string;
   categoryOrder: number;
   products: Product[];
-  subCategories: CategorizedProductList[];
 }
 
 export interface CategorizedInventoryList {
-  categoryId: string;
+  categoryId: number;
   categoryName: string;
   inventories: Inventory[];
 }

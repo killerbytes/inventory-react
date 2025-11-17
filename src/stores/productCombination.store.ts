@@ -21,8 +21,9 @@ export const useProductCombinationStore = create<ProductCombinationStore>(
     productCombinationsHasLoaded: false,
     productCombinationsNoBreakPack: [],
     productCombinationsNoBreakPackHasLoaded: false,
-    setProductsCombinations: (productCombinations: ProductCombinations[]) =>
-      set({ productCombinations, productCombinationsHasLoaded: true }),
+    setProductsCombinations: (productCombinations: ProductCombinations[]) => {
+      set({ productCombinations, productCombinationsHasLoaded: true });
+    },
     setProductCombinationsNoBreakPack: (
       productCombinationsNoBreakPack: ProductCombinations[],
     ) =>

@@ -7,18 +7,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  MODE_OF_PAYMENT_OPTIONS,
-  ORDER_STATUS,
-  UNIT_COLOR,
-  WHOLESALE_UNITS,
-} from "@/utils/definitions";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  MODE_OF_PAYMENT_OPTIONS,
+  ORDER_STATUS,
+  WHOLESALE_UNITS,
+} from "@/utils/definitions";
 import {
   ApiError,
   ProductCombinations,
@@ -31,18 +30,17 @@ import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
 import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
-import { CommandGroup, CommandItem } from "@/components/ui/command";
 import { BanknoteArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { customerServices, salesOrderServices } from "@/services";
+import GroupedCommandList from "@/components/GroupedCommandList";
 import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
-import { formatCurrency, getScore } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
-import HighlightMatch from "@/components/HighlightMatch";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { formatCurrency } from "@/utils/formatters";
 import { useProductCombinationStore } from "@/stores";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -51,7 +49,6 @@ import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
-import ColorBadge from "@/components/ColorBadge";
 import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
@@ -334,43 +331,13 @@ export default function SalesOrderModal({
                             search,
                           }) => {
                             return (
-                              open &&
-                              items
-                                .map((item) => ({
-                                  item,
-                                  score: getScore(item.name, search),
-                                }))
-                                .filter(({ score }) => score > 0)
-                                .sort((a, b) => b.score - a.score)
-                                .map(({ item }) => (
-                                  <CommandGroup key={item.id}>
-                                    <CommandItem
-                                      value={String(item.name + item.unit)}
-                                      disabled={item.inventory?.quantity < 1}
-                                      key={item.id}
-                                      onSelect={() => {
-                                        setOpen(false);
-                                        onSelect?.(item);
-                                      }}
-                                    >
-                                      <ColorBadge colorMap={UNIT_COLOR}>
-                                        {item.unit}
-                                      </ColorBadge>
-                                      <div>
-                                        <HighlightMatch
-                                          text={item.name}
-                                          query={search}
-                                        />
-                                      </div>
-                                      <div className="ml-auto flex gap-2">
-                                        {Number(item.inventory?.quantity)}
-                                        <span>
-                                          {formatCurrency(item.price)}
-                                        </span>
-                                      </div>
-                                    </CommandItem>
-                                  </CommandGroup>
-                                ))
+                              <GroupedCommandList
+                                items={items}
+                                open={open}
+                                setOpen={setOpen}
+                                onSelect={onSelect}
+                                search={search}
+                              />
                             );
                           }}
                         />

@@ -82,6 +82,7 @@ export const categoryBaseSchema = z.object({
   }),
   parentId: z.number().nullish(),
   description: z.string(),
+  order: z.number(),
 });
 
 export const categorySchema = categoryBaseSchema.extend({

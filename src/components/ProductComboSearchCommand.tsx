@@ -118,7 +118,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
               listRef.current?.scrollTo(0, 0);
             }}
           />
-          <CommandList ref={listRef}>
+          <CommandList ref={listRef} className="overflow-hidden">
             <CommandEmpty>No results found.</CommandEmpty>
             {renderOptions({ items, open, setOpen, onSelect, search })}
           </CommandList>

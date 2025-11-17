@@ -11,22 +11,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  categoryServices,
-  productCombinationServices,
-  productServices,
-} from "@/services";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
-import { CategorizedProductList, PaginatedResponse, Product } from "@/types";
+import { categoryServices, productCombinationServices } from "@/services";
 import { useCategoryStore, useProductCombinationStore } from "@/stores";
-import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
-import { CommandGroup, CommandItem } from "@/components/ui/command";
-import { formatCurrency, getScore } from "@/utils/formatters";
-import HighlightMatch from "@/components/HighlightMatch";
+import GroupedCommandList from "@/components/GroupedCommandList";
+import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
+import { CategorizedProductList, Product } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
-import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, Search } from "lucide-react";
 import { cx } from "class-variance-authority";
@@ -35,6 +28,7 @@ import useDebounce from "@/hooks/useDebounce";
 import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
+import Loader from "@/components/Loader";
 import ProductItem from "./ProductItem";
 import React, { Fragment } from "react";
 
@@ -56,15 +50,8 @@ export default function Products() {
     setProductsCombinations,
   } = useProductCombinationStore();
   const [query, setQuery] = React.useState("");
-  const [data, setData] = React.useState<
-    PaginatedResponse<CategorizedProductList>
-  >({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
-  const [loading, setLoading] = React.useState(true);
+  const [data, setData] = React.useState<CategorizedProductList[]>([]);
+  const [loading, setLoading] = React.useState(false);
   const [filter, setFilter] = React.useState<filterProps>({
     categoryId: "ALL",
   });
@@ -82,28 +69,36 @@ export default function Products() {
     }));
   }, [debouncedQuery]);
 
-  const getData = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      if (!filter.q) {
-        delete filter.q;
-      }
-      const data = await productServices.getAll({
-        ...filter,
-        ...(filter.categoryId === "ALL" && { categoryId: null }),
-      });
-      console.log(data);
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
-
   React.useEffect(() => {
-    getData();
-  }, [getData]);
+    if (categories.length > 0 && productCombinations.length > 0) {
+      const productMap = new Map<number, Product>();
+      productCombinations.forEach((item) => {
+        const productId = item.product.id ?? 0;
+        if (!productMap.has(productId)) {
+          productMap.set(productId, {
+            id: productId,
+            ...item.product,
+            combinations: [],
+          });
+        }
+        const product = productMap.get(productId);
+        product!.combinations?.push(item);
+      });
+
+      const categorizedProductList = categories.map((category) => {
+        return {
+          categoryId: category.id ?? 0,
+          categoryName: category.name,
+          categoryOrder: category.order,
+          products: Array.from(productMap.values()).filter(
+            (product) => product.categoryId === category.id,
+          ),
+        };
+      });
+
+      setData(categorizedProductList);
+    }
+  }, [categories, productCombinations]);
 
   React.useEffect(() => {
     const getData = async () => {
@@ -117,8 +112,15 @@ export default function Products() {
 
   React.useEffect(() => {
     const getData = async () => {
-      const data = await productCombinationServices.list();
-      setProductsCombinations(data);
+      setLoading(true);
+      try {
+        const data = await productCombinationServices.list();
+        setProductsCombinations(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     if (!productCombinationsHasLoaded) {
       getData();
@@ -142,40 +144,13 @@ export default function Products() {
             }}
             renderOptions={({ items, open, setOpen, onSelect, search }) => {
               return (
-                open &&
-                items
-                  .map((item) => ({
-                    item,
-                    score: getScore(item.name, search),
-                  }))
-                  .filter(({ score }) => score > 0)
-                  .sort((a, b) => b.score - a.score)
-                  .map(({ item }) => (
-                    <CommandGroup key={item.id}>
-                      <CommandItem
-                        // value={String(item.name + item.unit)}
-                        value={item.name}
-                        key={item.id}
-                        onSelect={() => {
-                          setOpen(false);
-                          onSelect?.(item);
-                        }}
-                        className="flex items-center gap-2 "
-                      >
-                        <ColorBadge colorMap={UNIT_COLOR}>
-                          {item.unit}
-                        </ColorBadge>
-                        <div>
-                          <HighlightMatch text={item.name} query={search} />
-                        </div>
-
-                        {/* {item.name} */}
-                        <div className="flex gap-2 ml-auto">
-                          <span>{formatCurrency(item.price)}</span>
-                        </div>
-                      </CommandItem>
-                    </CommandGroup>
-                  ))
+                <GroupedCommandList
+                  items={items}
+                  open={open}
+                  setOpen={setOpen}
+                  onSelect={onSelect}
+                  search={search}
+                />
               );
             }}
           >
@@ -232,27 +207,27 @@ export default function Products() {
             </div>
           </div>
           {loading ? (
-            <p>Loading...</p>
+            <Loader />
           ) : (
-            <Accordion
-              type="multiple"
-              className="w-full"
-              // defaultValue={data.data?.map((item) => item.categoryId)}
-              defaultValue={data?.data
-                ?.filter((i) => i.products.length > 0)
-                .map((i) => i.categoryId)}
-            >
-              {data?.data?.map((item) => (
-                <AccordionItem value={item.categoryId} key={item.categoryId}>
-                  <AccordionTrigger
-                    className={cx(
-                      "uppercase text-right",
-                      GLOBAL_COLOR.CATEGORY,
-                    )}
-                  >
-                    {item.categoryName}
+            data.length > 0 && (
+              <Accordion
+                type="multiple"
+                className="w-full"
+                xxxdefaultValue={data
+                  ?.filter((i) => i.products.length > 0)
+                  .map((i) => i.categoryId)}
+              >
+                {data?.map((item) => (
+                  <AccordionItem value={item.categoryId} key={item.categoryId}>
+                    <AccordionTrigger
+                      className={cx(
+                        "uppercase text-right",
+                        GLOBAL_COLOR.CATEGORY,
+                      )}
+                    >
+                      {item.categoryName}
 
-                    {/* <div
+                      {/* <div
                       onClick={(e) => {
                         e.stopPropagation();
                         setCategory(Number(item.categoryId));
@@ -261,13 +236,13 @@ export default function Products() {
                     >
                       <PlusIcon />
                     </div> */}
-                  </AccordionTrigger>
-                  <AccordionContent className="flex flex-col">
-                    <>
-                      {item.products.map((product) => (
-                        <Fragment key={product.id}>
-                          <ProductItem item={product} />
-                          {/* 
+                    </AccordionTrigger>
+                    <AccordionContent className="flex flex-col">
+                      <>
+                        {item.products.map((product) => (
+                          <Fragment key={product.id}>
+                            <ProductItem item={product} />
+                            {/* 
                         {product.combinations?.map((combination: Product) => {
                           return (
                             <Fragment key={combination.id}>
@@ -281,13 +256,13 @@ export default function Products() {
                             </Fragment>
                           );
                         })} */}
-                        </Fragment>
-                      ))}
-                      {item.subCategories.map((i) => (
-                        <Fragment key={i.id}>
-                          <div className="flex gap-2 justify-start items-center">
-                            {i.categoryName}
-                            {/* <Button
+                          </Fragment>
+                        ))}
+                        {item.subCategories?.map((i) => (
+                          <Fragment key={i.id}>
+                            <div className="flex gap-2 justify-start items-center">
+                              {i.categoryName}
+                              {/* <Button
                               variant="ghost"
                               size="icon"
                               className="size-8"
@@ -298,19 +273,19 @@ export default function Products() {
                             >
                               <PlusIcon />
                             </Button> */}
-                          </div>
+                            </div>
 
-                          <div className="flex gap-2 justify-start items-center">
-                            {i.products.map((product: Product) => (
-                              <ProductItem item={product} />
-                            ))}
-                          </div>
-                        </Fragment>
-                      ))}
-                    </>
+                            <div className="flex gap-2 justify-start items-center">
+                              {i.products.map((product: Product) => (
+                                <ProductItem item={product} />
+                              ))}
+                            </div>
+                          </Fragment>
+                        ))}
+                      </>
 
-                    <div className="flex justify-start  py-1">
-                      {/* <Button
+                      <div className="flex justify-start  py-1">
+                        {/* <Button
                         variant="outline"
                         size="icon"
                         className="size-8 shadow-sm"
@@ -321,7 +296,7 @@ export default function Products() {
                       >
                         <PlusIcon />
                       </Button> */}
-                      {/* {item.subCategories.map((i) => (
+                        {/* {item.subCategories.map((i) => (
                         <Badge
                           onClick={() => {
                             setCategory(Number(i.id));
@@ -332,11 +307,12 @@ export default function Products() {
                           {i.subCategoryName}
                         </Badge>
                       ))} */}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )
           )}
         </CardContent>
       </Card>

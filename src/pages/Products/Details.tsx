@@ -35,15 +35,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
 import { useCategoryStore, useProductCombinationStore } from "@/stores";
-import { CommandGroup, CommandItem } from "@/components/ui/command";
 import PriceHistoryTable from "@/pages/Products/PriceHistoryTable";
+import GroupedCommandList from "@/components/GroupedCommandList";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
-import { formatCurrency, getScore } from "@/utils/formatters";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
+import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
 import ColorBadge from "@/components/ColorBadge";
@@ -56,6 +56,7 @@ import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import { productSchema } from "@/schemas";
+import Loader from "@/components/Loader";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
 import { toast } from "sonner";
@@ -101,7 +102,6 @@ export default function ProductEdit() {
       toast.success("Product updated successfully");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
-      console.log(apiError);
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors.forEach((err) => {
           if (err.field) {
@@ -118,6 +118,7 @@ export default function ProductEdit() {
   }
   const getData = React.useCallback(async () => {
     try {
+      setLoading(true);
       const product: Product = await productServices.get(Number(id));
       const { combinations, variants, ...rest }: Product = product;
       setCombinations(combinations ?? []);
@@ -132,6 +133,8 @@ export default function ProductEdit() {
         navigate(`${ROUTES.PRODUCTS}`);
       }
       toast.error(apiError.message);
+    } finally {
+      setLoading(false);
     }
   }, [form, id, navigate]);
 
@@ -312,36 +315,13 @@ export default function ProductEdit() {
             }
             renderOptions={({ items, open, setOpen, onSelect, search }) => {
               return (
-                open &&
-                items
-                  .map((item) => ({
-                    item,
-                    score: getScore(item.name, search),
-                  }))
-                  .filter(({ score }) => score > 0)
-                  .sort((a, b) => b.score - a.score)
-                  .map(({ item }) => (
-                    <CommandGroup key={item.id}>
-                      <CommandItem
-                        value={String(item.name + item.unit)}
-                        key={item.id}
-                        onSelect={() => {
-                          setOpen(false);
-                          onSelect?.(item);
-                        }}
-                        className="flex items-center gap-2 "
-                      >
-                        <ColorBadge colorMap={UNIT_COLOR}>
-                          {item.unit}
-                        </ColorBadge>
-
-                        {item.name}
-                        <div className="flex gap-2 ml-auto">
-                          <span>{formatCurrency(item.price)}</span>
-                        </div>
-                      </CommandItem>
-                    </CommandGroup>
-                  ))
+                <GroupedCommandList
+                  items={items}
+                  open={open}
+                  setOpen={setOpen}
+                  onSelect={onSelect}
+                  search={search}
+                />
               );
             }}
           >
@@ -360,139 +340,146 @@ export default function ProductEdit() {
           </Button>
         </PageHeaderActions>
       </PageHeader>
-      <Form {...form}>
-        <form
-          className="h-full flex flex-col gap-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            console.log(form.formState.errors);
-            form
-              .handleSubmit(onSubmit)(e)
-              .catch((error) => {
-                console.error("Form submission error:", error);
-              });
-          }}
-        >
-          <Card>
-            <CardContent>
-              <ProductForm
-                form={form}
-                onSubmit={onSubmit}
-                categories={categories}
-              />
-              <div className="flex justify-end">
-                <Button className="shadow-sm" type="submit" disabled={loading}>
-                  {loading ? (
-                    <Loader2Icon className="animate-spin" />
-                  ) : (
-                    <Save />
-                  )}
-                  Save changes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      {loading ? (
+        <Loader />
+      ) : (
+        <Form {...form}>
+          <form
+            className="h-full flex flex-col gap-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              console.log(form.formState.errors);
+              form
+                .handleSubmit(onSubmit)(e)
+                .catch((error) => {
+                  console.error("Form submission error:", error);
+                });
+            }}
+          >
+            <Card>
+              <CardContent>
+                <ProductForm
+                  form={form}
+                  onSubmit={onSubmit}
+                  categories={categories}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    className="shadow-sm"
+                    type="submit"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader2Icon className="animate-spin" />
+                    ) : (
+                      <Save />
+                    )}
+                    Save changes
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="product_combination">
-                Product Combinations
-              </TabsTrigger>
-              <TabsTrigger value="variants">Variants</TabsTrigger>
-              <TabsTrigger value="price_history">Price History</TabsTrigger>
-            </TabsList>
-            <TabsContent value="product_combination">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Product Combinations</CardTitle>
-                  <CardAction>
-                    <Button
-                      onClick={() => handleToggle({ combinationModal: true })}
-                      type="button"
-                      variant="outline"
-                      className="shadow-sm"
-                    >
-                      <Pencil />
-                      Edit Combinations
-                    </Button>
-                  </CardAction>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <DataTable
-                    data={combinations || []}
-                    columns={columns}
-                    meta={{
-                      disabledRow: "isActive",
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="variants">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Variants</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Variant Types</CardTitle>
-                      <CardAction>
-                        <Button
-                          onClick={() => handleToggle({ variantModal: true })}
-                          type="button"
-                          variant="outline"
-                          className="shadow-sm"
-                        >
-                          <Pencil />
-                          Edit Variants
-                        </Button>
-                      </CardAction>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex gap-4">
-                        {variants.map((variant, idx) => {
-                          return (
-                            <div className="flex flex-col gap-2">
-                              <Badge
-                                variant="secondary"
-                                key={idx}
-                                className={cx("outline", {
-                                  "font-bold italic underline":
-                                    variant.isBreakpackFilter,
-                                })}
-                              >
-                                {variant.name}
-                              </Badge>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="product_combination">
+                  Product Combinations
+                </TabsTrigger>
+                <TabsTrigger value="variants">Variants</TabsTrigger>
+                <TabsTrigger value="price_history">Price History</TabsTrigger>
+              </TabsList>
+              <TabsContent value="product_combination">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Product Combinations</CardTitle>
+                    <CardAction>
+                      <Button
+                        onClick={() => handleToggle({ combinationModal: true })}
+                        type="button"
+                        variant="outline"
+                        className="shadow-sm"
+                      >
+                        <Pencil />
+                        Edit Combinations
+                      </Button>
+                    </CardAction>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <DataTable
+                      data={combinations || []}
+                      columns={columns}
+                      meta={{
+                        disabledRow: "isActive",
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="variants">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Variants</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Variant Types</CardTitle>
+                        <CardAction>
+                          <Button
+                            onClick={() => handleToggle({ variantModal: true })}
+                            type="button"
+                            variant="outline"
+                            className="shadow-sm"
+                          >
+                            <Pencil />
+                            Edit Variants
+                          </Button>
+                        </CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-4">
+                          {variants.map((variant, idx) => {
+                            return (
+                              <div className="flex flex-col gap-2">
+                                <Badge
+                                  variant="secondary"
+                                  key={idx}
+                                  className={cx("outline", {
+                                    "font-bold italic underline":
+                                      variant.isBreakpackFilter,
+                                  })}
+                                >
+                                  {variant.name}
+                                </Badge>
 
-                              <ul className="text-sm flex gap-1 flex-col">
-                                {variant.values.map((i) => (
-                                  <li>{i.value}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="price_history">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Price History</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <PriceHistoryTable productId={id ?? ""} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </form>
-      </Form>
-
+                                <ul className="text-sm flex gap-1 flex-col">
+                                  {variant.values.map((i) => (
+                                    <li>{i.value}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="price_history">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Price History</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <PriceHistoryTable productId={id ?? ""} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </form>
+        </Form>
+      )}
       {/* {JSON.stringify(x)} */}
       {toggle.variantModal && (
         <VariantsModal

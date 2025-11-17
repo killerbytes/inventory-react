@@ -15,21 +15,20 @@ import {
 import { ProductCombinations, GoodReceiptCreate, Supplier } from "@/types";
 import { productCombinationServices, supplierServices } from "@/services";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
-import { goodReceiptItemDefault, UNIT_COLOR } from "@/utils/definitions";
 import { useProductCombinationStore, useSupplierStore } from "@/stores";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
-import { CommandGroup, CommandItem } from "@/components/ui/command";
-import { formatCurrency, getScore } from "@/utils/formatters";
+import GroupedCommandList from "@/components/GroupedCommandList";
+import { goodReceiptItemDefault } from "@/utils/definitions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
-import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
@@ -194,35 +193,13 @@ export default function PendingForm({
                         search,
                       }) => {
                         return (
-                          open &&
-                          items
-                            .map((item) => ({
-                              item,
-                              score: getScore(item.name, search),
-                            }))
-                            .filter(({ score }) => score > 0)
-                            .sort((a, b) => b.score - a.score)
-                            .map(({ item }) => (
-                              <CommandGroup key={item.id}>
-                                <CommandItem
-                                  value={String(item.name + item.unit)}
-                                  key={item.id}
-                                  onSelect={() => {
-                                    setOpen(false);
-                                    onSelect?.(item);
-                                  }}
-                                  className="flex items-center gap-2 "
-                                >
-                                  <ColorBadge colorMap={UNIT_COLOR}>
-                                    {item.unit}
-                                  </ColorBadge>
-                                  {item.name}
-                                  <div className="flex gap-2 ml-auto">
-                                    <span>{formatCurrency(item.price)}</span>
-                                  </div>
-                                </CommandItem>
-                              </CommandGroup>
-                            ))
+                          <GroupedCommandList
+                            items={items}
+                            open={open}
+                            setOpen={setOpen}
+                            onSelect={onSelect}
+                            search={search}
+                          />
                         );
                       }}
                     />

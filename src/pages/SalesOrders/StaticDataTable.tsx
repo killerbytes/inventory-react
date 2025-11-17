@@ -14,11 +14,11 @@ import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { Link, useParams } from "react-router";
 import { inventoryServices } from "@/services";
 import { Label } from "@/components/ui/label";
 import { useSalesOrderStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
-import { useParams } from "react-router";
 import React from "react";
 
 const renderFooter = (data: SalesOrder) => {
@@ -107,6 +107,13 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         header: "Product",
         meta: {
           className: GLOBAL_COLOR.PRODUCT,
+        },
+        cell: ({ row }) => {
+          return (
+            <Link to={`/products/${row.original.combinations.productId}`}>
+              {row.original.nameSnapshot}
+            </Link>
+          );
         },
       },
       {

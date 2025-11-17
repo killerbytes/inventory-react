@@ -37,9 +37,9 @@ import ColorBadge from "@/components/ColorBadge";
 import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import StaticDataTable from "./StaticDataTable";
-import { useForm } from "react-hook-form";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import Static from "./Static";
 
@@ -51,7 +51,7 @@ export default function SalesOrderDetails() {
   });
   const navigate = useNavigate();
   const { id } = useParams();
-  const { setProducts } = useProductStore();
+  const productStore = useProductStore();
   const { returnEnabled, setReturnEnabled } = useSalesOrderStore();
   const { customers, setCustomers } = useCustomerStore();
 
@@ -62,10 +62,14 @@ export default function SalesOrderDetails() {
   React.useEffect(() => {
     const getData = async () => {
       const data: CategorizedProductList[] = await productServices.list();
-      setProducts(data);
+      productStore.setProducts(data);
     };
-    getData();
-  }, [setProducts, returnEnabled]);
+    console.log(productStore.hasLoaded);
+
+    if (!productStore.hasLoaded) {
+      getData();
+    }
+  }, [productStore, productStore.setProducts, returnEnabled]);
 
   const getData = useCallback(async () => {
     try {
