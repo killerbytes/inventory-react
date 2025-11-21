@@ -7,6 +7,14 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    minify: "terser",
+    terserOptions: {
+      format: {
+        comments: false,
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
