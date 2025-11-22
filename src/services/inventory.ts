@@ -20,7 +20,7 @@ export default class InventoryService extends BaseService<Inventory> {
     return await this.http.post(`${this.url}/breakPacks`, data);
   };
 
-  getStockAdjustments = async (data?: StockAdjustment) => {
+  getStockAdjustments = async (data?: filterProps) => {
     return await this.http.post(`${this.url}/stockAdjustments`, data);
   };
 

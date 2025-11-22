@@ -95,7 +95,8 @@ export default function CombinationModal({
     unit: product.baseUnit,
     price: 0,
     conversionFactor: 1,
-    isActive: false,
+    isActive: true,
+    quantity: 0,
     values: variants.map((i) => ({
       variantTypeId: i.id,
     })),
@@ -335,11 +336,7 @@ export default function CombinationModal({
           className: "text-left w-[50px]",
         },
         cell: ({ row }) => {
-          return (
-            <div className="text-center">
-              {Number(row.original.inventory?.quantity)}
-            </div>
-          );
+          return Number(row.original.inventory?.quantity ?? 0);
         },
       },
       {
