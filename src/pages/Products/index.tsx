@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/accordion";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { categoryServices, productCombinationServices } from "@/services";
-import GroupedCommandList from "@/components/GroupedCommandList";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { CategorizedProductList, Product } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,13 +41,7 @@ export default function Products() {
   const {
     categoryState: { hasLoaded: categoryHasLoaded, categories, setCategories },
   } = useStore();
-  const {
-    productCombinationState: {
-      productCombinationsHasLoaded,
-      productCombinations,
-      setProductsCombinations,
-    },
-  } = useStore();
+  const { productCombinationState } = useStore();
   const [query, setQuery] = React.useState("");
   const [data, setData] = React.useState<CategorizedProductList[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -70,9 +63,12 @@ export default function Products() {
   }, [debouncedQuery]);
 
   React.useEffect(() => {
-    if (categories.length > 0 && productCombinations.length > 0) {
+    if (
+      categories.length > 0 &&
+      productCombinationState.productCombinations.length > 0
+    ) {
       const productMap = new Map<number, Product>();
-      productCombinations.forEach((item) => {
+      productCombinationState.productCombinations.forEach((item) => {
         const productId = item.product.id ?? 0;
         if (!productMap.has(productId)) {
           productMap.set(productId, {
@@ -89,7 +85,7 @@ export default function Products() {
         return {
           categoryId: category.id ?? 0,
           categoryName: category.name,
-          categoryOrder: category.order,
+          categoryOrder: category.order ?? 0,
           products: Array.from(productMap.values()).filter(
             (product) => product.categoryId === category.id,
           ),
@@ -98,7 +94,7 @@ export default function Products() {
 
       setData(categorizedProductList);
     }
-  }, [categories, productCombinations]);
+  }, [categories, productCombinationState.productCombinations]);
 
   React.useEffect(() => {
     const getData = async () => {
@@ -115,17 +111,17 @@ export default function Products() {
       setLoading(true);
       try {
         const data = await productCombinationServices.list();
-        setProductsCombinations(data);
+        productCombinationState.setProductsCombinations(data);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    if (!productCombinationsHasLoaded) {
+    if (!productCombinationState.hasLoaded) {
       getData();
     }
-  }, [productCombinationsHasLoaded, setProductsCombinations]);
+  }, [productCombinationState]);
 
   return (
     <>
@@ -138,7 +134,7 @@ export default function Products() {
         </PageHeaderContent>
         <PageHeaderActions>
           <ProductComboSearchCommand
-            items={productCombinations}
+            items={productCombinationState.productCombinations}
             onSelect={(item) => {
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
             }}

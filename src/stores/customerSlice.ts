@@ -26,6 +26,7 @@ export const createCustomerSlice: StateCreator<
     setCustomers: (customers: Customer[]) =>
       set(({ customerState }) => {
         customerState.customers = customers;
+        customerState.hasLoaded = true;
       }),
   },
 });

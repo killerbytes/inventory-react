@@ -19,14 +19,14 @@ export const createSupplierSlice: StateCreator<
   supplierState: {
     hasLoaded: false,
     invalidate: () =>
-      set((state) => {
-        state.supplierState.hasLoaded = false;
+      set(({ supplierState }) => {
+        supplierState.hasLoaded = false;
       }),
     suppliers: [],
     setSuppliers: (suppliers: Supplier[]) =>
-      set((state) => {
-        state.supplierState.suppliers = suppliers;
-        state.supplierState.hasLoaded = true;
+      set(({ supplierState }) => {
+        supplierState.suppliers = suppliers;
+        supplierState.hasLoaded = true;
       }),
   },
 });

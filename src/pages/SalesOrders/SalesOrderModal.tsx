@@ -32,7 +32,6 @@ import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
 import { BanknoteArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { customerServices, salesOrderServices } from "@/services";
-import GroupedCommandList from "@/components/GroupedCommandList";
 import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
@@ -83,14 +82,7 @@ export default function SalesOrderModal({
   onClose: (reload: boolean) => void;
 }) {
   const [loading, setLoading] = React.useState(false);
-  const {
-    productCombinationState: {
-      productCombinationsHasLoaded,
-      productCombinations,
-      setProductsCombinations,
-    },
-    customerState: { hasLoaded: hasLoadedCustomers, customers, setCustomers },
-  } = useStore();
+  const { productCombinationState, customerState } = useStore();
 
   const defaultValues = localStorage.getItem(
     `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
@@ -126,22 +118,22 @@ export default function SalesOrderModal({
   React.useEffect(() => {
     const getData = async () => {
       const data = await productCombinationServices.list();
-      setProductsCombinations(data);
+      productCombinationState.setProductsCombinations(data);
     };
-    if (!productCombinationsHasLoaded) {
+    if (!productCombinationState.hasLoaded) {
       getData();
     }
-  }, [productCombinationsHasLoaded, setProductsCombinations]);
+  }, [productCombinationState]);
 
   React.useEffect(() => {
     const getData = async () => {
       const data: Customer[] = await customerServices.list();
-      setCustomers(data);
+      customerState.setCustomers(data);
     };
-    if (!hasLoadedCustomers) {
+    if (!customerState.hasLoaded) {
       getData();
     }
-  }, [customers.length, hasLoadedCustomers, setCustomers]);
+  }, [customerState]);
 
   async function onSubmit(values: SalesOrderForm) {
     try {
@@ -295,7 +287,9 @@ export default function SalesOrderModal({
                             form.formState.errors?.salesOrderItems?.[row.index]
                               ?.combinationId,
                           )}
-                          items={productCombinations as ProductCombinations[]}
+                          items={
+                            productCombinationState.productCombinations as ProductCombinations[]
+                          }
                           form={form}
                           {...field}
                           name="salesOrderItems"
@@ -344,7 +338,7 @@ export default function SalesOrderModal({
               index={row.index}
               control={form.control}
               name="salesOrderItems"
-              productCombinations={productCombinations}
+              productCombinations={productCombinationState.productCombinations}
             />
           );
         },
@@ -430,7 +424,7 @@ export default function SalesOrderModal({
         ),
       },
     ],
-    [fields.length, form, productCombinations, remove],
+    [fields.length, form, productCombinationState.productCombinations, remove],
   );
 
   const isDelivery = useWatch({ control: form.control, name: "isDelivery" });
@@ -451,10 +445,11 @@ export default function SalesOrderModal({
                 <FormLabel>Customer</FormLabel>
                 <Autocomplete
                   value={
-                    customers.find((customer) => customer.id === field.value)
-                      ?.name
+                    customerState.customers.find(
+                      (customer) => customer.id === field.value,
+                    )?.name
                   }
-                  options={customers}
+                  options={customerState.customers}
                   placeholder="Customer"
                   onChange={(value) => {
                     form.setValue("customerId", Number(value.id), {
@@ -754,7 +749,7 @@ export default function SalesOrderModal({
             return (
               formData.salesOrderItems
                 ?.map((i) => {
-                  return productCombinations.find(
+                  return productCombinationState.productCombinations.find(
                     (p) => p.id === i.combinationId,
                   )?.unit;
                 })

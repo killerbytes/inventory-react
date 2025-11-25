@@ -101,7 +101,6 @@ export default function AddModal({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="description"
@@ -115,7 +114,6 @@ export default function AddModal({
               </FormItem>
             )}
           />
-
           <DialogFooter>
             <Button type="submit">Save changes</Button>
           </DialogFooter>
