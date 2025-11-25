@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { filterProps, PaginatedResponse, Supplier } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supplierServices } from "@/services";
@@ -36,8 +37,8 @@ export default function Suppliers() {
   const [selected, setSelected] = React.useState<Supplier | null>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
-    limit: 10,
-    page: 1,
+    limit: PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
     sort: "name",
     order: "ASC",
     q: "",
@@ -180,7 +181,9 @@ export default function Suppliers() {
                   ))}
                 </TableBody>
               </Table>
-              <Pager data={data} filter={filter} setFilter={setFilter} />
+              {data.totalPages > 1 && (
+                <Pager data={data} filter={filter} setFilter={setFilter} />
+              )}
             </>
           )}
         </CardContent>

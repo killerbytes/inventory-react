@@ -17,8 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
 import { inventoryServices } from "@/services";
 import { Label } from "@/components/ui/label";
-import { useSalesOrderStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
+import { useStore } from "@/stores";
 import React from "react";
 
 const renderFooter = (data: SalesOrder) => {
@@ -40,7 +40,9 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
   const [returns, setReturns] = React.useState<ReturnItem[]>();
   const [returnItems, setReturnItems] = React.useState<ReturnItem[]>([]);
   const [hasReturnItems, setHasReturnItems] = React.useState<boolean>(false);
-  const { returnEnabled, setReturnEnabled } = useSalesOrderStore();
+  const {
+    salesOrderState: { returnEnabled, setReturnEnabled },
+  } = useStore();
   const [returnTransactions, setReturnTransactions] =
     React.useState<ReturnTransaction[]>();
 

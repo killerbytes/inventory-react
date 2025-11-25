@@ -21,12 +21,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { stockAdjustmentSchema } from "@/schemas";
 import ConfirmDialog from "../ConfirmDialog";
 import { DialogFooter } from "../ui/dialog";
-import { Loader2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Textarea } from "../ui/textarea";
 import NumberInput from "../NumberInput";
 import ColorBadge from "../ColorBadge";
 import { Button } from "../ui/button";
+import { useStore } from "@/stores";
 import Select from "../Select";
 import { toast } from "sonner";
 import Modal from "../Modal";
@@ -45,6 +45,7 @@ export default function StockAdjustmentModal({
 }) {
   const [loading, setLoading] = React.useState(false);
   const [data, setData] = React.useState<ProductCombinations>();
+  const { productCombinationState } = useStore();
   const form = useForm<StockAdjustment>({
     resolver: zodResolver(stockAdjustmentSchema),
     defaultValues: {
@@ -74,6 +75,7 @@ export default function StockAdjustmentModal({
       await productCombinationServices.stockAdjustment(values);
       toast.success("Stock Adjustment successful");
       onClose();
+      productCombinationState.invalidate();
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {

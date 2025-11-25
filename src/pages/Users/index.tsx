@@ -157,8 +157,9 @@ export default function Users() {
           ) : (
             <>
               <DataTable data={data?.data || []} columns={columns} />
-
-              <Pager data={data} filter={filter} setFilter={setFilter} />
+              {data.totalPages > 1 && (
+                <Pager data={data} filter={filter} setFilter={setFilter} />
+              )}
             </>
           )}
         </CardContent>

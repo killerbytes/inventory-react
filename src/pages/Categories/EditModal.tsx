@@ -14,11 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
-import { useCategoryStore } from "@/stores";
 import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 
 export default function EditModal({
@@ -32,7 +32,9 @@ export default function EditModal({
   cb: () => void;
   data: Category;
 }) {
-  const { invalidate } = useCategoryStore();
+  const {
+    categoryState: { invalidate },
+  } = useStore();
   const form = useForm<Category>({
     resolver: zodResolver(categorySchema),
     defaultValues: { ...data },

@@ -2,11 +2,9 @@ import {
   AlertCircleIcon,
   Equal,
   Loader2Icon,
-  Merge,
   MoveRight,
   PackageOpen,
   PackagePlus,
-  Split,
 } from "lucide-react";
 import {
   ApiErrorResponse,
@@ -18,7 +16,6 @@ import { Form, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { productCombinationServices, productServices } from "@/services";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useController, useForm } from "react-hook-form";
-import { SelectItemText } from "@radix-ui/react-select";
 import { ERROR, UNIT_COLOR } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "../ui/dialog";
@@ -27,6 +24,7 @@ import { SelectItem } from "../ui/select";
 import NumberInput from "../NumberInput";
 import ColorBadge from "../ColorBadge";
 import { Button } from "../ui/button";
+import { useStore } from "@/stores";
 import Select from "../Select";
 import { toast } from "sonner";
 import Modal from "../Modal";
@@ -46,6 +44,7 @@ export default function BreakPackModal({
   const [options, setOptions] = React.useState<ProductCombinations[]>([]);
   const [selected, setSelected] = React.useState<ProductCombinations>();
   const [loading, setLoading] = React.useState(false);
+  const { productCombinationState } = useStore();
   const form = useForm<BreakPack>({
     resolver: zodResolver(breakPackSchema),
     defaultValues: {
@@ -119,6 +118,7 @@ export default function BreakPackModal({
     try {
       setLoading(true);
       await productCombinationServices.breakPack(values);
+      productCombinationState.invalidate();
       onSubmit();
       toast.success("Break Pack successful");
     } catch (error) {

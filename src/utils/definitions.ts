@@ -233,6 +233,7 @@ export const INVOICE_STATUS = {
 };
 
 export const goodReceiptItemDefault = {
+  combinationId: -1,
   discountNote: "",
   discount: 0,
   purchasePrice: 0,

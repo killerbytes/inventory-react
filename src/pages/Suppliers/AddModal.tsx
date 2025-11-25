@@ -16,6 +16,7 @@ import { ERROR } from "@/utils/definitions";
 import { supplierSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 
 export default function AddModal({
@@ -27,11 +28,12 @@ export default function AddModal({
   onClose: () => void;
   cb: () => void;
 }) {
+  const { supplierState } = useStore();
   const form = useForm<Supplier>({
     resolver: zodResolver(supplierSchema),
   });
 
-  async function onSubmit(values: Supplier) {
+  const onSubmit = async (values: Supplier) => {
     try {
       const { name, address, contact, phone, email } = values;
       await supplierServices.create({
@@ -41,6 +43,7 @@ export default function AddModal({
         phone,
         email,
       });
+      supplierState.invalidate();
       toast.success(`Submitted: ${values.name}`);
       form.reset();
       onClose();
@@ -62,7 +65,7 @@ export default function AddModal({
     } finally {
       cb();
     }
-  }
+  };
 
   return (
     <Modal

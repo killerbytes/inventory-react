@@ -34,5 +34,5 @@ export default function AmountColumn<T extends FieldValues>({
     setValue(total);
   }, [discount.field.value, purchasePrice.field.value, quantity.field.value]);
 
-  return formatCurrency(value);
+  return formatCurrency(value || 0);
 }

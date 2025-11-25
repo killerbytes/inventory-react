@@ -181,7 +181,9 @@ export default function Customers() {
                   ))}
                 </TableBody>
               </Table>
-              <Pager data={data} filter={filter} setFilter={setFilter} />
+              {data.totalPages > 1 && (
+                <Pager data={data} filter={filter} setFilter={setFilter} />
+              )}
             </>
           )}
         </CardContent>

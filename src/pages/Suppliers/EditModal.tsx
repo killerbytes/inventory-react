@@ -28,6 +28,7 @@ import { supplierSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 import React from "react";
 
@@ -43,15 +44,17 @@ export default function EditModal({
   data: Supplier;
 }) {
   const [confirm, setConfirm] = React.useState(false);
+  const { supplierState } = useStore();
   const form = useForm<Supplier>({
     resolver: zodResolver(supplierSchema),
     defaultValues: { ...data },
   });
 
-  async function onSubmit(values: Supplier) {
+  const onSubmit = async (values: Supplier) => {
     try {
       await supplierServices.update(Number(data.id), values);
       toast.success(`Submitted: ${values.name}`);
+      supplierState.invalidate();
       form.reset();
       onClose();
     } catch (error) {
@@ -70,13 +73,14 @@ export default function EditModal({
     } finally {
       cb();
     }
-  }
+  };
 
   const handleDelete = async () => {
     try {
       await supplierServices.delete(Number(data.id));
       toast.success(`Deleted: ${data.name}`);
       onClose();
+      supplierState.invalidate();
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {

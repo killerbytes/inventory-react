@@ -12,19 +12,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Ban,
+  BUTTON_COLOR,
+  ORDER_STATUS,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
+import {
   ClipboardList,
   EllipsisVertical,
   Save,
   Trash2,
   Undo,
 } from "lucide-react";
-import {
-  BUTTON_COLOR,
-  ORDER_STATUS,
-  ROUTES,
-  STATUS_COLOR,
-} from "@/utils/definitions";
 import { ApiErrorResponse, CancelOrder, GoodReceiptCreate } from "@/types";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
 import { CancelModal } from "@/components/modals/CancelModal";
@@ -37,13 +36,13 @@ import { goodReceiptFormSchema } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
-import { useGoodReceiptStore } from "@/stores";
 import { cx } from "class-variance-authority";
 import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
-import { useForm } from "react-hook-form";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
+import { useForm } from "react-hook-form";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 
 export default function Create() {
@@ -53,7 +52,9 @@ export default function Create() {
     cancelModal: false,
     dropdownMenu: false,
   });
-  const { returnEnabled, setReturnEnabled } = useGoodReceiptStore();
+  const {
+    goodReceiptState: { returnEnabled, setReturnEnabled },
+  } = useStore();
 
   const form = useForm<GoodReceiptCreate>({
     resolver: zodResolver(goodReceiptFormSchema),
@@ -169,7 +170,7 @@ export default function Create() {
                   Order History
                 </DropdownMenuItem>
 
-                {(data?.status === ORDER_STATUS.RECEIVED ||
+                {/* {(data?.status === ORDER_STATUS.RECEIVED ||
                   data?.status === ORDER_STATUS.COMPLETED) && (
                   <DropdownMenuItem
                     onSelect={(e) => {
@@ -180,7 +181,7 @@ export default function Create() {
                     <Ban color="red" />
                     Cancel Order
                   </DropdownMenuItem>
-                )}
+                )} */}
                 {data?.status === ORDER_STATUS.DRAFT && (
                   <>
                     <DropdownMenuItem
@@ -208,17 +209,20 @@ export default function Create() {
                     </ConfirmDialog>
                   </>
                 )}
-                <DropdownMenuItem
-                  onSelect={() => {
-                    setReturnEnabled(!returnEnabled);
-                    handleToggle({
-                      dropdownMenu: false,
-                    });
-                  }}
-                >
-                  <Undo />
-                  Returns
-                </DropdownMenuItem>
+                {data?.status === ORDER_STATUS.RECEIVED ||
+                data?.status === ORDER_STATUS.COMPLETED ? (
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setReturnEnabled(!returnEnabled);
+                      handleToggle({
+                        dropdownMenu: false,
+                      });
+                    }}
+                  >
+                    <Undo />
+                    Returns
+                  </DropdownMenuItem>
+                ) : null}
               </DropdownMenuContent>
             </DropdownMenu>
           </CardAction>

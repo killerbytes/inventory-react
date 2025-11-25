@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/accordion";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { categoryServices, productCombinationServices } from "@/services";
-import { useCategoryStore, useProductCombinationStore } from "@/stores";
 import GroupedCommandList from "@/components/GroupedCommandList";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { CategorizedProductList, Product } from "@/types";
@@ -31,6 +30,7 @@ import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import ProductItem from "./ProductItem";
 import React, { Fragment } from "react";
+import { useStore } from "@/stores";
 
 interface filterProps {
   q?: string;
@@ -40,15 +40,15 @@ interface filterProps {
 export default function Products() {
   const navigate = useNavigate();
   const {
-    hasLoaded: categoryHasLoaded,
-    categories,
-    setCategories,
-  } = useCategoryStore();
+    categoryState: { hasLoaded: categoryHasLoaded, categories, setCategories },
+  } = useStore();
   const {
-    productCombinationsHasLoaded,
-    productCombinations,
-    setProductsCombinations,
-  } = useProductCombinationStore();
+    productCombinationState: {
+      productCombinationsHasLoaded,
+      productCombinations,
+      setProductsCombinations,
+    },
+  } = useStore();
   const [query, setQuery] = React.useState("");
   const [data, setData] = React.useState<CategorizedProductList[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -141,17 +141,6 @@ export default function Products() {
             items={productCombinations}
             onSelect={(item) => {
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
-            }}
-            renderOptions={({ items, open, setOpen, onSelect, search }) => {
-              return (
-                <GroupedCommandList
-                  items={items}
-                  open={open}
-                  setOpen={setOpen}
-                  onSelect={onSelect}
-                  search={search}
-                />
-              );
             }}
           >
             <Button variant="outline" size="sm">

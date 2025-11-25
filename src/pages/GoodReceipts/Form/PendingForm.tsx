@@ -15,16 +15,15 @@ import {
 import { ProductCombinations, GoodReceiptCreate, Supplier } from "@/types";
 import { productCombinationServices, supplierServices } from "@/services";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
-import { useProductCombinationStore, useSupplierStore } from "@/stores";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
 import GroupedCommandList from "@/components/GroupedCommandList";
 import { goodReceiptItemDefault } from "@/utils/definitions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatters";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
+import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -33,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
 import { GoodReceiptItem } from "@/types";
+import { useStore } from "@/stores";
 import React from "react";
 
 export default function PendingForm({
@@ -40,12 +40,8 @@ export default function PendingForm({
 }: {
   form: UseFormReturn<GoodReceiptCreate>;
 }) {
-  const { suppliers, setSuppliers } = useSupplierStore();
-  const {
-    productCombinationsNoBreakPack,
-    setProductCombinationsNoBreakPack,
-    productCombinationsNoBreakPackHasLoaded,
-  } = useProductCombinationStore();
+  const { supplierState } = useStore();
+  const { productCombinationState } = useStore();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -65,27 +61,25 @@ export default function PendingForm({
   React.useEffect(() => {
     const getData = async () => {
       const data: Supplier[] = await supplierServices.list();
-      setSuppliers(data);
+      supplierState.setSuppliers(data);
     };
-    if (suppliers.length === 0) {
+    if (!supplierState.hasLoaded) {
       getData();
     }
-  }, [setSuppliers, suppliers.length]);
+  }, [supplierState]);
 
   React.useEffect(() => {
     const getData = async () => {
-      if (!productCombinationsNoBreakPackHasLoaded) {
+      if (!productCombinationState.noBreakPackHasLoaded) {
         const data = await productCombinationServices.list();
-        setProductCombinationsNoBreakPack(
+        productCombinationState.setNoBreakPack(
           data.filter((i: ProductCombinations) => i.isBreakPack === false),
         );
       }
     };
     getData();
-  }, [
-    productCombinationsNoBreakPackHasLoaded,
-    setProductCombinationsNoBreakPack,
-  ]);
+  }, [productCombinationState]);
+
   const columns = React.useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
       {
@@ -138,6 +132,7 @@ export default function PendingForm({
               index={row.index}
               control={form.control}
               name="goodReceiptLines"
+              productCombinations={productCombinationState.noBreakPack}
             />
           );
         },
@@ -159,7 +154,7 @@ export default function PendingForm({
                           ?.combinationId,
                       )}
                       items={
-                        productCombinationsNoBreakPack as ProductCombinations[]
+                        productCombinationState.noBreakPack as ProductCombinations[]
                       }
                       form={form}
                       {...field}
@@ -184,23 +179,6 @@ export default function PendingForm({
                             );
                           }
                         }, 0);
-                      }}
-                      renderOptions={({
-                        items,
-                        open,
-                        setOpen,
-                        onSelect,
-                        search,
-                      }) => {
-                        return (
-                          <GroupedCommandList
-                            items={items}
-                            open={open}
-                            setOpen={setOpen}
-                            onSelect={onSelect}
-                            search={search}
-                          />
-                        );
                       }}
                     />
                   </FormControl>
@@ -285,7 +263,7 @@ export default function PendingForm({
         ),
       },
     ],
-    [fields.length, form, productCombinationsNoBreakPack, remove],
+    [fields.length, form, productCombinationState.noBreakPack, remove],
   );
 
   return (
@@ -299,10 +277,11 @@ export default function PendingForm({
               <FormLabel>Supplier</FormLabel>
               <Autocomplete
                 value={
-                  suppliers.find((supplier) => supplier.id === field.value)
-                    ?.name
+                  supplierState.suppliers.find(
+                    (supplier) => supplier.id === field.value,
+                  )?.name
                 }
-                options={suppliers}
+                options={supplierState.suppliers}
                 placeholder="Supplier"
                 onChange={(value) => {
                   form.setValue("supplierId", Number(value.id), {

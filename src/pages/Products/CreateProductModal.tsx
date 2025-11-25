@@ -5,12 +5,12 @@ import { ROUTES, UNIT } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/utils";
 import { Form } from "@/components/ui/form";
-import { useCategoryStore } from "@/stores";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import Modal from "@/components/Modal";
+import { useStore } from "@/stores";
 import React from "react";
 
 export default function CreateProductModal({
@@ -22,7 +22,9 @@ export default function CreateProductModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { categories, setCategories } = useCategoryStore();
+  const {
+    categoryState: { categories, setCategories },
+  } = useStore();
   const form = useForm<Product>({
     resolver: zodResolver(productSchema),
 

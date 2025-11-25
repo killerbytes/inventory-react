@@ -31,7 +31,6 @@ import UnitColumn from "../forms/OrderItemForm/UnitColumn";
 import { CommandGroup, CommandItem } from "../ui/command";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useProductCombinationStore } from "@/stores";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCell, TableRow } from "../ui/table";
 import { UNIT_COLOR } from "@/utils/definitions";
@@ -45,6 +44,7 @@ import { DataTable } from "../DataTable";
 import { returnSchema } from "@/schemas";
 import ColorBadge from "../ColorBadge";
 import { Button } from "../ui/button";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 import Modal from "../Modal";
 import React from "react";
@@ -106,7 +106,9 @@ export default function ReturnExchangeModal({
       toast.error("Submission failed - " + apiError.message);
     }
   };
-  const { productCombinations } = useProductCombinationStore();
+  const {
+    productCombinationState: { productCombinations },
+  } = useStore();
 
   const returnColumns = React.useMemo<ColumnDef<ReturnItem>[]>(
     () => [
