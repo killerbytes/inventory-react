@@ -82,7 +82,7 @@ export const categoryBaseSchema = z.object({
   }),
   parentId: z.number().nullish(),
   description: z.string(),
-  order: z.number(),
+  order: z.number().nullish(),
 });
 
 export const categorySchema = categoryBaseSchema.extend({
@@ -168,7 +168,7 @@ export const supplierSchema = z.object({
   address: z.string().min(2, {
     message: "Address must be at least 2 characters.",
   }),
-  contact: z.string().optional(),
+  contact: z.string().nullish(),
   phone: z.string().min(2, {
     message: "Phone must be at least 2 characters.",
   }),
@@ -177,7 +177,7 @@ export const supplierSchema = z.object({
     .email({
       message: "Please enter a valid email address.",
     })
-    .optional(),
+    .nullish(),
 });
 
 export const customerSchema = supplierSchema;

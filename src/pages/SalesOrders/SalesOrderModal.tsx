@@ -40,11 +40,10 @@ import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
-import { formatCurrency } from "@/utils/formatters";
-import { useProductCombinationStore } from "@/stores";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
+import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -55,9 +54,9 @@ import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import { ERROR } from "@/utils/definitions";
-import { useCustomerStore } from "@/stores";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 import React from "react";
 
@@ -85,15 +84,13 @@ export default function SalesOrderModal({
 }) {
   const [loading, setLoading] = React.useState(false);
   const {
-    hasLoaded: hasLoadedCustomers,
-    customers,
-    setCustomers,
-  } = useCustomerStore();
-  const {
-    productCombinationsHasLoaded,
-    productCombinations,
-    setProductsCombinations,
-  } = useProductCombinationStore();
+    productCombinationState: {
+      productCombinationsHasLoaded,
+      productCombinations,
+      setProductsCombinations,
+    },
+    customerState: { hasLoaded: hasLoadedCustomers, customers, setCustomers },
+  } = useStore();
 
   const defaultValues = localStorage.getItem(
     `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
@@ -323,23 +320,7 @@ export default function SalesOrderModal({
                               }
                             }, 0);
                           }}
-                          renderOptions={({
-                            items,
-                            open,
-                            setOpen,
-                            onSelect,
-                            search,
-                          }) => {
-                            return (
-                              <GroupedCommandList
-                                items={items}
-                                open={open}
-                                setOpen={setOpen}
-                                onSelect={onSelect}
-                                search={search}
-                              />
-                            );
-                          }}
+                          disableNoQuantity={true}
                         />
                       </FormControl>
                     </FormItem>
@@ -363,6 +344,7 @@ export default function SalesOrderModal({
               index={row.index}
               control={form.control}
               name="salesOrderItems"
+              productCombinations={productCombinations}
             />
           );
         },

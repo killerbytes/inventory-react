@@ -19,7 +19,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2Icon, Plus, Trash2 } from "lucide-react";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useProductCombinationStore } from "@/stores";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SelectItem } from "@/components/ui/select";
 import NumberInput from "@/components/NumberInput";
@@ -33,6 +32,7 @@ import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
 import Modal from "@/components/Modal";
 import React, { useMemo } from "react";
+import { useStore } from "@/stores";
 import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -59,11 +59,14 @@ export default function CombinationModal({
 }: {
   product: Product;
   onSubmit: (e: Product) => Promise<void>;
-  onClose: () => void;
+  onClose: (shouldReload: boolean) => void;
   isOpen: boolean;
 }) {
   const [loading, setLoading] = React.useState(false);
-  const { invalidate } = useProductCombinationStore();
+  const [shouldReload, setShouldReload] = React.useState(false);
+  const {
+    productCombinationState: { invalidate },
+  } = useStore();
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const form = useForm<{
     combinations: z.infer<typeof formSchema>[];
@@ -143,6 +146,7 @@ export default function CombinationModal({
         values,
       );
       invalidate();
+      setShouldReload(true);
       toast.success("Variants saved successfully");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
@@ -457,7 +461,7 @@ export default function CombinationModal({
   return (
     <Modal
       isOpen={isOpen}
-      onOpenChange={onClose}
+      onOpenChange={() => onClose(shouldReload)}
       title={`Product: ${product.name}`}
       description="Manage product variants"
       className="!max-w-[90%]"

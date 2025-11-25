@@ -2,65 +2,26 @@ import {
   Command,
   CommandDialog,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
-  CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import GroupedCommandList from "./GroupedCommandList";
+import { ProductCombinations } from "@/types";
 import { Button } from "./ui/button";
 import * as React from "react";
 
-type BaseProps = {
-  id: string | number;
-  name: string;
-};
-
-const RenderOptionsDefault = React.memo(function RenderOptionsDefault<
-  T extends BaseProps,
->({
-  items,
-  open,
-  setOpen,
-  onSelect,
-}: {
-  items: T[];
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  onSelect?: (item: T) => void;
-  search: string;
-}) {
-  return (
-    <CommandGroup>
-      {open &&
-        items.map((item) => (
-          <CommandItem
-            value={String(item.name)}
-            key={item.id}
-            onSelect={() => {
-              setOpen(false);
-              onSelect?.(item);
-            }}
-            className="flex items-center gap-2 justify-between"
-          >
-            {item.name}
-          </CommandItem>
-        ))}
-    </CommandGroup>
-  );
-});
-
-function ProductComboSearchCommandComponent<T extends BaseProps>({
+function ProductComboSearchCommandComponent<T extends ProductCombinations>({
   items,
   onSelect,
   children,
   className,
-  renderOptions = ({ items, open, setOpen, onSelect }) => (
-    <RenderOptionsDefault
+  renderOptions = ({ items, open, setOpen, onSelect, search }) => (
+    <GroupedCommandList
       items={items}
       open={open}
       setOpen={setOpen}
       onSelect={onSelect}
-      search
+      search={search}
     />
   ),
 }: {

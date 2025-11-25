@@ -27,9 +27,7 @@ import {
 import { ERROR, ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
 import { Ban, Car, EllipsisVertical, Undo } from "lucide-react";
-import { useProductStore, useSalesOrderStore } from "@/stores";
 import { CancelModal } from "@/components/modals/CancelModal";
-import { useCustomerStore } from "@/stores/customer.store";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
@@ -40,6 +38,7 @@ import StaticDataTable from "./StaticDataTable";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 import Static from "./Static";
 
@@ -51,9 +50,11 @@ export default function SalesOrderDetails() {
   });
   const navigate = useNavigate();
   const { id } = useParams();
-  const productStore = useProductStore();
-  const { returnEnabled, setReturnEnabled } = useSalesOrderStore();
-  const { customers, setCustomers } = useCustomerStore();
+  const {
+    customerState: { customers, setCustomers },
+    salesOrderState: { returnEnabled, setReturnEnabled },
+    productState,
+  } = useStore();
 
   const form = useForm<SalesOrderForm>({
     resolver: zodResolver(salesOrderFormSchema),
@@ -62,14 +63,13 @@ export default function SalesOrderDetails() {
   React.useEffect(() => {
     const getData = async () => {
       const data: CategorizedProductList[] = await productServices.list();
-      productStore.setProducts(data);
+      productState.setProducts(data);
     };
-    console.log(productStore.hasLoaded);
 
-    if (!productStore.hasLoaded) {
+    if (!productState.hasLoaded) {
       getData();
     }
-  }, [productStore, productStore.setProducts, returnEnabled]);
+  }, [productState, productState.setProducts, returnEnabled]);
 
   const getData = useCallback(async () => {
     try {

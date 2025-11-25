@@ -35,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import ChangePasswordModal from "./modals/ChangePassword";
-import { useGlobalStore, useUserStore } from "@/stores";
 import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
@@ -43,6 +42,7 @@ import { productServices } from "@/services";
 import { ApiErrorResponse } from "@/types";
 import useToggle from "@/hooks/useToggle";
 import { Button } from "./ui/button";
+import { useStore } from "@/stores";
 import Http from "@/services/http";
 import { toast } from "sonner";
 import Header from "./Header";
@@ -138,8 +138,7 @@ export default function AppSidebar() {
     env: string;
     buildTime: string;
   }>();
-  const { logout } = useUserStore();
-  const { setVariantTemplateModal } = useGlobalStore();
+  const { authState } = useStore();
   const { setOpen, setOpenMobile } = useSidebar();
   const location = useLocation();
   const pathRef = React.useRef(location.pathname);
@@ -150,10 +149,9 @@ export default function AppSidebar() {
   React.useEffect(() => {
     if (location.pathname !== pathRef.current) {
       setOpenMobile(false);
-      setVariantTemplateModal(false);
     }
     pathRef.current = location.pathname;
-  }, [location.pathname, setOpen, setOpenMobile, setVariantTemplateModal]);
+  }, [location.pathname, setOpen, setOpenMobile]);
 
   React.useEffect(() => {
     const getData = async () => {
@@ -273,7 +271,7 @@ export default function AppSidebar() {
                 >
                   Change Password
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={logout}>
+                <DropdownMenuItem onClick={authState.logout}>
                   <span>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

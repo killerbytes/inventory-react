@@ -1,22 +1,13 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useGlobalStore } from "@/stores/global.store";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { useUserStore } from "@/stores/user.store";
-import { ApiErrorResponse, User } from "@/types";
-import { ROUTES } from "@/utils/definitions";
 import { authServices } from "@/services";
-import { Link } from "react-router-dom";
+import { useStore } from "@/stores";
+import { User } from "@/types";
 import React from "react";
 
 export default function UserIcon() {
-  const { setVariantTemplateModal } = useGlobalStore();
-  const { user, setUser } = useUserStore();
+  const {
+    authState: { user, setUser, logout },
+  } = useStore();
 
   const getInitials = (name: string) => {
     const names = name.split(" ");
@@ -30,24 +21,18 @@ export default function UserIcon() {
   React.useEffect(() => {
     const getData = async () => {
       try {
-        const user: User = await authServices.me();
-        setUser(user);
+        const res: User = await authServices.me();
+        setUser(res);
       } catch (error) {
-        // const apiError = error as ApiErrorResponse;
         console.log(error);
       }
     };
     if (localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`)) {
       getData();
     } else {
-      handleLogout();
+      logout();
     }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
-    window.location.href = "/login";
-  };
+  }, [logout, setUser]);
 
   return (
     <>

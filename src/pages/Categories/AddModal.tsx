@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
-import { useCategoryStore } from "@/stores";
 import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 
 export default function AddModal({
@@ -30,7 +30,9 @@ export default function AddModal({
   cb: () => void;
   selected?: Category;
 }) {
-  const { invalidate } = useCategoryStore();
+  const {
+    categoryState: { invalidate },
+  } = useStore();
   const form = useForm<Category>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -75,6 +77,8 @@ export default function AddModal({
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            console.log(form.getValues(), form.formState.errors);
+
             form
               .handleSubmit(onSubmit)(e)
               .catch((error) => {

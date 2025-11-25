@@ -1,45 +1,27 @@
 import ProductComboSearchCommand from "../ProductComboSearchCommand";
 import useExcludeExistToList from "@/hooks/useExcludeExists";
+import GroupedCommandList from "../GroupedCommandList";
 import { UseFormReturn } from "react-hook-form";
 import { ChevronsUpDown } from "lucide-react";
+import { ProductCombinations } from "@/types";
 import { Button } from "../ui/button";
 
-export default function ProductLookupInput<
-  T extends {
-    id: number;
-    name: string;
-    price: number;
-    unit: string;
-    inventory: { quantity: number };
-  },
->({
+export default function ProductLookupInput<T extends ProductCombinations>({
   items,
   form,
   onChange,
   value,
   name,
-  renderOptions,
   ariaInvalid,
+  disableNoQuantity,
 }: {
   items: T[];
   form: UseFormReturn;
   onChange: (value: T) => void;
   value: number;
   name: string;
-  renderOptions?: ({
-    items,
-    open,
-    setOpen,
-    onSelect,
-    search,
-  }: {
-    items: T[];
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    onSelect: (item: T) => void;
-    search: string;
-  }) => React.ReactNode;
   ariaInvalid?: boolean;
+  disableNoQuantity?: boolean;
 }) {
   const options = useExcludeExistToList(items, form?.control, name);
 
@@ -49,8 +31,16 @@ export default function ProductLookupInput<
       onSelect={(item) => {
         onChange(item);
       }}
-      name={name}
-      renderOptions={renderOptions}
+      renderOptions={({ items, open, setOpen, onSelect, search }) => (
+        <GroupedCommandList
+          items={items}
+          open={open}
+          setOpen={setOpen}
+          onSelect={onSelect}
+          search={search}
+          disableNoQuantity={disableNoQuantity}
+        />
+      )}
     >
       <Button
         variant="outline"

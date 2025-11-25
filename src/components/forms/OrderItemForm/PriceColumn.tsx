@@ -1,5 +1,5 @@
 import { Control, FieldValues, Path, useController } from "react-hook-form";
-import { useProductCombinationStore } from "@/stores";
+import { useStore } from "@/stores";
 import React from "react";
 
 export default function PriceColumn<T extends FieldValues>({
@@ -11,7 +11,9 @@ export default function PriceColumn<T extends FieldValues>({
   control: Control<T>;
   name: Path<T>;
 }) {
-  const { productCombinations } = useProductCombinationStore();
+  const {
+    productCombinationState: { productCombinations },
+  } = useStore();
   const [purchasePrice, setPurchasePrice] = React.useState<number>();
   const { field } = useController({
     name: `${name}.${index}.combinationId` as Path<T>,

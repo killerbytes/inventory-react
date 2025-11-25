@@ -16,7 +16,6 @@ import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
 import { GoodReceiptItem, ReturnItem, ReturnTransaction } from "@/types";
-import { useGoodReceiptStore } from "@/stores/goodReceipt.store";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -33,6 +32,7 @@ import { cx } from "class-variance-authority";
 import { Label } from "@/components/ui/label";
 import useToggle from "@/hooks/useToggle";
 import React, { useMemo } from "react";
+import { useStore } from "@/stores";
 export default function PartialForm({ form }: { form: UseFormReturn }) {
   const { id } = useParams();
   const { control } = form;
@@ -46,7 +46,9 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
   const [returnItems, setReturnItems] = React.useState<ReturnItem[]>([]);
   const [returnTransactions, setReturnTransactions] =
     React.useState<ReturnTransaction[]>();
-  const { returnEnabled, setReturnEnabled } = useGoodReceiptStore();
+  const {
+    goodReceiptState: { returnEnabled, setReturnEnabled },
+  } = useStore();
   const data = form.getValues();
 
   const getReturns = React.useCallback(async () => {

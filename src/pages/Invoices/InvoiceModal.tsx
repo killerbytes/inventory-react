@@ -34,12 +34,12 @@ import { supplierServices } from "@/services";
 import { invoiceFormSchema } from "@/schemas";
 import { invoiceServices } from "@/services";
 import { Form } from "@/components/ui/form";
-import { useSupplierStore } from "@/stores";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Plus } from "lucide-react";
 import { addWeeks } from "date-fns";
+import { useStore } from "@/stores";
 import { Supplier } from "@/types";
 import { toast } from "sonner";
 import React from "react";
@@ -54,7 +54,9 @@ export default function InvoiceModal({
   isOpen: boolean;
   onClose: (boolean: boolean) => void;
 }) {
-  const { suppliers, setSuppliers } = useSupplierStore();
+  const {
+    supplierState: { suppliers, setSuppliers },
+  } = useStore();
   const { toggle, handleToggle } = useToggle({
     goodReceiptPickerModal: false,
   });

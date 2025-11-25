@@ -34,9 +34,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
-import { useCategoryStore, useProductCombinationStore } from "@/stores";
 import PriceHistoryTable from "@/pages/Products/PriceHistoryTable";
-import GroupedCommandList from "@/components/GroupedCommandList";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { ColumnDef, Row } from "@tanstack/react-table";
@@ -59,18 +57,17 @@ import { productSchema } from "@/schemas";
 import Loader from "@/components/Loader";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
+import { useStore } from "@/stores";
 import { toast } from "sonner";
 
 export default function ProductEdit() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = React.useState("product_combination");
   const {
-    hasLoaded: categoryHasLoaded,
-    categories,
-    setCategories,
-  } = useCategoryStore();
+    categoryState: { hasLoaded: categoryHasLoaded, categories, setCategories },
+  } = useStore();
   const [loading, setLoading] = React.useState(false);
-  const productCombinationStore = useProductCombinationStore();
+  const { productCombinationState } = useStore();
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
     [],
   );
@@ -98,7 +95,7 @@ export default function ProductEdit() {
       setLoading(true);
       await productServices.update(Number(id), values);
       getData();
-      productCombinationStore.invalidate();
+      productCombinationState.invalidate();
       toast.success("Product updated successfully");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
@@ -154,13 +151,13 @@ export default function ProductEdit() {
 
   React.useEffect(() => {
     const getData = async () => {
-      if (!productCombinationStore.productCombinationsHasLoaded) {
+      if (!productCombinationState.hasLoaded) {
         const data = await productCombinationServices.list();
-        productCombinationStore.setProductsCombinations(data);
+        productCombinationState.setProductsCombinations(data);
       }
     };
     getData();
-  }, [productCombinationStore]);
+  }, [productCombinationState]);
 
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
@@ -309,21 +306,10 @@ export default function ProductEdit() {
         </PageHeaderContent>
         <PageHeaderActions>
           <ProductComboSearchCommand
-            items={productCombinationStore.productCombinations}
+            items={productCombinationState.productCombinations}
             onSelect={(item) =>
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`)
             }
-            renderOptions={({ items, open, setOpen, onSelect, search }) => {
-              return (
-                <GroupedCommandList
-                  items={items}
-                  open={open}
-                  setOpen={setOpen}
-                  onSelect={onSelect}
-                  search={search}
-                />
-              );
-            }}
           >
             <Button variant="outline" size="sm">
               <Search />
@@ -499,9 +485,11 @@ export default function ProductEdit() {
           product={form.getValues()}
           isOpen={true}
           onSubmit={onSubmit}
-          onClose={() => {
-            getData();
-            productCombinationStore.invalidate();
+          onClose={(shouldReload) => {
+            if (shouldReload) {
+              getData();
+              productCombinationState.invalidate();
+            }
             handleToggle({ combinationModal: false });
             setActiveTab("product_combination");
           }}
@@ -517,7 +505,7 @@ export default function ProductEdit() {
           combination={selected as ProductCombinations}
           onSubmit={async () => {
             getData();
-            productCombinationStore.invalidate();
+            productCombinationState.invalidate();
             handleToggle({ breakPackModal: false });
           }}
         />
