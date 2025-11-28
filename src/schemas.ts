@@ -296,8 +296,8 @@ export const salesOrderItemSchema = z.object({
     message: "Quantity must be at least 1.",
   }),
   originalPrice: z.coerce.number().nullish(),
-  purchasePrice: z.coerce.number().min(1, {
-    message: "Unit Price must be at least 1.",
+  purchasePrice: z.coerce.number().min(0.01, {
+    message: "Price must be at least 0.01.",
   }),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),

@@ -170,6 +170,7 @@ export const UNIT_COLOR = {
   FTS: "bg-lime-100 text-black border-lime-500",
   KGS: "bg-cyan-200 text-black border-cyan-500",
   LTS: "bg-teal-100 text-black border-teal-500",
+  BTL: "bg--lime text-black border-lime-500",
   BOX: "bg-indigo-600 ",
   BAG: "bg-yellow-900",
   GAL: "bg-green-900",
