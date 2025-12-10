@@ -1,8 +1,10 @@
-import { CancelOrder, GoodReceipt } from "@/types";
+import { CancelOrder, GoodReceipt, GoodReceiptUpdate } from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 
-export default class GoodReceiptService extends BaseService<GoodReceipt> {
+export default class GoodReceiptService extends BaseService<
+  GoodReceipt | GoodReceiptUpdate
+> {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/good-receipt" });
   }

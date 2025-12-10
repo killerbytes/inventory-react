@@ -29,7 +29,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import { getReturnAmount } from "@/lib/utils";
 import { supplierServices } from "@/services";
 import { invoiceFormSchema } from "@/schemas";
 import { invoiceServices } from "@/services";
@@ -118,19 +120,23 @@ export default function InvoiceModal({
       const { gr, ...rest } = values;
       const invoiceLines = gr.map((item) => ({
         goodReceiptId: Number(item.id),
-        amount: Number(item.totalAmount),
+        amount: Number(item.totalAmount) - getReturnAmount(item),
       }));
 
-      await invoiceServices.create({
+      const payload = {
         ...rest,
         status: INVOICE_STATUS.POSTED,
         invoiceLines,
         applications: [],
-      });
+      };
+
+      await invoiceServices.create(payload);
 
       toast.success(`Good Receipt created successfully`);
       onClose(true);
     } catch (error) {
+      console.log(error);
+
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err) => {
@@ -176,7 +182,16 @@ export default function InvoiceModal({
           headerClassName: "text-right",
           className: "text-right",
         },
-        cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
+        cell: ({ row }) => {
+          const { totalAmount } = row.original;
+          const returnAmount = getReturnAmount(row.original);
+
+          return (
+            <div className={cx({ "text-red-500": Number(returnAmount) > 0 })}>
+              {formatCurrency(Number(totalAmount) - Number(returnAmount))}
+            </div>
+          );
+        },
       },
     ],
     [],
@@ -303,7 +318,9 @@ export default function InvoiceModal({
                               {formatCurrency(
                                 rows?.reduce(
                                   (acc: number, item: GoodReceipt) =>
-                                    acc + parseFloat(item.totalAmount ?? "0"),
+                                    acc +
+                                    Number(item.totalAmount) -
+                                    getReturnAmount(item),
                                   0,
                                 ),
                               )}
@@ -322,7 +339,7 @@ export default function InvoiceModal({
 
           {toggle.goodReceiptPickerModal && (
             <GoodReceiptPickerModal
-              isOpen={true}
+              isOpen
               onClose={() => handleToggle({ goodReceiptPickerModal: false })}
               supplierId={Number(supplier.field.value)}
               onSubmit={(selected) => {

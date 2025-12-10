@@ -7,17 +7,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  GoodReceiptCreate,
+  GoodReceiptUpdate,
+  ProductCombinations,
+  Supplier,
+} from "@/types";
+import {
   Controller,
   useFieldArray,
   UseFormReturn,
   useWatch,
 } from "react-hook-form";
-import { ProductCombinations, GoodReceiptCreate, Supplier } from "@/types";
 import { productCombinationServices, supplierServices } from "@/services";
 import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
-import GroupedCommandList from "@/components/GroupedCommandList";
 import { goodReceiptItemDefault } from "@/utils/definitions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
@@ -38,7 +42,7 @@ import React from "react";
 export default function PendingForm({
   form,
 }: {
-  form: UseFormReturn<GoodReceiptCreate>;
+  form: UseFormReturn<GoodReceiptCreate | GoodReceiptUpdate>;
 }) {
   const { supplierState } = useStore();
   const { productCombinationState } = useStore();
@@ -53,10 +57,6 @@ export default function PendingForm({
     control: form?.control,
     name: "goodReceiptLines",
   });
-
-  React.useEffect(() => {
-    form.setFocus("supplierId");
-  }, [form]);
 
   React.useEffect(() => {
     const getData = async () => {
@@ -286,6 +286,7 @@ export default function PendingForm({
                 onChange={(value) => {
                   form.setValue("supplierId", Number(value.id), {
                     shouldValidate: true,
+                    shouldDirty: true,
                   });
                 }}
               />

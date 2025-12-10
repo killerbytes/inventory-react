@@ -9,6 +9,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
+import { cx } from "class-variance-authority";
+import { getReturnAmount } from "@/lib/utils";
 import Modal from "@/components/Modal";
 import { GoodReceipt } from "@/types";
 import React from "react";
@@ -27,7 +29,9 @@ export default function GoodReceiptPickerModal({
   defaultSelected: GoodReceipt[];
 }) {
   const [selected, setSelected] = React.useState([]);
-  const [goodReceipts, setGoodReceipts] = React.useState<GoodReceipt[]>([]);
+  const [goodReceipts, setGoodReceipts] =
+    React.useState<GoodReceipt[]>(defaultSelected);
+
   React.useEffect(() => {
     const getData = async (id: number) => {
       const data: GoodReceipt[] = await goodReceiptServices.getBySupplier(id, {
@@ -101,7 +105,16 @@ export default function GoodReceiptPickerModal({
           headerClassName: "text-right",
           className: "text-right",
         },
-        cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
+        cell: ({ row }) => {
+          const { totalAmount } = row.original;
+          const returnAmount = getReturnAmount(row.original);
+
+          return (
+            <div className={cx({ "text-red-500": Number(returnAmount) > 0 })}>
+              {formatCurrency(Number(totalAmount) - returnAmount)}
+            </div>
+          );
+        },
       },
     ],
     [],
@@ -129,7 +142,7 @@ export default function GoodReceiptPickerModal({
                   {formatCurrency(
                     selected.reduce(
                       (acc: number, item: GoodReceipt) =>
-                        acc + parseFloat(item.totalAmount ?? "0"),
+                        acc + Number(item.totalAmount) - getReturnAmount(item),
                       0,
                     ),
                   )}

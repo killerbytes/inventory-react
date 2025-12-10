@@ -17,8 +17,8 @@ import {
 } from "@/types";
 import { ERROR, goodReceiptItemDefault, ROUTES } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { goodReceiptCreateSchema } from "@/schemas";
 import PendingOrderForm from "./Form/PendingForm";
-import { goodReceiptFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
@@ -30,6 +30,8 @@ const goodReceiptDefault = {
   referenceNo: "",
   receiptDate: new Date().toISOString(),
   goodReceiptLines: Array.from({ length: 3 }, () => goodReceiptItemDefault),
+  supplierId: -1,
+  internalNotes: "",
 };
 
 export default function Create() {
@@ -47,7 +49,7 @@ export default function Create() {
     : goodReceiptDefault;
 
   const form = useForm<GoodReceiptCreate>({
-    resolver: zodResolver(goodReceiptFormSchema),
+    resolver: zodResolver(goodReceiptCreateSchema),
     defaultValues,
   });
 
@@ -104,8 +106,10 @@ export default function Create() {
   const debouncedFormData = useDebounce(formData, 1000);
 
   React.useEffect(() => {
-    saveDraft();
-  }, [debouncedFormData, saveDraft]);
+    if (form.formState.isDirty) {
+      saveDraft();
+    }
+  }, [form, debouncedFormData, saveDraft]);
 
   React.useEffect(() => {
     if (json) {

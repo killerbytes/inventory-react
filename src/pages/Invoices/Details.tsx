@@ -168,10 +168,11 @@ export default function Details() {
                 renderFooter={(rows: InvoiceLine[]) => {
                   return (
                     <TableRow>
-                      <TableCell className="font-semibold" colSpan={2}>
-                        Total:
-                      </TableCell>
-                      <TableCell className="font-semibold text-right">
+                      <TableCell className="font-semibold">Total:</TableCell>
+                      <TableCell
+                        className="font-semibold text-right"
+                        colSpan={10}
+                      >
                         {formatCurrency(
                           rows.reduce(
                             (acc, val) => acc + Number(val.amount),

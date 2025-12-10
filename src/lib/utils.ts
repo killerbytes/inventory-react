@@ -1,6 +1,7 @@
 import {
   ApiErrorResponse,
   CategorizedProductList,
+  GoodReceipt,
   Product,
   ProductCombinations,
   StatusHistory,
@@ -158,4 +159,19 @@ export const getTotalAmountTableFooter = (data) => {
     },
   );
   return total;
+};
+
+export const getGoodReceiptTotalAmount = (data: GoodReceipt[]) => {
+  return data.reduce(
+    (acc: number, item: GoodReceipt) =>
+      acc + Number(item.totalAmount) - getReturnAmount(item),
+    0,
+  );
+};
+
+export const getReturnAmount = (data: GoodReceipt) => {
+  return data.returnTransactions.reduce(
+    (acc: number, val: any) => acc + Number(val.totalReturnAmount),
+    0,
+  );
 };

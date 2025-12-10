@@ -11,6 +11,7 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
+import { getGoodReceiptTotalAmount, mappedStatusHistory } from "@/lib/utils";
 import { PaginatedResponse, GoodReceipt, filterProps } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -21,7 +22,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { mappedStatusHistory } from "@/lib/utils";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ import React from "react";
 
 export default function GoodReceipts() {
   const navigate = useNavigate();
-  const [data, setData] = React.useState<PaginatedResponse<GoodReceipt[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<GoodReceipt>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -53,8 +53,6 @@ export default function GoodReceipts() {
     sort: "id",
     order: "DESC",
     q: "",
-    // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
-    // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
   });
 
   const getData = React.useCallback(async () => {
@@ -67,7 +65,7 @@ export default function GoodReceipts() {
 
         status: filter.status === "ALL" ? undefined : filter.status,
       };
-      const data: PaginatedResponse<GoodReceipt[]> =
+      const data: PaginatedResponse<GoodReceipt> =
         await goodReceiptServices.getAll(payload);
       setData(data);
     } catch (error) {
@@ -211,7 +209,18 @@ export default function GoodReceipts() {
           headerClassName: "justify-end",
           className: "text-right",
         },
-        cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
+        cell: ({ row }) => {
+          const { totalAmount, returnTransactions } = row.original;
+          const returnAmount = returnTransactions?.reduce(
+            (acc, item) => acc + Number(item.totalReturnAmount),
+            0,
+          );
+          return (
+            <div className={cx({ "text-red-500": Number(returnAmount) > 0 })}>
+              {formatCurrency(Number(totalAmount) - Number(returnAmount))}
+            </div>
+          );
+        },
       },
     ],
     [filter.order, filter.sort, handleFilterChange],
@@ -259,7 +268,9 @@ export default function GoodReceipts() {
               }}
             />
             <DateRangePicker value={range} onChange={setRange} />
-            <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
+            <div className="text-xl">
+              {formatCurrency(getGoodReceiptTotalAmount(data?.data))}
+            </div>
           </div>
           {loading ? (
             <p>Loading...</p>
@@ -277,13 +288,7 @@ export default function GoodReceipts() {
                     <TableRow className="font-bold">
                       <TableCell>Total Amount</TableCell>
                       <TableCell colSpan={10} className="text-right">
-                        {formatCurrency(
-                          data.reduce(
-                            (acc: number, item: GoodReceipt) =>
-                              acc + Number(item.totalAmount ?? "0"),
-                            0,
-                          ),
-                        )}
+                        {formatCurrency(getGoodReceiptTotalAmount(data))}
                       </TableCell>
                     </TableRow>
                   );

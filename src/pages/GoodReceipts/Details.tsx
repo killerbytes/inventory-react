@@ -12,6 +12,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  ApiErrorResponse,
+  CancelOrder,
+  GoodReceipt,
+  GoodReceiptUpdate,
+} from "@/types";
+import {
   BUTTON_COLOR,
   ORDER_STATUS,
   ROUTES,
@@ -24,15 +30,14 @@ import {
   Trash2,
   Undo,
 } from "lucide-react";
-import { ApiErrorResponse, CancelOrder, GoodReceiptCreate } from "@/types";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { goodReceiptUpdateSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import PendingOrderForm from "./Form/PendingForm";
-import { goodReceiptFormSchema } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
@@ -48,6 +53,7 @@ import { toast } from "sonner";
 export default function Create() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [data, setData] = React.useState<GoodReceipt>();
   const { toggle, handleToggle } = useToggle({
     cancelModal: false,
     dropdownMenu: false,
@@ -56,15 +62,15 @@ export default function Create() {
     goodReceiptState: { returnEnabled, setReturnEnabled },
   } = useStore();
 
-  const form = useForm<GoodReceiptCreate>({
-    resolver: zodResolver(goodReceiptFormSchema),
+  const form = useForm<GoodReceiptUpdate>({
+    resolver: zodResolver(goodReceiptUpdateSchema),
   });
 
-  async function onSaveOrder(values: GoodReceiptCreate) {
+  async function onSaveOrder(values: GoodReceiptUpdate) {
     try {
       await goodReceiptServices.update(Number(id), {
         ...values,
-        status: data.status,
+        status: data?.status ?? ORDER_STATUS.DRAFT,
       });
       toast.success(`Purchase Order saved successfully`);
     } catch (error) {
@@ -74,7 +80,7 @@ export default function Create() {
     handleToggle({ dropdownMenu: false });
   }
 
-  async function onReceiveOrder(form: GoodReceiptCreate) {
+  async function onReceiveOrder(form: GoodReceiptUpdate) {
     try {
       await goodReceiptServices.update(Number(id), {
         ...form,
@@ -116,6 +122,7 @@ export default function Create() {
   const getData = useCallback(async () => {
     try {
       const data = await goodReceiptServices.get(Number(id));
+      setData(data);
       form.reset(data);
     } catch (error) {
       const { message } = getErrorMessage(error as ApiErrorResponse);
@@ -127,8 +134,6 @@ export default function Create() {
   React.useEffect(() => {
     getData();
   }, [getData, returnEnabled]);
-
-  const data = form.getValues();
 
   return (
     <div className="flex flex-col gap-4">
@@ -187,7 +192,7 @@ export default function Create() {
                     <DropdownMenuItem
                       onClick={(e) => {
                         // e.preventDefault();
-                        console.log(form.formState.errors);
+                        console.log(form.getValues(), form.formState.errors);
                         form
                           .handleSubmit(onSaveOrder)(e)
                           .catch((error) => {
