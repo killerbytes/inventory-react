@@ -1,4 +1,11 @@
 import {
+  GoodReceipt,
+  GoodReceiptItem,
+  GoodReceiptUpdate,
+  ReturnItem,
+  ReturnTransaction,
+} from "@/types";
+import {
   Form,
   FormControl,
   FormField,
@@ -13,13 +20,10 @@ import {
   UNIT_COLOR,
 } from "@/utils/definitions";
 import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
-import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
-import { GoodReceiptItem, ReturnItem, ReturnTransaction } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { getTotalAmountTableFooter } from "@/lib/utils";
 import SupplierPanel from "@/components/SupplierPanel";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,13 +31,16 @@ import { DataTable } from "@/components/DataTable";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
-import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
-import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import useToggle from "@/hooks/useToggle";
 import React, { useMemo } from "react";
 import { useStore } from "@/stores";
-export default function PartialForm({ form }: { form: UseFormReturn }) {
+export default function PartialForm({
+  form,
+}: {
+  form: UseFormReturn<GoodReceiptUpdate>;
+}) {
   const { id } = useParams();
   const { control } = form;
   const { fields } = useFieldArray({
@@ -41,39 +48,12 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
     name: "goodReceiptLines",
   });
   const [toggle, handleToggle] = useToggle({ supplierReturnsModal: false });
-  const [hasReturns, setHasReturns] = React.useState(false);
   const [returns, setReturns] = React.useState<ReturnItem[]>([]);
-  const [returnItems, setReturnItems] = React.useState<ReturnItem[]>([]);
-  const [returnTransactions, setReturnTransactions] =
-    React.useState<ReturnTransaction[]>();
+  React.useState<ReturnTransaction[]>();
   const {
     goodReceiptState: { returnEnabled, setReturnEnabled },
   } = useStore();
-  const data = form.getValues();
-
-  const getReturns = React.useCallback(async () => {
-    try {
-      setHasReturns(false);
-      const returns = await inventoryServices.getReturnTransaction(Number(id));
-      if (returns.length > 0) {
-        setHasReturns(true);
-        setReturnTransactions(returns);
-        const returnItems = await Promise.all(
-          returns.map(async (i) => {
-            const returnItems = await inventoryServices.getReturnItems(i.id);
-            return returnItems;
-          }),
-        );
-        setReturnItems(returnItems.flat());
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }, [id]);
-
-  React.useEffect(() => {
-    getReturns();
-  }, [getReturns]);
+  const data = form.getValues() as GoodReceipt;
 
   const columns = useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
@@ -130,13 +110,25 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
           className: GLOBAL_COLOR.PRODUCT,
         },
         cell: ({ row }) => {
+          const { returns } = row.original;
           return (
-            <Link
-              to={`${ROUTES.PRODUCTS}/${row.original.combinations?.productId}`}
-              className={cx("font-medium", GLOBAL_COLOR.PRODUCT)}
-            >
-              {row.original.nameSnapshot}
-            </Link>
+            <div className="flex gap-1">
+              {returns.quantity > 0 && (
+                <Badge
+                  className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
+                  variant="destructive"
+                >
+                  {Number(returns.quantity)}
+                </Badge>
+              )}
+
+              <Link
+                to={`${ROUTES.PRODUCTS}/${row.original.combinations?.productId}`}
+                className={cx("font-medium", GLOBAL_COLOR.PRODUCT)}
+              >
+                {row.original.nameSnapshot}
+              </Link>
+            </div>
           );
         },
       },
@@ -204,67 +196,6 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
     [returnEnabled],
   );
 
-  const returnItemsColumns = useMemo<ColumnDef<GoodReceiptItem>[]>(
-    () => [
-      {
-        header: "Id",
-        accessorKey: "returnTransactionId",
-      },
-      {
-        header: "Quantity",
-        accessorKey: "quantity",
-        meta: {
-          headerClassName: "text-right w-0",
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return Number(row.original.quantity);
-        },
-      },
-      {
-        accessorKey: "combination.name",
-        header: "Product",
-      },
-      {
-        header: "Unit",
-        accessorKey: "combination.unit",
-        cell: ({ row }) => {
-          return (
-            <ColorBadge colorMap={UNIT_COLOR}>
-              {String(row.original.combination.unit)}
-            </ColorBadge>
-          );
-        },
-      },
-      {
-        header: "Reason",
-        accessorKey: "reason",
-      },
-      {
-        header: "Price",
-        accessorKey: "unitPrice",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return formatCurrency(row.original.unitPrice);
-        },
-      },
-
-      {
-        header: "Amount",
-        accessorKey: "totalAmount",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right",
-        },
-        cell: ({ row }) => formatCurrency(row.original.totalAmount ?? 0),
-      },
-    ],
-    [],
-  );
-
   return (
     <Form {...form}>
       <form>
@@ -321,19 +252,27 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
               );
             }}
             showFooter
-            renderFooter={(data) => {
-              const total = getTotalAmountTableFooter(data);
+            renderFooter={() => {
               return (
-                <TableRow>
-                  <TableCell>Total</TableCell>
-                  <TableCell className="text-right font-bold"></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell className="text-right font-bold"></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell colSpan={10} className="text-right font-bold">
-                    {formatCurrency(total?.amount - total?.discount)}
-                  </TableCell>
-                </TableRow>
+                <>
+                  <TableRow>
+                    <TableCell className="flex-start">Total</TableCell>
+                    <TableCell colSpan={10} className="text-right font-bold">
+                      <div>
+                        {formatCurrency(Number(data?.totalAmount))}
+                        <div className="text-red-500">
+                          -{formatCurrency(data.returnedTotalAmount)}
+                        </div>
+                        <div>
+                          {formatCurrency(
+                            Number(data?.totalAmount) -
+                              data.returnedTotalAmount,
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </>
               );
             }}
           />
@@ -346,36 +285,6 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
                 Supplier Returns
               </Button>
             </div>
-          )}
-          {hasReturns && (
-            <>
-              <Label className="font-bold">Return Transactions</Label>
-              <ReturnTransactionsTable data={returnTransactions} />
-              <Label className="font-bold">Return Items</Label>
-              <DataTable
-                data={returnItems}
-                columns={returnItemsColumns}
-                showFooter
-                renderFooter={(data) => {
-                  const total = data.reduce(
-                    (acc, item) => (acc += Number(item.totalAmount)),
-                    0,
-                  );
-                  return (
-                    <TableRow>
-                      <TableCell>Total</TableCell>
-                      <TableCell className="text-right font-bold"></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell className="text-right font-bold"></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell colSpan={10} className="text-right font-bold">
-                        {formatCurrency(total)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                }}
-              />
-            </>
           )}
         </div>
         <div className="flex flex-col gap-2">
@@ -401,8 +310,6 @@ export default function PartialForm({ form }: { form: UseFormReturn }) {
           onClose={() => {
             handleToggle({ supplierReturnsModal: false });
             setReturnEnabled(false);
-            setReturns([]);
-            getReturns();
           }}
           returns={returns}
           referenceId={Number(id)}

@@ -8,7 +8,6 @@ import {
   loginSchema,
   productCombinationsSchema,
   productSchema,
-  goodReceiptFormSchema,
   goodReceiptLineSchema,
   goodReceiptSchema,
   salesOrderFormSchema,
@@ -30,6 +29,8 @@ import {
   returnSchema,
   returnItemSchema,
   exchangeItemSchema,
+  goodReceiptCreateSchema,
+  goodReceiptUpdateSchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -107,7 +108,8 @@ type Product = z.infer<typeof productSchema>;
 type Supplier = z.infer<typeof supplierSchema>;
 type Customer = z.infer<typeof customerSchema>;
 type GoodReceipt = z.infer<typeof goodReceiptSchema>;
-type GoodReceiptCreate = z.infer<typeof goodReceiptFormSchema>;
+type GoodReceiptCreate = z.infer<typeof goodReceiptCreateSchema>;
+type GoodReceiptUpdate = z.infer<typeof goodReceiptUpdateSchema>;
 type GoodReceiptItem = z.infer<typeof goodReceiptLineSchema>;
 type CancelOrder = z.infer<typeof cancelOrderSchema>;
 type SalesOrder = z.infer<typeof salesOrderSchema>;
@@ -141,6 +143,7 @@ export type {
   Customer,
   GoodReceipt,
   GoodReceiptCreate,
+  GoodReceiptUpdate,
   GoodReceiptItem,
   CancelOrder,
   SalesOrder,
