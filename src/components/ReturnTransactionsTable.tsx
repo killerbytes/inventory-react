@@ -8,7 +8,7 @@ import React from "react";
 export default function ReturnTransactionsTable({
   data,
 }: {
-  data: ReturnTransaction[] | undefined;
+  data: ReturnTransaction[];
 }) {
   const returnTransactionsColumns = React.useMemo<
     ColumnDef<ReturnTransaction>[]

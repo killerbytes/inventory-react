@@ -1,4 +1,14 @@
 import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -30,18 +40,21 @@ import {
   Trash2,
   Undo,
 } from "lucide-react";
+import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { goodReceiptUpdateSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
+import { formatCurrency } from "@/utils/formatters";
+import { goodReceiptUpdateSchema } from "@/schemas";
 import PendingOrderForm from "./Form/PendingForm";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
+import { Label } from "@/components/ui/label";
 import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
 import React, { useCallback } from "react";
@@ -273,6 +286,47 @@ export default function Create() {
               )}
             </>
           )}
+          {data && data?.returnTransactions.length > 0 && (
+            <>
+              <Label className="font-bold">Return Transactions</Label>
+              <ReturnTransactionsTable data={data.returnTransactions} />
+            </>
+          )}
+
+          <div className="w-1/3 flex ml-auto">
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">Amount</TableCell>
+                  <TableHead className="text-right">
+                    {formatCurrency(Number(data?.totalAmount))}
+                  </TableHead>
+                </TableRow>
+                {data && data?.returnedTotalAmount > 0 && (
+                  <TableRow>
+                    <TableCell className="font-medium">Returns</TableCell>
+                    <TableHead className="text-right text-red-500">
+                      -{formatCurrency(data.returnedTotalAmount)}
+                    </TableHead>
+                  </TableRow>
+                )}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={1} className="font-semibold">
+                    Total
+                  </TableCell>
+                  <TableCell className="text-right font-semibold">
+                    {data &&
+                      data?.returnedTotalAmount > 0 &&
+                      formatCurrency(
+                        Number(data?.totalAmount) - data.returnedTotalAmount,
+                      )}
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
         </CardContent>
       </Card>
       {toggle.orderHistoryModal && data?.goodReceiptStatusHistory && (

@@ -232,10 +232,11 @@ export const statusHistorySchema = z.object({
   user: z.any(),
 });
 
-const returnTransactionSchema = z.object({
+export const returnTransactionSchema = z.object({
   id: z.number().optional(),
   totalReturnAmount: z.coerce.number(),
   sourceType: z.string(),
+  updatedAt: z.string(),
 });
 
 const goodReceiptBaseSchema = z.object({

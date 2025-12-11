@@ -251,30 +251,6 @@ export default function PartialForm({
                 })) as ReturnItem[],
               );
             }}
-            showFooter
-            renderFooter={() => {
-              return (
-                <>
-                  <TableRow>
-                    <TableCell className="flex-start">Total</TableCell>
-                    <TableCell colSpan={10} className="text-right font-bold">
-                      <div>
-                        {formatCurrency(Number(data?.totalAmount))}
-                        <div className="text-red-500">
-                          -{formatCurrency(data.returnedTotalAmount)}
-                        </div>
-                        <div>
-                          {formatCurrency(
-                            Number(data?.totalAmount) -
-                              data.returnedTotalAmount,
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                </>
-              );
-            }}
           />
           {returnEnabled && (
             <div className="flex justify-end">
