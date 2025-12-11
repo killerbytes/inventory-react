@@ -23,18 +23,20 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { goodReceiptServices, salesOrderServices } from "@/services";
-import { formatCurrency, getScore } from "@/utils/formatters";
+import {
+  goodReceiptServices,
+  productCombinationServices,
+  salesOrderServices,
+} from "@/services";
 import PriceColumn from "../forms/OrderItemForm/PriceColumn";
 import ProductLookupInput from "../forms/ProductLookupInput";
 import UnitColumn from "../forms/OrderItemForm/UnitColumn";
-import { CommandGroup, CommandItem } from "../ui/command";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { formatCurrency } from "@/utils/formatters";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCell, TableRow } from "../ui/table";
 import { UNIT_COLOR } from "@/utils/definitions";
-import HighlightMatch from "../HighlightMatch";
 import { cx } from "class-variance-authority";
 import { Plus, Trash2 } from "lucide-react";
 import { DialogFooter } from "../ui/dialog";
@@ -60,6 +62,7 @@ export default function ReturnExchangeModal({
   referenceId: number;
   salesOrder?: boolean;
 }) {
+  const { productCombinationState } = useStore();
   const form = useForm<Return>({
     resolver: zodResolver(returnSchema),
     defaultValues: {
@@ -106,9 +109,16 @@ export default function ReturnExchangeModal({
       toast.error("Submission failed - " + apiError.message);
     }
   };
-  const {
-    productCombinationState: { productCombinations },
-  } = useStore();
+
+  React.useEffect(() => {
+    const getData = async () => {
+      const data = await productCombinationServices.list();
+      productCombinationState.setProductsCombinations(data);
+    };
+    if (!productCombinationState.hasLoaded) {
+      getData();
+    }
+  }, [productCombinationState]);
 
   const returnColumns = React.useMemo<ColumnDef<ReturnItem>[]>(
     () => [
@@ -263,7 +273,9 @@ export default function ReturnExchangeModal({
                             form.formState.errors?.exchange?.[row.index]
                               ?.combinationId,
                           )}
-                          items={productCombinations as ProductCombinations[]}
+                          items={
+                            productCombinationState.productCombinations as ProductCombinations[]
+                          }
                           form={form}
                           {...field}
                           name="exchange"
@@ -287,53 +299,6 @@ export default function ReturnExchangeModal({
                                 );
                               }
                             }, 0);
-                          }}
-                          renderOptions={({
-                            items,
-                            open,
-                            setOpen,
-                            onSelect,
-                            search,
-                          }) => {
-                            return (
-                              open &&
-                              items
-                                .map((item) => ({
-                                  item,
-                                  score: getScore(item.name, search),
-                                }))
-                                .filter(({ score }) => score > 0)
-                                .sort((a, b) => b.score - a.score)
-                                .map(({ item }) => (
-                                  <CommandGroup key={item.id}>
-                                    <CommandItem
-                                      value={String(item.name + item.unit)}
-                                      disabled={item.inventory?.quantity < 1}
-                                      key={item.id}
-                                      onSelect={() => {
-                                        setOpen(false);
-                                        onSelect?.(item);
-                                      }}
-                                    >
-                                      <ColorBadge colorMap={UNIT_COLOR}>
-                                        {item.unit}
-                                      </ColorBadge>
-                                      <div>
-                                        <HighlightMatch
-                                          text={item.name}
-                                          query={search}
-                                        />
-                                      </div>
-                                      <div className="ml-auto flex gap-2">
-                                        {Number(item.inventory?.quantity)}
-                                        <span>
-                                          {formatCurrency(item.price)}
-                                        </span>
-                                      </div>
-                                    </CommandItem>
-                                  </CommandGroup>
-                                ))
-                            );
                           }}
                         />
                       </FormControl>
@@ -409,7 +374,7 @@ export default function ReturnExchangeModal({
         },
       },
     ],
-    [exchange, form, productCombinations],
+    [exchange, form, productCombinationState.productCombinations],
   );
   return (
     <Modal
