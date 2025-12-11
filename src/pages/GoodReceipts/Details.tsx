@@ -1,19 +1,17 @@
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Card,
   CardAction,
@@ -286,12 +284,14 @@ export default function Create() {
               )}
             </>
           )}
-          {data && data?.returnTransactions.length > 0 && (
-            <>
-              <Label className="font-bold">Return Transactions</Label>
-              <ReturnTransactionsTable data={data.returnTransactions} />
-            </>
-          )}
+          {data &&
+            data?.returnTransactions &&
+            data?.returnTransactions.length > 0 && (
+              <>
+                <Label className="font-bold">Return Transactions</Label>
+                <ReturnTransactionsTable data={data.returnTransactions} />
+              </>
+            )}
 
           <div className="w-1/3 flex ml-auto">
             <Table>
@@ -317,11 +317,11 @@ export default function Create() {
                     Total
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    {data &&
-                      data?.returnedTotalAmount > 0 &&
-                      formatCurrency(
-                        Number(data?.totalAmount) - data.returnedTotalAmount,
-                      )}
+                    {data && data?.returnedTotalAmount > 0
+                      ? formatCurrency(
+                          Number(data?.totalAmount) - data.returnedTotalAmount,
+                        )
+                      : formatCurrency(Number(data?.totalAmount))}
                   </TableCell>
                 </TableRow>
               </TableFooter>
