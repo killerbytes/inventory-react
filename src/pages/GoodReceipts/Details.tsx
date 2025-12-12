@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
+import { getErrorMessage, getReturnAmount } from "@/lib/utils";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -53,7 +54,6 @@ import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Label } from "@/components/ui/label";
-import { getErrorMessage } from "@/lib/utils";
 import PartialForm from "./Form/PartialForm";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
@@ -72,6 +72,8 @@ export default function Create() {
   const {
     goodReceiptState: { returnEnabled, setReturnEnabled },
   } = useStore();
+
+  const computedReturnAmount = (data && getReturnAmount(data)) ?? 0;
 
   const form = useForm<GoodReceiptUpdate>({
     resolver: zodResolver(goodReceiptUpdateSchema),
@@ -302,11 +304,12 @@ export default function Create() {
                     {formatCurrency(Number(data?.totalAmount))}
                   </TableHead>
                 </TableRow>
-                {data && data?.returnedTotalAmount > 0 && (
+
+                {computedReturnAmount > 0 && (
                   <TableRow>
                     <TableCell className="font-medium">Returns</TableCell>
                     <TableHead className="text-right text-red-500">
-                      -{formatCurrency(data.returnedTotalAmount)}
+                      -{formatCurrency(computedReturnAmount)}
                     </TableHead>
                   </TableRow>
                 )}
@@ -317,9 +320,9 @@ export default function Create() {
                     Total
                   </TableCell>
                   <TableCell className="text-right font-semibold">
-                    {data && data?.returnedTotalAmount > 0
+                    {computedReturnAmount > 0
                       ? formatCurrency(
-                          Number(data?.totalAmount) - data.returnedTotalAmount,
+                          Number(data?.totalAmount) - computedReturnAmount,
                         )
                       : formatCurrency(Number(data?.totalAmount))}
                   </TableCell>

@@ -269,14 +269,13 @@ export const goodReceiptSchema = goodReceiptBaseSchema
     id: z.number(),
     status: z.string(),
     supplier: z.any(),
-    cancellationReason: z.string(),
+    cancellationReason: z.string().nullish(),
     totalAmount: z.string(),
     goodReceiptLines: z.array(goodReceiptLineSchema).min(1, {
       message: "At least one product is required.",
     }),
     goodReceiptStatusHistory: z.array(statusHistorySchema),
     returnTransactions: z.array(returnTransactionSchema),
-    returnedTotalAmount: z.coerce.number(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -442,7 +441,7 @@ export const invoiceFormSchema = z.object({
   dueDate: z.string(),
   status: z.string(),
   notes: z.string().nullish(),
-  gr: z.array(goodReceiptBaseSchema).min(1, {
+  gr: z.array(goodReceiptSchema).min(1, {
     message: "At least one Good Receipt is required.",
   }),
 });

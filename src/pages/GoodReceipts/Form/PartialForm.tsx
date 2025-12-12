@@ -23,7 +23,6 @@ import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import { TableCell, TableRow } from "@/components/ui/table";
 import SupplierPanel from "@/components/SupplierPanel";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,7 +31,6 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
 import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
 import useToggle from "@/hooks/useToggle";
 import React, { useMemo } from "react";
 import { useStore } from "@/stores";
@@ -110,18 +108,8 @@ export default function PartialForm({
           className: GLOBAL_COLOR.PRODUCT,
         },
         cell: ({ row }) => {
-          const { returns } = row.original;
           return (
             <div className="flex gap-1">
-              {returns.quantity > 0 && (
-                <Badge
-                  className="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
-                  variant="destructive"
-                >
-                  {Number(returns.quantity)}
-                </Badge>
-              )}
-
               <Link
                 to={`${ROUTES.PRODUCTS}/${row.original.combinations?.productId}`}
                 className={cx("font-medium", GLOBAL_COLOR.PRODUCT)}
