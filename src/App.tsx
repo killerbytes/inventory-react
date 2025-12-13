@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router";
+import SupplierDetails from "./pages/Suppliers/Details";
 import { ROUTES } from "./utils/definitions";
 import Layout from "./components/Layout";
 import { lazy, Suspense } from "react";
@@ -41,6 +42,14 @@ function App() {
               element={
                 <Layout>
                   <Home />
+                </Layout>
+              }
+            />
+            <Route
+              path={ROUTES.SUPPLIERS_DETAILS}
+              element={
+                <Layout>
+                  <SupplierDetails />
                 </Layout>
               }
             />

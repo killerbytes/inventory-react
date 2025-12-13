@@ -34,9 +34,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
-import PriceHistoryTable from "@/pages/Products/PriceHistoryTable";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import PriceHistory from "@/pages/Products/PriceHistory";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CreateProductModal from "./CreateProductModal";
@@ -48,6 +48,7 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
+import ProductHistory from "./ProductHistory";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
 import Tooltip from "@/components/Tooltip";
@@ -373,6 +374,9 @@ export default function ProductEdit() {
                 </TabsTrigger>
                 <TabsTrigger value="variants">Variants</TabsTrigger>
                 <TabsTrigger value="price_history">Price History</TabsTrigger>
+                <TabsTrigger value="product_history">
+                  Product History
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="product_combination">
                 <Card>
@@ -458,7 +462,17 @@ export default function ProductEdit() {
                     <CardTitle>Price History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <PriceHistoryTable productId={id ?? ""} />
+                    <PriceHistory productId={id ?? ""} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="product_history">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Product History</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <ProductHistory productId={id ?? ""} />
                   </CardContent>
                 </Card>
               </TabsContent>

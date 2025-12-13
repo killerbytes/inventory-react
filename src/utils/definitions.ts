@@ -9,6 +9,7 @@ export const ROUTES = {
   VARIANTS: "/variants",
   CATEGORIES: "/categories",
   SUPPLIERS: "/suppliers",
+  SUPPLIERS_DETAILS: "/suppliers/:id",
   CUSTOMERS: "/customers",
   GOOD_RECEIPT: "/good-receipt",
   GOOD_RECEIPT_CREATE: "/good-receipt/new",

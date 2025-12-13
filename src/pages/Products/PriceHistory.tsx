@@ -142,33 +142,5 @@ export default function PriceHistoryTab({ productId }: { productId: string }) {
     ],
     [filter.order, filter.sort, onFilterChange],
   );
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Break Packs
-        </CardTitle>
-        <CardAction></CardAction>
-      </CardHeader>
-      <CardContent>
-        <div>
-          <Input
-            placeholder="Search invoice"
-            className="w-full mb-4"
-            value={filter.q}
-            onChange={(e) => {
-              setFilter((prev) => ({
-                ...prev,
-                q: e.target.value,
-                page: 1,
-              }));
-            }}
-          />
-        </div>
-        <DataTable data={data.data || []} columns={columns} />
-      </CardContent>
-    </Card>
-  );
+  return <DataTable data={data.data || []} columns={columns} />;
 }
