@@ -1,11 +1,20 @@
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { goodReceiptServices, supplierServices } from "@/services";
 import { ApiErrorResponse, GoodReceipt, Supplier } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { ROUTES, STATUS_COLOR } from "@/utils/definitions";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
+import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
 import { cx } from "class-variance-authority";
 import { getReturnAmount } from "@/lib/utils";
@@ -15,6 +24,7 @@ import React from "react";
 export default function SupplierDetails() {
   const { id } = useParams();
   const [data, setData] = React.useState<Supplier>();
+  const [supplier, setSupplier] = React.useState<Supplier>();
   const getData = React.useCallback(async () => {
     try {
       const data: GoodReceipt[] = await goodReceiptServices.getBySupplier(
@@ -31,6 +41,14 @@ export default function SupplierDetails() {
   React.useEffect(() => {
     getData();
   }, [getData]);
+
+  React.useEffect(() => {
+    const getSupplier = async () => {
+      const supplier = await supplierServices.get(Number(id));
+      setSupplier(supplier);
+    };
+    getSupplier();
+  }, [id]);
 
   const columns: ColumnDef<GoodReceipt>[] = React.useMemo(
     () => [
@@ -88,7 +106,22 @@ export default function SupplierDetails() {
   );
   return (
     <div>
-      <DataTable data={data || []} columns={columns} />
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>{supplier?.name}</CardTitle>
+          <CardDescription>
+            {supplier?.address}
+            <br />
+            {supplier?.phone}
+          </CardDescription>
+          <CardAction>
+            <Button disabled>Create Invoice</Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <DataTable data={data || []} columns={columns} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -102,6 +102,7 @@ export default function Suppliers() {
           return (
             <div>
               <Link
+                className="text-primary"
                 to={ROUTES.SUPPLIERS_DETAILS.replace(":id", row.original.id)}
               >
                 {row.original.name}
