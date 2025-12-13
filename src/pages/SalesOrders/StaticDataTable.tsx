@@ -107,12 +107,12 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
       {
         accessorKey: "nameSnapshot",
         header: "Product",
-        meta: {
-          className: GLOBAL_COLOR.PRODUCT,
-        },
         cell: ({ row }) => {
           return (
-            <Link to={`/products/${row.original.combinations.productId}`}>
+            <Link
+              className={GLOBAL_COLOR.PRODUCT}
+              to={`/products/${row.original.combinations.productId}`}
+            >
               {row.original.nameSnapshot}
             </Link>
           );

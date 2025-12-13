@@ -72,7 +72,10 @@ export default function Details() {
         accessorKey: "goodReceipt.referenceNo",
         header: "Reference",
         cell: ({ row }) => (
-          <Link to={`${ROUTES.GOOD_RECEIPT}/${row.original.goodReceipt?.id}`}>
+          <Link
+            className="text-primary"
+            to={`${ROUTES.GOOD_RECEIPT}/${row.original.goodReceipt?.id}`}
+          >
             {row.original.goodReceipt?.referenceNo}
           </Link>
         ),

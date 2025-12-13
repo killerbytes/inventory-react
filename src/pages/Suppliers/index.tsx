@@ -15,15 +15,19 @@ import {
 } from "@/components/ui/card";
 import { filterProps, PaginatedResponse, Supplier } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { PAGINATION } from "@/utils/definitions";
+import { PAGINATION, ROUTES } from "@/utils/definitions";
+import { DataTable } from "@/components/DataTable";
+import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supplierServices } from "@/services";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import Pager from "@/components/Pager";
+import { Link } from "react-router";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
+import { head } from "lodash";
 import React from "react";
 
 export default function Suppliers() {
@@ -71,7 +75,7 @@ export default function Suppliers() {
       order: prev.sort === sort && prev.order === "ASC" ? "DESC" : "ASC",
     }));
   };
-  const columns = [
+  const columns2 = [
     {
       title: "Name",
       dataIndex: "name",
@@ -89,7 +93,65 @@ export default function Suppliers() {
       key: "actions",
     },
   ];
-
+  const columns = React.useMemo<ColumnDef<Supplier>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => {
+          return (
+            <div>
+              <Link
+                to={ROUTES.SUPPLIERS_DETAILS.replace(":id", row.original.id)}
+              >
+                {row.original.name}
+              </Link>
+              <div className="text-xs text-muted-foreground">
+                {row.original.address}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "contact",
+        header: "Contact",
+        cell: ({ row }) => {
+          return (
+            <div>
+              <div>{row.original.contact}</div>
+              <div className="text-xs text-muted-foreground">
+                {row.original.phone}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        accessorKey: "actions",
+        header: "",
+        cell: ({ row }) => {
+          return (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ editModal: true });
+              }}
+            >
+              <Pencil size={16} />
+            </Button>
+          );
+        },
+      },
+    ],
+    [],
+  );
   return (
     <div>
       <Card>
@@ -129,10 +191,12 @@ export default function Suppliers() {
             <p>Loading...</p>
           ) : (
             <>
-              <Table>
+              <DataTable data={data.data || []} columns={columns} />
+
+              {/* <Table>
                 <TableHeader>
                   <TableRow>
-                    {columns.map((column) => (
+                    {columns2.map((column) => (
                       <TableHead
                         key={column.key}
                         onClick={() => requestSort(column.key)}
@@ -180,7 +244,7 @@ export default function Suppliers() {
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+              </Table> */}
               {data.totalPages > 1 && (
                 <Pager data={data} filter={filter} setFilter={setFilter} />
               )}

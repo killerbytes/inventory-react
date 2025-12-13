@@ -16,7 +16,12 @@ export default function ProductItem({ item }: { item: Product }) {
         header: () => {
           return (
             <>
-              <Link to={`${ROUTES.PRODUCTS}/${item.id}`}>{item.name}</Link>
+              <Link
+                to={`${ROUTES.PRODUCTS}/${item.id}`}
+                className={GLOBAL_COLOR.PRODUCT}
+              >
+                {item.name}
+              </Link>
               {item.sku && (
                 <span className="text-xs text-muted-foreground">
                   ({item.sku})
@@ -26,7 +31,7 @@ export default function ProductItem({ item }: { item: Product }) {
           );
         },
         meta: {
-          headerClassName: cx("flex items-center gap-2", GLOBAL_COLOR.PRODUCT),
+          headerClassName: cx("flex items-center gap-2"),
         },
       },
       // ...(item.variants?.map((variant, idx) => ({

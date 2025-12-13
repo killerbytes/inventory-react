@@ -107,7 +107,10 @@ export default function Movements() {
         },
         cell: ({ row }) => {
           return (
-            <Link to={`${ROUTES.GOOD_RECEIPT}/${row.original.reference}`}>
+            <Link
+              to={`${ROUTES.GOOD_RECEIPT}/${row.original.reference}`}
+              className="text-primary"
+            >
               <ColorBadge colorMap={INVENTORY_MOVEMENT_TYPE_COLOR}>
                 {String(row.original.type)}
               </ColorBadge>
@@ -151,7 +154,10 @@ export default function Movements() {
               route = ROUTES.GOOD_RECEIPT;
           }
           return (
-            <Link to={`${route}/${row.original.referenceId}`}>
+            <Link
+              to={`${route}/${row.original.referenceId}`}
+              className="text-primary"
+            >
               {row.original.referenceType}:{row.original.referenceId}
             </Link>
           );
