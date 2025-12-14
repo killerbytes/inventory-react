@@ -69,7 +69,10 @@ export default function Payments() {
         cell: ({ row }) => {
           const invoice = row.getValue("invoice") as Invoice;
           return (
-            <Link to={`${ROUTES.INVOICES}/${invoice.id}`}>
+            <Link
+              to={`${ROUTES.INVOICES}/${invoice.id}`}
+              className="text-primary"
+            >
               {invoice.invoiceNumber}
             </Link>
           );
@@ -78,6 +81,20 @@ export default function Payments() {
       {
         accessorKey: "payment.supplier.name",
         header: "Supplier",
+        cell: ({
+          row: {
+            original: { payment },
+          },
+        }) => {
+          return (
+            <Link
+              to={`${ROUTES.SUPPLIERS}/${payment.supplier.id}`}
+              className="text-primary"
+            >
+              {payment.supplier.name}
+            </Link>
+          );
+        },
       },
       {
         accessorKey: "payment.user.username",

@@ -1,3 +1,5 @@
+import { ROUTES } from "@/utils/definitions";
+import { Link } from "react-router";
 import { Supplier } from "@/types";
 
 export default function SupplierPanel({
@@ -6,10 +8,15 @@ export default function SupplierPanel({
   supplier: Supplier | undefined;
 }) {
   return (
-    <div className="bg-blue-100 px-4 py-2 rounded-md border border-blue-200 flex flex-col gap-2 text-sm">
-      <h3 className="text-lg gap-2 flex  items-center">{supplier?.name}</h3>
-      <div className="">{supplier?.address}</div>
-      <p>{supplier?.phone}</p>
+    <div>
+      <h3 className="text-lg gap-2 flex  items-center">
+        <Link
+          to={`${ROUTES.SUPPLIERS}/${supplier?.id}`}
+          className="text-primary"
+        >
+          {supplier?.name}
+        </Link>
+      </h3>
     </div>
   );
 }

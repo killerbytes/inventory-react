@@ -151,6 +151,19 @@ export const productCombinationsSchema = productCombinationBaseSchema.extend({
   isBreakPackOfId: z.coerce.number().nullish(),
 });
 
+export const returnItemSchema = z.object({
+  combinationId: z.number(),
+  combination: productCombinationsSchema.optional(),
+  returnQuantity: z.coerce.number(),
+  purchasePrice: z.coerce.number(),
+  discount: z.coerce.number(),
+  quantity: z.coerce.number(),
+  unitPrice: z.coerce.number().optional(),
+  totalAmount: z.coerce.number(),
+  unit: z.string(),
+  type: z.string().optional(),
+});
+
 export const productSchema = productBaseSchema.extend({
   id: z.number().nullish(),
   name: z.string().min(2, {
@@ -232,13 +245,6 @@ export const statusHistorySchema = z.object({
   user: z.any(),
 });
 
-export const returnTransactionSchema = z.object({
-  id: z.number().optional(),
-  totalReturnAmount: z.coerce.number(),
-  sourceType: z.string(),
-  updatedAt: z.string(),
-});
-
 const goodReceiptBaseSchema = z.object({
   supplierId: z.coerce
     .number({
@@ -262,6 +268,13 @@ export const goodReceiptUpdateSchema = goodReceiptBaseSchema.extend({
     message: "At least one product is required.",
   }),
   status: z.string().nullish(),
+});
+export const returnTransactionSchema = z.object({
+  id: z.number().optional(),
+  totalReturnAmount: z.coerce.number(),
+  sourceType: z.string(),
+  updatedAt: z.string(),
+  returnItems: z.array(returnItemSchema),
 });
 
 export const goodReceiptSchema = goodReceiptBaseSchema
@@ -452,22 +465,10 @@ export const paymentApplicationSchema = z.object({
   amountApplied: z.coerce.number().nullish(),
 });
 
-export const invoiceSchema = z.object({
-  id: z.number().optional(),
-  supplierId: z.number(),
-  invoiceNumber: z.string(),
-  invoiceDate: z.string(),
-  dueDate: z.string(),
-  status: z.string(),
-  totalAmount: z.coerce.number().nullish(),
-  notes: z.string().nullish(),
-  invoiceLines: z.array(invoiceLineSchema),
-  applications: z.array(paymentApplicationSchema),
-});
-
 export const paymentSchema = z.object({
   id: z.number().optional(),
   supplierId: z.number(),
+  supplier: supplierSchema,
   referenceNo: z.string().nullish(),
   paymentDate: z.string(),
   amount: z.coerce.number().nullish(),
@@ -476,6 +477,21 @@ export const paymentSchema = z.object({
   applications: z.array(paymentApplicationSchema).min(1, {
     message: "At least one product is required.",
   }),
+});
+
+export const invoiceSchema = z.object({
+  id: z.number().optional(),
+  supplierId: z.number(),
+  supplier: supplierSchema,
+  payment: paymentSchema,
+  invoiceNumber: z.string(),
+  invoiceDate: z.string(),
+  dueDate: z.string(),
+  status: z.string(),
+  totalAmount: z.coerce.number().nullish(),
+  notes: z.string().nullish(),
+  invoiceLines: z.array(invoiceLineSchema),
+  applications: z.array(paymentApplicationSchema),
 });
 
 export const priceHistorySchema = z.object({
@@ -488,19 +504,6 @@ export const priceHistorySchema = z.object({
   changedAt: z.string(),
   user: z.any(),
   quantity: z.coerce.number(),
-});
-
-export const returnItemSchema = z.object({
-  combinationId: z.number(),
-  combination: productCombinationsSchema.optional(),
-  returnQuantity: z.coerce.number(),
-  purchasePrice: z.coerce.number(),
-  discount: z.coerce.number(),
-  quantity: z.coerce.number(),
-  unitPrice: z.coerce.number().optional(),
-  totalAmount: z.coerce.number(),
-  unit: z.string(),
-  type: z.string().optional(),
 });
 
 export const exchangeItemSchema = returnItemSchema.omit({

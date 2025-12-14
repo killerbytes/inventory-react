@@ -381,7 +381,7 @@ export default function ReturnExchangeModal({
       size="lg"
       isOpen
       onOpenChange={onClose}
-      title="Supplier Returns"
+      title={salesOrder ? "Returns/Exchange" : "Supplier Returns"}
       description="Review the returns for this order"
     >
       <Form {...form}>

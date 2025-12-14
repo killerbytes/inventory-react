@@ -23,6 +23,7 @@ import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { TableCell, TableRow } from "@/components/ui/table";
 import SupplierPanel from "@/components/SupplierPanel";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -237,6 +238,21 @@ export default function PartialForm({
                   ...i,
                   returnQuantity: i.quantity,
                 })) as ReturnItem[],
+              );
+            }}
+            showFooter
+            renderFooter={(data) => {
+              const total = data.reduce(
+                (acc, item) => (acc += Number(item.totalAmount)),
+                0,
+              );
+              return (
+                <TableRow>
+                  <TableCell>Total</TableCell>
+                  <TableCell colSpan={10} className="text-right font-bold">
+                    {formatCurrency(total)}
+                  </TableCell>
+                </TableRow>
               );
             }}
           />

@@ -13,10 +13,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
+import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { invoiceServices } from "@/services";
-import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
 import InvoiceModal from "./InvoiceModal";
 import Pager from "@/components/Pager";
@@ -70,6 +70,21 @@ export default function Invoices() {
       {
         accessorKey: "supplier.name",
         header: "Supplier",
+        cell: ({
+          row: {
+            original: { supplier },
+          },
+        }) => {
+          return (
+            <Link
+              to={`${ROUTES.SUPPLIERS}/${supplier.id}`}
+              className="text-primary"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {supplier.name}
+            </Link>
+          );
+        },
       },
       {
         accessorKey: "status",

@@ -33,7 +33,7 @@ export default function PaymentTab({
         },
       },
       {
-        accessorKey: "payment.user.name",
+        accessorKey: "payment.user.username",
         header: "Changed By",
       },
 
