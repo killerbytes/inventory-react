@@ -198,6 +198,32 @@ export const supplierSchema = z.object({
 
 export const customerSchema = supplierSchema;
 
+export const goodReceiptLineBaseSchema = z.object({
+  combinationId: z.number().min(1, { message: "Product is required." }),
+  quantity: z.coerce.number().min(1, {
+    message: "Quantity must be at least 1.",
+  }),
+  purchasePrice: z.coerce
+    .number()
+    .min(0.01, { message: "Price must be at least 0.01." })
+    .superRefine((val, ctx) => {
+      if (isNaN(val)) {
+        ctx.addIssue({ code: "custom", message: "Amount is required" });
+      } else {
+        const decimalPlaces = (val.toString().split(".")[1] || "").length;
+        if (decimalPlaces > 2) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Max 2 decimal places allowed",
+          });
+        }
+      }
+    })
+    .pipe(z.number().min(0)),
+  discount: z.coerce.number().nullish(),
+  discountNote: z.string().nullish(),
+});
+
 export const goodReceiptLineSchema = z.object({
   id: z.coerce.number().nullish(),
   combinationId: z.number().min(1, { message: "Product is required." }),
@@ -258,13 +284,13 @@ const goodReceiptBaseSchema = z.object({
 });
 
 export const goodReceiptCreateSchema = goodReceiptBaseSchema.extend({
-  goodReceiptLines: z.array(goodReceiptLineSchema).min(1, {
+  goodReceiptLines: z.array(goodReceiptLineBaseSchema).min(1, {
     message: "At least one product is required.",
   }),
 });
 
 export const goodReceiptUpdateSchema = goodReceiptBaseSchema.extend({
-  goodReceiptLines: z.array(goodReceiptLineSchema).min(1, {
+  goodReceiptLines: z.array(goodReceiptLineBaseSchema).min(1, {
     message: "At least one product is required.",
   }),
   status: z.string().nullish(),
