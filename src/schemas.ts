@@ -132,15 +132,15 @@ const productCombinationBaseSchema = z.object({
   name: z.string(),
   sku: z.string(),
   unit: z.string(),
-  price: z.coerce.number().min(0.01, {
-    message: "Price must be at least 0.01.",
-  }),
 });
 
 export const productCombinationsSchema = productCombinationBaseSchema.extend({
   id: z.number(),
   conversionFactor: z.coerce.number().min(1, {
     message: "Conversion Factor must be at least 1.",
+  }),
+  price: z.coerce.number().min(0.01, {
+    message: "Price must be at least 0.01.",
   }),
   inventory: inventorySchema,
   product: productBaseSchema,
