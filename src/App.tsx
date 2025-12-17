@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router";
-import SupplierDetails from "./pages/Suppliers/Details";
 import { ROUTES } from "./utils/definitions";
 import Layout from "./components/Layout";
+import NotFound from "./pages/NotFound";
 import { lazy, Suspense } from "react";
 
 const Login = lazy(() => import("./pages/Login"));
@@ -28,7 +28,8 @@ const Payments = lazy(() => import("./pages/Payments"));
 const PriceHistory = lazy(() => import("./pages/Inventory/PriceHistory"));
 const Reorders = lazy(() => import("./pages/Inventory/Reorders"));
 const Settings = lazy(() => import("./pages/Settings"));
-const Test = lazy(() => import("./pages/Test"));
+const ProductSearch = lazy(() => import("./pages/ProductSearch"));
+const SupplierDetails = lazy(() => import("./pages/Suppliers/Details"));
 
 function App() {
   return (
@@ -220,16 +221,9 @@ function App() {
               }
             />
 
-            <Route
-              path="test"
-              element={
-                <Layout>
-                  <Test />
-                </Layout>
-              }
-            />
+            <Route path={ROUTES.SEARCH} element={<ProductSearch />} />
 
-            {/* <Route path="*" element={<NotFound />} /> */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

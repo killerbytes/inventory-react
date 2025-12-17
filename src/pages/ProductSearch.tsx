@@ -1,0 +1,135 @@
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import { productCombinationServices } from "@/services";
+import { ColumnDef, Row } from "@tanstack/react-table";
+import { Link, useSearchParams } from "react-router";
+import { formatCurrency } from "@/utils/formatters";
+import { DataTable } from "@/components/DataTable";
+import ColorBadge from "@/components/ColorBadge";
+import useDebounce from "@/hooks/useDebounce";
+import { ProductCombinations } from "@/types";
+import { Search } from "lucide-react";
+import React from "react";
+
+export default function ProductSearch() {
+  const [data, setData] = React.useState<ProductCombinations[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [search, setSearch] = React.useState(initialSearch);
+
+  const getData = React.useCallback(async (search: string) => {
+    if (!search || search.length < 2) {
+      setData([]);
+      return;
+    }
+
+    try {
+      const res = await productCombinationServices.search({
+        search,
+        limit: 20,
+      });
+
+      const result = [];
+      for (const item of res) {
+        result.push(...item.productCombinations);
+      }
+      setData(result);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }, []);
+
+  const debouncedQuery = useDebounce(search, 300);
+
+  React.useEffect(() => {
+    getData(debouncedQuery);
+  }, [debouncedQuery, getData]);
+
+  React.useEffect(() => {
+    if (debouncedQuery) {
+      setSearchParams({ search: debouncedQuery }, { replace: true });
+    } else {
+      setSearchParams({}, { replace: true });
+    }
+  }, [debouncedQuery, setSearchParams]);
+
+  const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return (
+            <Link
+              className={GLOBAL_COLOR.PRODUCT}
+              to={`${ROUTES.PRODUCTS}/${row.original.productId}`}
+            >
+              {row.original.name}
+            </Link>
+          );
+        },
+      },
+      {
+        header: "Unit",
+        accessorKey: "unit",
+        meta: {
+          headerClassName: "h-0",
+          className: "w-20",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
+          );
+        },
+      },
+      {
+        header: "Quantity",
+        accessorKey: "inventory.quantity",
+        meta: {
+          headerClassName: "h-0 text-right",
+          className: "w-20 text-right",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return Number(row.original.inventory?.quantity);
+        },
+      },
+
+      {
+        accessorKey: "price",
+        header: "Price",
+        meta: {
+          headerClassName: "h-0 text-right",
+          className: "w-20 text-right",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return formatCurrency(row.original.price);
+        },
+      },
+    ],
+    [],
+  );
+
+  return (
+    <div className="ml-auto p-4 flex flex-col gap-4">
+      <InputGroup>
+        <InputGroupInput
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+          }}
+        />
+        <InputGroupAddon>
+          <Search />
+        </InputGroupAddon>
+        <InputGroupAddon align="inline-end">
+          {data.length} results
+        </InputGroupAddon>
+      </InputGroup>
+      <DataTable data={data} columns={columns} />
+    </div>
+  );
+}

@@ -4,6 +4,7 @@ import { titleCase } from "title-case";
 export const ROUTES = {
   DASHBOARD: "/",
   LOGIN: "/login",
+  SEARCH: "/search",
   USERS: "/users",
   PRODUCTS: "/products",
   VARIANTS: "/variants",
