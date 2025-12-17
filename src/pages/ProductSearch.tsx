@@ -34,9 +34,20 @@ export default function ProductSearch() {
       });
 
       const result = [];
+      const words = search
+        .toLowerCase()
+        .split(" ")
+        .filter((i) => i.length > 0);
+
       for (const item of res) {
-        result.push(...item.productCombinations);
+        const productCombinations = item.productCombinations.filter((i) => {
+          const name = i.name.toLowerCase();
+          return words.every((word) => name.includes(word));
+        });
+
+        result.push(...productCombinations);
       }
+
       setData(result);
     } catch (error) {
       console.error("Error fetching data:", error);
