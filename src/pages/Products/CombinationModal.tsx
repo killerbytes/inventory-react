@@ -265,21 +265,14 @@ export default function CombinationModal({
             (item: VariantTypes) => item.isBreakpackFilter,
           );
           let options: z.infer<typeof formSchema>[] = [];
+
           if (type) {
             const f = row.original.values.find(
               (v) => v.variantTypeId === type.id,
             );
-
-            // const exists = x
-            //   .filter((i) => i.isBreakPackOfId)
-            //   .map((i) => i.isBreakPackOfId);
-
             options = x.filter((i) => i.values.find((v) => v.id === f?.id));
-            // options = options.filter(
-            //   (o) =>
-            //     !exists.includes(o.id!) ||
-            //     o.id === row.original.isBreakPackOfId,
-            // );
+          } else {
+            options = x.filter((i) => i.id !== row.original.id);
           }
 
           return (
