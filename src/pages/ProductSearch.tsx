@@ -1,6 +1,7 @@
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
@@ -10,9 +11,10 @@ import { Link, useSearchParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import ColorBadge from "@/components/ColorBadge";
+import { Button } from "@/components/ui/button";
 import useDebounce from "@/hooks/useDebounce";
 import { ProductCombinations } from "@/types";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import React from "react";
 
 export default function ProductSearch() {
@@ -20,6 +22,7 @@ export default function ProductSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
   const [search, setSearch] = React.useState(initialSearch);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const getData = React.useCallback(async (search: string) => {
     if (!search || search.length < 2) {
@@ -71,7 +74,7 @@ export default function ProductSearch() {
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
       {
-        accessorKey: "name",
+        accessorKey: "Product",
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
           return (
             <Link
@@ -127,8 +130,10 @@ export default function ProductSearch() {
     <div className="ml-auto p-4 flex flex-col gap-4">
       <InputGroup>
         <InputGroupInput
+          ref={inputRef}
           placeholder="Search..."
           value={search}
+          autoFocus
           onChange={(e) => {
             setSearch(e.target.value);
           }}
@@ -136,9 +141,25 @@ export default function ProductSearch() {
         <InputGroupAddon>
           <Search />
         </InputGroupAddon>
-        <InputGroupAddon align="inline-end">
-          {data.length} results
-        </InputGroupAddon>
+        {search.length > 0 && (
+          <>
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => {
+                  setSearch("");
+                  inputRef.current?.focus();
+                }}
+              >
+                <X />
+              </InputGroupButton>
+            </InputGroupAddon>
+            <InputGroupAddon align="inline-end">
+              {data.length} results
+            </InputGroupAddon>
+          </>
+        )}
       </InputGroup>
       <DataTable data={data} columns={columns} />
     </div>
