@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ApiErrorResponse, Signup } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,9 @@ export default function AddModal({
 }) {
   const form = useForm<Signup>({
     resolver: zodResolver(signupSchema),
+    defaultValues: {
+      isActive: false,
+    },
   });
 
   async function onSubmit(values: Signup) {
@@ -65,6 +69,7 @@ export default function AddModal({
       <Form {...form}>
         <form
           onSubmit={(e) => {
+            console.log(form.getValues(), form.formState.errors);
             e.preventDefault();
             form
               .handleSubmit(onSubmit)(e)
@@ -136,6 +141,24 @@ export default function AddModal({
                 <FormControl>
                   <Input type="password" placeholder="********" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="isActive"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel>Is Active</FormLabel>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
