@@ -155,7 +155,7 @@ export default function EditModal({
                 <FormItem>
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Phone" {...field} />
+                    <Textarea placeholder="Phone" {...field} rows={3} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -169,7 +169,11 @@ export default function EditModal({
                 <FormItem>
                   <FormLabel>Contact Person</FormLabel>
                   <FormControl>
-                    <Input placeholder="Contact" {...field} />
+                    <Input
+                      placeholder="Contact"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

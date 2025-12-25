@@ -3,7 +3,6 @@ import {
   CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -112,7 +111,7 @@ export default function SupplierDetails() {
           <CardDescription>
             {supplier?.address}
             <br />
-            {supplier?.phone}
+            <p className="whitespace-pre">{supplier?.phone}</p>
           </CardDescription>
           <CardAction>
             <Button disabled>Create Invoice</Button>

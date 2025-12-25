@@ -1,11 +1,6 @@
 import { format } from "date-fns";
 
-import {
-  DATE_FORMAT,
-  DATETIME_FORMAT,
-  ORDER_STATUS,
-  STATUS,
-} from "./definitions";
+import { DATE_FORMAT, DATETIME_FORMAT } from "./definitions";
 
 export const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -54,9 +49,3 @@ export const getScore = (value: string, search: string) => {
 
   return 0;
 };
-
-export function convertNumericStrings(obj) {
-  return JSON.parse(JSON.stringify(obj), (_, value) =>
-    typeof value === "string" && !isNaN(value) ? parseFloat(value) : value,
-  );
-}
