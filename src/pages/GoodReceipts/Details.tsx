@@ -294,42 +294,43 @@ export default function Create() {
                 <ReturnTransactionsTable data={data.returnTransactions} />
               </>
             )}
-
-          <div className="w-1/3 flex ml-auto">
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">Amount</TableCell>
-                  <TableHead className="text-right">
-                    {formatCurrency(Number(data?.totalAmount))}
-                  </TableHead>
-                </TableRow>
-
-                {computedReturnAmount > 0 && (
+          {data?.status === ORDER_STATUS.RECEIVED && (
+            <div className="w-1/3 flex ml-auto">
+              <Table>
+                <TableBody>
                   <TableRow>
-                    <TableCell className="font-medium">Returns</TableCell>
-                    <TableHead className="text-right text-red-500">
-                      -{formatCurrency(computedReturnAmount)}
+                    <TableCell className="font-medium">Amount</TableCell>
+                    <TableHead className="text-right">
+                      {formatCurrency(Number(data?.totalAmount))}
                     </TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={1} className="font-semibold">
-                    Total
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">
-                    {computedReturnAmount > 0
-                      ? formatCurrency(
-                          Number(data?.totalAmount) - computedReturnAmount,
-                        )
-                      : formatCurrency(Number(data?.totalAmount))}
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </div>
+
+                  {computedReturnAmount > 0 && (
+                    <TableRow>
+                      <TableCell className="font-medium">Returns</TableCell>
+                      <TableHead className="text-right text-red-500">
+                        -{formatCurrency(computedReturnAmount)}
+                      </TableHead>
+                    </TableRow>
+                  )}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={1} className="font-semibold">
+                      Total
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {computedReturnAmount > 0
+                        ? formatCurrency(
+                            Number(data?.totalAmount) - computedReturnAmount,
+                          )
+                        : formatCurrency(Number(data?.totalAmount))}
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
       {toggle.orderHistoryModal && data?.goodReceiptStatusHistory && (

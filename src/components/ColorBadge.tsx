@@ -8,10 +8,10 @@ export default function ColorBadge({
   ...props
 }: {
   className?: string;
-  children: string;
+  children: string | undefined;
   colorMap?: Record<string, string>;
 }) {
-  const unit = children.toUpperCase() as keyof typeof colorMap;
+  const unit = children?.toUpperCase() as keyof typeof colorMap;
   return (
     <Badge
       className={cx(

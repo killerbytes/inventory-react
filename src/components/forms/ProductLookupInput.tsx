@@ -1,39 +1,50 @@
 import ProductComboSearchCommand from "../ProductComboSearchCommand";
+import { FieldValues, Path, UseFormReturn } from "react-hook-form";
+import { getMappedSearchProductCombinations } from "@/lib/utils";
 import useExcludeExistToList from "@/hooks/useExcludeExists";
 import GroupedCommandList from "../GroupedCommandList";
-import { UseFormReturn } from "react-hook-form";
 import { ChevronsUpDown } from "lucide-react";
 import { ProductCombinations } from "@/types";
 import { Button } from "../ui/button";
+import React from "react";
 
-export default function ProductLookupInput<T extends ProductCombinations>({
-  items,
+export default function ProductLookupInput<T extends FieldValues>({
   form,
   onChange,
-  value,
+  index,
   name,
   ariaInvalid,
   disableNoQuantity,
 }: {
-  items: T[];
-  form: UseFormReturn;
-  onChange: (value: T) => void;
-  value: number;
-  name: string;
+  form: UseFormReturn<T>;
+  onChange: (value: ProductCombinations) => void;
+  index: number;
+  name: Path<T>;
   ariaInvalid?: boolean;
   disableNoQuantity?: boolean;
 }) {
-  const options = useExcludeExistToList(items, form?.control, name);
+  const [items, setItems] = React.useState<ProductCombinations[]>([]);
+  const onSearch = React.useCallback(async (search: string) => {
+    const combinations = await getMappedSearchProductCombinations({
+      search,
+      noBreakPacks: true,
+    });
+    setItems(combinations);
+    return combinations;
+  }, []);
 
+  const options = useExcludeExistToList(items, form?.control, name);
   return (
     <ProductComboSearchCommand
-      items={options}
-      onSelect={(item) => {
-        onChange(item);
+      onSearch={onSearch}
+      onSelect={(value) => {
+        // form.setValue(`${name}[${index}].combinations` as Path<T>, value);
+
+        onChange(value);
       }}
-      renderOptions={({ items, open, setOpen, onSelect, search }) => (
+      renderOptions={({ open, setOpen, onSelect, search }) => (
         <GroupedCommandList
-          items={items}
+          items={options}
           open={open}
           setOpen={setOpen}
           onSelect={onSelect}
@@ -48,7 +59,7 @@ export default function ProductLookupInput<T extends ProductCombinations>({
         type="button"
         aria-invalid={ariaInvalid}
       >
-        {items.find((i) => i.id === value)?.name}
+        {form.getValues()[name][index]?.combinations?.name}
         <ChevronsUpDown className="ml-auto" />
       </Button>
     </ProductComboSearchCommand>

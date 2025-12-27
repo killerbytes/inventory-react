@@ -10,8 +10,8 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import { Link, useSearchParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
+import { Spinner } from "@/components/ui/spinner";
 import ColorBadge from "@/components/ColorBadge";
-import { Button } from "@/components/ui/button";
 import useDebounce from "@/hooks/useDebounce";
 import { ProductCombinations } from "@/types";
 import { Search, X } from "lucide-react";
@@ -23,6 +23,7 @@ export default function ProductSearch() {
   const initialSearch = searchParams.get("search") || "";
   const [search, setSearch] = React.useState(initialSearch);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = React.useState(false);
 
   const getData = React.useCallback(async (search: string) => {
     if (!search || search.length < 2) {
@@ -31,6 +32,7 @@ export default function ProductSearch() {
     }
 
     try {
+      setLoading(true);
       const res = await productCombinationServices.search({
         search,
         limit: 20,
@@ -54,6 +56,8 @@ export default function ProductSearch() {
       setData(result);
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -143,21 +147,30 @@ export default function ProductSearch() {
         </InputGroupAddon>
         {search.length > 0 && (
           <>
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => {
-                  setSearch("");
-                  inputRef.current?.focus();
-                }}
-              >
-                <X />
-              </InputGroupButton>
-            </InputGroupAddon>
-            <InputGroupAddon align="inline-end">
-              {data.length} results
-            </InputGroupAddon>
+            {loading ? (
+              <InputGroupAddon align="inline-end">
+                <Spinner />
+              </InputGroupAddon>
+            ) : (
+              <>
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={() => {
+                      setSearch("");
+                      inputRef.current?.focus();
+                    }}
+                  >
+                    <X />
+                  </InputGroupButton>
+                </InputGroupAddon>
+
+                <InputGroupAddon align="inline-end">
+                  {data.length} results
+                </InputGroupAddon>
+              </>
+            )}
           </>
         )}
       </InputGroup>

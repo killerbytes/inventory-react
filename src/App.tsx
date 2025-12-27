@@ -3,6 +3,7 @@ import { ROUTES } from "./utils/definitions";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
 import { lazy, Suspense } from "react";
+import Test from "./pages/Test";
 
 const Login = lazy(() => import("./pages/Login"));
 const Home = lazy(() => import("./pages/Home"));
@@ -222,6 +223,8 @@ function App() {
             />
 
             <Route path={ROUTES.SEARCH} element={<ProductSearch />} />
+
+            <Route path={ROUTES.TEST} element={<Test />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

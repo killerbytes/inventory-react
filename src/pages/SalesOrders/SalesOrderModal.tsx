@@ -7,35 +7,28 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  MODE_OF_PAYMENT_OPTIONS,
+  ORDER_STATUS,
+  UNIT_COLOR,
+  WHOLESALE_UNITS,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  MODE_OF_PAYMENT_OPTIONS,
-  ORDER_STATUS,
-  WHOLESALE_UNITS,
-} from "@/utils/definitions";
-import {
-  ApiError,
-  ProductCombinations,
-  SalesOrderForm,
-  SalesOrderItem,
-} from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Controller, useFieldArray, useWatch, useForm } from "react-hook-form";
-import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
-import PriceColumn from "@/components/forms/OrderItemForm/PriceColumn";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
-import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
+import LineColumn from "@/components/forms/OrderItemForm/LineColumn";
 import { BanknoteArrowUp, Plus, Save, Trash2 } from "lucide-react";
+import { ApiError, SalesOrderForm, SalesOrderItem } from "@/types";
 import { customerServices, salesOrderServices } from "@/services";
 import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
-import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -47,6 +40,7 @@ import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
+import ColorBadge from "@/components/ColorBadge";
 import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
@@ -60,7 +54,11 @@ import { toast } from "sonner";
 import React from "react";
 
 const salesOrderItemDefault = {
+  quantity: 1,
+  purchasePrice: 0,
+  discount: 0,
   discountNote: "",
+  combinationId: -1,
 };
 const salesOrderDefalt = {
   // deliveryDate: new Date().toISOString(),
@@ -82,7 +80,7 @@ export default function SalesOrderModal({
   onClose: (reload: boolean) => void;
 }) {
   const [loading, setLoading] = React.useState(false);
-  const { productCombinationState, customerState } = useStore();
+  const { customerState } = useStore();
 
   const defaultValues = localStorage.getItem(
     `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
@@ -114,16 +112,6 @@ export default function SalesOrderModal({
       getData();
     }
   }, [data, form]);
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const data = await productCombinationServices.list();
-      productCombinationState.setProductsCombinations(data);
-    };
-    if (!productCombinationState.hasLoaded) {
-      getData();
-    }
-  }, [productCombinationState]);
 
   React.useEffect(() => {
     const getData = async () => {
@@ -267,6 +255,33 @@ export default function SalesOrderModal({
         ),
       },
       {
+        accessorKey: "unit",
+        header: "Unit",
+        meta: {
+          className: "w-15 text-center",
+          headerClassName: "text-center",
+        },
+        cell: ({ row }) => {
+          return (
+            <LineColumn
+              index={row.index}
+              control={form.control}
+              name="salesOrderItems"
+            >
+              {(value) => {
+                return (
+                  value.combinations?.unit && (
+                    <ColorBadge colorMap={UNIT_COLOR}>
+                      {value.combinations?.unit}
+                    </ColorBadge>
+                  )
+                );
+              }}
+            </LineColumn>
+          );
+        },
+      },
+      {
         accessorKey: "combinationId",
         header: "Product",
         meta: {
@@ -287,9 +302,8 @@ export default function SalesOrderModal({
                             form.formState.errors?.salesOrderItems?.[row.index]
                               ?.combinationId,
                           )}
-                          items={
-                            productCombinationState.productCombinations as ProductCombinations[]
-                          }
+                          index={row.index}
+                          disableNoQuantity
                           form={form}
                           {...field}
                           name="salesOrderItems"
@@ -298,6 +312,10 @@ export default function SalesOrderModal({
                             form.setValue(
                               `salesOrderItems.${row.index}.purchasePrice`,
                               value.price,
+                            );
+                            form.setValue(
+                              `salesOrderItems.${row.index}.combinations`,
+                              value,
                             );
 
                             setTimeout(() => {
@@ -314,7 +332,6 @@ export default function SalesOrderModal({
                               }
                             }, 0);
                           }}
-                          disableNoQuantity={true}
                         />
                       </FormControl>
                     </FormItem>
@@ -325,24 +342,7 @@ export default function SalesOrderModal({
           );
         },
       },
-      {
-        accessorKey: "unit",
-        header: "Unit",
-        meta: {
-          className: "w-15 text-center",
-          headerClassName: "text-center",
-        },
-        cell: ({ row }) => {
-          return (
-            <UnitColumn
-              index={row.index}
-              control={form.control}
-              name="salesOrderItems"
-              productCombinations={productCombinationState.productCombinations}
-            />
-          );
-        },
-      },
+
       {
         accessorKey: "discount",
         header: "Discount",
@@ -386,24 +386,28 @@ export default function SalesOrderModal({
           <FormField
             control={form.control}
             name={`salesOrderItems.${row.index}.purchasePrice`}
-            render={() => (
-              <FormItem
-                className={cx({
-                  "text-red-500 font-bold": Boolean(
-                    form.formState.errors?.salesOrderItems?.[row.index]
-                      ?.purchasePrice,
-                  ),
-                })}
-              >
-                <FormControl>
-                  <PriceColumn
-                    index={row.index}
-                    control={form.control}
-                    name="salesOrderItems"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
+            render={() => {
+              return (
+                <FormItem
+                  className={cx({
+                    "text-red-500 font-bold": Boolean(
+                      form.formState.errors?.salesOrderItems?.[row.index]
+                        ?.purchasePrice,
+                    ),
+                  })}
+                >
+                  <FormControl>
+                    <LineColumn
+                      index={row.index}
+                      control={form.control}
+                      name="salesOrderItems"
+                    >
+                      {(value) => formatCurrency(value.purchasePrice)}
+                    </LineColumn>
+                  </FormControl>
+                </FormItem>
+              );
+            }}
           />
         ),
       },
@@ -416,15 +420,22 @@ export default function SalesOrderModal({
         },
 
         cell: ({ row }) => (
-          <AmountColumn
+          <LineColumn
             index={row.index}
             control={form.control}
             name="salesOrderItems"
-          />
+          >
+            {(value) => {
+              const q = Number(value.quantity);
+              const p =
+                Number(value.purchasePrice) - Number(value.discount) / q;
+              return formatCurrency(q * p);
+            }}
+          </LineColumn>
         ),
       },
     ],
-    [fields.length, form, productCombinationState.productCombinations, remove],
+    [fields.length, form, remove],
   );
 
   const isDelivery = useWatch({ control: form.control, name: "isDelivery" });
@@ -597,15 +608,7 @@ export default function SalesOrderModal({
                                 type="button"
                                 variant="outline"
                                 className="shadow-sm append-btn"
-                                onClick={() =>
-                                  append({
-                                    quantity: 1,
-                                    purchasePrice: 0,
-                                    discount: 0,
-                                    discountNote: "",
-                                    combinationId: -1,
-                                  })
-                                }
+                                onClick={() => append(salesOrderItemDefault)}
                               >
                                 <Plus />
                               </Button>
@@ -745,19 +748,11 @@ export default function SalesOrderModal({
           title="Create Invoice"
           description="Are you sure you want to create this invoice? This action cannot be undone."
           isLoading={loading}
-          shouldConfirm={() => {
-            return (
-              formData.salesOrderItems
-                ?.map((i) => {
-                  return productCombinationState.productCombinations.find(
-                    (p) => p.id === i.combinationId,
-                  )?.unit;
-                })
-                .some((unit) =>
-                  Object.values(WHOLESALE_UNITS).includes(unit ?? ""),
-                ) ?? false
-            );
-          }}
+          shouldConfirm={() =>
+            formData.salesOrderItems?.some(({ combinations }) =>
+              Object.values(WHOLESALE_UNITS).includes(combinations?.unit ?? ""),
+            ) ?? false
+          }
           onConfirm={(e) => {
             e.preventDefault();
             console.log(form.getValues(), form.formState.errors);

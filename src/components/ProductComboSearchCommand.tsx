@@ -6,13 +6,14 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import GroupedCommandList from "./GroupedCommandList";
+import useDebounce from "@/hooks/useDebounce";
 import { ProductCombinations } from "@/types";
 import { Button } from "./ui/button";
 import * as React from "react";
 
 function ProductComboSearchCommandComponent<T extends ProductCombinations>({
-  items,
   onSelect,
+  onSearch,
   children,
   className,
   renderOptions = ({ items, open, setOpen, onSelect, search }) => (
@@ -25,9 +26,9 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
     />
   ),
 }: {
-  items: T[];
   onSelect?: (item: T) => void;
   children: React.ReactNode;
+  onSearch: (search: string) => Promise<T[]>;
   className?: string;
   renderOptions?: ({
     items,
@@ -35,7 +36,7 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
     setOpen,
     onSelect,
   }: {
-    items: T[];
+    items: ProductCombinations[];
     open: boolean;
     setOpen: (open: boolean) => void;
     onSelect?: (item: T) => void;
@@ -45,6 +46,17 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const listRef = React.useRef<HTMLDivElement>(null);
+  const [items, setItems] = React.useState<ProductCombinations[]>([]);
+
+  const debouncedQuery = useDebounce(search, 300);
+
+  React.useEffect(() => {
+    const getData = async () => {
+      const data = await onSearch(debouncedQuery);
+      setItems(data);
+    };
+    getData();
+  }, [debouncedQuery, onSearch]);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -58,6 +70,12 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  React.useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollTo(0, 0);
+    }
+  }, [items]);
+
   return (
     <div className={className}>
       <Button
@@ -69,17 +87,14 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
       >
         {children}
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <Command onValueChange={(val) => setSearch(val)}>
+      <CommandDialog open={open} onOpenChange={setOpen} className="!w-[70%]">
+        <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Type a command or search..."
+            placeholder="Type to search for products..."
             value={search}
-            onValueChange={(val) => {
-              setSearch(val);
-              listRef.current?.scrollTo(0, 0);
-            }}
+            onValueChange={setSearch}
           />
-          <CommandList ref={listRef} className="overflow-hidden">
+          <CommandList ref={listRef} className="max-h-96 overflow-y-auto">
             <CommandEmpty>No results found.</CommandEmpty>
             {renderOptions({ items, open, setOpen, onSelect, search })}
           </CommandList>

@@ -32,7 +32,11 @@ export default class ProductCombinationService extends BaseService<ProductCombin
     );
     return response;
   };
-  search = async (params: { search: string; limit: number }) => {
+  search = async (params: {
+    search: string;
+    limit: number;
+    noBreakPacks?: boolean;
+  }) => {
     const response = await this.http.get(`${this.url}/search`, {
       params,
     });
