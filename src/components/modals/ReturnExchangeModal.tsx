@@ -9,13 +9,6 @@ import {
   Controller,
 } from "react-hook-form";
 import {
-  ApiErrorResponse,
-  ExchangeItem,
-  ProductCombinations,
-  Return,
-  ReturnItem,
-} from "@/types";
-import {
   Form,
   FormControl,
   FormField,
@@ -23,14 +16,10 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import {
-  goodReceiptServices,
-  productCombinationServices,
-  salesOrderServices,
-} from "@/services";
-import PriceColumn from "../forms/OrderItemForm/PriceColumn";
+import { ApiErrorResponse, ExchangeItem, Return, ReturnItem } from "@/types";
+import { goodReceiptServices, salesOrderServices } from "@/services";
 import ProductLookupInput from "../forms/ProductLookupInput";
-import UnitColumn from "../forms/OrderItemForm/UnitColumn";
+import LineColumn from "../forms/OrderItemForm/LineColumn";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatCurrency } from "@/utils/formatters";
@@ -46,7 +35,6 @@ import { DataTable } from "../DataTable";
 import { returnSchema } from "@/schemas";
 import ColorBadge from "../ColorBadge";
 import { Button } from "../ui/button";
-import { useStore } from "@/stores";
 import { toast } from "sonner";
 import Modal from "../Modal";
 import React from "react";
@@ -62,7 +50,6 @@ export default function ReturnExchangeModal({
   referenceId: number;
   salesOrder?: boolean;
 }) {
-  const { productCombinationState } = useStore();
   const form = useForm<Return>({
     resolver: zodResolver(returnSchema),
     defaultValues: {
@@ -109,16 +96,6 @@ export default function ReturnExchangeModal({
       toast.error("Submission failed - " + apiError.message);
     }
   };
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const data = await productCombinationServices.list();
-      productCombinationState.setProductsCombinations(data);
-    };
-    if (!productCombinationState.hasLoaded) {
-      getData();
-    }
-  }, [productCombinationState]);
 
   const returnColumns = React.useMemo<ColumnDef<ReturnItem>[]>(
     () => [
@@ -253,6 +230,31 @@ export default function ReturnExchangeModal({
         ),
       },
       {
+        accessorKey: "unit",
+        header: "Unit",
+        meta: {
+          className: "w-15 text-center",
+          headerClassName: "text-center",
+        },
+        cell: ({ row }) => {
+          return (
+            <LineColumn
+              index={row.index}
+              control={form.control}
+              name="exchanges"
+            >
+              {(value) =>
+                value.combinations?.unit && (
+                  <ColorBadge colorMap={UNIT_COLOR}>
+                    {value.combinations?.unit}
+                  </ColorBadge>
+                )
+              }
+            </LineColumn>
+          );
+        },
+      },
+      {
         accessorKey: "combinationId",
         header: "Product",
         meta: {
@@ -270,20 +272,24 @@ export default function ReturnExchangeModal({
                       <FormControl>
                         <ProductLookupInput
                           ariaInvalid={Boolean(
-                            form.formState.errors?.exchange?.[row.index]
+                            form.formState.errors?.exchanges?.[row.index]
                               ?.combinationId,
                           )}
-                          items={
-                            productCombinationState.productCombinations as ProductCombinations[]
-                          }
+                          index={row.index}
+                          disableNoQuantity
                           form={form}
                           {...field}
-                          name="exchange"
+                          name="exchanges"
                           onChange={(value) => {
                             field.onChange(value.id);
                             form.setValue(
                               `exchanges.${row.index}.purchasePrice`,
                               value.price,
+                            );
+
+                            form.setValue(
+                              `exchanges.${row.index}.combinations`,
+                              value,
                             );
 
                             setTimeout(() => {
@@ -310,23 +316,6 @@ export default function ReturnExchangeModal({
           );
         },
       },
-      {
-        accessorKey: "unit",
-        header: "Unit",
-        meta: {
-          className: "w-15 text-center",
-          headerClassName: "text-center",
-        },
-        cell: ({ row }) => {
-          return (
-            <UnitColumn
-              index={row.index}
-              control={form.control}
-              name="exchanges"
-            />
-          );
-        },
-      },
 
       {
         accessorKey: "purchasePrice",
@@ -343,16 +332,19 @@ export default function ReturnExchangeModal({
               <FormItem
                 className={cx({
                   "text-red-500 font-bold": Boolean(
-                    form.formState.errors?.exchange?.[row.index]?.purchasePrice,
+                    form.formState.errors?.exchanges?.[row.index]
+                      ?.purchasePrice,
                   ),
                 })}
               >
                 <FormControl>
-                  <PriceColumn
+                  <LineColumn
                     index={row.index}
                     control={form.control}
                     name="exchanges"
-                  />
+                  >
+                    {(value) => formatCurrency(value.purchasePrice)}
+                  </LineColumn>
                 </FormControl>
               </FormItem>
             )}
@@ -374,7 +366,7 @@ export default function ReturnExchangeModal({
         },
       },
     ],
-    [exchange, form, productCombinationState.productCombinations],
+    [exchange, form],
   );
   return (
     <Modal
@@ -402,6 +394,7 @@ export default function ReturnExchangeModal({
             name="returns"
             render={() => (
               <FormItem className="w-full">
+                <FormLabel>Returns</FormLabel>
                 <FormControl>
                   <DataTable
                     data={returnsFieldArray.fields}
@@ -446,6 +439,8 @@ export default function ReturnExchangeModal({
               name="exchanges"
               render={() => (
                 <FormItem className="w-full mb-4">
+                  <FormLabel>Exchanges</FormLabel>
+
                   <FormControl>
                     <DataTable
                       data={exchange.fields}

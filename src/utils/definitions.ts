@@ -28,6 +28,7 @@ export const ROUTES = {
   PAYMENT_DETAILS: "/payments/:id",
   PRICE_HISTORY: "/price-history",
   REORDERS: "/reorders",
+  TEST: "/test",
 };
 
 export const ORDER_TYPE = {

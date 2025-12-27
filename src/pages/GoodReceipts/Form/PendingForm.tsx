@@ -19,10 +19,9 @@ import {
   useWatch,
 } from "react-hook-form";
 import { productCombinationServices, supplierServices } from "@/services";
-import AmountColumn from "@/components/forms/OrderItemForm/AmountColumn";
+import { goodReceiptItemDefault, UNIT_COLOR } from "@/utils/definitions";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
-import UnitColumn from "@/components/forms/OrderItemForm/UnitColumn";
-import { goodReceiptItemDefault } from "@/utils/definitions";
+import LineColumn from "@/components/forms/OrderItemForm/LineColumn";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +31,7 @@ import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
@@ -46,7 +46,6 @@ export default function PendingForm({
 }) {
   const { supplierState } = useStore();
   const { productCombinationState } = useStore();
-
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "goodReceiptLines",
@@ -128,12 +127,19 @@ export default function PendingForm({
         },
         cell: ({ row }) => {
           return (
-            <UnitColumn
+            <LineColumn
               index={row.index}
               control={form.control}
               name="goodReceiptLines"
-              productCombinations={productCombinationState.noBreakPack}
-            />
+            >
+              {(value) =>
+                value.combinations?.unit && (
+                  <ColorBadge colorMap={UNIT_COLOR}>
+                    {value.combinations?.unit}
+                  </ColorBadge>
+                )
+              }
+            </LineColumn>
           );
         },
       },
@@ -149,22 +155,25 @@ export default function PendingForm({
                 <FormItem>
                   <FormControl>
                     <ProductLookupInput
+                      index={row.index}
                       ariaInvalid={Boolean(
                         form.formState.errors?.goodReceiptLines?.[row.index]
                           ?.combinationId,
                       )}
-                      items={
-                        productCombinationState.noBreakPack as ProductCombinations[]
-                      }
                       form={form}
                       {...field}
                       name="goodReceiptLines"
                       onChange={(value) => {
                         field.onChange(value.id);
-                        // form.setValue(
-                        //   `goodReceiptLines.${row.index}.purchasePrice`,
-                        //   value.price,
-                        // );
+
+                        form.setValue(
+                          `goodReceiptLines.${row.index}.purchasePrice`,
+                          value.price,
+                        );
+                        form.setValue(
+                          `goodReceiptLines.${row.index}.combinations`,
+                          value,
+                        );
 
                         setTimeout(() => {
                           if (row.index + 1 === fields.length) {
@@ -236,11 +245,7 @@ export default function PendingForm({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <NumberInput
-                    {...field}
-                    // value={Number(field.value)}
-                    type="currency"
-                  />
+                  <NumberInput {...field} type="currency" />
                 </FormControl>
               </FormItem>
             )}
@@ -255,15 +260,23 @@ export default function PendingForm({
         },
 
         cell: ({ row }) => (
-          <AmountColumn
+          <LineColumn
             index={row.index}
             control={form.control}
             name="goodReceiptLines"
-          />
+          >
+            {(value) => {
+              const q = Number(value.quantity);
+              const p =
+                Number(value.purchasePrice) - Number(value.discount) / q;
+              const total = q * p || 0;
+              return formatCurrency(total);
+            }}
+          </LineColumn>
         ),
       },
     ],
-    [fields.length, form, productCombinationState.noBreakPack, remove],
+    [fields.length, form, remove],
   );
 
   return (

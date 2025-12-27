@@ -21,11 +21,6 @@ import {
   Search,
 } from "lucide-react";
 import {
-  categoryServices,
-  productCombinationServices,
-  productServices,
-} from "@/services";
-import {
   ApiErrorResponse,
   Product,
   ProductCombinations,
@@ -34,8 +29,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
+import { getMappedSearchProductCombinations } from "@/lib/utils";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import { categoryServices, productServices } from "@/services";
 import PriceHistory from "@/pages/Products/PriceHistory";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -150,15 +147,9 @@ export default function ProductEdit() {
     getData();
   }, [categories.length, categoryHasLoaded, setCategories]);
 
-  React.useEffect(() => {
-    const getData = async () => {
-      if (!productCombinationState.hasLoaded) {
-        const data = await productCombinationServices.list();
-        productCombinationState.setProductsCombinations(data);
-      }
-    };
-    getData();
-  }, [productCombinationState]);
+  const onSearch = React.useCallback(async (search: string) => {
+    return await getMappedSearchProductCombinations({ search });
+  }, []);
 
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
@@ -307,7 +298,7 @@ export default function ProductEdit() {
         </PageHeaderContent>
         <PageHeaderActions>
           <ProductComboSearchCommand
-            items={productCombinationState.productCombinations}
+            onSearch={onSearch}
             onSelect={(item) =>
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`)
             }
