@@ -13,6 +13,14 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Card,
   CardAction,
   CardContent,
@@ -26,11 +34,13 @@ import {
 } from "@/services";
 import { ERROR, ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
+import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import { Ban, Car, EllipsisVertical, Undo } from "lucide-react";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
+import { formatCurrency } from "@/utils/formatters";
 import ColorBadge from "@/components/ColorBadge";
 import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
@@ -55,6 +65,7 @@ export default function SalesOrderDetails() {
     salesOrderState: { returnEnabled, setReturnEnabled },
     productState,
   } = useStore();
+  const [data, setData] = React.useState<SalesOrder>();
 
   const form = useForm<SalesOrderForm>({
     resolver: zodResolver(salesOrderFormSchema),
@@ -74,7 +85,7 @@ export default function SalesOrderDetails() {
   const getData = useCallback(async () => {
     try {
       const data = await salesOrderServices.get(Number(id));
-      form.reset(data);
+      setData(data);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.NOT_FOUND) {
@@ -82,7 +93,7 @@ export default function SalesOrderDetails() {
       }
       toast.error("Submission failed - " + apiError.message);
     }
-  }, [form, id, navigate]);
+  }, [id, navigate]);
 
   React.useEffect(() => {
     getData();
@@ -110,7 +121,16 @@ export default function SalesOrderDetails() {
       toast.error(`Submission failed, ${apiError.message}`);
     }
   }
-  const data: SalesOrder = form.getValues();
+  const totalReturnAmount =
+    data?.returnTransactions?.reduce(
+      (acc, item) => acc + Number(item.totalReturnAmount),
+      0,
+    ) ?? 0;
+  const totalExchangeAmount =
+    data?.returnTransactions?.reduce(
+      (acc, item) => acc + Number(item.totalExchangeAmount),
+      0,
+    ) ?? 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -180,15 +200,65 @@ export default function SalesOrderDetails() {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          <Static data={data} />
+          {data && <Static data={data} />}
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
           <CardTitle>Order Items</CardTitle>
         </CardHeader>
-        <CardContent>
-          <StaticDataTable data={data} />
+        <CardContent className="flex flex-col gap-4">
+          {data && <StaticDataTable data={data} />}
+
+          {data &&
+            data?.returnTransactions &&
+            data?.returnTransactions.length > 0 && (
+              <ReturnTransactionsTable data={data.returnTransactions} />
+            )}
+
+          <div className="w-1/3 flex ml-auto">
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-semibold">Sale Amount</TableCell>
+                  <TableHead className="text-right">
+                    {formatCurrency(Number(data?.totalAmount))}
+                  </TableHead>
+                </TableRow>
+
+                {totalReturnAmount > 0 && (
+                  <TableRow>
+                    <TableCell>Total Returns</TableCell>
+                    <TableHead className="text-right text-red-500">
+                      -{formatCurrency(totalReturnAmount)}
+                    </TableHead>
+                  </TableRow>
+                )}
+                {totalExchangeAmount > 0 && (
+                  <TableRow>
+                    <TableCell>Total Exchanges</TableCell>
+                    <TableHead className="text-right ">
+                      {formatCurrency(totalExchangeAmount)}
+                    </TableHead>
+                  </TableRow>
+                )}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={1} className="font-bold">
+                    Grand Total
+                  </TableCell>
+                  <TableCell className="text-right font-bold">
+                    {formatCurrency(
+                      Number(data?.totalAmount) -
+                        totalReturnAmount +
+                        totalExchangeAmount,
+                    )}
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

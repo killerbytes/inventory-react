@@ -1,24 +1,14 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableRow,
-} from "@/components/ui/table";
 import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
-import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
 import { ReturnItem, SalesOrder, SalesOrderItem } from "@/types";
 import { GLOBAL_COLOR, UNIT_COLOR } from "@/utils/definitions";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
-import { Label } from "@/components/ui/label";
-import { getReturnAmount } from "@/lib/utils";
 import useToggle from "@/hooks/useToggle";
 import { Link } from "react-router";
 import { useStore } from "@/stores";
@@ -42,7 +32,7 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
   const {
     salesOrderState: { returnEnabled, setReturnEnabled },
   } = useStore();
-  const computedReturnAmount = (data && getReturnAmount(data)) ?? 0;
+
   const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
     () => [
       ...(returnEnabled
@@ -97,6 +87,18 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         },
       },
       {
+        header: "Unit",
+        accessorKey: "unit",
+        size: 20,
+        cell: ({ row }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>
+              {String(row.original.unit)}
+            </ColorBadge>
+          );
+        },
+      },
+      {
         accessorKey: "nameSnapshot",
         header: "Product",
         meta: {
@@ -123,18 +125,7 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
       //       .join(" | ");
       //   },
       // },
-      {
-        header: "Unit",
-        accessorKey: "unit",
-        size: 20,
-        cell: ({ row }) => {
-          return (
-            <ColorBadge colorMap={UNIT_COLOR}>
-              {String(row.original.unit)}
-            </ColorBadge>
-          );
-        },
-      },
+
       {
         header: "Price",
         accessorKey: "purchasePrice",
@@ -197,47 +188,6 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
           </Button>
         </div>
       )}
-
-      {data &&
-        data?.returnTransactions &&
-        data?.returnTransactions.length > 0 && (
-          <>
-            <Label className="font-bold">Return Transactions</Label>
-            <ReturnTransactionsTable data={data.returnTransactions} />
-          </>
-        )}
-      <div className="w-1/3 flex ml-auto">
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell className="font-medium">Amount</TableCell>
-              <TableHead className="text-right">
-                {formatCurrency(Number(data?.totalAmount))}
-              </TableHead>
-            </TableRow>
-
-            {computedReturnAmount > 0 && (
-              <TableRow>
-                <TableCell className="font-medium">Returns</TableCell>
-                <TableHead className="text-right text-red-500">
-                  -{formatCurrency(computedReturnAmount)}
-                </TableHead>
-              </TableRow>
-            )}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell className="text-right font-semibold" colSpan={10}>
-                {computedReturnAmount > 0
-                  ? formatCurrency(
-                      Number(data?.totalAmount) - computedReturnAmount,
-                    )
-                  : formatCurrency(Number(data?.totalAmount))}
-              </TableCell>
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </div>
 
       {toggle.returnExchangeModal && (
         <ReturnExchangeModal

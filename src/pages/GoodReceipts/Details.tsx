@@ -40,7 +40,6 @@ import {
 } from "lucide-react";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
-import { getErrorMessage, getReturnAmount } from "@/lib/utils";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -52,8 +51,8 @@ import PendingOrderForm from "./Form/PendingForm";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/utils";
 import { cx } from "class-variance-authority";
-import { Label } from "@/components/ui/label";
 import PartialForm from "./Form/PartialForm";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
@@ -72,8 +71,6 @@ export default function Create() {
   const {
     goodReceiptState: { returnEnabled, setReturnEnabled },
   } = useStore();
-
-  const computedReturnAmount = (data && getReturnAmount(data)) ?? 0;
 
   const form = useForm<GoodReceiptUpdate>({
     resolver: zodResolver(goodReceiptUpdateSchema),
@@ -147,6 +144,12 @@ export default function Create() {
   React.useEffect(() => {
     getData();
   }, [getData, returnEnabled]);
+
+  const totalReturnAmount =
+    data?.returnTransactions?.reduce(
+      (acc, item) => acc + Number(item.totalReturnAmount),
+      0,
+    ) ?? 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -289,42 +292,38 @@ export default function Create() {
           {data &&
             data?.returnTransactions &&
             data?.returnTransactions.length > 0 && (
-              <>
-                <Label className="font-bold">Return Transactions</Label>
-                <ReturnTransactionsTable data={data.returnTransactions} />
-              </>
+              <ReturnTransactionsTable data={data.returnTransactions} />
             )}
-          {data?.status === ORDER_STATUS.RECEIVED && (
+          {(data?.status === ORDER_STATUS.RECEIVED ||
+            data?.status === ORDER_STATUS.COMPLETED) && (
             <div className="w-1/3 flex ml-auto">
               <Table>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="font-medium">Amount</TableCell>
+                    <TableCell className="font-bold">Order Amount</TableCell>
                     <TableHead className="text-right">
                       {formatCurrency(Number(data?.totalAmount))}
                     </TableHead>
                   </TableRow>
 
-                  {computedReturnAmount > 0 && (
+                  {totalReturnAmount > 0 && (
                     <TableRow>
-                      <TableCell className="font-medium">Returns</TableCell>
+                      <TableCell>Returns</TableCell>
                       <TableHead className="text-right text-red-500">
-                        -{formatCurrency(computedReturnAmount)}
+                        -{formatCurrency(totalReturnAmount)}
                       </TableHead>
                     </TableRow>
                   )}
                 </TableBody>
                 <TableFooter>
                   <TableRow>
-                    <TableCell colSpan={1} className="font-semibold">
-                      Total
+                    <TableCell colSpan={1} className="font-bold">
+                      Grand Total
                     </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {computedReturnAmount > 0
-                        ? formatCurrency(
-                            Number(data?.totalAmount) - computedReturnAmount,
-                          )
-                        : formatCurrency(Number(data?.totalAmount))}
+                    <TableCell className="text-right font-bold">
+                      {formatCurrency(
+                        Number(data?.totalAmount) - totalReturnAmount,
+                      )}
                     </TableCell>
                   </TableRow>
                 </TableFooter>

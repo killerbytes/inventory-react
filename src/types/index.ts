@@ -53,6 +53,7 @@ export type PaginatedResponse<T extends object> = {
   total: number;
   totalPages: number;
   currentPage: number;
+  totalAmount: number;
 };
 
 export interface ApiError {

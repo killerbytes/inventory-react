@@ -275,6 +275,7 @@ export const goodReceiptUpdateSchema = goodReceiptBaseSchema.extend({
 export const returnTransactionSchema = z.object({
   id: z.number().optional(),
   totalReturnAmount: z.coerce.number(),
+  totalExchangeAmount: z.coerce.number(),
   sourceType: z.string(),
   updatedAt: z.string(),
   returnItems: z.array(returnItemSchema),
@@ -292,6 +293,7 @@ export const goodReceiptSchema = goodReceiptBaseSchema
     }),
     goodReceiptStatusHistory: z.array(statusHistorySchema),
     returnTransactions: z.array(returnTransactionSchema),
+    totalReturnAmount: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -383,6 +385,8 @@ export const salesOrderSchema = salesOrderBaseSchema
     customer: z.any(),
     cancellationReason: z.string().nullish(),
     returnTransactions: z.array(returnTransactionSchema),
+    totalReturnAmount: z.string().optional(),
+    totalExchangeAmount: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (
