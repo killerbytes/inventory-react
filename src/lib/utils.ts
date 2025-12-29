@@ -166,7 +166,7 @@ export const getTotalAmountTableFooter = (data) => {
 export const getGoodReceiptTotalAmount = (data: GoodReceipt[]) => {
   return data.reduce(
     (acc: number, item: GoodReceipt) =>
-      acc + Number(item.totalAmount) - getReturnAmount(item),
+      acc + Number(item.totalAmount) - Number(item.totalReturnAmount),
     0,
   );
 };
