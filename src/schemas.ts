@@ -153,7 +153,7 @@ export const productCombinationsSchema = productCombinationBaseSchema.extend({
 
 export const returnItemSchema = z.object({
   combinationId: z.number(),
-  combination: productCombinationsSchema.optional(),
+  combination: productCombinationBaseSchema.nullish(),
   returnQuantity: z.coerce.number(),
   purchasePrice: z.coerce.number(),
   discount: z.coerce.number(),
@@ -222,34 +222,11 @@ export const goodReceiptLineBaseSchema = z.object({
     .pipe(z.number().min(0)),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),
+  combinations: productCombinationBaseSchema.nullish(),
 });
 
-export const goodReceiptLineSchema = z.object({
+export const goodReceiptLineSchema = goodReceiptLineBaseSchema.extend({
   id: z.coerce.number().nullish(),
-  combinationId: z.number().min(1, { message: "Product is required." }),
-  quantity: z.coerce.number().min(1, {
-    message: "Quantity must be at least 1.",
-  }),
-  purchasePrice: z.coerce
-    .number()
-    .min(0.01, { message: "Price must be at least 0.01." })
-    .superRefine((val, ctx) => {
-      if (isNaN(val)) {
-        ctx.addIssue({ code: "custom", message: "Amount is required" });
-      } else {
-        const decimalPlaces = (val.toString().split(".")[1] || "").length;
-        if (decimalPlaces > 2) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Max 2 decimal places allowed",
-          });
-        }
-      }
-    })
-    .pipe(z.number().min(0)),
-  combinations: productCombinationBaseSchema.nullish(),
-  discount: z.coerce.number().nullish(),
-  discountNote: z.string().nullish(),
   totalAmount: z.coerce.number().nullish(),
   variantSnapshot: z.any().nullish(),
   skuSnapshot: z.string().nullish(),
@@ -298,6 +275,7 @@ export const goodReceiptUpdateSchema = goodReceiptBaseSchema.extend({
 export const returnTransactionSchema = z.object({
   id: z.number().optional(),
   totalReturnAmount: z.coerce.number(),
+  totalExchangeAmount: z.coerce.number(),
   sourceType: z.string(),
   updatedAt: z.string(),
   returnItems: z.array(returnItemSchema),
@@ -315,6 +293,7 @@ export const goodReceiptSchema = goodReceiptBaseSchema
     }),
     goodReceiptStatusHistory: z.array(statusHistorySchema),
     returnTransactions: z.array(returnTransactionSchema),
+    totalReturnAmount: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -329,21 +308,25 @@ export const goodReceiptSchema = goodReceiptBaseSchema
     }
   });
 
-export const salesOrderItemSchema = z.object({
-  id: z.coerce.number().nullish(),
+export const salesOrderItemBaseSchema = z.object({
   combinationId: z.coerce.number().min(1, {
     message: "Product must be selected.",
   }),
-
   quantity: z.coerce.number().min(1, {
     message: "Quantity must be at least 1.",
   }),
-  originalPrice: z.coerce.number().nullish(),
   purchasePrice: z.coerce.number().min(0.01, {
     message: "Price must be at least 0.01.",
   }),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),
+  combinations: productCombinationBaseSchema.nullish(),
+});
+
+export const salesOrderItemSchema = salesOrderItemBaseSchema.extend({
+  id: z.coerce.number().nullish(),
+
+  originalPrice: z.coerce.number().nullish(),
   totalAmount: z.coerce.number().nullish(),
   variantSnapshot: z.any().nullish(),
   skuSnapshot: z.string().nullish(),
@@ -372,7 +355,7 @@ const salesOrderBaseSchema = z.object({
   ),
   checkNumber: z.string().nullish(),
 
-  salesOrderItems: z.array(salesOrderItemSchema).min(1, {
+  salesOrderItems: z.array(salesOrderItemBaseSchema).min(1, {
     message: "At least one product is required.",
   }),
 });
@@ -401,6 +384,9 @@ export const salesOrderSchema = salesOrderBaseSchema
     totalAmount: z.string().optional(),
     customer: z.any(),
     cancellationReason: z.string().nullish(),
+    returnTransactions: z.array(returnTransactionSchema),
+    totalReturnAmount: z.string().optional(),
+    totalExchangeAmount: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (

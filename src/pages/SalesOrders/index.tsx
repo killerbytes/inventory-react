@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import SalesOrderModal from "./SalesOrderModal";
 import { salesOrderServices } from "@/services";
 import { useNavigate } from "react-router-dom";
+import { cx } from "class-variance-authority";
 import { DateRange } from "react-day-picker";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
@@ -144,7 +145,22 @@ export default function SalesOrders() {
         headerClassName: "text-right",
         className: "text-right",
       },
-      cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
+      cell: ({ row }) => {
+        const { totalAmount, totalReturnAmount, totalExchangeAmount } =
+          row.original;
+
+        return (
+          <div
+            className={cx({ "text-red-500": Number(totalReturnAmount) > 0 })}
+          >
+            {formatCurrency(
+              Number(totalAmount) -
+                Number(totalReturnAmount) +
+                Number(totalExchangeAmount),
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -216,7 +232,10 @@ export default function SalesOrders() {
                         {formatCurrency(
                           data.reduce(
                             (acc: number, item: SalesOrder) =>
-                              acc + parseFloat(item.totalAmount ?? "0"),
+                              acc +
+                              Number(item.totalAmount) -
+                              Number(item.totalReturnAmount) +
+                              Number(item.totalExchangeAmount),
                             0,
                           ),
                         )}

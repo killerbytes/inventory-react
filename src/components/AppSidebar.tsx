@@ -61,7 +61,7 @@ const items = [
     icon: BanknoteArrowDown,
   },
   {
-    title: "Sales",
+    title: "Sales Orders",
     url: ROUTES.SALES_ORDERS,
     icon: BanknoteArrowUp,
   },

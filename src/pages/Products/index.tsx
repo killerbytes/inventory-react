@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/accordion";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { categoryServices, productCombinationServices } from "@/services";
-import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
+import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { CategorizedProductList, Product } from "@/types";
+import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
@@ -123,6 +124,10 @@ export default function Products() {
     }
   }, [productCombinationState]);
 
+  const onSearch = React.useCallback(async (search: string) => {
+    return await getMappedSearchProductCombinations({ search });
+  }, []);
+
   return (
     <>
       <PageHeader>
@@ -134,7 +139,7 @@ export default function Products() {
         </PageHeaderContent>
         <PageHeaderActions>
           <ProductComboSearchCommand
-            items={productCombinationState.productCombinations}
+            onSearch={onSearch}
             onSelect={(item) => {
               navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
             }}
@@ -195,13 +200,7 @@ export default function Products() {
             <Loader />
           ) : (
             data.length > 0 && (
-              <Accordion
-                type="multiple"
-                className="w-full"
-                xxxdefaultValue={data
-                  ?.filter((i) => i.products.length > 0)
-                  .map((i) => i.categoryId)}
-              >
+              <Accordion type="multiple" className="w-full">
                 {data?.map((item) => (
                   <AccordionItem value={item.categoryId} key={item.categoryId}>
                     <AccordionTrigger
@@ -211,53 +210,18 @@ export default function Products() {
                       )}
                     >
                       {item.categoryName}
-
-                      {/* <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCategory(Number(item.categoryId));
-                        handleToggle({ createProductModal: true });
-                      }}
-                    >
-                      <PlusIcon />
-                    </div> */}
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col">
                       <>
                         {item.products.map((product) => (
                           <Fragment key={product.id}>
                             <ProductItem item={product} />
-                            {/* 
-                        {product.combinations?.map((combination: Product) => {
-                          return (
-                            <Fragment key={combination.id}>
-                              <CombinationItem
-                                item={combination}
-                                product={product}
-                                sub={true}
-                                onSelect={setSelected}
-                                onToggle={handleToggle}
-                              />
-                            </Fragment>
-                          );
-                        })} */}
                           </Fragment>
                         ))}
                         {item.subCategories?.map((i) => (
                           <Fragment key={i.id}>
                             <div className="flex gap-2 justify-start items-center">
                               {i.categoryName}
-                              {/* <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-8"
-                              onClick={() => {
-                                setCategory(Number(i.categoryId));
-                                handleToggle({ createProductModal: true });
-                              }}
-                            >
-                              <PlusIcon />
-                            </Button> */}
                             </div>
 
                             <div className="flex gap-2 justify-start items-center">
@@ -268,31 +232,6 @@ export default function Products() {
                           </Fragment>
                         ))}
                       </>
-
-                      <div className="flex justify-start  py-1">
-                        {/* <Button
-                        variant="outline"
-                        size="icon"
-                        className="size-8 shadow-sm"
-                        onClick={() => {
-                          setCategory(Number(item.categoryId));
-                          handleToggle({ createProductModal: true });
-                        }}
-                      >
-                        <PlusIcon />
-                      </Button> */}
-                        {/* {item.subCategories.map((i) => (
-                        <Badge
-                          onClick={() => {
-                            setCategory(Number(i.id));
-                            handleToggle({ createProductModal: true });
-                          }}
-                        >
-                          {console.log(i)}
-                          {i.subCategoryName}
-                        </Badge>
-                      ))} */}
-                      </div>
                     </AccordionContent>
                   </AccordionItem>
                 ))}

@@ -39,6 +39,7 @@ export default function GoodReceipts() {
     total: 0,
     totalPages: 0,
     currentPage: 0,
+    totalAmount: 0,
   });
 
   const [loading, setLoading] = React.useState(true);
@@ -210,14 +211,13 @@ export default function GoodReceipts() {
           className: "text-right",
         },
         cell: ({ row }) => {
-          const { totalAmount, returnTransactions } = row.original;
-          const returnAmount = returnTransactions?.reduce(
-            (acc, item) => acc + Number(item.totalReturnAmount),
-            0,
-          );
+          const { totalAmount, totalReturnAmount } = row.original;
+
           return (
-            <div className={cx({ "text-red-500": Number(returnAmount) > 0 })}>
-              {formatCurrency(Number(totalAmount) - Number(returnAmount))}
+            <div
+              className={cx({ "text-red-500": Number(totalReturnAmount) > 0 })}
+            >
+              {formatCurrency(Number(totalAmount) - Number(totalReturnAmount))}
             </div>
           );
         },
@@ -268,9 +268,7 @@ export default function GoodReceipts() {
               }}
             />
             <DateRangePicker value={range} onChange={setRange} />
-            <div className="text-xl">
-              {formatCurrency(getGoodReceiptTotalAmount(data?.data))}
-            </div>
+            <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
           </div>
           {loading ? (
             <p>Loading...</p>
@@ -283,12 +281,12 @@ export default function GoodReceipts() {
                   navigate(`${ROUTES.GOOD_RECEIPT}/${item.id}`)
                 }
                 showFooter
-                renderFooter={(data: GoodReceipt[]) => {
+                renderFooter={(items) => {
                   return (
                     <TableRow className="font-bold">
                       <TableCell>Total Amount</TableCell>
                       <TableCell colSpan={10} className="text-right">
-                        {formatCurrency(getGoodReceiptTotalAmount(data))}
+                        {formatCurrency(getGoodReceiptTotalAmount(items))}
                       </TableCell>
                     </TableRow>
                   );

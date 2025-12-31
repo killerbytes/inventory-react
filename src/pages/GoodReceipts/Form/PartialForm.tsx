@@ -103,6 +103,17 @@ export default function PartialForm({
         },
       },
       {
+        header: "Unit",
+        accessorKey: "unit",
+        cell: ({ row }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>
+              {String(row.original.unit)}
+            </ColorBadge>
+          );
+        },
+      },
+      {
         accessorKey: "nameSnapshot",
         header: "Product",
         meta: {
@@ -118,17 +129,6 @@ export default function PartialForm({
                 {row.original.nameSnapshot}
               </Link>
             </div>
-          );
-        },
-      },
-      {
-        header: "Unit",
-        accessorKey: "unit",
-        cell: ({ row }) => {
-          return (
-            <ColorBadge colorMap={UNIT_COLOR}>
-              {String(row.original.unit)}
-            </ColorBadge>
           );
         },
       },

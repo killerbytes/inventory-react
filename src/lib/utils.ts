@@ -4,9 +4,11 @@ import {
   GoodReceipt,
   Product,
   ProductCombinations,
+  SalesOrder,
   StatusHistory,
 } from "@/types";
 import { ProductCommandSelectedItemProps } from "@/components/ProductCommand";
+import { productCombinationServices } from "@/services";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -164,14 +166,48 @@ export const getTotalAmountTableFooter = (data) => {
 export const getGoodReceiptTotalAmount = (data: GoodReceipt[]) => {
   return data.reduce(
     (acc: number, item: GoodReceipt) =>
-      acc + Number(item.totalAmount) - getReturnAmount(item),
+      acc + Number(item.totalAmount) - Number(item.totalReturnAmount),
     0,
   );
 };
 
-export const getReturnAmount = (data: GoodReceipt) => {
-  return data.returnTransactions.reduce(
+export const getReturnAmount = (data: GoodReceipt | SalesOrder) => {
+  return data?.returnTransactions?.reduce(
     (acc: number, val: any) => acc + Number(val.totalReturnAmount),
     0,
   );
+};
+
+export const getMappedSearchProductCombinations = async (params: {
+  search: string;
+  limit?: number;
+  noBreakPacks?: boolean;
+}) => {
+  const { search } = params;
+  if (!search || search.length < 2) {
+    return [];
+  }
+
+  const productCombinations = await productCombinationServices.search({
+    limit: params.limit ?? 20,
+    ...params,
+  });
+
+  const result = [];
+  const words = search
+    .toLowerCase()
+    .split(" ")
+    .filter((i) => i.length > 0);
+
+  for (const item of productCombinations) {
+    const productCombinations = item.combinations?.filter(
+      (i: ProductCombinations) => {
+        const name = i.name.toLowerCase();
+        return words.every((word) => name.includes(word));
+      },
+    );
+
+    result.push(...productCombinations);
+  }
+  return result;
 };
