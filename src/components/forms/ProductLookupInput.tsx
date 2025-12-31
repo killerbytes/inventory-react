@@ -15,6 +15,7 @@ export default function ProductLookupInput<T extends FieldValues>({
   name,
   ariaInvalid,
   disableNoQuantity,
+  noBreakPacks = false,
 }: {
   form: UseFormReturn<T>;
   onChange: (value: ProductCombinations) => void;
@@ -22,16 +23,20 @@ export default function ProductLookupInput<T extends FieldValues>({
   name: Path<T>;
   ariaInvalid?: boolean;
   disableNoQuantity?: boolean;
+  noBreakPacks?: boolean;
 }) {
   const [items, setItems] = React.useState<ProductCombinations[]>([]);
-  const onSearch = React.useCallback(async (search: string) => {
-    const combinations = await getMappedSearchProductCombinations({
-      search,
-      noBreakPacks: true,
-    });
-    setItems(combinations);
-    return combinations;
-  }, []);
+  const onSearch = React.useCallback(
+    async (search: string) => {
+      const combinations = await getMappedSearchProductCombinations({
+        search,
+        ...(noBreakPacks && { noBreakPacks }),
+      });
+      setItems(combinations);
+      return combinations;
+    },
+    [noBreakPacks],
+  );
 
   const options = useExcludeExistToList(items, form?.control, name);
   return (

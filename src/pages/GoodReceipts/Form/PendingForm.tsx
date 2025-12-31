@@ -163,6 +163,7 @@ export default function PendingForm({
                       form={form}
                       {...field}
                       name="goodReceiptLines"
+                      noBreakPacks
                       onChange={(value) => {
                         field.onChange(value.id);
 
