@@ -38,9 +38,10 @@ import React from "react";
 
 export default function SalesOrders() {
   const navigate = useNavigate();
-  const [data, setData] = React.useState<PaginatedResponse<SalesOrder[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<SalesOrder>>({
     data: [],
     total: 0,
+    totalAmount: 0,
     totalPages: 0,
     currentPage: 0,
   });
@@ -73,7 +74,7 @@ export default function SalesOrders() {
         status: filter.status === "ALL" ? undefined : filter.status,
       };
 
-      const data: PaginatedResponse<SalesOrder[]> =
+      const data: PaginatedResponse<SalesOrder> =
         await salesOrderServices.getAll(payload);
 
       setData(data);

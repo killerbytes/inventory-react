@@ -387,6 +387,7 @@ export const salesOrderSchema = salesOrderBaseSchema
     returnTransactions: z.array(returnTransactionSchema),
     totalReturnAmount: z.string().optional(),
     totalExchangeAmount: z.string().optional(),
+    salesOrderStatusHistory: z.array(statusHistorySchema),
   })
   .superRefine((data, ctx) => {
     if (

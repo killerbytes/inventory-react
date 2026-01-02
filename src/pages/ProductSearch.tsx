@@ -45,10 +45,12 @@ export default function ProductSearch() {
         .filter((i) => i.length > 0);
 
       for (const item of res) {
-        const productCombinations = item.productCombinations.filter((i) => {
-          const name = i.name.toLowerCase();
-          return words.every((word) => name.includes(word));
-        });
+        const productCombinations = item.combinations.filter(
+          (i: ProductCombinations) => {
+            const name = i.name.toLowerCase();
+            return words.every((word) => name.includes(word.toLowerCase()));
+          },
+        );
 
         result.push(...productCombinations);
       }
