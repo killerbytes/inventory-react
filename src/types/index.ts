@@ -32,6 +32,7 @@ import {
   goodReceiptCreateSchema,
   goodReceiptUpdateSchema,
   returnTransactionSchema,
+  invoiceGoodReceiptSchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -122,6 +123,7 @@ type StockAdjustment = z.infer<typeof stockAdjustmentSchema>;
 type Invoice = z.infer<typeof invoiceSchema>;
 type InvoiceLine = z.infer<typeof invoiceLineSchema>;
 type invoiceForm = z.infer<typeof invoiceFormSchema>;
+type InvoiceGoodReceipt = z.infer<typeof invoiceGoodReceiptSchema>;
 type Payment = z.infer<typeof paymentSchema>;
 type PaymentApplication = z.infer<typeof paymentApplicationSchema>;
 type priceHistory = z.infer<typeof priceHistorySchema>;
@@ -157,6 +159,7 @@ export type {
   Invoice,
   invoiceForm,
   InvoiceLine,
+  InvoiceGoodReceipt,
   Payment,
   PaymentApplication,
   priceHistory,

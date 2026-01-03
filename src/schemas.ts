@@ -292,8 +292,8 @@ export const goodReceiptSchema = goodReceiptBaseSchema
       message: "At least one product is required.",
     }),
     goodReceiptStatusHistory: z.array(statusHistorySchema),
-    returnTransactions: z.array(returnTransactionSchema),
-    totalReturnAmount: z.string().optional(),
+    returnTransactions: z.array(returnTransactionSchema).nullish(),
+    totalReturnAmount: z.coerce.number().nullish(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -307,6 +307,14 @@ export const goodReceiptSchema = goodReceiptBaseSchema
       });
     }
   });
+
+export const invoiceGoodReceiptSchema = goodReceiptBaseSchema.extend({
+  id: z.number(),
+  status: z.string(),
+  supplier: z.any(),
+  totalAmount: z.string(),
+  totalReturnAmount: z.coerce.number().nullish(),
+});
 
 export const salesOrderItemBaseSchema = z.object({
   combinationId: z.coerce.number().min(1, {
@@ -467,7 +475,7 @@ export const invoiceFormSchema = z.object({
   dueDate: z.string(),
   status: z.string(),
   notes: z.string().nullish(),
-  gr: z.array(goodReceiptSchema).min(1, {
+  gr: z.array(invoiceGoodReceiptSchema).min(1, {
     message: "At least one Good Receipt is required.",
   }),
 });

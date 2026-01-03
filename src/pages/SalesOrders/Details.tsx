@@ -121,16 +121,17 @@ export default function SalesOrderDetails() {
       toast.error(`Submission failed, ${apiError.message}`);
     }
   }
+
   const totalReturnAmount =
     data?.returnTransactions?.reduce(
       (acc, item) => acc + Number(item.totalReturnAmount),
       0,
-    ) ?? 0;
+    ) || 0;
   const totalExchangeAmount =
     data?.returnTransactions?.reduce(
       (acc, item) => acc + Number(item.totalExchangeAmount),
       0,
-    ) ?? 0;
+    ) || 0;
 
   return (
     <div className="flex flex-col gap-4">

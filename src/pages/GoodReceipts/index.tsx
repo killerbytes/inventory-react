@@ -244,6 +244,8 @@ export default function GoodReceipts() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex gap-2 justify-between items-center">
+            <DateRangePicker value={range} onChange={setRange} />
+
             <Input
               placeholder="Search Reference"
               className="w-full"
@@ -267,7 +269,6 @@ export default function GoodReceipts() {
                 }
               }}
             />
-            <DateRangePicker value={range} onChange={setRange} />
             <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
           </div>
           {loading ? (

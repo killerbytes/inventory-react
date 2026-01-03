@@ -16,18 +16,17 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
 import { cx } from "class-variance-authority";
-import { getReturnAmount } from "@/lib/utils";
 import { toast } from "sonner";
 import React from "react";
 
 export default function SupplierDetails() {
   const { id } = useParams();
-  const [data, setData] = React.useState<Supplier>();
+  const [data, setData] = React.useState<GoodReceipt[]>();
   const [supplier, setSupplier] = React.useState<Supplier>();
   const getData = React.useCallback(async () => {
     try {
       const data: GoodReceipt[] = await goodReceiptServices.getBySupplier(
-        id,
+        Number(id),
         {},
       );
 
@@ -58,7 +57,10 @@ export default function SupplierDetails() {
           return (
             <Link
               className="text-primary"
-              to={ROUTES.GOOD_RECEIPT_DETAILS.replace(":id", row.original.id)}
+              to={ROUTES.GOOD_RECEIPT_DETAILS.replace(
+                ":id",
+                String(row.original.id),
+              )}
             >
               {row.original.referenceNo}
             </Link>
@@ -90,12 +92,12 @@ export default function SupplierDetails() {
           className: "text-right",
         },
         cell: ({ row }) => {
-          const { totalAmount } = row.original;
-          const returnAmount = getReturnAmount(row.original);
-
+          const { totalAmount, totalReturnAmount } = row.original;
           return (
-            <div className={cx({ "text-red-500": Number(returnAmount) > 0 })}>
-              {formatCurrency(Number(totalAmount) - returnAmount)}
+            <div
+              className={cx({ "text-red-500": Number(totalReturnAmount) > 0 })}
+            >
+              {formatCurrency(Number(totalAmount) - Number(totalReturnAmount))}
             </div>
           );
         },

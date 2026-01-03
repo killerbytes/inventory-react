@@ -171,13 +171,6 @@ export const getGoodReceiptTotalAmount = (data: GoodReceipt[]) => {
   );
 };
 
-export const getReturnAmount = (data: GoodReceipt | SalesOrder) => {
-  return data?.returnTransactions?.reduce(
-    (acc: number, val: any) => acc + Number(val.totalReturnAmount),
-    0,
-  );
-};
-
 export const getMappedSearchProductCombinations = async (params: {
   search: string;
   limit?: number;

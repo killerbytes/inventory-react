@@ -1,17 +1,19 @@
 import {
+  ApiErrorResponse,
+  GoodReceipt,
+  Invoice,
+  invoiceForm,
+  InvoiceGoodReceipt,
+  InvoiceLine,
+  Supplier,
+} from "@/types";
+import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  ApiErrorResponse,
-  GoodReceipt,
-  Invoice,
-  invoiceForm,
-  InvoiceLine,
-} from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { useController, useFieldArray } from "react-hook-form";
 import GoodReceiptPickerModal from "./GoodReceiptPickerModal";
@@ -31,7 +33,6 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import { getReturnAmount } from "@/lib/utils";
 import { supplierServices } from "@/services";
 import { invoiceFormSchema } from "@/schemas";
 import { invoiceServices } from "@/services";
@@ -42,7 +43,6 @@ import Modal from "@/components/Modal";
 import { Plus } from "lucide-react";
 import { addWeeks } from "date-fns";
 import { useStore } from "@/stores";
-import { Supplier } from "@/types";
 import { toast } from "sonner";
 import React from "react";
 import { z } from "zod";
@@ -110,7 +110,7 @@ export default function InvoiceModal({
     }
   }, [setSuppliers, suppliers.length]);
 
-  const onPickerSubmit = (selected: GoodReceipt[]) => {
+  const onPickerSubmit = (selected: InvoiceGoodReceipt[]) => {
     handleToggle({ goodReceiptPickerModal: false });
     form.setValue("gr", selected);
   };
@@ -120,7 +120,7 @@ export default function InvoiceModal({
       const { gr, ...rest } = values;
       const invoiceLines = gr.map((item) => ({
         goodReceiptId: Number(item.id),
-        amount: Number(item.totalAmount) - getReturnAmount(item),
+        amount: Number(item.totalAmount) - Number(item.totalReturnAmount),
       }));
 
       const payload = {
@@ -183,12 +183,12 @@ export default function InvoiceModal({
           className: "text-right",
         },
         cell: ({ row }) => {
-          const { totalAmount } = row.original;
-          const returnAmount = getReturnAmount(row.original);
-
+          const { totalAmount, totalReturnAmount } = row.original;
           return (
-            <div className={cx({ "text-red-500": Number(returnAmount) > 0 })}>
-              {formatCurrency(Number(totalAmount) - Number(returnAmount))}
+            <div
+              className={cx({ "text-red-500": Number(totalReturnAmount) > 0 })}
+            >
+              {formatCurrency(Number(totalAmount) - Number(totalReturnAmount))}
             </div>
           );
         },
@@ -320,7 +320,7 @@ export default function InvoiceModal({
                                   (acc: number, item: GoodReceipt) =>
                                     acc +
                                     Number(item.totalAmount) -
-                                    getReturnAmount(item),
+                                    Number(item.totalReturnAmount),
                                   0,
                                 ),
                               )}

@@ -10,9 +10,8 @@ import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
-import { getReturnAmount } from "@/lib/utils";
+import { InvoiceGoodReceipt } from "@/types";
 import Modal from "@/components/Modal";
-import { GoodReceipt } from "@/types";
 import React from "react";
 
 export default function GoodReceiptPickerModal({
@@ -25,18 +24,19 @@ export default function GoodReceiptPickerModal({
   isOpen: boolean;
   onClose: () => void;
   supplierId: number;
-  onSubmit: (selected: GoodReceipt[]) => void;
-  defaultSelected: GoodReceipt[];
+  onSubmit: (selected: InvoiceGoodReceipt[]) => void;
+  defaultSelected: InvoiceGoodReceipt[];
 }) {
-  const [selected, setSelected] = React.useState([]);
+  const [selected, setSelected] = React.useState<InvoiceGoodReceipt[]>([]);
   const [goodReceipts, setGoodReceipts] =
-    React.useState<GoodReceipt[]>(defaultSelected);
+    React.useState<InvoiceGoodReceipt[]>(defaultSelected);
 
   React.useEffect(() => {
     const getData = async (id: number) => {
-      const data: GoodReceipt[] = await goodReceiptServices.getBySupplier(id, {
-        status: ORDER_STATUS.RECEIVED,
-      });
+      const data: InvoiceGoodReceipt[] =
+        await goodReceiptServices.getBySupplier(id, {
+          status: ORDER_STATUS.RECEIVED,
+        });
       setGoodReceipts(data);
     };
     if (supplierId) {
@@ -44,7 +44,7 @@ export default function GoodReceiptPickerModal({
     }
   }, [supplierId]);
 
-  const columns: ColumnDef<GoodReceipt>[] = React.useMemo(
+  const columns: ColumnDef<InvoiceGoodReceipt>[] = React.useMemo(
     () => [
       {
         accessorKey: "selected",
@@ -106,12 +106,12 @@ export default function GoodReceiptPickerModal({
           className: "text-right",
         },
         cell: ({ row }) => {
-          const { totalAmount } = row.original;
-          const returnAmount = getReturnAmount(row.original);
-
+          const { totalAmount, totalReturnAmount } = row.original;
           return (
-            <div className={cx({ "text-red-500": Number(returnAmount) > 0 })}>
-              {formatCurrency(Number(totalAmount) - returnAmount)}
+            <div
+              className={cx({ "text-red-500": Number(totalReturnAmount) > 0 })}
+            >
+              {formatCurrency(Number(totalAmount) - Number(totalReturnAmount))}
             </div>
           );
         },
@@ -131,9 +131,12 @@ export default function GoodReceiptPickerModal({
           columns={columns}
           showFooter={true}
           defaultSelected={defaultSelected}
-          onSelectionChange={React.useCallback((items) => {
-            setSelected(items);
-          }, [])}
+          onSelectionChange={React.useCallback(
+            (items: InvoiceGoodReceipt[]) => {
+              setSelected(items);
+            },
+            [],
+          )}
           renderFooter={() => {
             return (
               <TableRow>
@@ -141,8 +144,10 @@ export default function GoodReceiptPickerModal({
                 <TableCell className="text-right">
                   {formatCurrency(
                     selected.reduce(
-                      (acc: number, item: GoodReceipt) =>
-                        acc + Number(item.totalAmount) - getReturnAmount(item),
+                      (acc: number, item: InvoiceGoodReceipt) =>
+                        acc +
+                        Number(item.totalAmount) -
+                        Number(item.totalReturnAmount),
                       0,
                     ),
                   )}
