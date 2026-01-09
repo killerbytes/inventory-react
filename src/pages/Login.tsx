@@ -34,11 +34,11 @@ export default function Login() {
   const { callbackUrl } = qs.parse(window.location.search);
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username:
-        localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_USER`) || "",
-      password: "",
-    },
+    // defaultValues: {
+    //   username:
+    //     localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_USER`) || "",
+    //   password: "",
+    // },
   });
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
@@ -51,10 +51,10 @@ export default function Login() {
       );
       toast.success(`Logging in... ${values.username}`);
       form.reset();
-      localStorage.setItem(
-        `${import.meta.env.VITE_APP_NAME}_USER`,
-        values.username,
-      );
+      // localStorage.setItem(
+      //   `${import.meta.env.VITE_APP_NAME}_USER`,
+      //   values.username,
+      // );
       navigate(typeof callbackUrl === "string" ? callbackUrl : "/");
     } catch (error) {
       const apiError = error as ApiErrorResponse;
@@ -73,6 +73,7 @@ export default function Login() {
         <CardContent className="grid gap-4">
           <Form {...form}>
             <form
+              name="login"
               autoComplete="on"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -84,6 +85,13 @@ export default function Login() {
               }}
               className="space-y-8"
             >
+              <input
+                type="text"
+                name="username"
+                autoComplete="username"
+                hidden
+              />
+
               <FormField
                 control={form.control}
                 name="username"
