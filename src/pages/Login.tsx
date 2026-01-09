@@ -91,7 +91,7 @@ export default function Login() {
                       <Input
                         placeholder="Username"
                         {...field}
-                        autoComplete="off"
+                        autoComplete="username"
                       />
                     </FormControl>
                     <FormMessage />
@@ -110,6 +110,7 @@ export default function Login() {
                         placeholder="********"
                         {...field}
                         autoFocus
+                        autoComplete="current-password"
                       />
                     </FormControl>
                     <FormMessage />
