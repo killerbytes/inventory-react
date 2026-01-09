@@ -72,6 +72,9 @@ export default function Login() {
         <CardContent className="grid gap-4">
           <Form {...form}>
             <form
+              action="/login"
+              method="post"
+              autoComplete="on"
               onSubmit={(e) => {
                 e.preventDefault();
                 form
