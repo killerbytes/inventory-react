@@ -75,6 +75,8 @@ export default function Login() {
             <form
               name="login"
               autoComplete="on"
+              action="/login"
+              method="post"
               onSubmit={(e) => {
                 e.preventDefault();
                 form
@@ -85,13 +87,6 @@ export default function Login() {
               }}
               className="space-y-8"
             >
-              <input
-                type="text"
-                name="username"
-                autoComplete="username"
-                hidden
-              />
-
               <FormField
                 control={form.control}
                 name="username"
