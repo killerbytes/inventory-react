@@ -1,17 +1,18 @@
 import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Toaster } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
@@ -72,8 +73,6 @@ export default function Login() {
         <CardContent className="grid gap-4">
           <Form {...form}>
             <form
-              action="/login"
-              method="post"
               autoComplete="on"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -90,11 +89,13 @@ export default function Login() {
                 name="username"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel htmlFor="username">Username</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Username"
                         {...field}
                         autoComplete="username"
+                        id="username"
                       />
                     </FormControl>
                     <FormMessage />
@@ -107,13 +108,14 @@ export default function Login() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel htmlFor="password">Password</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
                         placeholder="********"
                         {...field}
-                        autoFocus
                         autoComplete="current-password"
+                        id="password"
                       />
                     </FormControl>
                     <FormMessage />
