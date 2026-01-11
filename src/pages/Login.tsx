@@ -44,10 +44,10 @@ export default function Login() {
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
       const data = await authServices.login(values);
-      const { token } = data;
+      const { accessToken } = data;
       await localStorage.setItem(
         `${import.meta.env.VITE_APP_NAME}_TOKEN`,
-        token,
+        accessToken,
       );
       toast.success(`Logging in... ${values.username}`);
       form.reset();

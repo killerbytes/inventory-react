@@ -27,9 +27,10 @@ export default class Http {
         "x-access-token": token,
       },
     });
+    this.axiosInstance.defaults.withCredentials = true;
     this.axiosInstance.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
         try {
           if (error.code === "ERR_NETWORK") {
             throw error;
@@ -38,22 +39,68 @@ export default class Http {
           const { status } = error.response || {};
           switch (status) {
             case 401:
-            case 403:
-              localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
+            case 403: {
+              const originalRequest = error.config;
+              if (!originalRequest._retry) {
+                if (originalRequest.url?.includes("/auth/refresh-token")) {
+                  return Promise.reject(error);
+                }
 
-              window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
-
+                originalRequest._retry = true;
+                try {
+                  const token = await this.refreshToken();
+                  originalRequest.headers["x-access-token"] = token;
+                  return this.axiosInstance(originalRequest);
+                } catch (retryError) {
+                  return Promise.reject(retryError);
+                }
+              }
               return Promise.reject(error);
+            }
             default:
               return Promise.reject(error);
           }
         } catch (error) {
           const apiError = error as ApiErrorResponse;
           toast.error(apiError.message);
+          return Promise.reject(error);
         }
       },
     );
   }
+
+  private refreshPromise: Promise<string> | null = null;
+
+  refreshToken = async (): Promise<string> => {
+    if (this.refreshPromise) return this.refreshPromise;
+
+    this.refreshPromise = (async () => {
+      try {
+        const { accessToken } = await this.post(
+          `/auth${ROUTES.REFRESH}`,
+          {},
+          { withCredentials: true },
+        );
+
+        localStorage.setItem(
+          `${import.meta.env.VITE_APP_NAME}_TOKEN`,
+          accessToken,
+        );
+        return accessToken;
+      } catch (error) {
+        const apiError = error as ApiErrorResponse;
+        if (apiError.message === "Invalid refresh token") {
+          localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
+          window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+        }
+        throw error;
+      } finally {
+        this.refreshPromise = null;
+      }
+    })();
+
+    return this.refreshPromise;
+  };
   getToken = () => {
     return localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
   };
@@ -71,9 +118,10 @@ export default class Http {
       errorParser(error);
     }
   };
-  post = async (url: string, payload: object) => {
+  post = async (url: string, payload: object, options: object = {}) => {
     const config = {
       headers: this.getHeaders(),
+      ...options,
     };
     try {
       const res = await this.axiosInstance.post(url, payload, config);
