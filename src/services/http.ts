@@ -89,9 +89,15 @@ export default class Http {
         return accessToken;
       } catch (error) {
         const apiError = error as ApiErrorResponse;
-        if (apiError.message === "Invalid refresh token") {
-          localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
-          window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+        switch (apiError.message) {
+          case "Invalid refresh token":
+            localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
+            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+            break;
+          case "jwt must be provided":
+            localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
+            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+            break;
         }
         throw error;
       } finally {
