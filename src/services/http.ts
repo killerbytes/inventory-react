@@ -89,6 +89,8 @@ export default class Http {
         return accessToken;
       } catch (error) {
         const apiError = error as ApiErrorResponse;
+        console.log(apiError.message);
+
         switch (apiError.message) {
           case "Invalid refresh token":
             localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);

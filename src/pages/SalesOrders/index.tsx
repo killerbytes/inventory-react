@@ -48,8 +48,10 @@ export default function SalesOrders() {
   const [selected, setSelected] = React.useState<SalesOrder>();
   const [loading, setLoading] = React.useState(true);
   const [range, setRange] = React.useState<DateRange>({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
+    // from: startOfMonth(new Date()),
+    // to: endOfMonth(new Date()),
+    from: new Date(),
+    to: new Date(),
   });
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,

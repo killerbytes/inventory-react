@@ -12,6 +12,7 @@ import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { Spinner } from "@/components/ui/spinner";
 import ColorBadge from "@/components/ColorBadge";
+import { cx } from "class-variance-authority";
 import useDebounce from "@/hooks/useDebounce";
 import { ProductCombinations } from "@/types";
 import { Search, X } from "lucide-react";
@@ -116,7 +117,17 @@ export default function ProductSearch() {
           return Number(row.original.inventory?.quantity);
         },
       },
-
+      {
+        accessorKey: "inventory.averagePrice",
+        header: "Avg Price",
+        meta: {
+          headerClassName: "h-0 text-right",
+          className: "w-20 text-right text-green-700",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return formatCurrency(Number(row.original.inventory?.averagePrice));
+        },
+      },
       {
         accessorKey: "price",
         header: "Price",
@@ -125,7 +136,17 @@ export default function ProductSearch() {
           className: "w-20 text-right",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return formatCurrency(row.original.price);
+          const error =
+            Number(row.original.inventory?.averagePrice) >= row.original.price;
+          return (
+            <span
+              className={cx({
+                "text-red-500 font-bold": error,
+              })}
+            >
+              {formatCurrency(row.original.price)}
+            </span>
+          );
         },
       },
     ],
