@@ -59,11 +59,19 @@ export default function ProductHistory({
   React.useEffect(() => {
     getData();
   }, [getData]);
+  const uniqueCombinations = React.useMemo(
+    () =>
+      combinations.filter(
+        (item, index) =>
+          combinations.findIndex((i) => i.name === item.name) === index,
+      ),
+    [combinations],
+  );
 
   return (
     <>
       <Select
-        options={combinations}
+        options={uniqueCombinations}
         value={String(selectedCombination.id)}
         onChange={(value) => {
           const combination = combinations.find((i) => String(i.id) === value);
@@ -71,8 +79,7 @@ export default function ProductHistory({
         }}
         renderOption={(option) => (
           <SelectItem key={option.id} value={String(option.id)}>
-            {option.name}{" "}
-            <ColorBadge colorMap={UNIT_COLOR}>{String(option.unit)}</ColorBadge>
+            {option.name}
           </SelectItem>
         )}
       />

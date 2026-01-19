@@ -77,23 +77,26 @@ export default function Movements({ data }: { data: InventoryMovement[] }) {
           switch (row.original.referenceType) {
             case INVENTORY_MOVEMENT_REFERENCE_TYPE.GOOD_RECEIPT:
               route = ROUTES.GOOD_RECEIPT;
+
               break;
             case INVENTORY_MOVEMENT_REFERENCE_TYPE.SALES_ORDER:
               route = ROUTES.SALES_ORDERS;
               break;
             case INVENTORY_MOVEMENT_REFERENCE_TYPE.STOCK_ADJUSTMENT:
-              route = ROUTES.GOOD_RECEIPT;
+              // route = ROUTES.GOOD_RECEIPT;
               break;
             default:
-              route = ROUTES.GOOD_RECEIPT;
+            // route = ROUTES.GOOD_RECEIPT;
           }
           return (
-            <Link
-              to={`${route}/${row.original.referenceId}`}
-              className="text-primary"
-            >
-              {row.original.referenceType}:{row.original.referenceId}
-            </Link>
+            route && (
+              <Link
+                to={`${route}/${row.original.referenceId}`}
+                className="text-primary"
+              >
+                {row.original.referenceType}:{row.original.referenceId}
+              </Link>
+            )
           );
         },
       },
