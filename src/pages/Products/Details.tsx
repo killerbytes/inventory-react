@@ -477,10 +477,7 @@ export default function ProductEdit() {
                     <CardTitle>Product History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <ProductHistory
-                      product={form.getValues()}
-                      combinations={combinations}
-                    />
+                    <ProductHistory combinations={combinations} />
                   </CardContent>
                 </Card>
               </TabsContent>
