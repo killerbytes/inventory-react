@@ -1,113 +1,85 @@
-import { formatCurrency, formatDate } from "@/utils/formatters";
-import { GoodReceiptItem, PaginatedResponse } from "@/types";
-import { ROUTES, UNIT_COLOR } from "@/utils/definitions";
-import { DataTable } from "@/components/DataTable";
-import { ColumnDef } from "@tanstack/react-table";
+import {
+  ApiErrorResponse,
+  filterProps,
+  InventoryMovement,
+  PaginatedResponse,
+  Product,
+  ProductCombinations,
+} from "@/types";
+import {
+  INVENTORY_MOVEMENT_TYPE_OPTIONS,
+  PAGINATION,
+  UNIT_COLOR,
+} from "@/utils/definitions";
+import { SelectItem } from "@/components/ui/select";
 import ColorBadge from "@/components/ColorBadge";
-import { supplierServices } from "@/services";
-import { Link } from "react-router";
+import Movements from "@/components/Movements";
+import { inventoryServices } from "@/services";
+import Select from "@/components/Select";
+import Pager from "@/components/Pager";
 import React from "react";
 
-export default function ProductHistory({ productId }: { productId: string }) {
-  const [data, setData] = React.useState<PaginatedResponse<GoodReceiptItem>[]>({
+export default function ProductHistory({
+  product,
+  combinations,
+}: {
+  product: Product;
+  combinations: ProductCombinations[];
+}) {
+  const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
     data: [],
     total: 0,
     totalPages: 0,
     currentPage: 0,
   });
-
+  const [selectedCombination, setSelectedCombination] =
+    React.useState<ProductCombinations | null>(combinations[0]);
+  const [filter, setFilter] = React.useState<filterProps>({
+    limit: PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
+    type: "ALL",
+    // q: product.name,
+  });
   const getData = React.useCallback(async () => {
-    const res = await supplierServices.getByProductId(Number(productId));
-    setData(
-      res.combinations.reduce(
-        (acc, val) => [...acc, ...val.goodReceiptLines],
-        [],
-      ),
-    );
-  }, [productId]);
+    try {
+      const payload = {
+        ...filter,
+        q: selectedCombination?.name,
+        type: filter.type === "ALL" ? undefined : filter.type,
+      };
+
+      const data = await inventoryServices.getMovements(payload);
+      setData(data);
+    } catch (error) {
+      const apiError = error as ApiErrorResponse;
+      console.error("Error fetching data:", apiError.message);
+    }
+  }, [filter, selectedCombination]);
 
   React.useEffect(() => {
     getData();
   }, [getData]);
 
-  const columns = React.useMemo<ColumnDef<GoodReceiptItem>[]>(
-    () => [
-      {
-        accessorKey: "nameSnapshot",
-        header: "Name",
-        meta: {},
-      },
-      {
-        header: "Unit",
-        accessorKey: "unit",
-        cell: ({ row }) => {
-          return (
-            <ColorBadge colorMap={UNIT_COLOR}>
-              {String(row.original.unit)}
-            </ColorBadge>
-          );
-        },
-      },
-      {
-        accessorKey: "quantity",
-        header: "Quantity",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return Number(row.original.quantity);
-        },
-      },
-      {
-        accessorKey: "purchasePrice",
-        header: "Price",
-        meta: {
-          headerClassName: "text-right",
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return formatCurrency(row.original.purchasePrice);
-        },
-      },
-
-      {
-        accessorKey: "goodReceipt.supplier.name",
-        header: "Supplier",
-        cell: ({ row }) => {
-          return (
-            <Link
-              className="text-primary"
-              to={`/suppliers/${row.original.goodReceipt.supplierId}`}
-            >
-              {row.original.goodReceipt.supplier.name}
-            </Link>
-          );
-        },
-      },
-      {
-        accessorKey: "goodReceipt.id",
-        header: "Good Receipt",
-        cell: ({ row }) => {
-          return (
-            <Link
-              className="text-primary"
-              to={`${ROUTES.GOOD_RECEIPT}/${row.original.goodReceipt.id}`}
-            >
-              {row.original.goodReceipt.id}
-            </Link>
-          );
-        },
-      },
-      {
-        accessorKey: "goodReceipt.receiptDate",
-        header: "Date",
-        cell: ({ row }) => {
-          return formatDate(row.original.goodReceipt.receiptDate);
-        },
-      },
-    ],
-    [],
+  return (
+    <>
+      <Select
+        options={combinations}
+        value={String(selectedCombination.id)}
+        onChange={(value) => {
+          const combination = combinations.find((i) => String(i.id) === value);
+          setSelectedCombination(combination);
+        }}
+        renderOption={(option) => (
+          <SelectItem key={option.id} value={String(option.id)}>
+            {option.name}{" "}
+            <ColorBadge colorMap={UNIT_COLOR}>{String(option.unit)}</ColorBadge>
+          </SelectItem>
+        )}
+      />
+      <Movements data={data.data} />
+      {data.totalPages > 1 && (
+        <Pager data={data} filter={filter} setFilter={setFilter} />
+      )}
+    </>
   );
-  return <DataTable data={data} columns={columns} />;
 }

@@ -43,6 +43,7 @@ import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import SupplierHistory from "./SupplierHistory";
 import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
 import ProductHistory from "./ProductHistory";
@@ -365,6 +366,9 @@ export default function ProductEdit() {
                 </TabsTrigger>
                 <TabsTrigger value="variants">Variants</TabsTrigger>
                 <TabsTrigger value="price_history">Price History</TabsTrigger>
+                <TabsTrigger value="supplier_history">
+                  Supplier History
+                </TabsTrigger>
                 <TabsTrigger value="product_history">
                   Product History
                 </TabsTrigger>
@@ -457,13 +461,26 @@ export default function ProductEdit() {
                   </CardContent>
                 </Card>
               </TabsContent>
+              <TabsContent value="supplier_history">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Supplier History</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <SupplierHistory productId={id ?? ""} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
               <TabsContent value="product_history">
                 <Card>
                   <CardHeader>
                     <CardTitle>Product History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <ProductHistory productId={id ?? ""} />
+                    <ProductHistory
+                      product={form.getValues()}
+                      combinations={combinations}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>

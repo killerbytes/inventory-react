@@ -1,12 +1,4 @@
 import {
-  INVENTORY_MOVEMENT_REFERENCE_TYPE,
-  INVENTORY_MOVEMENT_TYPE_COLOR,
-  INVENTORY_MOVEMENT_TYPE_OPTIONS,
-  PAGINATION,
-  ROUTES,
-  UNIT_COLOR,
-} from "@/utils/definitions";
-import {
   Card,
   CardAction,
   CardContent,
@@ -19,23 +11,24 @@ import {
   InventoryMovement,
   PaginatedResponse,
 } from "@/types";
-import { formatCurrency, formatDateTime } from "@/utils/formatters";
+import {
+  INVENTORY_MOVEMENT_TYPE_OPTIONS,
+  PAGINATION,
+} from "@/utils/definitions";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { formatCurrency } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
-import { DataTable } from "@/components/DataTable";
-import { ColumnDef } from "@tanstack/react-table";
-import ColorBadge from "@/components/ColorBadge";
+import Movements from "@/components/Movements";
 import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
 import { DateRange } from "react-day-picker";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
-import { Link } from "react-router";
 import React from "react";
 
-export default function Movements() {
+export default function InventoryMovements() {
   const [range, setRange] = React.useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
@@ -79,109 +72,6 @@ export default function Movements() {
     getData();
   }, [getData]);
 
-  const columns = React.useMemo<ColumnDef<InventoryMovement>[]>(
-    () => [
-      {
-        header: "Product",
-        accessorKey: "combination.product.name",
-        cell: ({ row }) => {
-          return (
-            <Link
-              className="flex gap-2 items-center"
-              to={`${ROUTES.PRODUCTS}/${row.original.combination?.productId}`}
-            >
-              {row.original.combination?.name}
-              <ColorBadge colorMap={UNIT_COLOR}>
-                {String(row.original.combination?.unit)}
-              </ColorBadge>
-            </Link>
-          );
-        },
-      },
-      {
-        accessorKey: "type",
-        header: "Type",
-        meta: {
-          headerClassName: "text-center",
-          className: "text-center",
-        },
-        cell: ({ row }) => {
-          return (
-            <Link
-              to={`${ROUTES.GOOD_RECEIPT}/${row.original.reference}`}
-              className="text-primary"
-            >
-              <ColorBadge colorMap={INVENTORY_MOVEMENT_TYPE_COLOR}>
-                {String(row.original.type)}
-              </ColorBadge>
-            </Link>
-          );
-        },
-      },
-      {
-        accessorKey: "quantity",
-        cell: ({ row }) => {
-          return Number(row.original.quantity);
-        },
-      },
-      {
-        accessorKey: "costPerUnit",
-        cell: ({ row }) => {
-          return formatCurrency(row.original.costPerUnit);
-        },
-      },
-      {
-        accessorKey: "totalCost",
-        cell: ({ row }) => {
-          return formatCurrency(row.original.totalCost);
-        },
-      },
-      {
-        accessorKey: "referenceId",
-        cell: ({ row }) => {
-          let route;
-          switch (row.original.referenceType) {
-            case INVENTORY_MOVEMENT_REFERENCE_TYPE.GOOD_RECEIPT:
-              route = ROUTES.GOOD_RECEIPT;
-              break;
-            case INVENTORY_MOVEMENT_REFERENCE_TYPE.SALES_ORDER:
-              route = ROUTES.SALES_ORDERS;
-              break;
-            case INVENTORY_MOVEMENT_REFERENCE_TYPE.STOCK_ADJUSTMENT:
-              route = ROUTES.GOOD_RECEIPT;
-              break;
-            default:
-              route = ROUTES.GOOD_RECEIPT;
-          }
-          return (
-            <Link
-              to={`${route}/${row.original.referenceId}`}
-              className="text-primary"
-            >
-              {row.original.referenceType}:{row.original.referenceId}
-            </Link>
-          );
-        },
-      },
-
-      {
-        accessorKey: "updatedAt",
-        header: "Updated At",
-        meta: {
-          className: "w-0",
-        },
-        cell: ({ row }) => {
-          return formatDateTime(String(row.original.updatedAt));
-        },
-      },
-      {
-        header: "User",
-        accessorKey: "user.username",
-      },
-    ],
-    [],
-  );
-
   return (
     <Card>
       <CardHeader>
@@ -216,13 +106,11 @@ export default function Movements() {
           />
           <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
         </div>
-        <>
-          <Loader isLoading={loading} />
-          <DataTable data={data.data} columns={columns} showFooter={false} />
-          {data.totalPages > 1 && (
-            <Pager data={data} filter={filter} setFilter={setFilter} />
-          )}
-        </>
+        <Loader isLoading={loading} />
+        <Movements data={data.data} />
+        {data.totalPages > 1 && (
+          <Pager data={data} filter={filter} setFilter={setFilter} />
+        )}
       </CardContent>
     </Card>
   );

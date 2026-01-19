@@ -58,10 +58,11 @@ export default function Pager({ data, filter, setFilter }: pagerProps) {
       <div className="absolute left-0">
         <Select
           onChange={(e) => {
-            setFilter({
+            setFilter((prev) => ({
+              ...prev,
               limit: Number(e),
               page: 1,
-            });
+            }));
           }}
           value={String(limit)}
           options={paginationLimits}
