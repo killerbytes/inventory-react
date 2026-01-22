@@ -13,14 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Loader2Icon,
-  PackageOpen,
-  Pencil,
-  PlusIcon,
-  Save,
-  Search,
-} from "lucide-react";
-import {
   ApiErrorResponse,
   Product,
   ProductCombinations,
@@ -28,20 +20,15 @@ import {
 } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
-import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
+import { Loader2Icon, Pencil, PlusIcon, Save, Search } from "lucide-react";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
-import BreakPackModal from "@/components/modals/BreakPackModal";
-import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { categoryServices, productServices } from "@/services";
 import PriceHistory from "@/pages/Products/PriceHistory";
-import { ColumnDef, Row } from "@tanstack/react-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
-import { formatCurrency } from "@/utils/formatters";
-import { DataTable } from "@/components/DataTable";
+import { ERROR, ROUTES } from "@/utils/definitions";
 import CombinationModal from "./CombinationModal";
-import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import SupplierHistory from "./SupplierHistory";
 import { cx } from "class-variance-authority";
@@ -49,9 +36,9 @@ import { Badge } from "@/components/ui/badge";
 import ProductHistory from "./ProductHistory";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
-import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
+import Combinations from "./Combinations";
 import { productSchema } from "@/schemas";
 import Loader from "@/components/Loader";
 import ProductForm from "./ProductForm";
@@ -70,9 +57,6 @@ export default function ProductEdit() {
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
     [],
   );
-  const [selected, setSelected] = React.useState<ProductCombinations | null>(
-    null,
-  );
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const navigate = useNavigate();
   const form = useForm<Product>({
@@ -84,9 +68,6 @@ export default function ProductEdit() {
   const [toggle, handleToggle] = useToggle({
     variantModal: false,
     combinationModal: false,
-    cloneModal: false,
-    breakPackModal: false,
-    stockAdjustmentModal: false,
     createProductModal: false,
   });
   async function onSubmit(values: Product) {
@@ -152,142 +133,6 @@ export default function ProductEdit() {
     return await getMappedSearchProductCombinations({ search });
   }, []);
 
-  const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
-    () => [
-      {
-        accessorKey: "name",
-        header: "Name",
-      },
-      ...variants.map((variant, idx) => ({
-        accessorKey: "values.values." + variant.name,
-        header: variant.name,
-        meta: {
-          headerClassName: cx({
-            "italic underline font-bold": variant.isBreakpackFilter,
-          }),
-        },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          const x = row.original.values.findIndex(
-            (i) => i.variantTypeId === variants[idx].id,
-          );
-
-          return row.original.values[x]?.value;
-        },
-      })),
-      {
-        accessorKey: "unit",
-        header: "Unit",
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return (
-            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
-          );
-        },
-      },
-      {
-        accessorKey: "price",
-        header: "Price",
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return (
-            <div className={cx({ "text-red-500": row.original.price == 0 })}>
-              {formatCurrency(row.original.price)}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "averagePrice",
-        header: "Average Price",
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return formatCurrency(Number(row.original.inventory.averagePrice));
-        },
-      },
-      {
-        header: "Quantity",
-        accessorKey: "inventory.quantity",
-        meta: {
-          headerClassName: "text-right",
-          className: "w-0 text-right",
-        },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => (
-          <div>{Number(row.original.inventory.quantity)}</div>
-        ),
-      },
-      {
-        accessorKey: "conversionFactor",
-        header: "Conversion Factor",
-        meta: {
-          headerClassName: "text-right",
-          className: "w-0 text-right",
-        },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => (
-          <div>{Number(row.original.conversionFactor)}</div>
-        ),
-      },
-      {
-        header: "Re-order Level",
-        accessorKey: "reorderLevel",
-        meta: {
-          headerClassName: "text-right",
-          className: "w-0 text-right",
-        },
-      },
-      {
-        accessorKey: "stockAdjustment",
-        header: "Stock Adjustment",
-        meta: {
-          className: "w-0",
-        },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => (
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="shadow-sm"
-              onClick={() => {
-                setSelected(row.original);
-                handleToggle({ stockAdjustmentModal: true });
-              }}
-            >
-              <Pencil />
-            </Button>
-            {Number(row.original?.inventory?.quantity) === 0 ||
-            row.original?.inventory?.quantity === undefined ? (
-              <Tooltip content="Quantity must be more than 1">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="shadow-sm"
-                  disabled
-                  onClick={() => {
-                    setSelected(row.original);
-                    handleToggle({ breakPackModal: true });
-                  }}
-                >
-                  <PackageOpen />
-                </Button>
-              </Tooltip>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="shadow-sm"
-                onClick={() => {
-                  setSelected(row.original);
-                  handleToggle({ breakPackModal: true });
-                }}
-              >
-                <PackageOpen />
-              </Button>
-            )}
-          </div>
-        ),
-      },
-    ],
-    [handleToggle, variants],
-  );
   return (
     <Fragment key={id}>
       <PageHeader>
@@ -390,12 +235,10 @@ export default function ProductEdit() {
                     </CardAction>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <DataTable
-                      data={combinations || []}
-                      columns={columns}
-                      meta={{
-                        disabledRow: "isActive",
-                      }}
+                    <Combinations
+                      combinations={combinations}
+                      variants={variants}
+                      getData={getData}
                     />
                   </CardContent>
                 </Card>
@@ -515,34 +358,6 @@ export default function ProductEdit() {
         />
       )}
 
-      {toggle.breakPackModal && ( // && selected
-        <BreakPackModal
-          isOpen={true}
-          onClose={() => {
-            handleToggle({ breakPackModal: false });
-          }}
-          combination={selected as ProductCombinations}
-          onSubmit={async () => {
-            getData();
-            productCombinationState.invalidate();
-            handleToggle({ breakPackModal: false });
-          }}
-        />
-      )}
-      {toggle.stockAdjustmentModal && (
-        <StockAdjustmentModal
-          isOpen={true}
-          onClose={() => {
-            getData();
-            handleToggle({ stockAdjustmentModal: false });
-          }}
-          combinationId={Number(selected?.id)}
-          onSubmit={async () => {
-            // handleToggle({ stockAdjustmentModal: false });
-            // navigate(`${ROUTES.PRODUCTS}/${productId}`);
-          }}
-        />
-      )}
       {toggle.createProductModal && (
         <CreateProductModal
           isOpen={true}

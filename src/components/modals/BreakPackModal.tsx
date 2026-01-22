@@ -186,6 +186,7 @@ export default function BreakPackModal({
           )}
           {combination?.name}
           <span className="ml-auto">
+            {console.log(combination?.inventory?.quantity)}
             Stock: {Number(combination?.inventory?.quantity)}
           </span>
         </div>
@@ -227,7 +228,7 @@ export default function BreakPackModal({
                           {...field}
                           // type="number"
                           thousandSeparator={false}
-                          decimalScale={1}
+                          decimalScale={16}
                           value={Number.parseFloat(String(field.value))}
                         />
                         <FormMessage />

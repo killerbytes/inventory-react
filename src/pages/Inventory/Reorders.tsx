@@ -11,6 +11,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
+import { formatDate } from "@/utils/formatters";
 import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
 import Pager from "@/components/Pager";
@@ -27,8 +28,8 @@ export default function Reorders() {
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    sort: "quantity",
-    order: "ASC",
+    sort: "lastSoldAt",
+    order: "DESC",
     q: "",
   });
 
@@ -79,6 +80,17 @@ export default function Reorders() {
         },
         cell: ({ row }) => {
           return Number(row.original.quantity);
+        },
+      },
+      {
+        accessorKey: "lastSoldAt",
+        header: "Last Sold",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
+        cell: ({ row }) => {
+          return formatDate(row.original.lastSoldAt);
         },
       },
     ],

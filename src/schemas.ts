@@ -450,9 +450,10 @@ export const stockAdjustmentSchema = z.object({
   combinationId: z.number(),
   combination: productCombinationsSchema.optional(),
   systemQuantity: z.number().nullish(),
-  newQuantity: z.number().min(0, {
+  newQuantity: z.coerce.number().min(0, {
     message: "New Quantity must be at least 0.",
   }),
+
   difference: z.number().nullish(),
   reason: z.string(),
   notes: z.string().min(1, {
