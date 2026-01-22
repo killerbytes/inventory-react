@@ -5,21 +5,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { filterProps, PaginatedResponse, priceHistory } from "@/types";
+import { filterProps, PaginatedResponse, ProductCombinations } from "@/types";
 import { PAGINATION, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { formatDate } from "@/utils/formatters";
 import { inventoryServices } from "@/services";
-import { Input } from "@/components/ui/input";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
+import { last } from "lodash";
 import React from "react";
 
+type Props = {
+  name: string;
+  combinations: ProductCombinations;
+  lastSoldAt: string;
+  quantity: number;
+};
+
 export default function Reorders() {
-  const [data, setData] = React.useState<PaginatedResponse<priceHistory[]>>({
+  const [data, setData] = React.useState<PaginatedResponse<Props[]>>({
     data: [],
     total: 0,
     totalPages: 0,
@@ -42,7 +50,17 @@ export default function Reorders() {
     getData();
   }, [getData]);
 
-  const columns = React.useMemo<ColumnDef<priceHistory>[]>(
+  const handleFilterChange = React.useCallback((data: filterProps) => {
+    const { sort } = data;
+
+    setFilter((prevState) => ({
+      ...prevState,
+      ...data,
+      sort: last(sort?.split("_")),
+    }));
+  }, []);
+
+  const columns = React.useMemo<ColumnDef<Props>[]>(
     () => [
       {
         accessorKey: "name",
@@ -73,9 +91,28 @@ export default function Reorders() {
       },
       {
         accessorKey: "combinations.inventory.quantity",
-        header: "Stock",
+        header: ({ column }) => {
+          const columnId = last(column.id.split("_"));
+          return (
+            <span
+              className="flex items-center gap-2 cursor-pointer justify-end"
+              onClick={() => {
+                handleFilterChange({
+                  order: filter.order === "ASC" ? "DESC" : "ASC",
+                  sort: columnId,
+                });
+              }}
+            >
+              Quantity
+              {filter.sort === columnId && filter.order === "ASC" ? (
+                <ChevronUp />
+              ) : (
+                filter.sort === columnId && <ChevronDown />
+              )}
+            </span>
+          );
+        },
         meta: {
-          headerClassName: "text-right",
           className: "text-right",
         },
         cell: ({ row }) => {
@@ -84,9 +121,27 @@ export default function Reorders() {
       },
       {
         accessorKey: "lastSoldAt",
-        header: "Last Sold",
+        header: ({ column }) => {
+          return (
+            <span
+              className="flex items-center gap-2 cursor-pointer justify-end"
+              onClick={() => {
+                handleFilterChange({
+                  order: filter.order === "ASC" ? "DESC" : "ASC",
+                  sort: column.id,
+                });
+              }}
+            >
+              Date
+              {filter.sort === column.id && filter.order === "ASC" ? (
+                <ChevronUp />
+              ) : (
+                filter.sort === column.id && <ChevronDown />
+              )}
+            </span>
+          );
+        },
         meta: {
-          headerClassName: "text-right",
           className: "text-right",
         },
         cell: ({ row }) => {
@@ -94,7 +149,7 @@ export default function Reorders() {
         },
       },
     ],
-    [],
+    [filter.order, filter.sort, handleFilterChange],
   );
   return (
     <Card>
@@ -107,20 +162,6 @@ export default function Reorders() {
         <CardAction></CardAction>
       </CardHeader>
       <CardContent>
-        <div>
-          <Input
-            placeholder="Search invoice"
-            className="w-full mb-4"
-            value={filter.q}
-            onChange={(e) => {
-              setFilter((prev) => ({
-                ...prev,
-                q: e.target.value,
-                page: 1,
-              }));
-            }}
-          />
-        </div>
         <DataTable
           data={data.data || []}
           columns={columns}
