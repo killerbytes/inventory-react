@@ -228,7 +228,7 @@ export default function BreakPackModal({
                           {...field}
                           // type="number"
                           thousandSeparator={false}
-                          decimalScale={16}
+                          decimalScale={10}
                           value={Number.parseFloat(String(field.value))}
                         />
                         <FormMessage />

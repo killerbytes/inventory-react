@@ -16,9 +16,9 @@ import Select from "@/components/Select";
 import { useStore } from "@/stores";
 import React from "react";
 
-const defaultOption = { id: -1, value: "ALL" };
+const defaultOption = { id: "ALL", value: "ALL" };
 export default function Combinations({
-  combinations,
+  combinations: _combinations,
   variants,
   getData,
 }: {
@@ -26,14 +26,13 @@ export default function Combinations({
   variants: VariantTypes[];
   getData: () => void;
 }) {
+  const [combinations, setCombinations] = React.useState(_combinations);
   const { productCombinationState } = useStore();
   const [selected, setSelected] = React.useState<ProductCombinations | null>(
     null,
   );
   const [selectedBreakPackVariant, setSelectedBreakPackVariant] =
-    React.useState<{ id?: number; value: string; variantTypeId?: string }>(
-      defaultOption,
-    );
+    React.useState<string>(String(defaultOption.id));
   const [toggle, handleToggle] = useToggle({
     breakPackModal: false,
     stockAdjustmentModal: false,
@@ -177,33 +176,38 @@ export default function Combinations({
   );
 
   const breakPackVariantOptions = React.useMemo(
-    () => [
-      defaultOption,
-      ...(variants.find((i) => i.isBreakpackFilter)?.values || []),
-    ],
+    () => variants.find((i) => i.isBreakpackFilter)?.values || [],
     [variants],
   );
 
-  console.log(selectedBreakPackVariant.value);
+  React.useEffect(() => {
+    if (selectedBreakPackVariant !== "ALL") {
+      setCombinations(
+        _combinations.filter((i) =>
+          i.values.some((v) => v.id === Number(selectedBreakPackVariant)),
+        ),
+      );
+    } else {
+      setCombinations(_combinations);
+    }
+  }, [_combinations, selectedBreakPackVariant]);
 
   return (
     <>
-      <Select
-        options={breakPackVariantOptions}
-        value={String(selectedBreakPackVariant.id)}
-        onChange={(value) => {
-          const selected = breakPackVariantOptions.find(
-            (i) => String(i.id) === value,
-          );
-
-          setSelectedBreakPackVariant(selected);
-        }}
-        renderOption={(option) => (
-          <SelectItem key={option.id} value={String(option.id)}>
-            {option.value}
-          </SelectItem>
-        )}
-      />
+      {!!breakPackVariantOptions.length && (
+        <Select
+          options={[defaultOption, ...breakPackVariantOptions]}
+          value={String(selectedBreakPackVariant)}
+          onChange={(value) => {
+            setSelectedBreakPackVariant(value);
+          }}
+          renderOption={(option) => (
+            <SelectItem key={option.id} value={String(option.id)}>
+              {option.value}
+            </SelectItem>
+          )}
+        />
+      )}
 
       <DataTable
         data={combinations}
