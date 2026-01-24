@@ -18,6 +18,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { PAGINATION, ROUTES } from "@/utils/definitions";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColumnSort from "@/components/ColumnSort";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supplierServices } from "@/services";
@@ -75,29 +76,26 @@ export default function Suppliers() {
       order: prev.sort === sort && prev.order === "ASC" ? "DESC" : "ASC",
     }));
   };
-  const columns2 = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      className: "w-[50%]",
-    },
-    {
-      title: "Contact",
-      dataIndex: "contact",
-      key: "contact",
-      className: "w-[50%]",
-    },
-    {
-      dataIndex: "actions",
-      key: "actions",
-    },
-  ];
+
+  const handleFilterChange = React.useCallback((data: filterProps) => {
+    setFilter((prevState) => ({ ...prevState, ...data }));
+  }, []);
+
   const columns = React.useMemo<ColumnDef<Supplier>[]>(
     () => [
       {
         accessorKey: "name",
-        header: "Name",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Name
+            </ColumnSort>
+          );
+        },
         cell: ({ row }) => {
           return (
             <div>
@@ -151,7 +149,7 @@ export default function Suppliers() {
         },
       },
     ],
-    [],
+    [filter, handleFilterChange, handleToggle],
   );
   return (
     <div>

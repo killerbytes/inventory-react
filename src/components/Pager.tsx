@@ -11,9 +11,9 @@ import { PAGINATION } from "@/utils/definitions";
 import { pagerProps } from "@/types";
 import Select from "./Select";
 
-export default function Pager({ data, filter, setFilter }: pagerProps) {
+export default function Pager({ meta, filter, setFilter }: pagerProps) {
   const { page = 0, limit } = filter;
-  const pageCount = data.totalPages;
+  const pageCount = meta.totalPages;
   const paginationLimits = PAGINATION.PAGE_SIZE_OPTIONS.map((i) => ({
     label: i,
     value: i,

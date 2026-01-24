@@ -10,6 +10,7 @@ import ColorBadge from "@/components/ColorBadge";
 import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
+import { Badge } from "@/components/ui/badge";
 import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
@@ -46,7 +47,13 @@ export default function Combinations({
       },
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
-        header: variant.name,
+        header: () => {
+          return variant.isBreakpackFilter ? (
+            <Badge variant="secondary">{variant.name}</Badge>
+          ) : (
+            variant.name
+          );
+        },
         meta: {
           headerClassName: cx({
             "italic underline font-bold": variant.isBreakpackFilter,
@@ -74,7 +81,11 @@ export default function Combinations({
         header: "Price",
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
           return (
-            <div className={cx({ "text-red-500": row.original.price == 0 })}>
+            <div
+              className={cx("font-bold", {
+                "text-red-500": row.original.price == 0,
+              })}
+            >
               {formatCurrency(row.original.price)}
             </div>
           );
@@ -95,7 +106,13 @@ export default function Combinations({
           className: "w-0 text-right",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => (
-          <div>{Number(row.original.inventory.quantity)}</div>
+          <span
+            className={cx({
+              "font-bold text-red-500": row.original.inventory.quantity == 0,
+            })}
+          >
+            {Number(row.original.inventory.quantity)}
+          </span>
         ),
       },
       {
@@ -103,7 +120,7 @@ export default function Combinations({
         header: "Conversion Factor",
         meta: {
           headerClassName: "text-right",
-          className: "w-0 text-right",
+          className: "w-0 text-right text-xs",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => (
           <div>{Number(row.original.conversionFactor)}</div>
@@ -114,7 +131,7 @@ export default function Combinations({
         accessorKey: "reorderLevel",
         meta: {
           headerClassName: "text-right",
-          className: "w-0 text-right",
+          className: "w-0 text-right text-xs",
         },
       },
       {

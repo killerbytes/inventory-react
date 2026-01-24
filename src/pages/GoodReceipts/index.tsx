@@ -1,27 +1,29 @@
 import {
+  ORDER_STATUS_OPTIONS,
+  PAGINATION,
+  PAGINATION_RESPONSE,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ORDER_STATUS_OPTIONS,
-  PAGINATION,
-  ROUTES,
-  STATUS_COLOR,
-} from "@/utils/definitions";
 import { getGoodReceiptTotalAmount, mappedStatusHistory } from "@/lib/utils";
 import { PaginatedResponse, GoodReceipt, filterProps } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import SectionCards from "@/components/SectionCards";
 import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
@@ -30,17 +32,13 @@ import { Input } from "@/components/ui/input";
 import { DateRange } from "react-day-picker";
 import Select from "@/components/Select";
 import Pager from "@/components/Pager";
+import { Plus } from "lucide-react";
 import React from "react";
 
 export default function GoodReceipts() {
   const navigate = useNavigate();
-  const [data, setData] = React.useState<PaginatedResponse<GoodReceipt>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-    totalAmount: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<GoodReceipt>>(PAGINATION_RESPONSE);
 
   const [loading, setLoading] = React.useState(true);
   const [range, setRange] = React.useState<DateRange>({
@@ -90,32 +88,44 @@ export default function GoodReceipts() {
         accessorKey: "id",
         header: ({ column }) => {
           return (
-            <span
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                handleFilterChange({
-                  order: filter.order === "ASC" ? "DESC" : "ASC",
-                  sort: column.id,
-                });
-              }}
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
             >
-              ID
-              {filter.sort === column.id && filter.order === "ASC" ? (
-                <ChevronUp />
-              ) : (
-                filter.sort === column.id && <ChevronDown />
-              )}
-            </span>
+              Id
+            </ColumnSort>
           );
         },
       },
       {
         accessorKey: "supplier.name",
-        header: "Supplier",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              sortKey="supplier.name"
+            >
+              Supplier
+            </ColumnSort>
+          );
+        },
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Status
+            </ColumnSort>
+          );
+        },
         cell: ({ row }) => {
           const status = row.original.status;
           return (
@@ -137,22 +147,13 @@ export default function GoodReceipts() {
         accessorKey: "receiptDate",
         header: ({ column }) => {
           return (
-            <span
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                handleFilterChange({
-                  order: filter.order === "ASC" ? "DESC" : "ASC",
-                  sort: column.id,
-                });
-              }}
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
             >
               Receipt Date
-              {filter.sort === column.id && filter.order === "ASC" ? (
-                <ChevronUp />
-              ) : (
-                filter.sort === column.id && <ChevronDown />
-              )}
-            </span>
+            </ColumnSort>
           );
         },
 
@@ -162,22 +163,13 @@ export default function GoodReceipts() {
         accessorKey: "referenceNo",
         header: ({ column }) => {
           return (
-            <span
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                handleFilterChange({
-                  order: filter.order === "ASC" ? "DESC" : "ASC",
-                  sort: column.id,
-                });
-              }}
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
             >
               Reference
-              {filter.sort === column.id && filter.order === "ASC" ? (
-                <ChevronUp />
-              ) : (
-                filter.sort === column.id && <ChevronDown />
-              )}
-            </span>
+            </ColumnSort>
           );
         },
       },
@@ -185,25 +177,14 @@ export default function GoodReceipts() {
         accessorKey: "totalAmount",
         header: ({ column }) => {
           return (
-            <span
-              className={cx(
-                "flex items-center gap-2 cursor-pointer",
-                column.columnDef.meta?.headerClassName,
-              )}
-              onClick={() => {
-                handleFilterChange({
-                  order: filter.order === "ASC" ? "DESC" : "ASC",
-                  sort: column.id,
-                });
-              }}
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              align="right"
             >
               Total Amount
-              {filter.sort === column.id && filter.order === "ASC" ? (
-                <ChevronUp />
-              ) : (
-                filter.sort === column.id && <ChevronDown />
-              )}
-            </span>
+            </ColumnSort>
           );
         },
         meta: {
@@ -223,7 +204,7 @@ export default function GoodReceipts() {
         },
       },
     ],
-    [filter.order, filter.sort, handleFilterChange],
+    [filter, handleFilterChange],
   );
   return (
     <div>
@@ -243,6 +224,8 @@ export default function GoodReceipts() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          <SectionCards data={data.summary} />
+
           <div className="flex gap-2 justify-between items-center">
             <DateRangePicker value={range} onChange={setRange} />
 
@@ -269,7 +252,6 @@ export default function GoodReceipts() {
                 }
               }}
             />
-            <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
           </div>
           {loading ? (
             <p>Loading...</p>
@@ -293,8 +275,8 @@ export default function GoodReceipts() {
                   );
                 }}
               />
-              {data.totalPages > 1 && (
-                <Pager data={data} filter={filter} setFilter={setFilter} />
+              {data.meta.totalPages > 1 && (
+                <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
               )}
             </>
           )}

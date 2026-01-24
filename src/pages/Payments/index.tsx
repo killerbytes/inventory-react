@@ -12,30 +12,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColumnSort from "@/components/ColumnSort";
 import { Input } from "@/components/ui/input";
-import { ROUTES } from "@/utils/definitions";
 import { paymentServices } from "@/services";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
 export default function Payments() {
-  const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<Customer[]>>(PAGINATION_RESPONSE);
 
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
-    limit: 10,
-    page: 1,
+    limit: PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
     sort: "createdAt",
     order: "ASC",
     q: "",
@@ -57,15 +54,41 @@ export default function Payments() {
     getData();
   }, [filter, getData]);
 
+  const handleFilterChange = React.useCallback((data: filterProps) => {
+    setFilter((prevState) => ({ ...prevState, ...data }));
+  }, []);
+
   const columns: ColumnDef<Invoice>[] = React.useMemo(
     () => [
       {
         accessorKey: "payment.referenceNo",
-        header: "Reference No",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              sortKey="payment.referenceNo"
+            >
+              Reference No
+            </ColumnSort>
+          );
+        },
       },
       {
         accessorKey: "invoice",
-        header: "Invoice Number",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              sortKey="invoice.invoiceNumber"
+            >
+              Invoice Number
+            </ColumnSort>
+          );
+        },
         cell: ({ row }) => {
           const invoice = row.getValue("invoice") as Invoice;
           return (
@@ -80,7 +103,18 @@ export default function Payments() {
       },
       {
         accessorKey: "payment.supplier.name",
-        header: "Supplier",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              sortKey="payment.supplier.name"
+            >
+              Supplier
+            </ColumnSort>
+          );
+        },
         cell: ({
           row: {
             original: { payment },
@@ -98,11 +132,33 @@ export default function Payments() {
       },
       {
         accessorKey: "payment.user.username",
-        header: "Changed By",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              sortKey="payment.user.username"
+            >
+              Changed By
+            </ColumnSort>
+          );
+        },
       },
       {
         accessorKey: "amountApplied",
-        header: () => "Amount",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              align="right"
+            >
+              Amount
+            </ColumnSort>
+          );
+        },
         meta: {
           headerClassName: "text-right",
           className: "text-right",
@@ -110,7 +166,7 @@ export default function Payments() {
         cell: ({ row }) => formatCurrency(row.getValue("amountApplied")),
       },
     ],
-    [],
+    [filter, handleFilterChange],
   );
 
   return (
@@ -152,30 +208,9 @@ export default function Payments() {
           <p>Loading...</p>
         ) : (
           <>
-            <DataTable
-              data={data.data || []}
-              columns={columns}
-              showFooter={true}
-              renderFooter={(rows: PaymentApplication[]) => {
-                return (
-                  <TableRow>
-                    <TableCell colSpan={4} className="font-semibold">
-                      Total
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatCurrency(
-                        rows.reduce(
-                          (sum, row) => sum + Number(row.amountApplied),
-                          0,
-                        ),
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              }}
-            />
-            {data.totalPages > 1 && (
-              <Pager data={data} filter={filter} setFilter={setFilter} />
+            <DataTable data={data.data || []} columns={columns} />
+            {data.meta.totalPages > 1 && (
+              <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
             )}
           </>
         )}

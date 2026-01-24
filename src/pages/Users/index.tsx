@@ -11,6 +11,7 @@ import { filterProps, PaginatedResponse, User } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColumnSort from "@/components/ColumnSort";
 import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,10 @@ export default function Users() {
     getData();
   }, [filter, getData]);
 
+  const handleFilterChange = React.useCallback((data: filterProps) => {
+    setFilter((prevState) => ({ ...prevState, ...data }));
+  }, []);
+
   const columns = React.useMemo<ColumnDef<User>[]>(
     () => [
       {
@@ -81,28 +86,68 @@ export default function Users() {
       },
       {
         accessorKey: "name",
-        header: "Name",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Name
+            </ColumnSort>
+          );
+        },
         meta: {
           className: "w-50",
         },
       },
       {
         accessorKey: "username",
-        header: "Username",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Username
+            </ColumnSort>
+          );
+        },
         meta: {
           className: "w-50",
         },
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Email
+            </ColumnSort>
+          );
+        },
         meta: {
           className: "w-50",
         },
       },
       {
         accessorKey: "isActive",
-        header: "Active",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Active
+            </ColumnSort>
+          );
+        },
         meta: {
           className: "w-50",
         },
@@ -115,7 +160,7 @@ export default function Users() {
         },
       },
     ],
-    [],
+    [filter, handleFilterChange, handleToggle],
   );
 
   return (

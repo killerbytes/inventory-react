@@ -12,6 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
@@ -44,7 +45,7 @@ export default function PriceHistoryTab({ productId }: { productId: string }) {
     getData();
   }, [getData]);
 
-  const onFilterChange = React.useCallback((data: filterProps) => {
+  const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
 
@@ -110,22 +111,13 @@ export default function PriceHistoryTab({ productId }: { productId: string }) {
         accessorKey: "createdAt",
         header: ({ column }) => {
           return (
-            <span
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                onFilterChange({
-                  order: filter.order === "ASC" ? "DESC" : "ASC",
-                  sort: column.id,
-                });
-              }}
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
             >
               Created
-              {filter.sort === column.id && filter.order === "ASC" ? (
-                <ChevronUp size={16} />
-              ) : (
-                filter.sort === column.id && <ChevronDown size={16} />
-              )}
-            </span>
+            </ColumnSort>
           );
         },
         cell: ({ row }) => {
@@ -140,7 +132,7 @@ export default function PriceHistoryTab({ productId }: { productId: string }) {
         },
       },
     ],
-    [filter.order, filter.sort, onFilterChange],
+    [filter, handleFilterChange],
   );
   return <DataTable data={data.data || []} columns={columns} />;
 }

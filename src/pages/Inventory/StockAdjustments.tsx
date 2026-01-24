@@ -1,40 +1,67 @@
 import {
+  PAGINATION,
+  PAGINATION_RESPONSE,
   ROUTES,
   STOCK_ADJUSTMENT_TYPE_COLOR,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { InventoryMovement, PaginatedResponse, StockAdjustment } from "@/types";
+import {
+  filterProps,
+  InventoryMovement,
+  PaginatedResponse,
+  StockAdjustment,
+} from "@/types";
 import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
+import { Input } from "@/components/ui/input";
+import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
 export default function StockAdjustments() {
-  const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
+  const [data, setData] =
+    React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
+  const [filter, setFilter] = React.useState<filterProps>({
+    limit: PAGINATION.PAGE_SIZE,
+    page: PAGINATION.PAGE,
+    type: "ALL",
+    q: "",
   });
-  const getData = async () => {
-    const data = await inventoryServices.getStockAdjustments();
+  const getData = React.useCallback(async () => {
+    const data = await inventoryServices.getStockAdjustments(filter);
     setData(data);
-  };
+  }, [filter]);
 
   React.useEffect(() => {
     getData();
+  }, [filter, getData]);
+
+  const handleFilterChange = React.useCallback((data: filterProps) => {
+    setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
 
   const columns = React.useMemo<ColumnDef<StockAdjustment>[]>(
     () => [
       {
-        header: "Product",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              sortKey="combination.product.name"
+            >
+              Product
+            </ColumnSort>
+          );
+        },
         accessorKey: "combination.product.name",
         cell: ({ row }) => {
           return (
@@ -59,7 +86,17 @@ export default function StockAdjustments() {
       },
       {
         accessorKey: "reason",
-        header: "Type",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Reason
+            </ColumnSort>
+          );
+        },
         meta: {
           headerClassName: "text-center",
           className: "text-center",
@@ -96,16 +133,18 @@ export default function StockAdjustments() {
       },
 
       {
-        accessorKey: "notes",
-        header: "Notes",
-        meta: {
-          headerClassName: "w-[100px]",
-          className: "w-0 text-ellipsis w-[100px]",
-        },
-      },
-      {
         accessorKey: "createdAt",
-        header: "Updated At",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Date
+            </ColumnSort>
+          );
+        },
         meta: {
           className: "w-0",
         },
@@ -117,8 +156,16 @@ export default function StockAdjustments() {
         header: "User",
         accessorKey: "user.username",
       },
+      {
+        accessorKey: "notes",
+        header: "Notes",
+        meta: {
+          headerClassName: "w-[100px]",
+          className: "w-0 text-ellipsis w-[100px]",
+        },
+      },
     ],
-    [],
+    [filter, handleFilterChange],
   );
 
   return (
@@ -133,8 +180,23 @@ export default function StockAdjustments() {
         </div>
       </PageHeader>
       <Card>
-        <CardContent>
+        <CardContent className="gap-4 flex flex-col">
+          <Input
+            placeholder="Search Product"
+            className="w-full"
+            value={filter.q}
+            onChange={(e) => {
+              setFilter((prev) => ({
+                ...prev,
+                q: e.target.value,
+                page: 1,
+              }));
+            }}
+          />
           <DataTable data={data.data} columns={columns} showFooter={false} />
+          {data.meta.totalPages > 1 && (
+            <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+          )}
         </CardContent>
       </Card>
     </>

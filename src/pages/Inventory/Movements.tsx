@@ -1,4 +1,9 @@
 import {
+  INVENTORY_MOVEMENT_TYPE_OPTIONS,
+  PAGINATION,
+  PAGINATION_RESPONSE,
+} from "@/utils/definitions";
+import {
   Card,
   CardAction,
   CardContent,
@@ -11,12 +16,9 @@ import {
   InventoryMovement,
   PaginatedResponse,
 } from "@/types";
-import {
-  INVENTORY_MOVEMENT_TYPE_OPTIONS,
-  PAGINATION,
-} from "@/utils/definitions";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import SectionCards from "@/components/SectionCards";
 import { formatCurrency } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
 import Movements from "@/components/Movements";
@@ -35,12 +37,8 @@ export default function InventoryMovements() {
   });
 
   const [loading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -83,6 +81,7 @@ export default function InventoryMovements() {
         <CardAction></CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <SectionCards data={data.summary} />
         <div className="flex gap-2 justify-between items-center">
           <Input
             placeholder="Search Product"
@@ -104,12 +103,11 @@ export default function InventoryMovements() {
               setFilter(({ ...prev }) => ({ ...prev, type }));
             }}
           />
-          <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
         </div>
         <Loader isLoading={loading} />
         <Movements data={data.data} />
-        {data.totalPages > 1 && (
-          <Pager data={data} filter={filter} setFilter={setFilter} />
+        {data.meta.totalPages > 1 && (
+          <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}
       </CardContent>
     </Card>

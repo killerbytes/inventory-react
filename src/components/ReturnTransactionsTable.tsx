@@ -75,6 +75,13 @@ export default function ReturnTransactionsTable({
         },
       },
       {
+        accessorKey: "reason",
+        header: "Reason",
+        meta: {
+          className: "text-xs text-red-500",
+        },
+      },
+      {
         header: "Price",
         accessorKey: "unitPrice",
         meta: {

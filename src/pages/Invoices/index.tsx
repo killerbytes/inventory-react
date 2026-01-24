@@ -5,13 +5,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  PAGINATION,
+  PAGINATION_RESPONSE,
+  ROUTES,
+  STATUS_COLOR,
+} from "@/utils/definitions";
 import { Customer, filterProps, Invoice, PaginatedResponse } from "@/types";
-import { PAGINATION, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -29,18 +35,14 @@ export default function Invoices() {
     addInvoiceModal: false,
   });
   const [selected, setSelected] = React.useState<Invoice>();
-  const [data, setData] = React.useState<PaginatedResponse<Customer[]>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<Customer[]>>(PAGINATION_RESPONSE);
 
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    sort: "createdAt",
+    sort: "id",
     order: "DESC",
     q: "",
   });
@@ -61,15 +63,41 @@ export default function Invoices() {
     getData();
   }, [filter, getData]);
 
+  const handleFilterChange = React.useCallback((data: filterProps) => {
+    setFilter((prevState) => ({ ...prevState, ...data }));
+  }, []);
+
   const columns: ColumnDef<Invoice>[] = React.useMemo(
     () => [
       {
         accessorKey: "invoiceNumber",
-        header: "Invoice Number",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              sortKey="invoiceNumber"
+            >
+              Invoice Number
+            </ColumnSort>
+          );
+        },
       },
       {
         accessorKey: "supplier.name",
-        header: "Supplier",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              sortKey="supplier.name"
+            >
+              Supplier
+            </ColumnSort>
+          );
+        },
         cell: ({
           row: {
             original: { supplier },
@@ -99,17 +127,47 @@ export default function Invoices() {
 
       {
         accessorKey: "invoiceDate",
-        header: "Invoice Date",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Invoice Date
+            </ColumnSort>
+          );
+        },
         cell: ({ row }) => formatDate(row.getValue("invoiceDate")),
       },
       {
         accessorKey: "dueDate",
-        header: "Due Date",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Due Date
+            </ColumnSort>
+          );
+        },
         cell: ({ row }) => formatDate(row.getValue("dueDate")),
       },
       {
         accessorKey: "totalAmount",
-        header: () => "Total Amount",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Total Amount
+            </ColumnSort>
+          );
+        },
         meta: {
           headerClassName: "text-right",
           className: "text-right",
@@ -117,7 +175,7 @@ export default function Invoices() {
         cell: ({ row }) => formatCurrency(row.getValue("totalAmount")),
       },
     ],
-    [],
+    [filter, handleFilterChange],
   );
 
   return (
@@ -191,8 +249,8 @@ export default function Invoices() {
                 );
               }}
             />
-            {data.totalPages > 1 && (
-              <Pager data={data} filter={filter} setFilter={setFilter} />
+            {data.meta.totalPages > 1 && (
+              <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
             )}
           </>
         )}

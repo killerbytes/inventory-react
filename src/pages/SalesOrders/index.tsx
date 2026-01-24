@@ -3,6 +3,7 @@ import {
   ORDER_STATUS,
   ORDER_STATUS_OPTIONS,
   PAGINATION,
+  PAGINATION_RESPONSE,
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
@@ -15,13 +16,14 @@ import {
 } from "@/components/ui/card";
 import { filterProps, PaginatedResponse, SalesOrder } from "@/types";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
-import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import SectionCards from "@/components/SectionCards";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
+import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import SalesOrderModal from "./SalesOrderModal";
@@ -38,28 +40,20 @@ import React from "react";
 
 export default function SalesOrders() {
   const navigate = useNavigate();
-  const [data, setData] = React.useState<PaginatedResponse<SalesOrder>>({
-    data: [],
-    total: 0,
-    totalAmount: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<SalesOrder>>(PAGINATION_RESPONSE);
   const [selected, setSelected] = React.useState<SalesOrder>();
   const [loading, setLoading] = React.useState(true);
   const [range, setRange] = React.useState<DateRange>({
-    // from: startOfMonth(new Date()),
-    // to: endOfMonth(new Date()),
-    from: new Date(),
-    to: new Date(),
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
   });
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     order: "DESC",
     sort: "salesOrderNumber",
-    // ...(range?.from && range?.to && { startDate: range.from.toISOString() }),
-    // ...(range?.from && range?.to && { endDate: range.to.toISOString() }),
+    status: "ALL",
   });
   const [toggle, handleToggle] = useToggle({
     salesOrderModal: false,
@@ -91,23 +85,68 @@ export default function SalesOrders() {
     getData();
   }, [getData]);
 
+  const handleFilterChange = React.useCallback((data: filterProps) => {
+    setFilter((prevState) => ({ ...prevState, ...data }));
+  }, []);
+
   const columns: ColumnDef<SalesOrder>[] = [
     {
       accessorKey: "salesOrderNumber",
-      header: "Order #",
+      header: ({ column }) => {
+        return (
+          <ColumnSort
+            filter={filter}
+            handleFilterChange={handleFilterChange}
+            column={column}
+          >
+            Order #
+          </ColumnSort>
+        );
+      },
     },
     {
       accessorKey: "orderDate",
-      header: "Order Date",
+      header: ({ column }) => {
+        return (
+          <ColumnSort
+            filter={filter}
+            handleFilterChange={handleFilterChange}
+            column={column}
+          >
+            Order Date
+          </ColumnSort>
+        );
+      },
       cell: ({ row }) => formatDateTime(row.getValue("orderDate")),
     },
     {
       accessorKey: "customer.name",
-      header: "Customer",
+      header: ({ column }) => {
+        return (
+          <ColumnSort
+            filter={filter}
+            handleFilterChange={handleFilterChange}
+            column={column}
+            sortKey="customer.name"
+          >
+            Customer
+          </ColumnSort>
+        );
+      },
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: ({ column }) => {
+        return (
+          <ColumnSort
+            filter={filter}
+            handleFilterChange={handleFilterChange}
+            column={column}
+          >
+            Status
+          </ColumnSort>
+        );
+      },
       cell: ({ row }) => {
         const status = row.original.status;
         return (
@@ -143,7 +182,18 @@ export default function SalesOrders() {
     },
     {
       accessorKey: "totalAmount",
-      header: () => "Total Amount",
+      header: ({ column }) => {
+        return (
+          <ColumnSort
+            filter={filter}
+            handleFilterChange={handleFilterChange}
+            column={column}
+            align="right"
+          >
+            Total Amount
+          </ColumnSort>
+        );
+      },
       meta: {
         headerClassName: "text-right",
         className: "text-right",
@@ -189,18 +239,18 @@ export default function SalesOrders() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          <SectionCards data={data.summary} />
           <div className="flex gap-2 justify-between items-center">
             <div>
               <DateRangePicker value={range} onChange={setRange} />
             </div>
-            <div className="text-xl">{formatCurrency(data?.totalAmount)}</div>
             <div className="w-1/4">
               <Select
                 options={ORDER_STATUS_OPTIONS}
-                value={ORDER_STATUS_OPTIONS[0].value}
+                value={filter.status}
                 onChange={(selected) => {
                   if (selected === "ALL") {
-                    setFilter(({ ...prev }) => ({ ...prev, status: "" }));
+                    setFilter(({ ...prev }) => ({ ...prev, status: "ALL" }));
                   } else {
                     setFilter((prev) => ({ ...prev, status: selected }));
                   }
@@ -226,29 +276,9 @@ export default function SalesOrders() {
                     navigate(`${ROUTES.SALES_ORDERS}/${item.id}`);
                   }
                 }}
-                showFooter
-                renderFooter={(data: SalesOrder[]) => {
-                  return (
-                    <TableRow>
-                      <TableCell>Total Amount</TableCell>
-                      <TableCell colSpan={7} className="text-right">
-                        {formatCurrency(
-                          data.reduce(
-                            (acc: number, item: SalesOrder) =>
-                              acc +
-                              Number(item.totalAmount) -
-                              Number(item.totalReturnAmount) +
-                              Number(item.totalExchangeAmount),
-                            0,
-                          ),
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                }}
               />
-              {data.totalPages > 1 && (
-                <Pager data={data} filter={filter} setFilter={setFilter} />
+              {data.meta.totalPages > 1 && (
+                <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
               )}
             </>
           )}

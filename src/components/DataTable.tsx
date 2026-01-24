@@ -139,12 +139,12 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
       >
         <Table className="overflow ">
           {showHeader && (
-            <TableHeader>
+            <TableHeader className="text-xs ">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead
-                      style={{ width: `${header.getSize()}px` }}
+                      // style={{ width: `${header.getSize()}px` }}
                       key={header.id}
                       className={
                         header.column.columnDef?.meta?.headerClassName ?? ""

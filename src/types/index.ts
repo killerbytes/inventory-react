@@ -49,12 +49,20 @@ export interface ApiErrorResponse {
   statusCode: number;
 }
 
+export interface Summary {
+  totalAmount: number;
+  totalReturnAmount?: number;
+  totalExchangeAmount?: number;
+}
+
 export type PaginatedResponse<T extends object> = {
   data: T[];
-  total: number;
-  totalPages: number;
-  currentPage: number;
-  totalAmount: number;
+  meta: {
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+  summary?: Summary;
 };
 
 export interface ApiError {
@@ -73,7 +81,7 @@ export interface filterProps {
 }
 
 export interface pagerProps {
-  data: { totalPages: number };
+  meta: { totalPages: number };
   filter: filterProps;
   setFilter: React.Dispatch<React.SetStateAction<filterProps>>;
 }

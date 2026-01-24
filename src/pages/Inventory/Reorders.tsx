@@ -5,12 +5,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  PAGINATION,
+  PAGINATION_RESPONSE,
+  ROUTES,
+  UNIT_COLOR,
+} from "@/utils/definitions";
 import { filterProps, PaginatedResponse, ProductCombinations } from "@/types";
-import { PAGINATION, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { formatDate } from "@/utils/formatters";
 import { inventoryServices } from "@/services";
@@ -27,12 +32,8 @@ type Props = {
 };
 
 export default function Reorders() {
-  const [data, setData] = React.useState<PaginatedResponse<Props[]>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<Props[]>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -64,7 +65,17 @@ export default function Reorders() {
     () => [
       {
         accessorKey: "name",
-        header: "Name",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Name
+            </ColumnSort>
+          );
+        },
         meta: {},
         cell: ({ row }) => {
           const { combinations } = row.original;
@@ -83,33 +94,32 @@ export default function Reorders() {
       },
       {
         accessorKey: "combinations.reorderLevel",
-        header: "Reorder Level",
+        header: ({ column }) => (
+          <ColumnSort
+            filter={filter}
+            handleFilterChange={handleFilterChange}
+            column={column}
+            align="right"
+          >
+            Reorder Level
+          </ColumnSort>
+        ),
         meta: {
-          headerClassName: "text-right",
           className: "text-right",
         },
       },
       {
         accessorKey: "combinations.inventory.quantity",
         header: ({ column }) => {
-          const columnId = last(column.id.split("_"));
           return (
-            <span
-              className="flex items-center gap-2 cursor-pointer justify-end"
-              onClick={() => {
-                handleFilterChange({
-                  order: filter.order === "ASC" ? "DESC" : "ASC",
-                  sort: columnId,
-                });
-              }}
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              align="right"
             >
               Quantity
-              {filter.sort === columnId && filter.order === "ASC" ? (
-                <ChevronUp />
-              ) : (
-                filter.sort === columnId && <ChevronDown />
-              )}
-            </span>
+            </ColumnSort>
           );
         },
         meta: {
@@ -123,22 +133,14 @@ export default function Reorders() {
         accessorKey: "lastSoldAt",
         header: ({ column }) => {
           return (
-            <span
-              className="flex items-center gap-2 cursor-pointer justify-end"
-              onClick={() => {
-                handleFilterChange({
-                  order: filter.order === "ASC" ? "DESC" : "ASC",
-                  sort: column.id,
-                });
-              }}
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+              align="right"
             >
               Date
-              {filter.sort === column.id && filter.order === "ASC" ? (
-                <ChevronUp />
-              ) : (
-                filter.sort === column.id && <ChevronDown />
-              )}
-            </span>
+            </ColumnSort>
           );
         },
         meta: {
@@ -149,7 +151,7 @@ export default function Reorders() {
         },
       },
     ],
-    [filter.order, filter.sort, handleFilterChange],
+    [filter, handleFilterChange],
   );
   return (
     <Card>
@@ -167,7 +169,9 @@ export default function Reorders() {
           columns={columns}
           meta={{ disabledRow: "combinations.isActive" }}
         />
-        <Pager data={data} filter={filter} setFilter={setFilter} />
+        {data.meta.totalPages > 1 && (
+          <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+        )}
       </CardContent>
     </Card>
   );

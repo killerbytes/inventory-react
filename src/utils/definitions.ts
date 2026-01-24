@@ -244,3 +244,15 @@ export const goodReceiptItemDefault = {
   purchasePrice: 0,
   quantity: 0,
 };
+
+export const PAGINATION_RESPONSE = {
+  data: [],
+  meta: {
+    total: 0,
+    totalPages: 0,
+    currentPage: 0,
+  },
+  summary: {
+    totalAmount: 0,
+  },
+};
