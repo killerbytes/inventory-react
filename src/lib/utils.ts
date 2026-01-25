@@ -193,14 +193,17 @@ export const getMappedSearchProductCombinations = async (params: {
     .filter((i) => i.length > 0);
 
   for (const item of productCombinations) {
-    const productCombinations = item.combinations?.filter(
-      (i: ProductCombinations) => {
-        const name = i.name.toLowerCase();
-        return words.every((word) => name.includes(word));
-      },
-    );
-
-    result.push(...productCombinations);
+    if (item?.description?.indexOf(search) > -1) {
+      result.push(...item.combinations);
+    } else {
+      const productCombinations = item.combinations?.filter(
+        (i: ProductCombinations) => {
+          const name = i.name.toLowerCase();
+          return words.every((word) => name.includes(word));
+        },
+      );
+      result.push(...productCombinations);
+    }
   }
   return result;
 };
