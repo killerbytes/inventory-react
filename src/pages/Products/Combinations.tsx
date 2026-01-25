@@ -24,7 +24,7 @@ export default function Combinations({
   combinations: ProductCombinations[];
   variants: VariantTypes[];
   getData: () => void;
-  selectedCombination: string;
+  selectedCombination: { id: number | string; name: string };
 }) {
   const [combinations, setCombinations] = React.useState(_combinations);
   const { productCombinationState } = useStore();
@@ -192,16 +192,16 @@ export default function Combinations({
 
   React.useEffect(() => {
     let combinations = [];
-    if (selectedCombination !== "ALL") {
+    if (selectedCombination.name !== "ALL") {
       combinations = _combinations.filter(
-        (v) => v.name === selectedCombination,
+        (v) => v.name === selectedCombination.name,
       );
     } else {
       combinations = _combinations;
     }
 
     setCombinations(combinations);
-  }, [_combinations, selectedCombination]);
+  }, [_combinations, selectedCombination.name]);
 
   return (
     <>

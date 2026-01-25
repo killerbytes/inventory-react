@@ -1,32 +1,30 @@
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  PAGINATION,
+  PAGINATION_RESPONSE,
+  ROUTES,
+  UNIT_COLOR,
+} from "@/utils/definitions";
 import { filterProps, PaginatedResponse, priceHistory } from "@/types";
-import { PAGINATION, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
-import { Input } from "@/components/ui/input";
 import { Link } from "react-router";
 import React from "react";
 
-export default function PriceHistoryTab({ productId }: { productId: string }) {
-  const [data, setData] = React.useState<PaginatedResponse<priceHistory[]>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+export default function PriceHistoryTab({
+  productId,
+  selectedCombination,
+}: {
+  productId: string;
+  selectedCombination: { id: number | string; name: string };
+}) {
+  const [data, setData] =
+    React.useState<PaginatedResponse<priceHistory>>(PAGINATION_RESPONSE);
+
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -38,6 +36,7 @@ export default function PriceHistoryTab({ productId }: { productId: string }) {
 
   const getData = React.useCallback(async () => {
     const data = await inventoryServices.getPriceHistory(filter);
+
     setData(data);
   }, [filter]);
 
@@ -134,5 +133,17 @@ export default function PriceHistoryTab({ productId }: { productId: string }) {
     ],
     [filter, handleFilterChange],
   );
-  return <DataTable data={data.data || []} columns={columns} />;
+
+  const filterData = React.useMemo(() => {
+    if (selectedCombination.id === "ALL") {
+      return data.data || [];
+    }
+    return (
+      data.data?.filter(
+        (item) => item.combinations.name === selectedCombination.name,
+      ) || []
+    );
+  }, [data.data, selectedCombination.id, selectedCombination.name]);
+
+  return <DataTable data={filterData} columns={columns} />;
 }

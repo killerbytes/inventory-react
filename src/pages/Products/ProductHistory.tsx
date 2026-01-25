@@ -11,9 +11,11 @@ import Pager from "@/components/Pager";
 import React from "react";
 
 export default function ProductHistory({
+  productName,
   selectedCombination,
 }: {
-  selectedCombination: string;
+  productName: string;
+  selectedCombination: { id: number | string; name: string };
 }) {
   const [data, setData] =
     React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
@@ -27,7 +29,10 @@ export default function ProductHistory({
     try {
       const payload = {
         ...filter,
-        q: selectedCombination,
+        q:
+          selectedCombination.id === "ALL"
+            ? productName
+            : selectedCombination.name,
         type: filter.type === "ALL" ? undefined : filter.type,
       };
 
@@ -37,7 +42,7 @@ export default function ProductHistory({
       const apiError = error as ApiErrorResponse;
       console.error("Error fetching data:", apiError.message);
     }
-  }, [filter, selectedCombination]);
+  }, [filter, selectedCombination, productName]);
 
   React.useEffect(() => {
     getData();

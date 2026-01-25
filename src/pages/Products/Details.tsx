@@ -58,6 +58,9 @@ export default function ProductEdit() {
   } = useStore();
   const [loading, setLoading] = React.useState(false);
   const { productCombinationState } = useStore();
+  const [selectedCombination, setSelectedCombination] = React.useState<string>(
+    String(defaultOption.id),
+  );
   const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
     [],
   );
@@ -146,9 +149,17 @@ export default function ProductEdit() {
     [combinations],
   );
 
-  const [selectedCombination, setSelectedCombination] = React.useState<string>(
-    String(defaultOption.id),
-  );
+  const selectedCombo = React.useMemo<{
+    id: number | string;
+    name: string;
+  }>(() => {
+    return (
+      uniqueCombinations.find((i) => i.id === Number(selectedCombination)) || {
+        name: "ALL",
+        id: "ALL",
+      }
+    );
+  }, [selectedCombination, uniqueCombinations]);
 
   return (
     <Fragment key={id}>
@@ -260,10 +271,7 @@ export default function ProductEdit() {
                           setSelectedCombination(value);
                         }}
                         renderOption={(option) => (
-                          <SelectItem
-                            key={option.id}
-                            value={String(option.name)}
-                          >
+                          <SelectItem key={option.id} value={String(option.id)}>
                             {option.name}
                           </SelectItem>
                         )}
@@ -273,7 +281,7 @@ export default function ProductEdit() {
                       combinations={combinations}
                       variants={variants}
                       getData={getData}
-                      selectedCombination={selectedCombination}
+                      selectedCombination={selectedCombo}
                     />
                   </CardContent>
                 </Card>
@@ -335,7 +343,24 @@ export default function ProductEdit() {
                     <CardTitle>Price History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <PriceHistory productId={id ?? ""} />
+                    {uniqueCombinations.length > 1 && (
+                      <Select
+                        options={[defaultOption, ...uniqueCombinations]}
+                        value={String(selectedCombination)}
+                        onChange={(value) => {
+                          setSelectedCombination(value);
+                        }}
+                        renderOption={(option) => (
+                          <SelectItem key={option.id} value={String(option.id)}>
+                            {option.name}
+                          </SelectItem>
+                        )}
+                      />
+                    )}
+                    <PriceHistory
+                      productId={id ?? ""}
+                      selectedCombination={selectedCombo}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -380,16 +405,17 @@ export default function ProductEdit() {
                           setSelectedCombination(value);
                         }}
                         renderOption={(option) => (
-                          <SelectItem
-                            key={option.id}
-                            value={String(option.name)}
-                          >
+                          <SelectItem key={option.id} value={String(option.id)}>
                             {option.name}
                           </SelectItem>
                         )}
                       />
                     )}
-                    <ProductHistory selectedCombination={selectedCombination} />
+
+                    <ProductHistory
+                      productName={form.getValues().name}
+                      selectedCombination={selectedCombo}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
