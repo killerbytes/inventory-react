@@ -27,6 +27,7 @@ import PriceHistory from "@/pages/Products/PriceHistory";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
+import { SelectItem } from "@/components/ui/select";
 import { ERROR, ROUTES } from "@/utils/definitions";
 import CombinationModal from "./CombinationModal";
 import { Button } from "@/components/ui/button";
@@ -40,11 +41,14 @@ import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import Combinations from "./Combinations";
 import { productSchema } from "@/schemas";
+import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
+
+const defaultOption = { id: "ALL", name: "ALL" };
 
 export default function ProductEdit() {
   const { id } = useParams();
@@ -132,6 +136,19 @@ export default function ProductEdit() {
   const onSearch = React.useCallback(async (search: string) => {
     return await getMappedSearchProductCombinations({ search });
   }, []);
+
+  const uniqueCombinations = React.useMemo(
+    () =>
+      combinations.filter(
+        (item, index) =>
+          combinations.findIndex((i) => i.name === item.name) === index,
+      ),
+    [combinations],
+  );
+
+  const [selectedCombination, setSelectedCombination] = React.useState<string>(
+    String(defaultOption.id),
+  );
 
   return (
     <Fragment key={id}>
@@ -235,10 +252,28 @@ export default function ProductEdit() {
                     </CardAction>
                   </CardHeader>
                   <CardContent className="grid gap-6">
+                    {uniqueCombinations.length > 1 && (
+                      <Select
+                        options={[defaultOption, ...uniqueCombinations]}
+                        value={String(selectedCombination)}
+                        onChange={(value) => {
+                          setSelectedCombination(value);
+                        }}
+                        renderOption={(option) => (
+                          <SelectItem
+                            key={option.id}
+                            value={String(option.name)}
+                          >
+                            {option.name}
+                          </SelectItem>
+                        )}
+                      />
+                    )}
                     <Combinations
                       combinations={combinations}
                       variants={variants}
                       getData={getData}
+                      selectedCombination={selectedCombination}
                     />
                   </CardContent>
                 </Card>
@@ -310,6 +345,23 @@ export default function ProductEdit() {
                     <CardTitle>Supplier History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
+                    {uniqueCombinations.length > 1 && (
+                      <Select
+                        options={[defaultOption, ...uniqueCombinations]}
+                        value={String(selectedCombination)}
+                        onChange={(value) => {
+                          setSelectedCombination(value);
+                        }}
+                        renderOption={(option) => (
+                          <SelectItem
+                            key={option.id}
+                            value={String(option.name)}
+                          >
+                            {option.name}
+                          </SelectItem>
+                        )}
+                      />
+                    )}
                     <SupplierHistory productId={id ?? ""} />
                   </CardContent>
                 </Card>
@@ -320,7 +372,24 @@ export default function ProductEdit() {
                     <CardTitle>Product History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <ProductHistory combinations={combinations} />
+                    {uniqueCombinations.length > 1 && (
+                      <Select
+                        options={[defaultOption, ...uniqueCombinations]}
+                        value={String(selectedCombination)}
+                        onChange={(value) => {
+                          setSelectedCombination(value);
+                        }}
+                        renderOption={(option) => (
+                          <SelectItem
+                            key={option.id}
+                            value={String(option.name)}
+                          >
+                            {option.name}
+                          </SelectItem>
+                        )}
+                      />
+                    )}
+                    <ProductHistory selectedCombination={selectedCombination} />
                   </CardContent>
                 </Card>
               </TabsContent>

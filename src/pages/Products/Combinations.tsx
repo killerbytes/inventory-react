@@ -2,7 +2,6 @@ import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
 import BreakPackModal from "@/components/modals/BreakPackModal";
 import { ProductCombinations, VariantTypes } from "@/types";
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { SelectItem } from "@/components/ui/select";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { PackageOpen, Pencil } from "lucide-react";
@@ -13,27 +12,26 @@ import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
 import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
-import Select from "@/components/Select";
 import { useStore } from "@/stores";
 import React from "react";
 
-const defaultOption = { id: "ALL", value: "ALL" };
 export default function Combinations({
   combinations: _combinations,
   variants,
   getData,
+  selectedCombination,
 }: {
   combinations: ProductCombinations[];
   variants: VariantTypes[];
   getData: () => void;
+  selectedCombination: string;
 }) {
   const [combinations, setCombinations] = React.useState(_combinations);
   const { productCombinationState } = useStore();
   const [selected, setSelected] = React.useState<ProductCombinations | null>(
     null,
   );
-  const [selectedBreakPackVariant, setSelectedBreakPackVariant] =
-    React.useState<string>(String(defaultOption.id));
+
   const [toggle, handleToggle] = useToggle({
     breakPackModal: false,
     stockAdjustmentModal: false,
@@ -192,40 +190,21 @@ export default function Combinations({
     [handleToggle, variants],
   );
 
-  const breakPackVariantOptions = React.useMemo(
-    () => variants.find((i) => i.isBreakpackFilter)?.values || [],
-    [variants],
-  );
-
   React.useEffect(() => {
-    if (selectedBreakPackVariant !== "ALL") {
-      setCombinations(
-        _combinations.filter((i) =>
-          i.values.some((v) => v.id === Number(selectedBreakPackVariant)),
-        ),
+    let combinations = [];
+    if (selectedCombination !== "ALL") {
+      combinations = _combinations.filter(
+        (v) => v.name === selectedCombination,
       );
     } else {
-      setCombinations(_combinations);
+      combinations = _combinations;
     }
-  }, [_combinations, selectedBreakPackVariant]);
+
+    setCombinations(combinations);
+  }, [_combinations, selectedCombination]);
 
   return (
     <>
-      {!!breakPackVariantOptions.length && (
-        <Select
-          options={[defaultOption, ...breakPackVariantOptions]}
-          value={String(selectedBreakPackVariant)}
-          onChange={(value) => {
-            setSelectedBreakPackVariant(value);
-          }}
-          renderOption={(option) => (
-            <SelectItem key={option.id} value={String(option.id)}>
-              {option.value}
-            </SelectItem>
-          )}
-        />
-      )}
-
       <DataTable
         data={combinations}
         columns={columns}

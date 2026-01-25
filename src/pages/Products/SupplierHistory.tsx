@@ -1,6 +1,6 @@
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { GoodReceiptItem, PaginatedResponse } from "@/types";
 import { ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import { GoodReceipt, GoodReceiptItem } from "@/types";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
@@ -9,18 +9,16 @@ import { Link } from "react-router";
 import React from "react";
 
 export default function SupplierHistory({ productId }: { productId: string }) {
-  const [data, setData] = React.useState<PaginatedResponse<GoodReceiptItem>[]>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] = React.useState<GoodReceiptItem[]>([]);
 
   const getData = React.useCallback(async () => {
     const res = await supplierServices.getByProductId(Number(productId));
     setData(
       res.combinations.reduce(
-        (acc, val) => [...acc, ...val.goodReceiptLines],
+        (acc: GoodReceipt[], val: GoodReceipt) => [
+          ...acc,
+          ...val.goodReceiptLines,
+        ],
         [],
       ),
     );

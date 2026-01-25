@@ -55,7 +55,7 @@ export default function BreakPackModal({
 
   const quantity = useController({ control: form.control, name: "quantity" });
 
-  const packType = getPackRelationType(combination, selected || {});
+  const packType = getPackRelationType(combination, selected);
 
   let totalQuantity;
   if (packType === "BREAK_PACK") {
@@ -65,6 +65,15 @@ export default function BreakPackModal({
     totalQuantity =
       Number(quantity.field.value) / Number(selected?.conversionFactor);
   }
+
+  React.useEffect(() => {
+    if (combination?.inventory?.quantity && packType === "RE_PACK") {
+      form.reset({
+        ...form.getValues(),
+        quantity: Number(selected?.conversionFactor),
+      });
+    }
+  }, [combination, form, packType, selected?.conversionFactor]);
 
   const filterOptionsByVariant = (
     options: ProductCombinations[],
@@ -186,7 +195,6 @@ export default function BreakPackModal({
           )}
           {combination?.name}
           <span className="ml-auto">
-            {console.log(combination?.inventory?.quantity)}
             Stock: {Number(combination?.inventory?.quantity)}
           </span>
         </div>
@@ -227,8 +235,6 @@ export default function BreakPackModal({
                         <NumberInput
                           {...field}
                           // type="number"
-                          thousandSeparator={false}
-                          decimalScale={10}
                           value={Number.parseFloat(String(field.value))}
                         />
                         <FormMessage />
@@ -280,12 +286,12 @@ export default function BreakPackModal({
                   {loading && <Loader2Icon className="animate-spin" />}
                   {packType === "BREAK_PACK" ? (
                     <>
-                      <PackageOpen /> Break Pack
+                      <PackageOpen className="text-red-500" /> Break Pack
                     </>
                   ) : (
                     packType === "RE_PACK" && (
                       <>
-                        <PackagePlus />
+                        <PackagePlus className="text-green-500" />
                         Re-Pack
                       </>
                     )
@@ -300,8 +306,11 @@ export default function BreakPackModal({
   );
 }
 
-function getPackRelationType(fromCombo, toCombo) {
-  if (toCombo.isBreakPackOfId === fromCombo.id) return "BREAK_PACK";
-  if (fromCombo.isBreakPackOfId === toCombo.id) return "RE_PACK";
+function getPackRelationType(
+  fromCombo: ProductCombinations,
+  toCombo?: ProductCombinations,
+) {
+  if (toCombo?.isBreakPackOfId === fromCombo.id) return "BREAK_PACK";
+  if (fromCombo.isBreakPackOfId === toCombo?.id) return "RE_PACK";
   return null;
 }

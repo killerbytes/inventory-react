@@ -3,29 +3,21 @@ import {
   filterProps,
   InventoryMovement,
   PaginatedResponse,
-  ProductCombinations,
 } from "@/types";
-import { SelectItem } from "@/components/ui/select";
-import { PAGINATION } from "@/utils/definitions";
+import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
 import Movements from "@/components/Movements";
 import { inventoryServices } from "@/services";
-import Select from "@/components/Select";
 import Pager from "@/components/Pager";
 import React from "react";
 
 export default function ProductHistory({
-  combinations,
+  selectedCombination,
 }: {
-  combinations: ProductCombinations[];
+  selectedCombination: string;
 }) {
-  const [data, setData] = React.useState<PaginatedResponse<InventoryMovement>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
-  const [selectedCombination, setSelectedCombination] =
-    React.useState<ProductCombinations>(combinations[0]);
+  const [data, setData] =
+    React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
+
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -35,7 +27,7 @@ export default function ProductHistory({
     try {
       const payload = {
         ...filter,
-        q: selectedCombination?.name,
+        q: selectedCombination,
         type: filter.type === "ALL" ? undefined : filter.type,
       };
 
@@ -50,33 +42,12 @@ export default function ProductHistory({
   React.useEffect(() => {
     getData();
   }, [getData]);
-  const uniqueCombinations = React.useMemo(
-    () =>
-      combinations.filter(
-        (item, index) =>
-          combinations.findIndex((i) => i.name === item.name) === index,
-      ),
-    [combinations],
-  );
 
   return (
     <>
-      <Select
-        options={uniqueCombinations}
-        value={String(selectedCombination?.id)}
-        onChange={(value) => {
-          const combination = combinations.find((i) => String(i.id) === value);
-          setSelectedCombination(combination!);
-        }}
-        renderOption={(option) => (
-          <SelectItem key={option.id} value={String(option.id)}>
-            {option.name}
-          </SelectItem>
-        )}
-      />
       <Movements data={data.data} />
-      {data.totalPages > 1 && (
-        <Pager data={data} filter={filter} setFilter={setFilter} />
+      {data.meta.totalPages > 1 && (
+        <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
       )}
     </>
   );
