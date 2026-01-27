@@ -54,6 +54,7 @@ export interface Summary {
   totalAmount: number;
   totalReturnAmount?: number;
   totalExchangeAmount?: number;
+  totalCost?: number;
 }
 
 export type PaginatedResponse<T extends object> = {

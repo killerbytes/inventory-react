@@ -175,7 +175,6 @@ export default function ProductEdit() {
       }
     );
   }, [breakPackFilter, selectedCombination, uniqueCombinations]);
-  console.log(selectedCombo);
 
   return (
     <Fragment key={id}>

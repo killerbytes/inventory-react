@@ -1,30 +1,44 @@
-import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardFooter, CardTitle } from "./ui/card";
 import { formatCurrency } from "@/utils/formatters";
 import { Summary } from "@/types";
 
 export default function SectionCards({ data }: { data: Summary | undefined }) {
   return (
-    <div className="grid grid-cols-3 gap-4  ">
-      <Card>
-        <CardHeader>
-          <CardDescription>Grand Total</CardDescription>
+    <div className="grid grid-cols-4 gap-4 text-xl">
+      <Card className="gap-4">
+        <CardContent className="text-sm">Total</CardContent>
+        <CardFooter className="mt-auto">
           <CardTitle>{formatCurrency(data?.totalAmount || 0)}</CardTitle>
-        </CardHeader>
+        </CardFooter>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardDescription>Total Return Amount</CardDescription>
+      {!!data?.totalCost && (
+        <Card className="gap-4">
+          <CardContent className="text-sm">Profit</CardContent>
+          <CardFooter className="mt-auto">
+            <CardTitle>
+              {formatCurrency(
+                (data?.totalAmount || 0) - (data?.totalCost || 0),
+              )}
+            </CardTitle>
+          </CardFooter>
+        </Card>
+      )}
+      <Card className="gap-4">
+        <CardContent className="text-sm">Return Amount</CardContent>
+        <CardFooter className="mt-auto">
           <CardTitle>{formatCurrency(data?.totalReturnAmount || 0)}</CardTitle>
-        </CardHeader>
+        </CardFooter>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardDescription>Total Exchange Amount</CardDescription>
-          <CardTitle>
-            {formatCurrency(data?.totalExchangeAmount || 0)}
-          </CardTitle>
-        </CardHeader>
-      </Card>
+      {!!data?.totalExchangeAmount && (
+        <Card className="gap-4">
+          <CardContent className="text-sm">Exchange Amount</CardContent>
+          <CardFooter className="mt-auto">
+            <CardTitle>
+              {formatCurrency(data?.totalExchangeAmount || 0)}
+            </CardTitle>
+          </CardFooter>
+        </Card>
+      )}
     </div>
   );
 }

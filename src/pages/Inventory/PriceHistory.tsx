@@ -31,7 +31,7 @@ export default function PriceHistory() {
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    sort: "createdAt",
+    sort: "changedAt",
     order: "DESC",
     q: "",
   });
