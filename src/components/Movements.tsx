@@ -54,24 +54,40 @@ export default function Movements({ data }: { data: InventoryMovement[] }) {
       },
       {
         accessorKey: "quantity",
+        header: "Quantity",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
         cell: ({ row }) => {
           return Number(row.original.quantity);
         },
       },
       {
         accessorKey: "costPerUnit",
+        header: "Cost Per Unit",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
         cell: ({ row }) => {
           return formatCurrency(row.original.costPerUnit);
         },
       },
       {
         accessorKey: "totalCost",
+        header: "Total Cost",
+        meta: {
+          headerClassName: "text-right",
+          className: "text-right",
+        },
         cell: ({ row }) => {
           return formatCurrency(row.original.totalCost);
         },
       },
       {
         accessorKey: "referenceId",
+        header: "Reference",
         cell: ({ row }) => {
           let route;
           switch (row.original.referenceType) {

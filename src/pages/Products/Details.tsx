@@ -48,7 +48,7 @@ import React, { Fragment } from "react";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
 
-const defaultOption = { id: "ALL", name: "ALL" };
+const defaultOption = { id: -1, name: "ALL" };
 
 export default function ProductEdit() {
   const { id } = useParams();
@@ -140,26 +140,42 @@ export default function ProductEdit() {
     return await getMappedSearchProductCombinations({ search });
   }, []);
 
-  const uniqueCombinations = React.useMemo(
-    () =>
-      combinations.filter(
-        (item, index) =>
-          combinations.findIndex((i) => i.name === item.name) === index,
-      ),
-    [combinations],
-  );
+  const uniqueCombinations = React.useMemo(() => {
+    return combinations.filter(
+      (item, index) =>
+        combinations.findIndex((i) => i.name === item.name) === index,
+    );
+  }, [combinations]);
+
+  const breakPackFilter = React.useMemo(() => {
+    return variants.find((item) => item.isBreakpackFilter);
+  }, [variants]);
 
   const selectedCombo = React.useMemo<{
-    id: number | string;
+    id: number;
     name: string;
   }>(() => {
+    if (breakPackFilter) {
+      const found = breakPackFilter?.values.find(
+        (i) => i.id === Number(selectedCombination),
+      );
+
+      if (found) {
+        return {
+          id: found.id!,
+          name: found.value,
+        };
+      }
+    }
+
     return (
       uniqueCombinations.find((i) => i.id === Number(selectedCombination)) || {
+        id: -1,
         name: "ALL",
-        id: "ALL",
       }
     );
-  }, [selectedCombination, uniqueCombinations]);
+  }, [breakPackFilter, selectedCombination, uniqueCombinations]);
+  console.log(selectedCombo);
 
   return (
     <Fragment key={id}>
@@ -246,6 +262,38 @@ export default function ProductEdit() {
                   Product History
                 </TabsTrigger>
               </TabsList>
+              {!breakPackFilter && uniqueCombinations.length > 1 && (
+                <Select
+                  options={[defaultOption, ...uniqueCombinations]}
+                  value={String(selectedCombination)}
+                  onChange={(value) => {
+                    setSelectedCombination(value);
+                  }}
+                  renderOption={(option) => (
+                    <SelectItem key={option.id} value={String(option.id)}>
+                      {option.name}
+                    </SelectItem>
+                  )}
+                />
+              )}
+
+              {breakPackFilter && breakPackFilter.values.length > 1 && (
+                <Select
+                  options={[
+                    { id: -1, value: "ALL" },
+                    ...breakPackFilter.values,
+                  ]}
+                  value={String(selectedCombination)}
+                  onChange={(value) => {
+                    setSelectedCombination(value);
+                  }}
+                  renderOption={(option) => (
+                    <SelectItem key={option.id} value={String(option.id)}>
+                      {breakPackFilter.name}: {option.value}
+                    </SelectItem>
+                  )}
+                />
+              )}
               <TabsContent value="product_combination">
                 <Card>
                   <CardHeader>
@@ -263,25 +311,12 @@ export default function ProductEdit() {
                     </CardAction>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    {uniqueCombinations.length > 1 && (
-                      <Select
-                        options={[defaultOption, ...uniqueCombinations]}
-                        value={String(selectedCombination)}
-                        onChange={(value) => {
-                          setSelectedCombination(value);
-                        }}
-                        renderOption={(option) => (
-                          <SelectItem key={option.id} value={String(option.id)}>
-                            {option.name}
-                          </SelectItem>
-                        )}
-                      />
-                    )}
                     <Combinations
                       combinations={combinations}
                       variants={variants}
                       getData={getData}
                       selectedCombination={selectedCombo}
+                      isBreakPackFilter={!!breakPackFilter}
                     />
                   </CardContent>
                 </Card>
@@ -343,23 +378,10 @@ export default function ProductEdit() {
                     <CardTitle>Price History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    {uniqueCombinations.length > 1 && (
-                      <Select
-                        options={[defaultOption, ...uniqueCombinations]}
-                        value={String(selectedCombination)}
-                        onChange={(value) => {
-                          setSelectedCombination(value);
-                        }}
-                        renderOption={(option) => (
-                          <SelectItem key={option.id} value={String(option.id)}>
-                            {option.name}
-                          </SelectItem>
-                        )}
-                      />
-                    )}
                     <PriceHistory
                       productId={id ?? ""}
                       selectedCombination={selectedCombo}
+                      isBreakPackFilter={!!breakPackFilter}
                     />
                   </CardContent>
                 </Card>
@@ -370,24 +392,11 @@ export default function ProductEdit() {
                     <CardTitle>Supplier History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    {uniqueCombinations.length > 1 && (
-                      <Select
-                        options={[defaultOption, ...uniqueCombinations]}
-                        value={String(selectedCombination)}
-                        onChange={(value) => {
-                          setSelectedCombination(value);
-                        }}
-                        renderOption={(option) => (
-                          <SelectItem
-                            key={option.id}
-                            value={String(option.name)}
-                          >
-                            {option.name}
-                          </SelectItem>
-                        )}
-                      />
-                    )}
-                    <SupplierHistory productId={id ?? ""} />
+                    <SupplierHistory
+                      productId={id ?? ""}
+                      selectedCombination={selectedCombo}
+                      isBreakPackFilter={!!breakPackFilter}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -397,24 +406,10 @@ export default function ProductEdit() {
                     <CardTitle>Product History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    {uniqueCombinations.length > 1 && (
-                      <Select
-                        options={[defaultOption, ...uniqueCombinations]}
-                        value={String(selectedCombination)}
-                        onChange={(value) => {
-                          setSelectedCombination(value);
-                        }}
-                        renderOption={(option) => (
-                          <SelectItem key={option.id} value={String(option.id)}>
-                            {option.name}
-                          </SelectItem>
-                        )}
-                      />
-                    )}
-
                     <ProductHistory
                       productName={form.getValues().name}
                       selectedCombination={selectedCombo}
+                      isBreakPackFilter={!!breakPackFilter}
                     />
                   </CardContent>
                 </Card>

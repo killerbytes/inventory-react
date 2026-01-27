@@ -18,9 +18,11 @@ import React from "react";
 export default function PriceHistoryTab({
   productId,
   selectedCombination,
+  isBreakPackFilter,
 }: {
   productId: string;
   selectedCombination: { id: number | string; name: string };
+  isBreakPackFilter: boolean;
 }) {
   const [data, setData] =
     React.useState<PaginatedResponse<priceHistory>>(PAGINATION_RESPONSE);
@@ -28,7 +30,7 @@ export default function PriceHistoryTab({
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    sort: "createdAt",
+    sort: "changedAt",
     order: "ASC",
     q: "",
     productId,
@@ -135,15 +137,25 @@ export default function PriceHistoryTab({
   );
 
   const filterData = React.useMemo(() => {
-    if (selectedCombination.id === "ALL") {
+    if (selectedCombination.id === -1) {
       return data.data || [];
     }
-    return (
-      data.data?.filter(
-        (item) => item.combinations.name === selectedCombination.name,
-      ) || []
-    );
-  }, [data.data, selectedCombination.id, selectedCombination.name]);
+
+    return isBreakPackFilter
+      ? data.data?.filter((item) =>
+          item.combinations.values.find(
+            (item) => item.id === selectedCombination.id,
+          ),
+        )
+      : data.data?.filter(
+          (item) => item.combinations.name === selectedCombination.name,
+        ) || [];
+  }, [
+    data,
+    isBreakPackFilter,
+    selectedCombination.id,
+    selectedCombination.name,
+  ]);
 
   return <DataTable data={filterData} columns={columns} />;
 }

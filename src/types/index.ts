@@ -33,6 +33,7 @@ import {
   goodReceiptUpdateSchema,
   returnTransactionSchema,
   invoiceGoodReceiptSchema,
+  supplierHistorySchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -139,6 +140,7 @@ type ReturnItem = z.infer<typeof returnItemSchema>;
 type ReturnTransaction = z.infer<typeof returnTransactionSchema>;
 type ExchangeItem = z.infer<typeof exchangeItemSchema>;
 type Return = z.infer<typeof returnSchema>;
+type supplierHistory = z.infer<typeof supplierHistorySchema>;
 
 export type {
   User,
@@ -175,4 +177,5 @@ export type {
   ExchangeItem,
   Return,
   ReturnTransaction,
+  supplierHistory,
 };

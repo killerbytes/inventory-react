@@ -1,34 +1,34 @@
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { ROUTES, UNIT_COLOR } from "@/utils/definitions";
-import { GoodReceipt, GoodReceiptItem } from "@/types";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { supplierServices } from "@/services";
+import { supplierHistory } from "@/types";
 import { Link } from "react-router";
 import React from "react";
 
-export default function SupplierHistory({ productId }: { productId: string }) {
-  const [data, setData] = React.useState<GoodReceiptItem[]>([]);
+export default function SupplierHistory({
+  productId,
+  selectedCombination,
+  isBreakPackFilter,
+}: {
+  productId: string;
+  selectedCombination: { id: number | string; name: string };
+  isBreakPackFilter: boolean;
+}) {
+  const [data, setData] = React.useState<supplierHistory[]>([]);
 
   const getData = React.useCallback(async () => {
     const res = await supplierServices.getByProductId(Number(productId));
-    setData(
-      res.combinations.reduce(
-        (acc: GoodReceipt[], val: GoodReceipt) => [
-          ...acc,
-          ...val.goodReceiptLines,
-        ],
-        [],
-      ),
-    );
+    setData(res);
   }, [productId]);
 
   React.useEffect(() => {
     getData();
   }, [getData]);
 
-  const columns = React.useMemo<ColumnDef<GoodReceiptItem>[]>(
+  const columns = React.useMemo<ColumnDef<supplierHistory>[]>(
     () => [
       {
         accessorKey: "nameSnapshot",
@@ -107,5 +107,26 @@ export default function SupplierHistory({ productId }: { productId: string }) {
     ],
     [],
   );
-  return <DataTable data={data} columns={columns} />;
+  const filteredData = React.useMemo(() => {
+    if (selectedCombination.id === -1) {
+      return data || [];
+    }
+
+    return isBreakPackFilter
+      ? data?.filter((item) =>
+          item.combinations.values.find(
+            (values) => values.id === selectedCombination.id,
+          ),
+        ) || []
+      : data?.filter(
+          (item) => item.combinations.name === selectedCombination.name,
+        ) || [];
+  }, [
+    data,
+    isBreakPackFilter,
+    selectedCombination.id,
+    selectedCombination.name,
+  ]);
+
+  return <DataTable data={filteredData} columns={columns} />;
 }

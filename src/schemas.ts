@@ -539,3 +539,8 @@ export const returnSchema = z.object({
   exchanges: z.array(exchangeItemSchema).optional(),
   reason: z.string(),
 });
+
+export const supplierHistorySchema = goodReceiptLineSchema.extend({
+  goodReceipt: goodReceiptSchema,
+  combinations: productCombinationsSchema,
+});
