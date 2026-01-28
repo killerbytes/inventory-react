@@ -11,15 +11,13 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, ProductCombinations } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { filterProps, PaginatedResponse } from "@/types";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { formatDate } from "@/utils/formatters";
-import { inventoryServices } from "@/services";
-import { cx } from "class-variance-authority";
+import { reportServices } from "@/services";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import { last } from "lodash";
@@ -27,24 +25,24 @@ import React from "react";
 
 type Props = {
   name: string;
-  combinations: ProductCombinations;
-  lastSoldAt: string;
-  quantity: number;
+  productId: string;
+  unit: string;
+  inventory: {
+    quantity: number;
+  };
 };
 
-export default function Reorders() {
+export default function NoSales() {
   const [data, setData] =
     React.useState<PaginatedResponse<Props[]>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    sort: "lastSoldAt",
-    order: "DESC",
-    q: "",
+    sort: "quantity",
   });
 
   const getData = React.useCallback(async () => {
-    const data = await inventoryServices.getReorderLevels(filter);
+    const data = await reportServices.noSales(filter);
     setData(data);
   }, [filter]);
 
@@ -61,7 +59,6 @@ export default function Reorders() {
       sort: last(sort?.split("_")),
     }));
   }, []);
-
   const columns = React.useMemo<ColumnDef<Props>[]>(
     () => [
       {
@@ -77,98 +74,48 @@ export default function Reorders() {
             </ColumnSort>
           );
         },
-        meta: {},
         cell: ({ row }) => {
-          const { combinations } = row.original;
           return (
             <Link
-              to={`${ROUTES.PRODUCTS}/${combinations.productId}`}
+              to={`${ROUTES.PRODUCTS}/${row.original.productId}`}
               className="flex gap-2 items-center"
             >
               <ColorBadge colorMap={UNIT_COLOR}>
-                {String(combinations.unit)}
+                {String(row.original.unit)}
               </ColorBadge>
-              {combinations.name}
+              {row.original.name}
             </Link>
           );
         },
       },
       {
-        accessorKey: "combinations.reorderLevel",
-        header: ({ column }) => (
-          <ColumnSort
-            filter={filter}
-            handleFilterChange={handleFilterChange}
-            column={column}
-            align="right"
-          >
-            Reorder Level
-          </ColumnSort>
-        ),
-        meta: {
-          className: "text-right",
-        },
-      },
-      {
-        accessorKey: "combinations.inventory.quantity",
+        accessorKey: "inventory.quantity",
         header: ({ column }) => {
           return (
             <ColumnSort
               filter={filter}
               handleFilterChange={handleFilterChange}
               column={column}
-              align="right"
             >
               Quantity
             </ColumnSort>
           );
         },
-        meta: {
-          className: "text-right",
-        },
         cell: ({ row }) => {
-          return (
-            <div
-              className={cx({
-                "font-bold text-red-500": row.original.quantity <= 0,
-              })}
-            >
-              {Number(row.original.quantity)}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "lastSoldAt",
-        header: ({ column }) => {
-          return (
-            <ColumnSort
-              filter={filter}
-              handleFilterChange={handleFilterChange}
-              column={column}
-              align="right"
-            >
-              Date
-            </ColumnSort>
-          );
-        },
-        meta: {
-          className: "text-right",
-        },
-        cell: ({ row }) => {
-          return formatDate(row.original.lastSoldAt);
+          return Number(row.original.inventory.quantity);
         },
       },
     ],
     [filter, handleFilterChange],
   );
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SidebarTrigger />
           <div className="bg-border h-5 w-[1px]"></div>
-          Reorder Levels
+          No Sales
         </CardTitle>
         <CardAction></CardAction>
       </CardHeader>
@@ -176,7 +123,7 @@ export default function Reorders() {
         <DataTable
           data={data.data || []}
           columns={columns}
-          meta={{ disabledRow: "combinations.isActive" }}
+          meta={{ disabledRow: "isActive" }}
         />
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />

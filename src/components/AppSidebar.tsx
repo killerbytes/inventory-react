@@ -15,6 +15,10 @@ import {
   CreditCard,
   ChartCandlestick,
   Gauge,
+  TrendingUp,
+  TrendingDown,
+  BadgeDollarSign,
+  Annoyed,
 } from "lucide-react";
 import {
   Sidebar,
@@ -102,6 +106,21 @@ const reports = [
     title: "Reorder Levels",
     url: ROUTES.REORDERS,
     icon: Gauge,
+  },
+  {
+    title: "Popular",
+    url: ROUTES.REPORTS_POPULAR,
+    icon: TrendingUp,
+  },
+  {
+    title: "Profit",
+    url: ROUTES.REPORTS_PROFIT,
+    icon: BadgeDollarSign,
+  },
+  {
+    title: "No Sales",
+    url: ROUTES.REPORTS_NO_SALES,
+    icon: Annoyed,
   },
 ];
 
