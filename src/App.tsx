@@ -1,5 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router";
+import Popular from "./pages/Reports/Popular";
+import NoSales from "./pages/Reports/NoSales";
 import { ROUTES } from "./utils/definitions";
+import Profit from "./pages/Reports/Profit";
+import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
 import { lazy, Suspense } from "react";
@@ -43,7 +47,7 @@ function App() {
               path={ROUTES.DASHBOARD}
               element={
                 <Layout>
-                  <Home />
+                  <Dashboard />
                 </Layout>
               }
             />
@@ -213,6 +217,30 @@ function App() {
               }
             />
 
+            <Route
+              path={ROUTES.REPORTS_POPULAR}
+              element={
+                <Layout>
+                  <Popular />
+                </Layout>
+              }
+            />
+            <Route
+              path={ROUTES.REPORTS_PROFIT}
+              element={
+                <Layout>
+                  <Profit />
+                </Layout>
+              }
+            />
+            <Route
+              path={ROUTES.REPORTS_NO_SALES}
+              element={
+                <Layout>
+                  <NoSales />
+                </Layout>
+              }
+            />
             <Route
               path="settings"
               element={

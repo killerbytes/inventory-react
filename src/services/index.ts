@@ -9,6 +9,7 @@ import CustomerService from "./customers";
 import ProductService from "./products";
 import PaymentService from "./payment";
 import InvoiceService from "./invoice";
+import ReportService from "./reports";
 import UserService from "./users";
 import AuthService from "./auth";
 import Http from "./http";
@@ -27,6 +28,7 @@ export const inventoryServices = new InventoryService({ http });
 export const invoiceServices = new InvoiceService({ http });
 export const paymentServices = new PaymentService({ http });
 export const variantTypesServices = new VariantTypesService({ http });
+export const reportServices = new ReportService({ http });
 export const productCombinationServices = new ProductCombinationService({
   http,
 });

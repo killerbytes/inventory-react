@@ -12,14 +12,16 @@ import {
   UNIT_COLOR,
 } from "@/utils/definitions";
 import { filterProps, PaginatedResponse, ProductCombinations } from "@/types";
+import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { formatCurrency } from "@/utils/formatters";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { formatDate } from "@/utils/formatters";
-import { inventoryServices } from "@/services";
-import { cx } from "class-variance-authority";
+import { DateRange } from "react-day-picker";
+import { reportServices } from "@/services";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import { last } from "lodash";
@@ -28,25 +30,32 @@ import React from "react";
 type Props = {
   name: string;
   combinations: ProductCombinations;
-  lastSoldAt: string;
-  quantity: number;
+  totalProfit: number;
+  totalQuantity: number;
 };
 
-export default function Reorders() {
+export default function Profit() {
+  const [range, setRange] = React.useState<DateRange>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
   const [data, setData] =
     React.useState<PaginatedResponse<Props[]>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
-    sort: "lastSoldAt",
-    order: "DESC",
-    q: "",
+    sort: "totalProfit",
   });
 
   const getData = React.useCallback(async () => {
-    const data = await inventoryServices.getReorderLevels(filter);
+    const payload = {
+      ...filter,
+      ...(range?.from && range?.to && { startDate: range.from }),
+      ...(range?.from && range?.to && { endDate: range.to }),
+    };
+    const data = await reportServices.profit(payload);
     setData(data);
-  }, [filter]);
+  }, [filter, range]);
 
   React.useEffect(() => {
     getData();
@@ -65,7 +74,7 @@ export default function Reorders() {
   const columns = React.useMemo<ColumnDef<Props>[]>(
     () => [
       {
-        accessorKey: "name",
+        accessorKey: "combinations.name",
         header: ({ column }) => {
           return (
             <ColumnSort
@@ -77,7 +86,6 @@ export default function Reorders() {
             </ColumnSort>
           );
         },
-        meta: {},
         cell: ({ row }) => {
           const { combinations } = row.original;
           return (
@@ -94,85 +102,58 @@ export default function Reorders() {
         },
       },
       {
-        accessorKey: "combinations.reorderLevel",
-        header: ({ column }) => (
-          <ColumnSort
-            filter={filter}
-            handleFilterChange={handleFilterChange}
-            column={column}
-            align="right"
-          >
-            Reorder Level
-          </ColumnSort>
-        ),
-        meta: {
-          className: "text-right",
-        },
-      },
-      {
-        accessorKey: "combinations.inventory.quantity",
+        accessorKey: "totalQuantity",
         header: ({ column }) => {
           return (
             <ColumnSort
               filter={filter}
               handleFilterChange={handleFilterChange}
               column={column}
-              align="right"
             >
-              Quantity
+              Total Quantity
             </ColumnSort>
           );
         },
-        meta: {
-          className: "text-right",
-        },
         cell: ({ row }) => {
-          return (
-            <div
-              className={cx({
-                "font-bold text-red-500": row.original.quantity <= 0,
-              })}
-            >
-              {Number(row.original.quantity)}
-            </div>
-          );
+          const { totalQuantity } = row.original;
+          return Number(totalQuantity);
         },
       },
       {
-        accessorKey: "lastSoldAt",
+        accessorKey: "totalProfit",
         header: ({ column }) => {
           return (
             <ColumnSort
               filter={filter}
               handleFilterChange={handleFilterChange}
               column={column}
-              align="right"
             >
-              Date
+              Total Profit
             </ColumnSort>
           );
         },
-        meta: {
-          className: "text-right",
-        },
         cell: ({ row }) => {
-          return formatDate(row.original.lastSoldAt);
+          const { totalProfit } = row.original;
+          return formatCurrency(totalProfit);
         },
       },
     ],
     [filter, handleFilterChange],
   );
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SidebarTrigger />
           <div className="bg-border h-5 w-[1px]"></div>
-          Reorder Levels
+          Profit Products
         </CardTitle>
         <CardAction></CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
+        <DateRangePicker value={range} onChange={setRange} />
+
         <DataTable
           data={data.data || []}
           columns={columns}

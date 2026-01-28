@@ -30,6 +30,10 @@ export const ROUTES = {
   PRICE_HISTORY: "/price-history",
   REORDERS: "/reorders",
   TEST: "/test",
+  REPORTS: "/reports",
+  REPORTS_POPULAR: "/reports/popular",
+  REPORTS_PROFIT: "/reports/profit",
+  REPORTS_NO_SALES: "/reports/no-sale",
 };
 
 export const ORDER_TYPE = {
