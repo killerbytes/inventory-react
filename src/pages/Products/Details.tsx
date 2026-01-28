@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import {
   ApiErrorResponse,
   Product,
@@ -47,6 +48,7 @@ import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
+import Variants from "./Variants";
 
 const defaultOption = { id: -1, name: "ALL" };
 
@@ -326,48 +328,10 @@ export default function ProductEdit() {
                     <CardTitle>Variants</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Variant Types</CardTitle>
-                        <CardAction>
-                          <Button
-                            onClick={() => handleToggle({ variantModal: true })}
-                            type="button"
-                            variant="outline"
-                            className="shadow-sm"
-                          >
-                            <Pencil />
-                            Edit Variants
-                          </Button>
-                        </CardAction>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex gap-4">
-                          {variants.map((variant, idx) => {
-                            return (
-                              <div className="flex flex-col gap-2">
-                                <Badge
-                                  variant="secondary"
-                                  key={idx}
-                                  className={cx("outline", {
-                                    "font-bold italic underline":
-                                      variant.isBreakpackFilter,
-                                  })}
-                                >
-                                  {variant.name}
-                                </Badge>
-
-                                <ul className="text-sm flex gap-1 flex-col">
-                                  {variant.values.map((i) => (
-                                    <li>{i.value}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <Variants
+                      id={id ?? ""}
+                      variants={variants}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -418,19 +382,6 @@ export default function ProductEdit() {
         </Form>
       )}
       {/* {JSON.stringify(x)} */}
-      {toggle.variantModal && (
-        <VariantsModal
-          productId={Number(id)}
-          isOpen={true}
-          onClose={(shouldOpenComboModal) => {
-            handleToggle({ variantModal: false });
-            getData();
-            if (shouldOpenComboModal) {
-              handleToggle({ combinationModal: true });
-            }
-          }}
-        />
-      )}
       {toggle.combinationModal && (
         <CombinationModal
           product={form.getValues()}
