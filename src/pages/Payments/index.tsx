@@ -1,19 +1,12 @@
 import {
-  Customer,
-  filterProps,
-  Invoice,
-  PaginatedResponse,
-  PaymentApplication,
-} from "@/types";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Customer, filterProps, Invoice, PaginatedResponse } from "@/types";
 import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -34,7 +27,7 @@ export default function Payments() {
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "createdAt",
-    order: "ASC",
+    order: "DESC",
     q: "",
   });
 

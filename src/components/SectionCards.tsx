@@ -24,14 +24,14 @@ export default function SectionCards({ data }: { data: Summary | undefined }) {
         </Card>
       )}
       <Card className="gap-4">
-        <CardContent className="text-sm">Return Amount</CardContent>
+        <CardContent className="text-sm">Returns</CardContent>
         <CardFooter className="mt-auto">
           <CardTitle>{formatCurrency(data?.totalReturnAmount || 0)}</CardTitle>
         </CardFooter>
       </Card>
       {!!data?.totalExchangeAmount && (
         <Card className="gap-4">
-          <CardContent className="text-sm">Exchange Amount</CardContent>
+          <CardContent className="text-sm">Exchanges</CardContent>
           <CardFooter className="mt-auto">
             <CardTitle>
               {formatCurrency(data?.totalExchangeAmount || 0)}

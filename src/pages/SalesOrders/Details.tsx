@@ -28,14 +28,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  AlertCircleIcon,
+  Ban,
+  Car,
+  EllipsisVertical,
+  Undo,
+} from "lucide-react";
+import {
   customerServices,
   productServices,
   salesOrderServices,
 } from "@/services";
 import { ERROR, ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
-import { Ban, Car, EllipsisVertical, Undo } from "lucide-react";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -202,8 +209,16 @@ export default function SalesOrderDetails() {
 
         <CardContent className="flex flex-col gap-4">
           {data && <Static data={data} />}
+          {data?.status === ORDER_STATUS.CANCELLED && (
+            <Alert variant="destructive">
+              <AlertCircleIcon />
+              <AlertTitle>Cancellation Reason</AlertTitle>
+              <AlertDescription>{data?.cancellationReason}</AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Order Items</CardTitle>
