@@ -285,7 +285,7 @@ export default function SalesOrderModal({
         accessorKey: "combinationId",
         header: "Product",
         meta: {
-          className: "w-100",
+          className: "w-[35%]",
         },
         cell: ({ row }) => {
           return (
@@ -347,7 +347,7 @@ export default function SalesOrderModal({
         accessorKey: "discount",
         header: "Discount",
         meta: {
-          className: "text-right w-32",
+          className: "text-right",
           type: "currency",
         },
         cell: ({ row }) => (
@@ -361,9 +361,7 @@ export default function SalesOrderModal({
       {
         accessorKey: "discountNote",
         header: "Discount Note",
-        meta: {
-          className: "w-50",
-        },
+        meta: {},
         cell: ({ row }) => (
           <Controller
             name={`salesOrderItems.${row.index}.discountNote`}
@@ -379,7 +377,7 @@ export default function SalesOrderModal({
         accessorKey: "purchasePrice",
         header: "Price",
         meta: {
-          headerClassName: "text-center",
+          headerClassName: "text-right",
           className: "text-right",
         },
         cell: ({ row }) => (
@@ -416,7 +414,7 @@ export default function SalesOrderModal({
         accessorKey: "amount",
         header: () => <div className="text-right">Amount</div>,
         meta: {
-          className: "text-right w-20",
+          className: "text-right",
         },
 
         cell: ({ row }) => (

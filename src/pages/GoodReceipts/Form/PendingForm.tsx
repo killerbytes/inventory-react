@@ -168,26 +168,13 @@ export default function PendingForm({
                         field.onChange(value.id);
 
                         form.setValue(
-                          `goodReceiptLines.${row.index}.purchasePrice`,
-                          value.price,
-                        );
-                        form.setValue(
                           `goodReceiptLines.${row.index}.combinations`,
                           value,
                         );
-
                         setTimeout(() => {
-                          if (row.index + 1 === fields.length) {
-                            const button: HTMLButtonElement | null =
-                              document.querySelector(".append-btn");
-                            if (button) {
-                              button.focus();
-                            }
-                          } else {
-                            form.setFocus(
-                              `goodReceiptLines.${row.index + 1}.quantity`,
-                            );
-                          }
+                          form.setFocus(
+                            `goodReceiptLines.${row.index}.purchasePrice`,
+                          );
                         }, 0);
                       }}
                     />
@@ -210,7 +197,9 @@ export default function PendingForm({
           <Controller
             name={`goodReceiptLines.${row.index}.discount`}
             control={form.control}
-            render={({ field }) => <NumberInput {...field} type="currency" />}
+            render={({ field }) => (
+              <NumberInput {...field} type="currency" tabIndex={-1} />
+            )}
           />
         ),
       },
@@ -228,6 +217,7 @@ export default function PendingForm({
               <Input
                 {...field}
                 value={field.value ? String(field.value) : undefined}
+                tabIndex={-1}
               />
             )}
           />

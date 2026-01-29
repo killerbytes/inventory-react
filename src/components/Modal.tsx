@@ -38,7 +38,7 @@ export default function Modal({
     >
       <DialogContent
         className={cx(
-          "w-full max-h-[95%] overflow-auto",
+          "w-full overflow-auto",
           `${Modal.sizes[size]}`,
           className,
         )}
@@ -55,8 +55,8 @@ export default function Modal({
 }
 
 Modal.sizes = {
-  sm: "sm:max-w-[500px]",
-  md: "sm:max-w-[800px]",
-  lg: "sm:max-w-[70%]",
-  xl: "sm:max-w-[90%]",
+  sm: "w-[95%] sm:w-[500px]",
+  md: "w-[95%] max-w-[800px]!",
+  lg: "w-[95%] max-w-[1200px]!",
+  xl: "w-[95%] max-w-[1600px]!",
 };
