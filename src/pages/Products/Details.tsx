@@ -47,8 +47,8 @@ import Loader from "@/components/Loader";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
 import { useStore } from "@/stores";
-import { toast } from "sonner";
 import Variants from "./Variants";
+import { toast } from "sonner";
 
 const defaultOption = { id: -1, name: "ALL" };
 
@@ -250,7 +250,7 @@ export default function ProductEdit() {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
+              <TabsList className="w-full xsm:w-fit flex items-center justify-start flex-nowrap overflow-x-auto md:overflow-x-visible">
                 <TabsTrigger value="product_combination">
                   Product Combinations
                 </TabsTrigger>
@@ -328,10 +328,7 @@ export default function ProductEdit() {
                     <CardTitle>Variants</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <Variants
-                      id={id ?? ""}
-                      variants={variants}
-                    />
+                    <Variants variants={variants} />
                   </CardContent>
                 </Card>
               </TabsContent>

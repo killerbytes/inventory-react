@@ -44,7 +44,7 @@ export default function Modal({
         )}
         tabIndex={undefined}
       >
-        <DialogHeader>
+        <DialogHeader className="text-left">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
