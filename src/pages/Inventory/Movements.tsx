@@ -19,7 +19,6 @@ import {
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
-import { formatCurrency } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
 import Movements from "@/components/Movements";
 import { inventoryServices } from "@/services";

@@ -10,20 +10,20 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
+import { Link, useParams } from "react-router";
 import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
-import { Link } from "react-router";
 import React from "react";
 
-export default function PriceHistoryTab({
-  productId,
+export default function PriceHistory({
   selectedCombination,
   isBreakPackFilter,
 }: {
-  productId: string;
   selectedCombination: { id: number | string; name: string };
   isBreakPackFilter: boolean;
 }) {
+  const { id } = useParams();
+
   const [data, setData] =
     React.useState<PaginatedResponse<priceHistory>>(PAGINATION_RESPONSE);
 
@@ -33,7 +33,7 @@ export default function PriceHistoryTab({
     sort: "changedAt",
     order: "ASC",
     q: "",
-    productId,
+    productId: id,
   });
 
   const getData = React.useCallback(async () => {

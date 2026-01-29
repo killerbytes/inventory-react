@@ -24,10 +24,10 @@ export default function Movements({ data }: { data: InventoryMovement[] }) {
               className="flex gap-2 items-center"
               to={`${ROUTES.PRODUCTS}/${row.original.combination?.productId}`}
             >
-              {row.original.combination?.name}
               <ColorBadge colorMap={UNIT_COLOR}>
                 {String(row.original.combination?.unit)}
               </ColorBadge>
+              {row.original.combination?.name}
             </Link>
           );
         },

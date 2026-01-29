@@ -103,12 +103,16 @@ export default function Profit() {
       },
       {
         accessorKey: "totalQuantity",
+        meta: {
+          className: "text-right",
+        },
         header: ({ column }) => {
           return (
             <ColumnSort
               filter={filter}
               handleFilterChange={handleFilterChange}
               column={column}
+              align="right"
             >
               Total Quantity
             </ColumnSort>
@@ -121,12 +125,16 @@ export default function Profit() {
       },
       {
         accessorKey: "totalProfit",
+        meta: {
+          className: "text-right",
+        },
         header: ({ column }) => {
           return (
             <ColumnSort
               filter={filter}
               handleFilterChange={handleFilterChange}
               column={column}
+              align="right"
             >
               Total Profit
             </ColumnSort>

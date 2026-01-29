@@ -3,26 +3,26 @@ import { ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
+import { Link, useParams } from "react-router";
 import { supplierServices } from "@/services";
 import { supplierHistory } from "@/types";
-import { Link } from "react-router";
 import React from "react";
 
 export default function SupplierHistory({
-  productId,
   selectedCombination,
   isBreakPackFilter,
 }: {
-  productId: string;
   selectedCombination: { id: number | string; name: string };
   isBreakPackFilter: boolean;
 }) {
+  const { id } = useParams();
+
   const [data, setData] = React.useState<supplierHistory[]>([]);
 
   const getData = React.useCallback(async () => {
-    const res = await supplierServices.getByProductId(Number(productId));
+    const res = await supplierServices.getByProductId(Number(id));
     setData(res);
-  }, [productId]);
+  }, [id]);
 
   React.useEffect(() => {
     getData();
