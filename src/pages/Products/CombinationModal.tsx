@@ -19,6 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2Icon, Plus, Trash2 } from "lucide-react";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SelectItem } from "@/components/ui/select";
 import NumberInput from "@/components/NumberInput";
@@ -478,14 +479,15 @@ export default function CombinationModal({
               <FormItem className="mb-2">
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
-                  <ScrollArea className="rounded-md border">
+                  <div className="rounded-md border   max-h-[50vh] overflow-y-auto ">
                     <DataTable
                       data={fields}
                       columns={columns}
                       errors={form.formState.errors}
                       showFooter={false}
+                      tableClassname="border-none"
                     />
-                  </ScrollArea>
+                  </div>
                 </FormControl>
                 <div></div>
 
@@ -494,11 +496,12 @@ export default function CombinationModal({
             )}
           />
 
-          <div className="flex justify-between">
+          <DialogFooter className="flex justify-between! items-center text-left flex-row">
             <Button
               type="button"
               variant="outline"
-              className="shadow-sm"
+              className="shadow-sm rounded-full"
+              size="icon"
               autoFocus
               onClick={() => {
                 const lastItem = last(x);
@@ -518,7 +521,7 @@ export default function CombinationModal({
               {loading && <Loader2Icon className="animate-spin" />}
               Save changes
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </Form>
       {/* {JSON.stringify(x)} */}
