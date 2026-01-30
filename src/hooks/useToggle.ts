@@ -1,26 +1,27 @@
 import React from "react";
 
-interface ToggleState<> {
-  [key: string]: boolean;
-}
+export type ToggleState = Record<string, boolean | undefined>;
 
-type UseToggleResult = [ToggleState, (item: Partial<ToggleState>) => void] & {
+export type ToggleUpdater =
+  | Partial<ToggleState>
+  | ((prev: ToggleState) => ToggleState);
+
+type UseToggleResult = [ToggleState, (updater: ToggleUpdater) => void] & {
   toggle: ToggleState;
-  handleToggle: (item: Partial<ToggleState>) => void;
+  handleToggle: (updater: ToggleUpdater) => void;
 };
 
-export default function useToggle(state: ToggleState): UseToggleResult {
-  const [toggle, setToggle] = React.useState<ToggleState>(state);
-  const handleToggle = React.useCallback((item: Partial<ToggleState>) => {
-    setToggle((prevState) => ({ ...prevState, ...item } as ToggleState));
+export default function useToggle(initialState: ToggleState): UseToggleResult {
+  const [toggle, setToggle] = React.useState<ToggleState>(initialState);
+
+  const handleToggle = React.useCallback((updater: ToggleUpdater) => {
+    setToggle((prev) =>
+      typeof updater === "function" ? updater(prev) : { ...prev, ...updater },
+    );
   }, []);
 
-  const result = Object.assign([toggle, handleToggle], {
+  return Object.assign([toggle, handleToggle], {
     toggle,
     handleToggle,
   }) as UseToggleResult;
-  result.toggle = result[0];
-  result.handleToggle = result[1];
-
-  return result;
 }

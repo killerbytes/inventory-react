@@ -15,18 +15,20 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { variantTypesServices } from "@/services";
 import { Button } from "@/components/ui/button";
-import VariantsModal from "./VariantsModal";
-import useToggle from "@/hooks/useToggle";
 import { useParams } from "react-router";
 import { VariantTypes } from "@/types";
 import { Pencil } from "lucide-react";
 
-export default function Variants({ variants }: { variants: VariantTypes[] }) {
-  const { id } = useParams();
+import { ToggleUpdater } from "@/hooks/useToggle";
 
-  const [toggle, handleToggle] = useToggle({
-    variantModal: false,
-  });
+export default function Variants({
+  variants,
+  handleToggle,
+}: {
+  variants: VariantTypes[];
+  handleToggle: (updater: ToggleUpdater) => void;
+}) {
+  const { id } = useParams();
 
   const handleVariantChange = async (variant: VariantTypes) => {
     const payload = {
@@ -44,7 +46,14 @@ export default function Variants({ variants }: { variants: VariantTypes[] }) {
           <CardTitle>Variant Types</CardTitle>
           <CardAction>
             <Button
-              onClick={() => handleToggle({ variantModal: true })}
+              onClick={() =>
+                handleToggle((prevState) => {
+                  return {
+                    ...prevState,
+                    variantModal: true,
+                  };
+                })
+              }
               type="button"
               variant="outline"
               className="shadow-sm"
@@ -84,18 +93,6 @@ export default function Variants({ variants }: { variants: VariantTypes[] }) {
           </RadioGroup>
         </CardContent>
       </Card>
-      {toggle.variantModal && (
-        <VariantsModal
-          productId={Number(id)}
-          isOpen={true}
-          onClose={(shouldOpenComboModal) => {
-            handleToggle({ variantModal: false });
-            if (shouldOpenComboModal) {
-              handleToggle({ combinationModal: true });
-            }
-          }}
-        />
-      )}
     </>
   );
 }

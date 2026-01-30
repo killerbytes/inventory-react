@@ -33,8 +33,6 @@ import { ERROR, ROUTES } from "@/utils/definitions";
 import CombinationModal from "./CombinationModal";
 import { Button } from "@/components/ui/button";
 import SupplierHistory from "./SupplierHistory";
-import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
 import ProductHistory from "./ProductHistory";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
@@ -328,7 +326,7 @@ export default function ProductEdit() {
                     <CardTitle>Variants</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <Variants variants={variants} />
+                    <Variants variants={variants} handleToggle={handleToggle} />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -391,6 +389,19 @@ export default function ProductEdit() {
             }
             handleToggle({ combinationModal: false });
             setActiveTab("product_combination");
+          }}
+        />
+      )}
+
+      {toggle.variantModal && (
+        <VariantsModal
+          productId={Number(id)}
+          isOpen={true}
+          onClose={(shouldOpenComboModal) => {
+            handleToggle({ variantModal: false });
+            if (shouldOpenComboModal) {
+              handleToggle({ combinationModal: true });
+            }
           }}
         />
       )}

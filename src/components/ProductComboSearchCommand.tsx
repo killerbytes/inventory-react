@@ -10,6 +10,7 @@ import useDebounce from "@/hooks/useDebounce";
 import { ProductCombinations } from "@/types";
 import { Button } from "./ui/button";
 import * as React from "react";
+import Loader from "./Loader";
 
 function ProductComboSearchCommandComponent<T extends ProductCombinations>({
   onSelect,
@@ -47,15 +48,19 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
   const [search, setSearch] = React.useState("");
   const listRef = React.useRef<HTMLDivElement>(null);
   const [items, setItems] = React.useState<ProductCombinations[]>([]);
-
+  const [loading, setLoading] = React.useState(false);
   const debouncedQuery = useDebounce(search, 300);
 
   React.useEffect(() => {
     const getData = async () => {
+      setLoading(true);
       const data = await onSearch(debouncedQuery);
       setItems(data);
+      setLoading(false);
     };
-    getData();
+    if (debouncedQuery) {
+      getData();
+    }
   }, [debouncedQuery, onSearch]);
 
   React.useEffect(() => {
@@ -90,12 +95,21 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
       <CommandDialog open={open} onOpenChange={setOpen} className="!w-[70%]">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Type to search for products..."
+            placeholder="Search"
             value={search}
             onValueChange={setSearch}
           />
           <CommandList ref={listRef} className="max-h-96 overflow-y-auto">
-            <CommandEmpty>No results found.</CommandEmpty>
+            {loading && (
+              <CommandEmpty>
+                <Loader />
+              </CommandEmpty>
+            )}
+            {!loading && debouncedQuery && items.length === 0 ? (
+              <CommandEmpty>No results found.</CommandEmpty>
+            ) : (
+              <CommandEmpty>Type to search for products...</CommandEmpty>
+            )}
             {renderOptions({ items, open, setOpen, onSelect, search })}
           </CommandList>
         </Command>
