@@ -31,7 +31,7 @@ export default function SupplierHistory({
   const columns = React.useMemo<ColumnDef<supplierHistory>[]>(
     () => [
       {
-        accessorKey: "nameSnapshot",
+        accessorKey: "combinations.name",
         header: "Name",
         meta: {},
       },
@@ -128,5 +128,15 @@ export default function SupplierHistory({
     selectedCombination.name,
   ]);
 
-  return <DataTable data={filteredData} columns={columns} />;
+  return (
+    <DataTable
+      data={filteredData}
+      columns={columns}
+      meta={{
+        disabledRow: {
+          "combinations.deletedAt": true,
+        },
+      }}
+    />
+  );
 }

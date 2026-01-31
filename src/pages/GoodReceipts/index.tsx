@@ -224,7 +224,7 @@ export default function GoodReceipts() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <SectionCards data={data.summary} />
+          <SectionCards data={data.summary || []} />
 
           <div className="flex gap-2 justify-between items-center">
             <DateRangePicker value={range} onChange={setRange} />
@@ -263,17 +263,6 @@ export default function GoodReceipts() {
                 onRowClick={(item: GoodReceipt) =>
                   navigate(`${ROUTES.GOOD_RECEIPT}/${item.id}`)
                 }
-                showFooter
-                renderFooter={(items) => {
-                  return (
-                    <TableRow className="font-bold">
-                      <TableCell>Total Amount</TableCell>
-                      <TableCell colSpan={10} className="text-right">
-                        {formatCurrency(getGoodReceiptTotalAmount(items))}
-                      </TableCell>
-                    </TableRow>
-                  );
-                }}
               />
               {data.meta.totalPages > 1 && (
                 <Pager meta={data.meta} filter={filter} setFilter={setFilter} />

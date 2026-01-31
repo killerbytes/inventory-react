@@ -74,7 +74,7 @@ export default function Profit() {
   const columns = React.useMemo<ColumnDef<Props>[]>(
     () => [
       {
-        accessorKey: "combinations.name",
+        accessorKey: "nameSnapshot",
         header: ({ column }) => {
           return (
             <ColumnSort
@@ -88,15 +88,16 @@ export default function Profit() {
         },
         cell: ({ row }) => {
           const { combinations } = row.original;
+          const name = combinations?.name || row.original.nameSnapshot;
+          const unit = combinations?.unit || row.original.unit;
+
           return (
             <Link
-              to={`${ROUTES.PRODUCTS}/${combinations.productId}`}
+              to={`${ROUTES.PRODUCTS}/${combinations?.productId}`}
               className="flex gap-2 items-center"
             >
-              <ColorBadge colorMap={UNIT_COLOR}>
-                {String(combinations.unit)}
-              </ColorBadge>
-              {combinations.name}
+              <ColorBadge colorMap={UNIT_COLOR}>{String(unit)}</ColorBadge>
+              {name}
             </Link>
           );
         },
@@ -157,7 +158,11 @@ export default function Profit() {
         <DataTable
           data={data.data || []}
           columns={columns}
-          meta={{ disabledRow: "combinations.isActive" }}
+          meta={{
+            disabledRow: {
+              combinations: false,
+            },
+          }}
         />
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />

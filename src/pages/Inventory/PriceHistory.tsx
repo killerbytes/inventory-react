@@ -170,8 +170,15 @@ export default function PriceHistory() {
             }}
           />
         </div>
-        {console.log(data)}
-        <DataTable data={data.data || []} columns={columns} />
+        <DataTable
+          data={data.data || []}
+          columns={columns}
+          meta={{
+            disabledRow: {
+              "combinations.deletedAt": true,
+            },
+          }}
+        />
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}

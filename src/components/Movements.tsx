@@ -136,7 +136,16 @@ export default function Movements({ data }: { data: InventoryMovement[] }) {
   );
   return (
     <>
-      <DataTable data={data} columns={columns} showFooter={false} />
+      <DataTable
+        data={data}
+        columns={columns}
+        showFooter={false}
+        meta={{
+          disabledRow: {
+            "combination.deletedAt": true,
+          },
+        }}
+      />
     </>
   );
 }

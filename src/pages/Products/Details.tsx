@@ -52,7 +52,7 @@ const defaultOption = { id: -1, name: "ALL" };
 
 export default function ProductEdit() {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = React.useState("product_combination");
+  const [activeTab, setActiveTab] = React.useState("product_history");
   const {
     categoryState: { hasLoaded: categoryHasLoaded, categories, setCategories },
   } = useStore();

@@ -157,5 +157,15 @@ export default function PriceHistoryTab({
     selectedCombination.name,
   ]);
 
-  return <DataTable data={filterData} columns={columns} />;
+  return (
+    <DataTable
+      data={filterData}
+      columns={columns}
+      meta={{
+        disabledRow: {
+          "combinations.deletedAt": true,
+        },
+      }}
+    />
+  );
 }

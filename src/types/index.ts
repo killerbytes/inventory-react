@@ -51,10 +51,8 @@ export interface ApiErrorResponse {
 }
 
 export interface Summary {
-  totalAmount: number;
-  totalReturnAmount?: number;
-  totalExchangeAmount?: number;
-  totalCost?: number;
+  label: string;
+  value: number;
 }
 
 export type PaginatedResponse<T extends object> = {
@@ -64,7 +62,7 @@ export type PaginatedResponse<T extends object> = {
     totalPages: number;
     currentPage: number;
   };
-  summary?: Summary;
+  summary?: Summary[];
 };
 
 export interface ApiError {

@@ -256,7 +256,5 @@ export const PAGINATION_RESPONSE = {
     totalPages: 0,
     currentPage: 0,
   },
-  summary: {
-    totalAmount: 0,
-  },
+  summary: [],
 };

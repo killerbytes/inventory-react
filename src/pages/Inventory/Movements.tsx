@@ -81,7 +81,7 @@ export default function InventoryMovements() {
         <CardAction></CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <SectionCards data={data.summary} />
+        <SectionCards data={data.summary || []} />
         <div className="flex gap-2 justify-between items-center">
           <Input
             placeholder="Search Product"
