@@ -1,7 +1,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { endOfDay, format, startOfDay } from "date-fns";
 import type { DateRange } from "react-day-picker";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { Calendar } from "./ui/calendar";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -54,7 +54,7 @@ export default function DateRangePicker({
           id="date"
           variant={"outline"}
           className={cn(
-            "w-[300px] justify-start text-left font-normal group",
+            "w-full justify-start text-left font-normal group",
             !value?.from && "text-muted-foreground",
             className,
           )}
@@ -74,10 +74,10 @@ export default function DateRangePicker({
           )}
           {value?.from && (
             <span
-              className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
+              className="ml-auto transition-opacity text-muted-foreground"
               onClick={clearSelection}
             >
-              Clear
+              <X />
             </span>
           )}
         </Button>

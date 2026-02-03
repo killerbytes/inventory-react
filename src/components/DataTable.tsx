@@ -29,7 +29,7 @@ type DataTableProps<T> = {
   data: object[];
   defaultColumn?: ColumnDef<T>;
   meta?: {
-    disabledRow?: Record<string, boolean>;
+    disabledRow?: Record<string, any>;
   };
   emptyText?: string;
   tableClassname?: string;
@@ -170,15 +170,13 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const isDisabled = disabledKey
-                  ? Boolean(
-                      disabledKey
-                        .split(".")
-                        .reduce(
-                          (acc: unknown, key) =>
-                            (acc as Record<string, unknown>)?.[key],
-                          row.original,
-                        ),
-                    ) == Boolean(disabledValue)
+                  ? (disabledKey
+                      .split(".")
+                      .reduce(
+                        (acc: unknown, key) =>
+                          (acc as Record<string, unknown>)?.[key],
+                        row.original,
+                      ) as any) === disabledValue
                   : null;
 
                 return (

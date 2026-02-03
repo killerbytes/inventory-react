@@ -19,7 +19,6 @@ import {
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
-import { formatCurrency } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
 import Movements from "@/components/Movements";
 import { inventoryServices } from "@/services";
@@ -72,7 +71,7 @@ export default function InventoryMovements() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="px-2 md:px-4">
         <CardTitle className="flex items-center gap-2">
           <SidebarTrigger />
           <div className="bg-border h-5 w-[1px]"></div>
@@ -80,9 +79,9 @@ export default function InventoryMovements() {
         </CardTitle>
         <CardAction></CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-4 px-2 md:px-4">
         <SectionCards data={data.summary || []} />
-        <div className="flex gap-2 justify-between items-center">
+        <div className="flex flex-col md:flex-row gap-2 justify-between items-center">
           <Input
             placeholder="Search Product"
             className="w-full"
@@ -95,14 +94,18 @@ export default function InventoryMovements() {
               }));
             }}
           />
-          <DateRangePicker value={range} onChange={setRange} />
-          <Select
-            options={INVENTORY_MOVEMENT_TYPE_OPTIONS}
-            value={filter.type}
-            onChange={(type) => {
-              setFilter(({ ...prev }) => ({ ...prev, type }));
-            }}
-          />
+          <div className="w-full">
+            <DateRangePicker value={range} onChange={setRange} />
+          </div>
+          <div className="w-full">
+            <Select
+              options={INVENTORY_MOVEMENT_TYPE_OPTIONS}
+              value={filter.type}
+              onChange={(type) => {
+                setFilter(({ ...prev }) => ({ ...prev, type }));
+              }}
+            />
+          </div>
         </div>
         <Loader isLoading={loading} />
         <Movements data={data.data} />

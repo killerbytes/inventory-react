@@ -1,12 +1,4 @@
 import {
-  ApiErrorResponse,
-  CancelOrder,
-  CategorizedProductList,
-  Customer,
-  SalesOrder,
-  SalesOrderForm,
-} from "@/types";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
@@ -20,6 +12,13 @@ import {
   TableHead,
   TableRow,
 } from "@/components/ui/table";
+import {
+  ApiErrorResponse,
+  CancelOrder,
+  CategorizedProductList,
+  Customer,
+  SalesOrder,
+} from "@/types";
 import {
   Card,
   CardAction,
@@ -45,16 +44,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
 import ColorBadge from "@/components/ColorBadge";
-import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import StaticDataTable from "./StaticDataTable";
 import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
-import { useForm } from "react-hook-form";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
 import Static from "./Static";
@@ -73,10 +69,6 @@ export default function SalesOrderDetails() {
     productState,
   } = useStore();
   const [data, setData] = React.useState<SalesOrder>();
-
-  const form = useForm<SalesOrderForm>({
-    resolver: zodResolver(salesOrderFormSchema),
-  });
 
   React.useEffect(() => {
     const getData = async () => {
@@ -143,7 +135,7 @@ export default function SalesOrderDetails() {
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardHeader>
+        <CardHeader className="px-2 md:px-4">
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
@@ -207,7 +199,7 @@ export default function SalesOrderDetails() {
           </CardAction>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4 px-2 md:px-4">
           {data && <Static data={data} />}
           {data?.status === ORDER_STATUS.CANCELLED && (
             <Alert variant="destructive">
@@ -232,7 +224,7 @@ export default function SalesOrderDetails() {
               <ReturnTransactionsTable data={data.returnTransactions} />
             )}
 
-          <div className="w-1/3 flex ml-auto">
+          <div className="md:w-1/3 flex ml-auto">
             <Table>
               <TableBody>
                 <TableRow>

@@ -444,273 +444,279 @@ export default function SalesOrderModal({
       onOpenChange={() => onClose(false)}
       size="xl"
     >
-      <Form {...form}>
-        <form className="flex flex-col gap-4">
-          <FormField
-            control={form.control}
-            name="customerId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Customer</FormLabel>
-                <Autocomplete
-                  value={
-                    customerState.customers.find(
-                      (customer) => customer.id === field.value,
-                    )?.name
-                  }
-                  options={customerState.customers}
-                  placeholder="Customer"
-                  onChange={(value) => {
-                    form.setValue("customerId", Number(value.id), {
-                      shouldValidate: true,
-                    });
-                  }}
-                />
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="w-full flex flex-col gap-4 items-start md:flex-row">
+      <div className="no-scrollbar -mx-4 max-h-[60vh] overflow-y-auto px-4 md:max-h-full">
+        <Form {...form}>
+          <form className="flex flex-col gap-4 ">
             <FormField
               control={form.control}
-              name="orderDate"
+              name="customerId"
               render={({ field }) => (
-                <FormItem className="w-full md:w-1/4">
-                  <FormLabel>Order Date</FormLabel>
-                  <DatePicker {...field} />
+                <FormItem>
+                  <FormLabel>Customer</FormLabel>
+                  <Autocomplete
+                    value={
+                      customerState.customers.find(
+                        (customer) => customer.id === field.value,
+                      )?.name
+                    }
+                    options={customerState.customers}
+                    placeholder="Customer"
+                    onChange={(value) => {
+                      form.setValue("customerId", Number(value.id), {
+                        shouldValidate: true,
+                      });
+                    }}
+                  />
+
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="modeOfPayment"
-              render={({ field }) => (
-                <FormItem className="w-full md:w-1/4">
-                  <FormLabel>Mode of Payment</FormLabel>
-                  <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
+            <div className="w-full flex flex-col gap-4 items-start md:flex-row">
+              <FormField
+                control={form.control}
+                name="orderDate"
+                render={({ field }) => (
+                  <FormItem className="w-full md:w-1/4">
+                    <FormLabel>Order Date</FormLabel>
+                    <DatePicker {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="checkNumber"
-              render={({ field }) => {
-                return (
+              <FormField
+                control={form.control}
+                name="modeOfPayment"
+                render={({ field }) => (
+                  <FormItem className="w-full md:w-1/4">
+                    <FormLabel>Mode of Payment</FormLabel>
+                    <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="checkNumber"
+                render={({ field }) => {
+                  return (
+                    <FormItem
+                      className={cx(
+                        "w-full md:w-1/4",
+                        modeOfPayment !== "CHECK" && "opacity-50",
+                      )}
+                    >
+                      <FormLabel>Check Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={modeOfPayment !== "CHECK"}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
                   <FormItem
                     className={cx(
                       "w-full md:w-1/4",
                       modeOfPayment !== "CHECK" && "opacity-50",
                     )}
                   >
-                    <FormLabel>Check Number</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={modeOfPayment !== "CHECK"}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
+                    <FormLabel>Due Date</FormLabel>
+                    <DatePicker
+                      {...field}
+                      disabled={modeOfPayment !== "CHECK"}
+                    />
                     <FormMessage />
                   </FormItem>
-                );
-              }}
-            />
+                )}
+              />
+            </div>
+            <Tabs defaultValue="notes">
+              <TabsList>
+                <TabsTrigger value="notes">Notes</TabsTrigger>
+                <TabsTrigger value="internalNotes">Internal Notes</TabsTrigger>
+              </TabsList>
+              <TabsContent value="notes">
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notes</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter some notes..."
+                          className="resize-none"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
+              <TabsContent value="internalNotes">
+                <FormField
+                  control={form.control}
+                  name="internalNotes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Internal Notes</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter some internal notes not visible to customer..."
+                          className="resize-none"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
+            </Tabs>
             <FormField
               control={form.control}
-              name="dueDate"
-              render={({ field }) => (
-                <FormItem
-                  className={cx(
-                    "w-full md:w-1/4",
-                    modeOfPayment !== "CHECK" && "opacity-50",
-                  )}
-                >
-                  <FormLabel>Due Date</FormLabel>
-                  <DatePicker {...field} disabled={modeOfPayment !== "CHECK"} />
+              name="salesOrderItems"
+              render={() => (
+                <FormItem className="w-full mb-4">
+                  <FormControl>
+                    <DataTable
+                      data={fields}
+                      columns={columns}
+                      showFooter
+                      renderFooter={() => {
+                        const total = getTotalAmountTableFooter(
+                          formData.salesOrderItems,
+                        );
+                        return (
+                          <>
+                            <TableRow>
+                              <TableCell colSpan={8}>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className="shadow-sm append-btn"
+                                  onClick={() => append(salesOrderItemDefault)}
+                                >
+                                  <Plus />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                            <TableRow className="font-bold">
+                              <TableCell>Total</TableCell>
+                              <TableCell colSpan={10} className="text-right">
+                                {formatCurrency(
+                                  total?.amount - total?.discount,
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          </>
+                        );
+                      }}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-          <Tabs defaultValue="notes">
-            <TabsList>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-              <TabsTrigger value="internalNotes">Internal Notes</TabsTrigger>
-            </TabsList>
-            <TabsContent value="notes">
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter some notes..."
-                        className="resize-none"
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </TabsContent>
-            <TabsContent value="internalNotes">
-              <FormField
-                control={form.control}
-                name="internalNotes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Internal Notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter some internal notes not visible to customer..."
-                        className="resize-none"
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </TabsContent>
-          </Tabs>
-          <FormField
-            control={form.control}
-            name="salesOrderItems"
-            render={() => (
-              <FormItem className="w-full mb-4">
-                <FormControl>
-                  <DataTable
-                    data={fields}
-                    columns={columns}
-                    showFooter
-                    renderFooter={() => {
-                      const total = getTotalAmountTableFooter(
-                        formData.salesOrderItems,
-                      );
-                      return (
-                        <>
-                          <TableRow>
-                            <TableCell colSpan={8}>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className="shadow-sm append-btn"
-                                onClick={() => append(salesOrderItemDefault)}
-                              >
-                                <Plus />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="font-bold">
-                            <TableCell>Total</TableCell>
-                            <TableCell colSpan={10} className="text-right">
-                              {formatCurrency(total?.amount - total?.discount)}
-                            </TableCell>
-                          </TableRow>
-                        </>
-                      );
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
-          <FormField
-            control={form.control}
-            name="isDelivery"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center gap-2">
-                <FormControl>
-                  <Checkbox
-                    {...field}
-                    checked={field.value}
-                    onCheckedChange={(value) => {
-                      field.onChange(value);
-                    }}
-                    value={String(field.value)}
-                  />
-                </FormControl>
-                <FormLabel>For Delivery</FormLabel>
-                <FormMessage />
-              </FormItem>
+            <FormField
+              control={form.control}
+              name="isDelivery"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center gap-2">
+                  <FormControl>
+                    <Checkbox
+                      {...field}
+                      checked={field.value}
+                      onCheckedChange={(value) => {
+                        field.onChange(value);
+                      }}
+                      value={String(field.value)}
+                    />
+                  </FormControl>
+                  <FormLabel>For Delivery</FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {isDelivery && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Delivery Details</CardTitle>
+                  <CardAction>
+                    <FormField
+                      control={form.control}
+                      name="deliveryDate"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col w-[200px]">
+                          <FormLabel>Delivery Date</FormLabel>
+                          <DatePicker {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardAction>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4">
+                    <FormField
+                      control={form.control}
+                      name="deliveryAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Delivery Address</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Enter some notes..."
+                              className="resize-none"
+                              {...field}
+                              value={field.value ?? ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="deliveryInstructions"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Delivery Notes</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Enter some notes..."
+                              className="resize-none"
+                              {...field}
+                              value={field.value ?? ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          />
-          {isDelivery && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Delivery Details</CardTitle>
-                <CardAction>
-                  <FormField
-                    control={form.control}
-                    name="deliveryDate"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col w-[200px]">
-                        <FormLabel>Delivery Date</FormLabel>
-                        <DatePicker {...field} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col gap-4">
-                  <FormField
-                    control={form.control}
-                    name="deliveryAddress"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Delivery Address</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Enter some notes..."
-                            className="resize-none"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="deliveryInstructions"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Delivery Notes</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Enter some notes..."
-                            className="resize-none"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </form>
-      </Form>
-
+          </form>
+        </Form>
+      </div>
       <DialogFooter>
         {data && (
           <div className="mr-auto">

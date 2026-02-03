@@ -2,13 +2,15 @@ import { Card, CardContent, CardFooter, CardTitle } from "./ui/card";
 import { formatCurrency } from "@/utils/formatters";
 import { Summary } from "@/types";
 
-export default function SectionCards({ data }: { data: Summary[] }) {
-  console.log(data);
-
+export default function SectionCards({
+  data,
+}: {
+  data: Summary[] | undefined;
+}) {
   if (!data) return null;
 
   return (
-    <div className="grid grid-cols-4 gap-4 text-xl">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xl">
       {data.map((item) => (
         <Card className="gap-4">
           <CardContent className="text-sm">{item.label}</CardContent>

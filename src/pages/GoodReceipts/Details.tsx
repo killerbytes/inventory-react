@@ -191,18 +191,6 @@ export default function Create() {
                   Order History
                 </DropdownMenuItem>
 
-                {/* {(data?.status === ORDER_STATUS.RECEIVED ||
-                  data?.status === ORDER_STATUS.COMPLETED) && (
-                  <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      handleToggle({ cancelModal: true, dropdownMenu: false });
-                    }}
-                  >
-                    <Ban color="red" />
-                    Cancel Order
-                  </DropdownMenuItem>
-                )} */}
                 {data?.status === ORDER_STATUS.DRAFT && (
                   <>
                     <DropdownMenuItem
@@ -296,7 +284,7 @@ export default function Create() {
             )}
           {(data?.status === ORDER_STATUS.RECEIVED ||
             data?.status === ORDER_STATUS.COMPLETED) && (
-            <div className="w-1/3 flex ml-auto">
+            <div className="md:w-1/3 flex ml-auto">
               <Table>
                 <TableBody>
                   <TableRow>

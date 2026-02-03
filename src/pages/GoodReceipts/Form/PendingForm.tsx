@@ -1,4 +1,11 @@
 import {
+  GoodReceiptCreate,
+  GoodReceiptItem,
+  GoodReceiptUpdate,
+  ProductCombinations,
+  Supplier,
+} from "@/types";
+import {
   Form,
   FormControl,
   FormField,
@@ -6,12 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  GoodReceiptCreate,
-  GoodReceiptUpdate,
-  ProductCombinations,
-  Supplier,
-} from "@/types";
 import {
   Controller,
   useFieldArray,
@@ -35,7 +36,6 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
-import { GoodReceiptItem } from "@/types";
 import { useStore } from "@/stores";
 import React from "react";
 

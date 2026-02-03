@@ -48,7 +48,7 @@ const MemoizedCommandItem = memo(
 
         <div className="ml-auto flex gap-2">
           <Badge>{Number(item.inventory.quantity)}</Badge>
-          <span>{formatCurrency(item.price)}</span>
+          <span className="font-bold">{formatCurrency(item.price)}</span>
         </div>
       </CommandItem>
     );

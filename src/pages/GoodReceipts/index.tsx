@@ -12,10 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getGoodReceiptTotalAmount, mappedStatusHistory } from "@/lib/utils";
-import { PaginatedResponse, GoodReceipt, filterProps } from "@/types";
+import { GoodReceipt, PaginatedResponse, filterProps } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { TableCell, TableRow } from "@/components/ui/table";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
@@ -23,6 +21,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import { mappedStatusHistory } from "@/lib/utils";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
@@ -209,7 +208,7 @@ export default function GoodReceipts() {
   return (
     <div>
       <Card>
-        <CardHeader>
+        <CardHeader className="px-2 md:px-4">
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
@@ -223,11 +222,13 @@ export default function GoodReceipts() {
             </Link>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4 px-2 md:px-4">
           <SectionCards data={data.summary || []} />
 
-          <div className="flex gap-2 justify-between items-center">
-            <DateRangePicker value={range} onChange={setRange} />
+          <div className="flex flex-col md:flex-row gap-2  ">
+            <div>
+              <DateRangePicker value={range} onChange={setRange} />
+            </div>
 
             <Input
               placeholder="Search Reference"

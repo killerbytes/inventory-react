@@ -92,7 +92,7 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
       >
         {children}
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen} className="!w-[70%]">
+      <CommandDialog open={open} onOpenChange={setOpen} className="md:!w-[70%]">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search"

@@ -220,7 +220,7 @@ export default function SalesOrders() {
   return (
     <div>
       <Card>
-        <CardHeader>
+        <CardHeader className="px-2 md:px-4">
           <CardTitle className="flex items-center gap-2">
             <SidebarTrigger />
             <div className="bg-border h-5 w-[1px]"></div>
@@ -238,13 +238,13 @@ export default function SalesOrders() {
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4 px-2 md:px-4">
           <SectionCards data={data.summary} />
-          <div className="flex gap-2 justify-between items-center">
+          <div className="flex flex-col md:flex-row gap-2 ">
             <div>
               <DateRangePicker value={range} onChange={setRange} />
             </div>
-            <div className="w-1/4">
+            <div>
               <Select
                 options={ORDER_STATUS_OPTIONS}
                 value={filter.status}
@@ -265,7 +265,11 @@ export default function SalesOrders() {
               <DataTable
                 data={data.data || []}
                 columns={columns}
-                meta={{ disabledRow: "status" }}
+                meta={{
+                  disabledRow: {
+                    status: ORDER_STATUS.CANCELLED,
+                  },
+                }}
                 onRowClick={(item: SalesOrder) => {
                   if (item.status === ORDER_STATUS.DRAFT) {
                     setSelected(item);

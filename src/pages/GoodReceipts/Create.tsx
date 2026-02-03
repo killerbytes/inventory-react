@@ -140,7 +140,7 @@ export default function Create() {
     <>
       <div>
         <Card>
-          <CardHeader>
+          <CardHeader className="px-2 md:px-4">
             <CardTitle className="flex items-center gap-2">
               <SidebarTrigger />
               <div className="bg-border h-5 w-[1px]"></div>
@@ -157,7 +157,7 @@ export default function Create() {
               />
             </CardAction>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <CardContent className="flex flex-col gap-4 px-2 md:px-4">
             <PendingOrderForm form={form} />
             <div className="flex justify-end mt-auto">
               <Button
