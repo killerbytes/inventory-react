@@ -6,7 +6,6 @@ import {
 } from "@/utils/definitions";
 import { filterProps, InvoiceGoodReceipt, PaginatedResponse } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogFooter } from "@/components/ui/dialog";
 import SectionCards from "@/components/SectionCards";

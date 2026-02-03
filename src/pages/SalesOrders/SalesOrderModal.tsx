@@ -1,4 +1,19 @@
 import {
+  ERROR,
+  MODE_OF_PAYMENT_OPTIONS,
+  ORDER_STATUS,
+  UNIT_COLOR,
+  WHOLESALE_UNITS,
+} from "@/utils/definitions";
+import {
+  ApiError,
+  ApiErrorResponse,
+  Customer,
+  SalesOrder,
+  SalesOrderForm,
+  SalesOrderItem,
+} from "@/types";
+import {
   Form,
   FormControl,
   FormField,
@@ -7,12 +22,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  MODE_OF_PAYMENT_OPTIONS,
-  ORDER_STATUS,
-  UNIT_COLOR,
-  WHOLESALE_UNITS,
-} from "@/utils/definitions";
-import {
   Card,
   CardAction,
   CardContent,
@@ -20,13 +29,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Controller, useFieldArray, useWatch, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import LineColumn from "@/components/forms/OrderItemForm/LineColumn";
 import { BanknoteArrowUp, Plus, Save, Trash2 } from "lucide-react";
-import { ApiError, SalesOrderForm, SalesOrderItem } from "@/types";
 import { customerServices, salesOrderServices } from "@/services";
-import { ApiErrorResponse, Customer, SalesOrder } from "@/types";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -38,6 +45,7 @@ import Autocomplete from "@/components/Autcomplete";
 import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
+import { Spinner } from "@/components/ui/spinner";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
@@ -46,7 +54,6 @@ import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
-import { ERROR } from "@/utils/definitions";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
 import { useStore } from "@/stores";
@@ -736,7 +743,7 @@ export default function SalesOrderModal({
           className="shadow-sm"
           variant="secondary"
           type="button"
-          // disabled={loading}
+          disabled={loading}
           onClick={(e) => {
             console.log(form.formState.errors);
             form.handleSubmit((props) =>
@@ -746,7 +753,8 @@ export default function SalesOrderModal({
             )(e);
           }}
         >
-          <Save /> Save as Draft
+          {loading ? <Spinner data-icon="inline-start" /> : <Save />}
+          Save as Draft
         </Button>
         <ConfirmDialog
           title="Create Invoice"
@@ -771,7 +779,7 @@ export default function SalesOrderModal({
               });
           }}
         >
-          <Button className="shadow-sm bg-green-500">
+          <Button className="shadow-sm bg-green-500 hidden md:inline-flex">
             <BanknoteArrowUp /> Create Order
           </Button>
         </ConfirmDialog>

@@ -189,7 +189,7 @@ export default function Details() {
               />
             </TabsContent>
             <TabsContent value="payments">
-              <PaymentTab data={data} cb={getData} />
+              <PaymentTab data={data || {}} cb={getData} />
             </TabsContent>
           </Tabs>
         </CardContent>

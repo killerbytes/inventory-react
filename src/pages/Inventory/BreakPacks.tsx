@@ -5,7 +5,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PAGINATION, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import {
+  PAGINATION,
+  PAGINATION_RESPONSE,
+  ROUTES,
+  UNIT_COLOR,
+} from "@/utils/definitions";
 import { BreakPack, filterProps, PaginatedResponse } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -19,12 +24,8 @@ import { Link } from "react-router";
 import React from "react";
 
 export default function BreakPacks() {
-  const [data, setData] = React.useState<PaginatedResponse<BreakPack[]>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<BreakPack[]>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
