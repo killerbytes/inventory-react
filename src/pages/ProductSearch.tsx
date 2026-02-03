@@ -81,6 +81,19 @@ export default function ProductSearch() {
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
       {
+        header: "Unit",
+        accessorKey: "unit",
+        meta: {
+          headerClassName: "h-0",
+          className: "w-20 text-xs",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return (
+            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
+          );
+        },
+      },
+      {
         accessorKey: "Product",
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
           return (
@@ -93,47 +106,13 @@ export default function ProductSearch() {
           );
         },
       },
-      {
-        header: "Unit",
-        accessorKey: "unit",
-        meta: {
-          headerClassName: "h-0",
-          className: "w-20",
-        },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return (
-            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
-          );
-        },
-      },
-      {
-        header: "Quantity",
-        accessorKey: "inventory.quantity",
-        meta: {
-          headerClassName: "h-0 text-right",
-          className: "w-20 text-right",
-        },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return Number(row.original.inventory?.quantity);
-        },
-      },
-      {
-        accessorKey: "inventory.averagePrice",
-        header: "Avg Price",
-        meta: {
-          headerClassName: "h-0 text-right",
-          className: "w-20 text-right text-green-700",
-        },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return formatCurrency(Number(row.original.inventory?.averagePrice));
-        },
-      },
+
       {
         accessorKey: "price",
-        header: "Price",
+        header: "SRP",
         meta: {
           headerClassName: "h-0 text-right",
-          className: "w-20 text-right",
+          className: "w-20 text-right font-bold",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
           const error =
@@ -147,6 +126,28 @@ export default function ProductSearch() {
               {formatCurrency(row.original.price)}
             </span>
           );
+        },
+      },
+      {
+        accessorKey: "inventory.averagePrice",
+        header: "Avg Price",
+        meta: {
+          headerClassName: "h-0 text-right",
+          className: "w-20 text-right text-gray-500 text-xs",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return formatCurrency(Number(row.original.inventory?.averagePrice));
+        },
+      },
+      {
+        header: "Quantity",
+        accessorKey: "inventory.quantity",
+        meta: {
+          headerClassName: "h-0 text-right",
+          className: "w-20 text-right",
+        },
+        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+          return Number(row.original.inventory?.quantity);
         },
       },
     ],
