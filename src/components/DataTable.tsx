@@ -29,7 +29,7 @@ type DataTableProps<T> = {
   data: object[];
   defaultColumn?: ColumnDef<T>;
   meta?: {
-    disabledRow?: string;
+    disabledRow?: Record<string, any>;
   };
   emptyText?: string;
   tableClassname?: string;
@@ -129,6 +129,10 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
     onSelectionChange(selectedItems);
   }, [rowSelection]);
 
+  const [disabledKey, disabledValue] = meta?.disabledRow
+    ? Object.entries(meta.disabledRow)[0]
+    : [null, null];
+
   return (
     <div className={cx("w-full overflow-auto", className)}>
       <div
@@ -165,24 +169,30 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
+                const isDisabled = disabledKey
+                  ? (disabledKey
+                      .split(".")
+                      .reduce(
+                        (acc: unknown, key) =>
+                          (acc as Record<string, unknown>)?.[key],
+                        row.original,
+                      ) as any) === disabledValue
+                  : null;
+
                 return (
                   <TableRow
                     className={cx(
-                      { "cursor-pointer": onRowClick },
-                      meta?.disabledRow
-                        ? {
-                            "opacity-50  bg-gray-100":
-                              meta?.disabledRow &&
-                              !meta.disabledRow
-                                .split(".")
-                                .reduce((acc, key) => acc?.[key], row.original),
-                          }
-                        : {},
+                      { "cursor-pointer": onRowClick && !isDisabled },
+                      isDisabled
+                        ? "pointer-events-none bg-muted text-muted-foreground opacity-50 text-red-500"
+                        : "hover:bg-muted/50",
                     )}
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
-                      onRowClick?.(row.original);
+                      if (!isDisabled) {
+                        onRowClick?.(row.original);
+                      }
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
