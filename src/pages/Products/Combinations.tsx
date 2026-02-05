@@ -223,7 +223,7 @@ export default function Combinations({
         data={combinations}
         columns={columns}
         meta={{
-          disabledRow: "isActive",
+          disabledRow: { isActive: false },
         }}
       />
 

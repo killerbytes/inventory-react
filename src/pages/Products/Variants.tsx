@@ -6,16 +6,14 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import {
-  CardAction,
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { variantTypesServices } from "@/services";
 import { Button } from "@/components/ui/button";
-import { useParams } from "react-router";
 import { VariantTypes } from "@/types";
 import { Pencil } from "lucide-react";
 
@@ -28,17 +26,6 @@ export default function Variants({
   variants: VariantTypes[];
   handleToggle: (updater: ToggleUpdater) => void;
 }) {
-  const { id } = useParams();
-
-  const handleVariantChange = async (variant: VariantTypes) => {
-    const payload = {
-      isBreakpackFilter: variant.isBreakpackFilter,
-      productId: Number(id),
-    };
-
-    await variantTypesServices.update(variant.id, payload);
-  };
-
   return (
     <>
       <Card>

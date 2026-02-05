@@ -1,21 +1,13 @@
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
 import { filterProps, PaginatedResponse, Supplier } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { PAGINATION, ROUTES } from "@/utils/definitions";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
@@ -28,16 +20,11 @@ import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
-import { head } from "lodash";
 import React from "react";
 
 export default function Suppliers() {
-  const [data, setData] = React.useState<PaginatedResponse<Supplier>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<Supplier>>(PAGINATION_RESPONSE);
 
   const [selected, setSelected] = React.useState<Supplier | null>();
   const [loading, setLoading] = React.useState(true);
@@ -69,14 +56,6 @@ export default function Suppliers() {
     getData();
   }, [filter, getData]);
 
-  const requestSort = (sort: string) => {
-    setFilter((prev) => ({
-      ...prev,
-      sort,
-      order: prev.sort === sort && prev.order === "ASC" ? "DESC" : "ASC",
-    }));
-  };
-
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
@@ -101,7 +80,10 @@ export default function Suppliers() {
             <div>
               <Link
                 className="text-primary"
-                to={ROUTES.SUPPLIERS_DETAILS.replace(":id", row.original.id)}
+                to={ROUTES.SUPPLIERS_DETAILS.replace(
+                  ":id",
+                  String(row.original.id),
+                )}
               >
                 {row.original.name}
               </Link>
@@ -192,60 +174,8 @@ export default function Suppliers() {
             <>
               <DataTable data={data.data || []} columns={columns} />
 
-              {/* <Table>
-                <TableHeader>
-                  <TableRow>
-                    {columns2.map((column) => (
-                      <TableHead
-                        key={column.key}
-                        onClick={() => requestSort(column.key)}
-                        style={{ cursor: "pointer" }}
-                        title={column.title}
-                        className={column.className}
-                      >
-                        {column.title}
-                        {filter.sort === column.key && (
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            {filter.order === "ASC" ? "↑" : "↓"}
-                          </span>
-                        )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data?.data?.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">
-                        {item.name}
-                        <p className="text-xs text-muted-foreground">
-                          {item.address}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        {item.contact}
-                        <p className="text-xs text-muted-foreground">
-                          {item.phone}
-                        </p>
-                      </TableCell>
-                      <TableHead className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelected(item);
-                            handleToggle({ editModal: true });
-                          }}
-                        >
-                          <Pencil size={16} />
-                        </Button>
-                      </TableHead>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table> */}
-              {data.totalPages > 1 && (
-                <Pager data={data} filter={filter} setFilter={setFilter} />
+              {data.meta.totalPages > 1 && (
+                <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
               )}
             </>
           )}

@@ -5,8 +5,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ApiErrorResponse, Category, PaginatedResponse } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ApiErrorResponse, Category } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,12 +22,7 @@ import { toast } from "sonner";
 import React from "react";
 
 export default function Categories() {
-  const [data, setData] = React.useState<PaginatedResponse<Category[]>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] = React.useState<Category[]>([]);
 
   const [selected, setSelected] = React.useState<Category>();
   const [loading, setLoading] = React.useState(true);

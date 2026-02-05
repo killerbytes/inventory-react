@@ -7,12 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
 import { filterProps, PaginatedResponse, User } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
-import { PAGINATION } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -24,12 +24,8 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 
 export default function Users() {
-  const [data, setData] = React.useState<PaginatedResponse<User>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<User>>(PAGINATION_RESPONSE);
   const [selectedUser, setSelectedUser] = React.useState<User>();
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
@@ -202,8 +198,8 @@ export default function Users() {
           ) : (
             <>
               <DataTable data={data?.data || []} columns={columns} />
-              {data.totalPages > 1 && (
-                <Pager data={data} filter={filter} setFilter={setFilter} />
+              {data.meta.totalPages > 1 && (
+                <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
               )}
             </>
           )}

@@ -138,7 +138,7 @@ export default function Popular() {
         <DataTable
           data={data.data || []}
           columns={columns}
-          meta={{ disabledRow: "combinations.isActive" }}
+          meta={{ disabledRow: { "combinations.isActive": false } }}
         />
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />

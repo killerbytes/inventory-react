@@ -123,7 +123,7 @@ export default function NoSales() {
         <DataTable
           data={data.data || []}
           columns={columns}
-          meta={{ disabledRow: "isActive" }}
+          meta={{ disabledRow: { isActive: false } }}
         />
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />

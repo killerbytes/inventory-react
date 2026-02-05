@@ -119,7 +119,7 @@ export default function ProductItem({ item }: { item: Product }) {
         columns={columns}
         showFooter={false}
         emptyText="No combinations found"
-        meta={{ disabledRow: "isActive" }}
+        meta={{ disabledRow: { isActive: false } }}
       />
     </div>
   );

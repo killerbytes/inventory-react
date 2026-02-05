@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Customer, filterProps, PaginatedResponse } from "@/types";
+import { PAGINATION_RESPONSE } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,12 +28,8 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 
 export default function Customers() {
-  const [data, setData] = React.useState<PaginatedResponse<Customer>>({
-    data: [],
-    total: 0,
-    totalPages: 0,
-    currentPage: 0,
-  });
+  const [data, setData] =
+    React.useState<PaginatedResponse<Customer>>(PAGINATION_RESPONSE);
 
   const [selected, setSelected] = React.useState<Customer | null>();
   const [loading, setLoading] = React.useState(true);
@@ -181,8 +178,8 @@ export default function Customers() {
                   ))}
                 </TableBody>
               </Table>
-              {data.totalPages > 1 && (
-                <Pager data={data} filter={filter} setFilter={setFilter} />
+              {data.meta.totalPages > 1 && (
+                <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
               )}
             </>
           )}
