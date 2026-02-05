@@ -17,13 +17,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Toaster } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import qs from "query-string";
 import * as z from "zod";
 
+import { useNavigate, useSearchParams } from "react-router";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router";
 import { ApiErrorResponse } from "@/types";
 import { authServices } from "@/services";
 import { loginSchema } from "@/schemas";
@@ -31,31 +30,24 @@ import { cn } from "@/lib/utils";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { callbackUrl } = qs.parse(window.location.search);
+  const [params] = useSearchParams();
+
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-    // defaultValues: {
-    //   username:
-    //     localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_USER`) || "",
-    //   password: "",
-    // },
   });
+  const redirect = params.get("callbackUrl") || "/";
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
       const data = await authServices.login(values);
       const { accessToken } = data;
-      await localStorage.setItem(
+      localStorage.setItem(
         `${import.meta.env.VITE_APP_NAME}_TOKEN`,
         accessToken,
       );
       toast.success(`Logging in... ${values.username}`);
       form.reset();
-      // localStorage.setItem(
-      //   `${import.meta.env.VITE_APP_NAME}_USER`,
-      //   values.username,
-      // );
-      navigate(typeof callbackUrl === "string" ? callbackUrl : "/");
+      navigate(decodeURIComponent(redirect), { replace: true });
     } catch (error) {
       const apiError = error as ApiErrorResponse;
 

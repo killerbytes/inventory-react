@@ -89,16 +89,16 @@ export default class Http {
         return accessToken;
       } catch (error) {
         const apiError = error as ApiErrorResponse;
-        console.log(apiError.message);
-
+        const currentUrl = window.location.pathname + window.location.search;
+        localStorage.setItem("apiError", apiError.message);
         switch (apiError.message) {
           case "Invalid refresh token":
             localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
-            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
             break;
           case "jwt must be provided":
             localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
-            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${window.location.pathname}`;
+            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
             break;
         }
         throw error;
