@@ -3,37 +3,39 @@ import {
   cancelOrderSchema,
   categorySchema,
   customerSchema,
-  inventoryMovementSchema,
-  inventorySchema,
-  loginSchema,
-  productCombinationsSchema,
-  productSchema,
+  exchangeItemSchema,
+  goodReceiptCreateSchema,
   goodReceiptLineSchema,
   goodReceiptSchema,
+  goodReceiptUpdateSchema,
+  inventoryMovementSchema,
+  inventorySchema,
+  invoiceBaseSchema,
+  invoiceFormSchema,
+  invoiceGoodReceiptSchema,
+  invoiceLineSchema,
+  invoiceSchema,
+  loginSchema,
+  paymentApplicationSchema,
+  paymentSchema,
+  priceHistorySchema,
+  productCombinationsSchema,
+  productCombinationUpdateSchema,
+  productSchema,
+  returnItemSchema,
+  returnSchema,
+  returnTransactionSchema,
   salesOrderFormSchema,
   salesOrderItemSchema,
   salesOrderSchema,
   signupSchema,
   statusHistorySchema,
   stockAdjustmentSchema,
+  supplierHistorySchema,
   supplierSchema,
   userSchema,
   variantTypesSchema,
   variantValuesSchema,
-  invoiceSchema,
-  paymentSchema,
-  invoiceLineSchema,
-  paymentApplicationSchema,
-  invoiceFormSchema,
-  priceHistorySchema,
-  returnSchema,
-  returnItemSchema,
-  exchangeItemSchema,
-  goodReceiptCreateSchema,
-  goodReceiptUpdateSchema,
-  returnTransactionSchema,
-  invoiceGoodReceiptSchema,
-  supplierHistorySchema,
 } from "../schemas";
 import type { z } from "zod";
 
@@ -105,76 +107,42 @@ export interface CategorizedInventoryList {
   inventories: Inventory[];
 }
 
-type User = z.infer<typeof userSchema>;
-type Signup = z.infer<typeof signupSchema>;
-type Login = z.infer<typeof loginSchema>;
-type Category = z.infer<typeof categorySchema>;
-type Product = z.infer<typeof productSchema>;
-type Supplier = z.infer<typeof supplierSchema>;
-type Customer = z.infer<typeof customerSchema>;
-type GoodReceipt = z.infer<typeof goodReceiptSchema>;
-type GoodReceiptCreate = z.infer<typeof goodReceiptCreateSchema>;
-type GoodReceiptUpdate = z.infer<typeof goodReceiptUpdateSchema>;
-type GoodReceiptItem = z.infer<typeof goodReceiptLineSchema>;
-type CancelOrder = z.infer<typeof cancelOrderSchema>;
-type SalesOrder = z.infer<typeof salesOrderSchema>;
-type SalesOrderForm = z.infer<typeof salesOrderFormSchema>;
-type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
-type Inventory = z.infer<typeof inventorySchema>;
-type VariantTypes = z.infer<typeof variantTypesSchema>;
-type ProductCombinations = z.infer<typeof productCombinationsSchema>;
-type VariantValues = z.infer<typeof variantValuesSchema>;
-type BreakPack = z.infer<typeof breakPackSchema>;
-type StatusHistory = z.infer<typeof statusHistorySchema>;
-type InventoryMovement = z.infer<typeof inventoryMovementSchema>;
-type StockAdjustment = z.infer<typeof stockAdjustmentSchema>;
-type Invoice = z.infer<typeof invoiceSchema>;
-type InvoiceLine = z.infer<typeof invoiceLineSchema>;
-type invoiceForm = z.infer<typeof invoiceFormSchema>;
-type InvoiceGoodReceipt = z.infer<typeof invoiceGoodReceiptSchema>;
-type Payment = z.infer<typeof paymentSchema>;
-type PaymentApplication = z.infer<typeof paymentApplicationSchema>;
-type priceHistory = z.infer<typeof priceHistorySchema>;
-type ReturnItem = z.infer<typeof returnItemSchema>;
-type ReturnTransaction = z.infer<typeof returnTransactionSchema>;
-type ExchangeItem = z.infer<typeof exchangeItemSchema>;
-type Return = z.infer<typeof returnSchema>;
-type supplierHistory = z.infer<typeof supplierHistorySchema>;
-
-export type {
-  User,
-  Signup,
-  Login,
-  Category,
-  Product,
-  Supplier,
-  Customer,
-  GoodReceipt,
-  GoodReceiptCreate,
-  GoodReceiptUpdate,
-  GoodReceiptItem,
-  CancelOrder,
-  SalesOrder,
-  SalesOrderForm,
-  SalesOrderItem,
-  Inventory,
-  VariantTypes,
-  ProductCombinations,
-  VariantValues,
-  BreakPack,
-  StatusHistory,
-  InventoryMovement,
-  StockAdjustment,
-  Invoice,
-  invoiceForm,
-  InvoiceLine,
-  InvoiceGoodReceipt,
-  Payment,
-  PaymentApplication,
-  priceHistory,
-  ReturnItem,
-  ExchangeItem,
-  Return,
-  ReturnTransaction,
-  supplierHistory,
-};
+export type User = z.infer<typeof userSchema>;
+export type Signup = z.infer<typeof signupSchema>;
+export type Login = z.infer<typeof loginSchema>;
+export type Category = z.infer<typeof categorySchema>;
+export type Product = z.infer<typeof productSchema>;
+export type Supplier = z.infer<typeof supplierSchema>;
+export type Customer = z.infer<typeof customerSchema>;
+export type GoodReceipt = z.infer<typeof goodReceiptSchema>;
+export type GoodReceiptCreate = z.infer<typeof goodReceiptCreateSchema>;
+export type GoodReceiptUpdate = z.infer<typeof goodReceiptUpdateSchema>;
+export type GoodReceiptItem = z.infer<typeof goodReceiptLineSchema>;
+export type CancelOrder = z.infer<typeof cancelOrderSchema>;
+export type SalesOrder = z.infer<typeof salesOrderSchema>;
+export type SalesOrderForm = z.infer<typeof salesOrderFormSchema>;
+export type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
+export type Inventory = z.infer<typeof inventorySchema>;
+export type VariantTypes = z.infer<typeof variantTypesSchema>;
+export type ProductCombinations = z.infer<typeof productCombinationsSchema>;
+export type ProductCombinationUpdate = z.infer<
+  typeof productCombinationUpdateSchema
+>;
+export type VariantValues = z.infer<typeof variantValuesSchema>;
+export type BreakPack = z.infer<typeof breakPackSchema>;
+export type StatusHistory = z.infer<typeof statusHistorySchema>;
+export type InventoryMovement = z.infer<typeof inventoryMovementSchema>;
+export type StockAdjustment = z.infer<typeof stockAdjustmentSchema>;
+export type Invoice = z.infer<typeof invoiceSchema>;
+export type InvoiceCreate = z.infer<typeof invoiceBaseSchema>;
+export type InvoiceLine = z.infer<typeof invoiceLineSchema>;
+export type invoiceForm = z.infer<typeof invoiceFormSchema>;
+export type InvoiceGoodReceipt = z.infer<typeof invoiceGoodReceiptSchema>;
+export type Payment = z.infer<typeof paymentSchema>;
+export type PaymentApplication = z.infer<typeof paymentApplicationSchema>;
+export type priceHistory = z.infer<typeof priceHistorySchema>;
+export type ReturnItem = z.infer<typeof returnItemSchema>;
+export type ReturnTransaction = z.infer<typeof returnTransactionSchema>;
+export type ExchangeItem = z.infer<typeof exchangeItemSchema>;
+export type Return = z.infer<typeof returnSchema>;
+export type supplierHistory = z.infer<typeof supplierHistorySchema>;

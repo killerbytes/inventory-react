@@ -1,25 +1,25 @@
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { Payment, PaymentApplication } from "@/types";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import AddPaymentModal from "./AddPaymentModal";
 import useToggle from "@/hooks/useToggle";
 import { Plus } from "lucide-react";
+import { Invoice } from "@/types";
 import React from "react";
 
 export default function PaymentTab({
   data,
   cb,
 }: {
-  data: Payment;
-  cb: () => void;
+  data: Invoice;
+  cb: (id: number) => Promise<void>;
 }) {
   const { toggle, handleToggle } = useToggle({
     addPaymentModal: false,
   });
 
-  const columns: ColumnDef<PaymentApplication>[] = React.useMemo(
+  const columns: ColumnDef<Invoice>[] = React.useMemo(
     () => [
       {
         accessorKey: "payment.referenceNo",
@@ -69,14 +69,14 @@ export default function PaymentTab({
           <Plus /> Add Payment
         </Button>
       </div>
-      <DataTable data={data.applications || []} columns={columns} />
+      <DataTable data={data?.applications || []} columns={columns} />
       {toggle.addPaymentModal && (
         <AddPaymentModal
           data={data}
           isOpen={true}
           onClose={() => {
             handleToggle({ addPaymentModal: false });
-            cb(data.id);
+            cb(Number(data.id));
           }}
         />
       )}

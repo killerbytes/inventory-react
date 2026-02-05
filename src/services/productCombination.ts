@@ -1,4 +1,9 @@
-import { BreakPack, ProductCombinations, StockAdjustment } from "@/types";
+import {
+  BreakPack,
+  ProductCombinations,
+  ProductCombinationUpdate,
+  StockAdjustment,
+} from "@/types";
 import BaseService from "./base";
 import type Http from "./http";
 
@@ -14,9 +19,11 @@ export default class ProductCombinationService extends BaseService<ProductCombin
 
   updateByProductId = async (
     id: number,
-    data: { combinations: ProductCombinations[] },
+    combinations: ProductCombinationUpdate[],
   ) => {
-    const response = await this.http.patch(`${this.url}/product/${id}`, data);
+    const response = await this.http.patch(`${this.url}/product/${id}`, {
+      combinations,
+    });
     return response;
   };
 

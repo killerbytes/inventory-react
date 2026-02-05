@@ -108,6 +108,8 @@ export default function Details() {
     ],
     [],
   );
+
+  if (!data) return <Loader isLoading={loading} />;
   return (
     <div className="flex flex-col gap-4 relative">
       <Card>
@@ -189,7 +191,7 @@ export default function Details() {
               />
             </TabsContent>
             <TabsContent value="payments">
-              <PaymentTab data={data || {}} cb={getData} />
+              <PaymentTab data={data} cb={getData} />
             </TabsContent>
           </Tabs>
         </CardContent>

@@ -1,4 +1,12 @@
 import {
+  ApiErrorResponse,
+  Product,
+  ProductCombinations,
+  ProductCombinationUpdate,
+  VariantTypes,
+  VariantValues,
+} from "@/types";
+import {
   Form,
   FormControl,
   FormField,
@@ -6,16 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Product,
-  VariantValues,
-  VariantTypes,
-  ApiErrorResponse,
-  ProductCombinations,
-} from "@/types";
+import { FieldPath, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { productCombinationUpdateSchema } from "@/schemas";
 import { Loader2Icon, Plus, Trash2 } from "lucide-react";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +28,6 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { variantValuesSchema } from "@/schemas";
 import { cx } from "class-variance-authority";
 import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
@@ -37,21 +37,6 @@ import { useStore } from "@/stores";
 import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
-
-const formSchema = z.object({
-  id: z.number().nullish(),
-  productId: z.number(),
-  unit: z.string(),
-  conversionFactor: z.coerce.number().min(1, {
-    message: "Conversion Factor must be at least 1.",
-  }),
-  price: z.coerce.number().nullish(),
-  reorderLevel: z.coerce.number(),
-  isBreakPack: z.boolean().nullish(),
-  isActive: z.boolean().nullish(),
-  isBreakPackOfId: z.coerce.number().nullish(),
-  values: z.array(variantValuesSchema),
-});
 
 export default function CombinationModal({
   product,
@@ -69,15 +54,16 @@ export default function CombinationModal({
     productCombinationState: { invalidate },
   } = useStore();
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
+
   const form = useForm<{
-    combinations: z.infer<typeof formSchema>[];
+    combinations: ProductCombinationUpdate[];
   }>({
     defaultValues: {
       combinations: [],
     },
     resolver: zodResolver(
       z.object({
-        combinations: z.array(formSchema),
+        combinations: z.array(productCombinationUpdateSchema),
       }),
     ),
   });
@@ -88,21 +74,22 @@ export default function CombinationModal({
     keyName: "fieldId",
   });
 
-  const x: z.infer<typeof formSchema>[] = useWatch({
+  const x: ProductCombinationUpdate[] = useWatch({
     control: form.control,
     name: "combinations",
   });
 
-  const productCombinationDefaultValue: z.infer<typeof formSchema> = {
+  const productCombinationDefaultValue: ProductCombinationUpdate = {
     productId: Number(product.id),
     reorderLevel: 10,
     unit: product.baseUnit,
     price: 0,
     conversionFactor: 1,
     isActive: true,
-    quantity: 0,
-    values: variants.map((i) => ({
-      variantTypeId: i.id,
+    values: variants.map(() => ({
+      value: "",
+      variantTypeId: null,
+      id: null,
     })),
   };
 
@@ -139,12 +126,16 @@ export default function CombinationModal({
     getData();
   }, [getData]);
 
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (data: {
+    combinations: ProductCombinationUpdate[];
+  }) => {
+    const { combinations } = data;
+
     try {
       setLoading(true);
       await productCombinationServices.updateByProductId(
         Number(product.id),
-        values,
+        combinations,
       );
       invalidate();
       setShouldReload(true);
@@ -152,9 +143,17 @@ export default function CombinationModal({
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors.forEach((err) => {
+        apiError.errors.forEach((err, index) => {
           if (err.field) {
-            form.setError(err.field, err.message);
+            form.setError(
+              `combinations.${index}.${err.field}` as FieldPath<{
+                combinations: ProductCombinationUpdate[];
+              }>,
+              {
+                type: "server",
+                message: err.message,
+              },
+            );
           }
         });
       } else {
@@ -265,7 +264,7 @@ export default function CombinationModal({
           const type = variants.find(
             (item: VariantTypes) => item.isBreakpackFilter,
           );
-          let options: z.infer<typeof formSchema>[] = [];
+          let options: ProductCombinationUpdate[] = [];
 
           if (type) {
             const f = row.original.values.find(
@@ -404,7 +403,7 @@ export default function CombinationModal({
                     <Checkbox
                       {...field}
                       tabIndex={-1}
-                      checked={field.value}
+                      checked={field.value || false}
                       onCheckedChange={(value) => {
                         field.onChange(value);
                       }}
@@ -435,7 +434,7 @@ export default function CombinationModal({
                     <Checkbox
                       {...field}
                       tabIndex={-1}
-                      checked={field.value}
+                      checked={field.value || false}
                       onCheckedChange={(value) => {
                         field.onChange(value);
                       }}
@@ -483,7 +482,6 @@ export default function CombinationModal({
                     <DataTable
                       data={fields}
                       columns={columns}
-                      errors={form.formState.errors}
                       showFooter={false}
                       tableClassname="border-none"
                     />

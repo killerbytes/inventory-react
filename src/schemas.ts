@@ -151,6 +151,26 @@ export const productCombinationsSchema = productCombinationBaseSchema.extend({
   isBreakPackOfId: z.coerce.number().nullish(),
 });
 
+export const productCombinationUpdateSchema = productCombinationsSchema
+  .extend({
+    id: z.number().optional(),
+    conversionFactor: z.coerce.number().min(1, {
+      message: "Conversion Factor must be at least 1.",
+    }),
+    price: z.coerce.number().optional(),
+    reorderLevel: z.coerce.number(),
+    isBreakPack: z.boolean().nullish(),
+    isActive: z.boolean().nullish(),
+    values: z.array(variantValuesSchema),
+    isBreakPackOfId: z.coerce.number().nullish(),
+  })
+  .omit({
+    inventory: true,
+    product: true,
+    name: true,
+    sku: true,
+  });
+
 export const returnItemSchema = z.object({
   combinationId: z.number(),
   combination: productCombinationBaseSchema.nullish(),
@@ -501,17 +521,20 @@ export const paymentSchema = z.object({
   }),
 });
 
-export const invoiceSchema = z.object({
-  id: z.number().optional(),
+export const invoiceBaseSchema = z.object({
   supplierId: z.number(),
-  supplier: supplierSchema,
-  payment: paymentSchema,
   invoiceNumber: z.string(),
   invoiceDate: z.string(),
   dueDate: z.string(),
   status: z.string(),
-  totalAmount: z.coerce.number().nullish(),
   notes: z.string().nullish(),
+});
+
+export const invoiceSchema = invoiceBaseSchema.extend({
+  id: z.number().optional(),
+  supplier: supplierSchema,
+  payment: paymentSchema,
+  totalAmount: z.coerce.number().nullish(),
   invoiceLines: z.array(invoiceLineSchema),
   applications: z.array(paymentApplicationSchema),
 });

@@ -14,8 +14,8 @@ import {
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { categoryServices, productCombinationServices } from "@/services";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
-import { CategorizedProductList, Product } from "@/types";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
+import { CategorizedProductList, Product } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
@@ -202,7 +202,10 @@ export default function Products() {
             data.length > 0 && (
               <Accordion type="multiple" className="w-full">
                 {data?.map((item) => (
-                  <AccordionItem value={item.categoryId} key={item.categoryId}>
+                  <AccordionItem
+                    value={String(item.categoryId)}
+                    key={item.categoryId}
+                  >
                     <AccordionTrigger
                       className={cx(
                         "uppercase text-right",
@@ -216,19 +219,6 @@ export default function Products() {
                         {item.products.map((product) => (
                           <Fragment key={product.id}>
                             <ProductItem item={product} />
-                          </Fragment>
-                        ))}
-                        {item.subCategories?.map((i) => (
-                          <Fragment key={i.id}>
-                            <div className="flex gap-2 justify-start items-center">
-                              {i.categoryName}
-                            </div>
-
-                            <div className="flex gap-2 justify-start items-center">
-                              {i.products.map((product: Product) => (
-                                <ProductItem item={product} />
-                              ))}
-                            </div>
                           </Fragment>
                         ))}
                       </>

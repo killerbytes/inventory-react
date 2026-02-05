@@ -6,10 +6,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ApiErrorResponse, Invoice, Payment } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { ApiErrorResponse, Payment } from "@/types";
 import NumberInput from "@/components/NumberInput";
 import DatePicker from "@/components/DatePicker";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ export default function AddPaymentModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  data: Payment;
+  data: Invoice;
 }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -56,7 +56,7 @@ export default function AddPaymentModal({
             amountApplied: values.amount,
           },
         ],
-      });
+      } as Payment);
       onClose();
     } catch (error) {
       const apiError = error as ApiErrorResponse;

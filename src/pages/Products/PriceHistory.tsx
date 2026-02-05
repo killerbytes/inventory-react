@@ -15,6 +15,10 @@ import { cx } from "class-variance-authority";
 import { Link } from "react-router";
 import React from "react";
 
+interface filterPropTypes extends filterProps {
+  productId: string;
+}
+
 export default function PriceHistoryTab({
   productId,
   selectedCombination,
@@ -27,7 +31,7 @@ export default function PriceHistoryTab({
   const [data, setData] =
     React.useState<PaginatedResponse<priceHistory>>(PAGINATION_RESPONSE);
 
-  const [filter, setFilter] = React.useState<filterProps>({
+  const [filter, setFilter] = React.useState<filterPropTypes>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "changedAt",
