@@ -49,9 +49,11 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
                     table.getIsAllPageRowsSelected() ||
                     (table.getIsSomePageRowsSelected() && "indeterminate")
                   }
-                  onCheckedChange={(value) =>
-                    table.toggleAllPageRowsSelected(!!value)
-                  }
+                  onCheckedChange={(value) => {
+                    console.log(value);
+
+                    table.toggleAllPageRowsSelected(!!value);
+                  }}
                   aria-label="Select all"
                 />
               ),
@@ -168,7 +170,6 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         data={data.salesOrderItems || []}
         columns={columns}
         renderFooter={() => renderFooter(data)}
-        showFooter
         onSelectionChange={(selectedItems) => {
           setReturns(
             selectedItems.map((i) => ({

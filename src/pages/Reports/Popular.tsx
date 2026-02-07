@@ -39,7 +39,7 @@ export default function Popular() {
     to: endOfMonth(new Date()),
   });
   const [data, setData] =
-    React.useState<PaginatedResponse<Props[]>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<Props>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,

@@ -107,7 +107,17 @@ export default function SalesOrderModal({
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "salesOrderItems",
+    keyName: "formId",
   });
+  const watchSalesOrderItems = useWatch({
+    control: form?.control,
+    name: "salesOrderItems",
+  }) as SalesOrderItem[];
+
+  const tableData = fields.map((field, index) => ({
+    ...field,
+    ...watchSalesOrderItems?.[index],
+  }));
   const modeOfPayment = form.watch("modeOfPayment");
 
   React.useEffect(() => {
@@ -602,9 +612,8 @@ export default function SalesOrderModal({
                 <FormItem className="w-full mb-4">
                   <FormControl>
                     <DataTable
-                      data={fields}
+                      data={tableData}
                       columns={columns}
-                      showFooter
                       renderFooter={() => {
                         const total = getTotalAmountTableFooter(
                           formData.salesOrderItems,
@@ -785,7 +794,7 @@ export default function SalesOrderModal({
         </ConfirmDialog>
       </DialogFooter>
 
-      {/* {JSON.stringify(formData, null, 2)} */}
+      {JSON.stringify(tableData, null, 2)}
     </Modal>
   );
 }

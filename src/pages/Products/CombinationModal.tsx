@@ -7,15 +7,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  Product,
-  VariantValues,
-  VariantTypes,
   ApiErrorResponse,
+  Product,
   ProductCombinations,
+  VariantTypes,
+  VariantValues,
 } from "@/types";
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2Icon, Plus, Trash2 } from "lucide-react";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -87,6 +86,16 @@ export default function CombinationModal({
     name: "combinations",
     keyName: "fieldId",
   });
+
+  const watchCombinations = useWatch({
+    control: form.control,
+    name: "combinations",
+  });
+
+  const tableData = fields.map((field, index) => ({
+    ...field,
+    ...watchCombinations?.[index],
+  }));
 
   const x: z.infer<typeof formSchema>[] = useWatch({
     control: form.control,
@@ -481,7 +490,7 @@ export default function CombinationModal({
                 <FormControl>
                   <div className="rounded-md border   max-h-[50vh] overflow-y-auto ">
                     <DataTable
-                      data={fields}
+                      data={tableData}
                       columns={columns}
                       errors={form.formState.errors}
                       showFooter={false}

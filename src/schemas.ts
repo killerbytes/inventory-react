@@ -226,12 +226,12 @@ export const goodReceiptLineBaseSchema = z.object({
 });
 
 export const goodReceiptLineSchema = goodReceiptLineBaseSchema.extend({
-  id: z.coerce.number().nullish(),
-  totalAmount: z.coerce.number().nullish(),
-  variantSnapshot: z.any().nullish(),
-  skuSnapshot: z.string().nullish(),
-  nameSnapshot: z.string().nullish(),
-  unit: z.string().nullish(),
+  id: z.coerce.number(),
+  totalAmount: z.coerce.number(),
+  variantSnapshot: z.any(),
+  skuSnapshot: z.string(),
+  nameSnapshot: z.string(),
+  unit: z.string(),
 });
 
 export const cancelOrderSchema = z.object({
@@ -332,7 +332,7 @@ export const salesOrderItemBaseSchema = z.object({
 });
 
 export const salesOrderItemSchema = salesOrderItemBaseSchema.extend({
-  id: z.coerce.number().nullish(),
+  id: z.coerce.number().optional(),
 
   originalPrice: z.coerce.number().nullish(),
   totalAmount: z.coerce.number().nullish(),

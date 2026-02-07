@@ -21,8 +21,8 @@ import {
 } from "@/utils/definitions";
 import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
+import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
 import SupplierPanel from "@/components/SupplierPanel";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +53,16 @@ export default function PartialForm({
     goodReceiptState: { returnEnabled, setReturnEnabled },
   } = useStore();
   const data = form.getValues() as GoodReceipt;
+
+  const watchGoodReceiptLines = useWatch({
+    control: form?.control,
+    name: "goodReceiptLines",
+  }) as GoodReceiptItem[];
+
+  const tableData = fields.map((field, index) => ({
+    ...field, // id (structure)
+    ...watchGoodReceiptLines?.[index], // values (reactive)
+  }));
 
   const columns = useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
@@ -230,7 +240,7 @@ export default function PartialForm({
 
         <div className="flex flex-col gap-4">
           <DataTable
-            data={fields}
+            data={tableData}
             columns={columns}
             onSelectionChange={(selectedItems) => {
               setReturns(
@@ -240,7 +250,6 @@ export default function PartialForm({
                 })) as ReturnItem[],
               );
             }}
-            showFooter
             renderFooter={(data) => {
               const total = data.reduce(
                 (acc, item) => (acc += Number(item.totalAmount)),

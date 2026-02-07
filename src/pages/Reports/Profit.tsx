@@ -32,6 +32,8 @@ type Props = {
   combinations: ProductCombinations;
   totalProfit: number;
   totalQuantity: number;
+  nameSnapshot: string;
+  unit: string;
 };
 
 export default function Profit() {
@@ -40,7 +42,7 @@ export default function Profit() {
     to: endOfMonth(new Date()),
   });
   const [data, setData] =
-    React.useState<PaginatedResponse<Props[]>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<Props>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
