@@ -1,4 +1,4 @@
-import { Invoice, InvoiceCreate, invoiceForm } from "@/types";
+import { Invoice, InvoiceCreate, invoiceForm } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 

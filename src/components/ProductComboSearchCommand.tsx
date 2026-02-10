@@ -7,12 +7,11 @@ import {
 } from "@/components/ui/command";
 import GroupedCommandList from "./GroupedCommandList";
 import useDebounce from "@/hooks/useDebounce";
-import { ProductCombinations } from "@/types";
 import { Button } from "./ui/button";
 import * as React from "react";
 import Loader from "./Loader";
 
-function ProductComboSearchCommandComponent<T extends ProductCombinations>({
+function ProductComboSearchCommandComponent<T>({
   onSelect,
   onSearch,
   children,
@@ -37,7 +36,7 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
     setOpen,
     onSelect,
   }: {
-    items: ProductCombinations[];
+    items: T[];
     open: boolean;
     setOpen: (open: boolean) => void;
     onSelect?: (item: T) => void;
@@ -47,7 +46,7 @@ function ProductComboSearchCommandComponent<T extends ProductCombinations>({
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const listRef = React.useRef<HTMLDivElement>(null);
-  const [items, setItems] = React.useState<ProductCombinations[]>([]);
+  const [items, setItems] = React.useState<T[]>([]);
   const [loading, setLoading] = React.useState(false);
   const debouncedQuery = useDebounce(search, 300);
 

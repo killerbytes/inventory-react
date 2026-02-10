@@ -11,8 +11,8 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
+import { filterProps, PaginatedResponse } from "@/schemas";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { filterProps, PaginatedResponse } from "@/types";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
@@ -34,7 +34,7 @@ type Props = {
 
 export default function NoSales() {
   const [data, setData] =
-    React.useState<PaginatedResponse<Props[]>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<Props>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,

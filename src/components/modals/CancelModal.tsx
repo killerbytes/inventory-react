@@ -6,13 +6,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { CancelOrder, cancelOrderSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { cancelOrderSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { CancelOrder } from "@/types";
 
 export const CancelModal = ({
   onClose,

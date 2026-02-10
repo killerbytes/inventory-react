@@ -3,9 +3,10 @@ import {
   Product,
   ProductCombinations,
   ProductCombinationUpdate,
+  productCombinationUpdateSchema,
   VariantTypes,
   VariantValues,
-} from "@/types";
+} from "@/schemas";
 import {
   Form,
   FormControl,
@@ -16,7 +17,6 @@ import {
 } from "@/components/ui/form";
 import { FieldPath, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
-import { productCombinationUpdateSchema } from "@/schemas";
 import { Loader2Icon, Plus, Trash2 } from "lucide-react";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,6 +37,13 @@ import { useStore } from "@/stores";
 import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
+
+type CombinationTableRow = ProductCombinationUpdate & {
+  fieldId: string;
+  inventory?: {
+    quantity?: number;
+  };
+};
 
 export default function CombinationModal({
   product,
@@ -74,10 +81,15 @@ export default function CombinationModal({
     keyName: "fieldId",
   });
 
-  const x: ProductCombinationUpdate[] = useWatch({
+  const watchCombinations = useWatch({
     control: form.control,
     name: "combinations",
   });
+
+  const tableData: CombinationTableRow[] = fields.map((field, index) => ({
+    ...field,
+    ...watchCombinations?.[index],
+  }));
 
   const productCombinationDefaultValue: ProductCombinationUpdate = {
     productId: Number(product.id),
@@ -164,7 +176,7 @@ export default function CombinationModal({
     }
   };
 
-  const columns = useMemo<ColumnDef<ProductCombinations>[]>(
+  const columns = useMemo<ColumnDef<CombinationTableRow>[]>(
     () => [
       {
         accessorKey: "id",
@@ -260,19 +272,25 @@ export default function CombinationModal({
           className: "text-right w-0",
         },
 
-        cell: ({ row }) => {
+        cell: (props) => {
+          const { row, table } = props;
           const type = variants.find(
             (item: VariantTypes) => item.isBreakpackFilter,
           );
           let options: ProductCombinationUpdate[] = [];
+          const allOriginalData = table
+            .getRowModel()
+            .rows.map((row) => row.original);
 
           if (type) {
             const f = row.original.values.find(
               (v) => v.variantTypeId === type.id,
             );
-            options = x.filter((i) => i.values.find((v) => v.id === f?.id));
+            options = allOriginalData.filter((i) =>
+              i.values.find((v) => v.id === f?.id),
+            );
           } else {
-            options = x.filter((i) => i.id !== row.original.id);
+            options = allOriginalData.filter((i) => i.id !== row.original.id);
           }
 
           return (
@@ -479,12 +497,7 @@ export default function CombinationModal({
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
                   <div className="rounded-md border   max-h-[50vh] overflow-y-auto ">
-                    <DataTable
-                      data={fields}
-                      columns={columns}
-                      showFooter={false}
-                      tableClassname="border-none"
-                    />
+                    <DataTable data={tableData} columns={columns} />
                   </div>
                 </FormControl>
                 <div></div>
@@ -502,7 +515,7 @@ export default function CombinationModal({
               size="icon"
               autoFocus
               onClick={() => {
-                const lastItem = last(x);
+                const lastItem = last(tableData);
                 const unit = lastItem
                   ? lastItem.unit
                   : productCombinationDefaultValue.unit;

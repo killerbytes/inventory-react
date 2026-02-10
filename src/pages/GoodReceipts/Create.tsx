@@ -3,21 +3,21 @@ import { useForm, useWatch } from "react-hook-form";
 import { goodReceiptServices } from "@/services";
 
 import {
+  ApiError,
+  ApiErrorResponse,
+  GoodReceipt,
+  GoodReceiptCreate,
+  goodReceiptCreateSchema,
+} from "@/schemas";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ApiError,
-  ApiErrorResponse,
-  GoodReceipt,
-  GoodReceiptCreate,
-} from "@/types";
 import { ERROR, goodReceiptItemDefault, ROUTES } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { goodReceiptCreateSchema } from "@/schemas";
 import PendingOrderForm from "./Form/PendingForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

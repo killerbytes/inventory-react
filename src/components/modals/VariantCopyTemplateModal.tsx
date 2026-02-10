@@ -6,8 +6,8 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import { ApiError, VariantTypes } from "@/schemas";
 import { variantTypesServices } from "@/services";
-import { ApiError, VariantTypes } from "@/types";
 import { DialogFooter } from "../ui/dialog";
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
@@ -21,7 +21,7 @@ export default function VariantCopyTemplateModal({
   onClose,
   isOpen,
 }: {
-  selected: any;
+  selected: VariantTypes;
   onClose: () => void;
   isOpen: boolean;
 }) {

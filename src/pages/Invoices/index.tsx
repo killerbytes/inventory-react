@@ -11,7 +11,7 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import { Customer, filterProps, Invoice, PaginatedResponse } from "@/types";
+import { filterProps, Invoice, PaginatedResponse } from "@/schemas";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -36,7 +36,7 @@ export default function Invoices() {
   });
   const [selected, setSelected] = React.useState<Invoice>();
   const [data, setData] =
-    React.useState<PaginatedResponse<Customer[]>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<Invoice>>(PAGINATION_RESPONSE);
 
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
@@ -105,11 +105,11 @@ export default function Invoices() {
         }) => {
           return (
             <Link
-              to={`${ROUTES.SUPPLIERS}/${supplier.id}`}
+              to={`${ROUTES.SUPPLIERS}/${supplier?.id}`}
               className="text-primary"
               onClick={(e) => e.stopPropagation()}
             >
-              {supplier.name}
+              {supplier?.name}
             </Link>
           );
         },
@@ -230,7 +230,6 @@ export default function Invoices() {
               }}
               data={data.data || []}
               columns={columns}
-              showFooter={true}
               renderFooter={(rows: Invoice[]) => {
                 return (
                   <TableRow>

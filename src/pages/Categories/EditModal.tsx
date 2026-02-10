@@ -6,7 +6,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ApiError, ApiErrorResponse, Category } from "@/types";
+import {
+  ApiError,
+  ApiErrorResponse,
+  Category,
+  categorySchema,
+} from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
-import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";

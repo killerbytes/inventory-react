@@ -1,5 +1,5 @@
 import { Control, FieldValues, Path, useWatch } from "react-hook-form";
-import { ProductCombinations } from "@/types";
+import { ProductCombinations } from "@/schemas";
 
 export default function useExcludeExistToList<T extends FieldValues>(
   combinations: ProductCombinations[],

@@ -1,5 +1,5 @@
+import { ApiError, ApiErrorResponse, Product, productSchema } from "@/schemas";
 import { categoryServices, productServices } from "@/services";
-import { ApiError, ApiErrorResponse, Product } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ROUTES, UNIT } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,6 @@ import { getErrorMessage } from "@/lib/utils";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import { productSchema } from "@/schemas";
 import ProductForm from "./ProductForm";
 import Modal from "@/components/Modal";
 import { useStore } from "@/stores";

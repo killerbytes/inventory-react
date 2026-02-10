@@ -1,4 +1,4 @@
-import { CancelOrder, GoodReceipt, GoodReceiptUpdate } from "@/types";
+import { CancelOrder, GoodReceipt, GoodReceiptUpdate } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 

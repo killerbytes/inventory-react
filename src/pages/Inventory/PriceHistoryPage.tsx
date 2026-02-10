@@ -11,7 +11,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, priceHistory } from "@/types";
+import { filterProps, PaginatedResponse, PriceHistory } from "@/schemas";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
@@ -25,9 +25,9 @@ import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
-export default function PriceHistory() {
+export default function PriceHistoryPage() {
   const [data, setData] =
-    React.useState<PaginatedResponse<priceHistory>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<PriceHistory>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -49,7 +49,7 @@ export default function PriceHistory() {
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
 
-  const columns = React.useMemo<ColumnDef<priceHistory>[]>(
+  const columns = React.useMemo<ColumnDef<PriceHistory>[]>(
     () => [
       {
         accessorKey: "combinations.name",

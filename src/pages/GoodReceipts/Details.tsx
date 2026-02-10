@@ -5,6 +5,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  ApiErrorResponse,
+  CancelOrder,
+  GoodReceipt,
+  GoodReceiptUpdate,
+  goodReceiptUpdateSchema,
+} from "@/schemas";
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,12 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ApiErrorResponse,
-  CancelOrder,
-  GoodReceipt,
-  GoodReceiptUpdate,
-} from "@/types";
 import {
   BUTTON_COLOR,
   ORDER_STATUS,
@@ -46,7 +47,6 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
-import { goodReceiptUpdateSchema } from "@/schemas";
 import PendingOrderForm from "./Form/PendingForm";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";

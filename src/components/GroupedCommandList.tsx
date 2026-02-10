@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect, memo, useCallback } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { formatCurrency, getScore } from "@/utils/formatters";
 import { CommandGroup, CommandItem } from "./ui/command";
 import { UNIT_COLOR } from "@/utils/definitions";

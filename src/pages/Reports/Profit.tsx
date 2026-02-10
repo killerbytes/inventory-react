@@ -11,7 +11,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, ProductCombinations } from "@/types";
+import { filterProps, PaginatedResponse, ProductCombinations } from "@/schemas";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
@@ -32,6 +32,8 @@ type Props = {
   combinations: ProductCombinations;
   totalProfit: number;
   totalQuantity: number;
+  nameSnapshot: string;
+  unit: string;
 };
 
 export default function Profit() {
@@ -40,7 +42,7 @@ export default function Profit() {
     to: endOfMonth(new Date()),
   });
   const [data, setData] =
-    React.useState<PaginatedResponse<Props[]>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<Props>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,

@@ -12,9 +12,9 @@ import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { Spinner } from "@/components/ui/spinner";
 import ColorBadge from "@/components/ColorBadge";
+import { ProductCombinations } from "@/schemas";
 import { cx } from "class-variance-authority";
 import useDebounce from "@/hooks/useDebounce";
-import { ProductCombinations } from "@/types";
 import { Search, X } from "lucide-react";
 import React from "react";
 

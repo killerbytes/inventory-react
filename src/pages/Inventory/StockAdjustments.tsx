@@ -5,12 +5,7 @@ import {
   STOCK_ADJUSTMENT_TYPE_COLOR,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import {
-  filterProps,
-  InventoryMovement,
-  PaginatedResponse,
-  StockAdjustment,
-} from "@/types";
+import { filterProps, PaginatedResponse, StockAdjustment } from "@/schemas";
 import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,7 +22,7 @@ import React from "react";
 
 export default function StockAdjustments() {
   const [data, setData] =
-    React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<StockAdjustment>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -193,7 +188,7 @@ export default function StockAdjustments() {
               }));
             }}
           />
-          <DataTable data={data.data} columns={columns} showFooter={false} />
+          <DataTable data={data.data} columns={columns} />
           {data.meta.totalPages > 1 && (
             <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
           )}

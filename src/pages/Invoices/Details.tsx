@@ -1,6 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
+  ApiErrorResponse,
+  Invoice,
+  invoiceFormSchema,
+  InvoiceLine,
+  PaymentApplication,
+} from "@/schemas";
+import {
   Card,
   CardAction,
   CardContent,
@@ -8,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ERROR, ROUTES, STATUS_COLOR } from "@/utils/definitions";
-import { ApiErrorResponse, Invoice, InvoiceLine } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Link, useNavigate, useParams } from "react-router";
@@ -18,7 +24,6 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Label } from "@/components/ui/label";
-import { invoiceFormSchema } from "@/schemas";
 import { invoiceServices } from "@/services";
 import { useForm } from "react-hook-form";
 import Loader from "@/components/Loader";
@@ -62,9 +67,12 @@ export default function Details() {
     getData(Number(id));
   }, [getData, id]);
 
-  const remainingBalance = data?.applications.reduce((acc, val) => {
-    return acc + Number(val.amountApplied);
-  }, 0);
+  const remainingBalance = data?.applications.reduce(
+    (acc: number, val: PaymentApplication) => {
+      return acc + Number(val.amountApplied);
+    },
+    0,
+  );
 
   const columns: ColumnDef<InvoiceLine>[] = React.useMemo(
     () => [
@@ -169,7 +177,6 @@ export default function Details() {
               <DataTable
                 data={data?.invoiceLines || []}
                 columns={columns}
-                showFooter
                 renderFooter={(rows: InvoiceLine[]) => {
                   return (
                     <TableRow>

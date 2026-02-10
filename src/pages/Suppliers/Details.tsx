@@ -12,7 +12,7 @@ import {
   GoodReceipt,
   PaginatedResponse,
   Supplier,
-} from "@/types";
+} from "@/schemas";
 import {
   PAGINATION,
   PAGINATION_RESPONSE,

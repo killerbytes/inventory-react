@@ -1,6 +1,6 @@
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import { useForm } from "react-hook-form";
-import { SalesOrder } from "@/types";
+import { SalesOrder } from "@/schemas";
 
 export default function Test() {
   const form = useForm<SalesOrder>({

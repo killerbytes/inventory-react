@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { filterProps, PaginatedResponse, SalesOrder } from "@/types";
+import { filterProps, PaginatedResponse, SalesOrder } from "@/schemas";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";

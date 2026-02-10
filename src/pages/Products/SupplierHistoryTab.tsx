@@ -1,14 +1,14 @@
 import { formatCurrency, formatDate } from "@/utils/formatters";
+import { SupplierHistory, VariantValues } from "@/schemas";
 import { ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { supplierServices } from "@/services";
-import { supplierHistory } from "@/types";
 import { Link } from "react-router";
 import React from "react";
 
-export default function SupplierHistory({
+export default function SupplierHistoryTab({
   productId,
   selectedCombination,
   isBreakPackFilter,
@@ -17,7 +17,7 @@ export default function SupplierHistory({
   selectedCombination: { id: number | string; name: string };
   isBreakPackFilter: boolean;
 }) {
-  const [data, setData] = React.useState<supplierHistory[]>([]);
+  const [data, setData] = React.useState<SupplierHistory[]>([]);
 
   const getData = React.useCallback(async () => {
     const res = await supplierServices.getByProductId(Number(productId));
@@ -28,7 +28,7 @@ export default function SupplierHistory({
     getData();
   }, [getData]);
 
-  const columns = React.useMemo<ColumnDef<supplierHistory>[]>(
+  const columns = React.useMemo<ColumnDef<SupplierHistory>[]>(
     () => [
       {
         accessorKey: "combinations.name",
@@ -115,7 +115,7 @@ export default function SupplierHistory({
     return isBreakPackFilter
       ? data?.filter((item) =>
           item.combinations.values.find(
-            (values) => values.id === selectedCombination.id,
+            (values: VariantValues) => values.id === selectedCombination.id,
           ),
         ) || []
       : data?.filter(

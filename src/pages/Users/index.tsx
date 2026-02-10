@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, User } from "@/types";
+import { filterProps, PaginatedResponse, User } from "@/schemas";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";

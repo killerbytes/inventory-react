@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ApiErrorResponse, Category } from "@/types";
+import { ApiErrorResponse, Category } from "@/schemas";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

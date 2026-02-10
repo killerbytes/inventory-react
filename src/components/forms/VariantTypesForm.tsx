@@ -7,6 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { VariantTypes, VariantValues } from "@/schemas";
 import { ColumnDef } from "@tanstack/react-table";
 import { ScrollArea } from "../ui/scroll-area";
 import { Plus, Trash2, X } from "lucide-react";
@@ -14,7 +15,6 @@ import ConfirmDialog from "../ConfirmDialog";
 import { DialogFooter } from "../ui/dialog";
 import { Checkbox } from "../ui/checkbox";
 import { DataTable } from "../DataTable";
-import { VariantTypes } from "@/types";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import React from "react";
@@ -30,7 +30,7 @@ export default function VariantTypesForm({
   onSubmit: (e: VariantTypes) => Promise<void>;
   selected?: VariantTypes;
   onDelete: () => Promise<void>;
-  variantTypes: VariantTypes[];
+  variantTypes?: VariantTypes[];
 }) {
   const [values, setValues] = React.useState("");
   const { fields, append, remove } = useFieldArray({
@@ -39,7 +39,12 @@ export default function VariantTypesForm({
     keyName: "id",
   });
 
-  const columns = React.useMemo<ColumnDef<VariantTypes>[]>(
+  const watchValues = form.watch("values");
+  const tableData = fields.map((field, index) => ({
+    ...field,
+    ...watchValues?.[index],
+  }));
+  const columns = React.useMemo<ColumnDef<VariantValues>[]>(
     () => [
       {
         accessorKey: "id",
@@ -162,11 +167,11 @@ export default function VariantTypesForm({
                     autoFocus={false}
                   >
                     <DataTable
-                      data={fields}
+                      data={tableData}
                       columns={columns}
-                      emptyText="Add values..."
-                      showHeader={false}
-                      showFooter={false}
+                      meta={{
+                        emptyText: "Add values...",
+                      }}
                     />
                   </ScrollArea>
                 </FormControl>

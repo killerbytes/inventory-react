@@ -14,8 +14,8 @@ import {
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { categoryServices, productCombinationServices } from "@/services";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
+import { CategorizedProductList, Product } from "@/schemas";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
-import { CategorizedProductList, Product } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";

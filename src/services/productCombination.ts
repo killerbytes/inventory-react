@@ -3,7 +3,7 @@ import {
   ProductCombinations,
   ProductCombinationUpdate,
   StockAdjustment,
-} from "@/types";
+} from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 

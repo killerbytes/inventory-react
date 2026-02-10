@@ -1,4 +1,5 @@
-import { ProductCombinations } from "@/types";
+import { ProductCombinations } from "@/schemas";
+import { StoreState } from "./store.types";
 import { StateCreator } from "zustand";
 
 export type ProductCombinationState = {
@@ -16,7 +17,7 @@ export type ProductCombinationState = {
 };
 
 export const createProductCombinationSlice: StateCreator<
-  ProductCombinationState,
+  StoreState,
   [["zustand/immer", never]],
   [],
   ProductCombinationState

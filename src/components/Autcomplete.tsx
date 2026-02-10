@@ -16,22 +16,26 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import React from "react";
 
-interface AutocompleteProps<T> {
+interface AutocompleteProps {
   value: string | undefined;
-  onChange: (item: T) => void;
-  options: T[];
+  onChange: (item: option) => void;
+  options: option[];
   placeholder?: string;
 }
+type option = {
+  id?: number | string;
+  name: string;
+};
 
-function renderOptionsDefault<T extends { id: number | string; name: string }>({
+function renderOptionsDefault({
   options,
   setOpen,
   onChange,
   value,
 }: {
-  options: T[];
+  options: option[];
   setOpen: (open: boolean) => void;
-  onChange: (item: T) => void;
+  onChange: (item: option) => void;
   value: string | undefined;
 }) {
   return (
@@ -58,12 +62,12 @@ function renderOptionsDefault<T extends { id: number | string; name: string }>({
   );
 }
 
-export default function Autocomplete<T>({
+export default function Autocomplete({
   value,
   onChange,
   options = [],
   placeholder = "Type to search...",
-}: AutocompleteProps<T>) {
+}: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -87,7 +91,7 @@ export default function Autocomplete<T>({
           <CommandInput placeholder={placeholder} className="h-9" />
           <CommandList>
             <CommandEmpty>No products found.</CommandEmpty>
-            {renderOptionsDefault({ options, open, setOpen, onChange, value })}
+            {renderOptionsDefault({ options, setOpen, onChange, value })}
           </CommandList>
         </Command>
       </PopoverContent>

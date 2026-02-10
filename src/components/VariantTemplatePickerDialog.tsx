@@ -6,7 +6,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { ApiErrorResponse, VariantTypes } from "@/types";
+import { ApiErrorResponse, VariantTypes } from "@/schemas";
 import { variantTypesServices } from "@/services";
 import { toast } from "sonner";
 import React from "react";
@@ -25,7 +25,7 @@ export default function VariantTemplatePickerDialog({
   const getData = React.useCallback(async () => {
     try {
       loadingState[1](true);
-      const data = await variantTypesServices.getAll({ q: null });
+      const data = await variantTypesServices.getAll({ q: undefined });
       setVariantTypes(data);
     } catch (error) {
       const apiError = error as ApiErrorResponse;

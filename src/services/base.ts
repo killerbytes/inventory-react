@@ -1,3 +1,4 @@
+import { filterProps } from "@/schemas";
 import type Http from "./http";
 
 export default class BaseService<T extends object> {
@@ -13,7 +14,7 @@ export default class BaseService<T extends object> {
     const response = await this.http.post(`${this.url}`, data);
     return response;
   };
-  getAll = async (params: T) => {
+  getAll = async (params: filterProps) => {
     const response = await this.http.get(`${this.url}/`, { params });
     return response;
   };

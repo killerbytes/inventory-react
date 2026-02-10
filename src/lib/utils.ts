@@ -1,13 +1,9 @@
 import {
   ApiErrorResponse,
-  CategorizedProductList,
   GoodReceipt,
-  Product,
   ProductCombinations,
-  SalesOrder,
   StatusHistory,
-} from "@/types";
-import { ProductCommandSelectedItemProps } from "@/components/ProductCommand";
+} from "@/schemas";
 import { productCombinationServices } from "@/services";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -44,34 +40,6 @@ export function getSKU(combination: ProductCombinations) {
   // return `${combination.product.name}-${combination.product.id}`;
 }
 
-export function flattenedProduct(data: CategorizedProductList[]) {
-  const flattened: ProductCommandSelectedItemProps[] = [];
-
-  data.forEach((cat) =>
-    cat.products.forEach((prod) => {
-      const variantMap = Object.fromEntries(
-        prod.variants.map((v) => [v.id, v.name]),
-      );
-
-      prod.combinations.forEach((comb) => {
-        flattened.push({
-          combinationId: comb.id,
-          name: comb.name,
-          unit: prod.unit,
-          price: comb.price,
-          variants: comb.values.map((v) => ({
-            variantType:
-              v.variantTypeId != null ? variantMap[v.variantTypeId] : undefined,
-            value: v.value,
-          })),
-        });
-      });
-    }),
-  );
-
-  return flattened;
-}
-
 export const mappedStatusHistory = (
   statusHistory: StatusHistory[],
 ): Record<string, StatusHistory> => {
@@ -83,69 +51,15 @@ export const mappedStatusHistory = (
   return map;
 };
 
-// export const getMappedVariantValues = (variants, values) => {
-//   const mappedVariantValues = {};
-//   variants?.forEach((val) => {
-//     mappedVariantValues[val.name] = values.find(
-//       (v) => v.variantTypeId === val.id,
-//     )?.value;
-//   });
-//   return mappedVariantValues;
-// };
-
-// export const getMappedProductComboName = (product, values) => {
-//   const mapped = getMappedVariantValues(product?.variants, values);
-//   return `${product?.name} - ${Object.keys(mapped)
-//     .map((key) => `${key}: ${mapped[key]}`)
-//     .join(" | ")}`;
-// };
-
-const getMappedVariantValues = (variants, values) => {
-  const mappedVariantValues = {};
-  variants.forEach((val) => {
-    const found = values.find((v) => v.variantTypeId === val.id);
-    if (found) {
-      mappedVariantValues[val.name] = found.value;
-    }
-  });
-  return mappedVariantValues;
-};
-
-export const getMappedProductComboName = (product, values) => {
-  const mapped = getMappedVariantValues(product?.variants, values);
-
-  const keys = Object.keys(mapped);
-  const mergedParts: string[] = [];
-  const remainingParts: string[] = [];
-  const usedKeys = new Set();
-
-  keys.forEach((key) => {
-    if (usedKeys.has(key)) return;
-
-    if (key.includes("_")) {
-      const [base] = key.split("_");
-      if (mapped[base]) {
-        // merge pair first
-        mergedParts.push(`${mapped[base]} x ${mapped[key]}`);
-        usedKeys.add(base);
-        usedKeys.add(key);
-        return;
-      }
-    }
-  });
-
-  // collect remaining keys not used in merges
-  keys
-    .filter((key) => !usedKeys.has(key))
-    .sort() // keep others sorted
-    .forEach((key) => remainingParts.push(mapped[key]));
-
-  const outputParts = [...mergedParts, ...remainingParts];
-
-  return `${product?.name} - ${outputParts.join(" | ")}`;
-};
-
-export const getTotalAmountTableFooter = (data) => {
+export const getTotalAmountTableFooter = <
+  T extends {
+    purchasePrice?: number;
+    quantity?: number;
+    discount?: number | null;
+  },
+>(
+  data: T[],
+) => {
   const total = data?.reduce(
     (acc, item) => {
       return {

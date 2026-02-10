@@ -1,5 +1,6 @@
+import { StoreState } from "./store.types";
 import { StateCreator } from "zustand";
-import { Category } from "@/types";
+import { Category } from "@/schemas";
 
 export type CategoryState = {
   categoryState: {
@@ -11,7 +12,7 @@ export type CategoryState = {
 };
 
 export const createCategorySlice: StateCreator<
-  CategoryState,
+  StoreState,
   [["zustand/immer", never]],
   [],
   CategoryState

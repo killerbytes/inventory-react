@@ -17,8 +17,9 @@ import {
   ApiErrorResponse,
   Product,
   ProductCombinations,
+  productSchema,
   VariantTypes,
-} from "@/types";
+} from "@/schemas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { Loader2Icon, Pencil, PlusIcon, Save, Search } from "lucide-react";
@@ -26,20 +27,19 @@ import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { categoryServices, productServices } from "@/services";
 import PriceHistory from "@/pages/Products/PriceHistory";
 import { zodResolver } from "@hookform/resolvers/zod";
+import SupplierHistoryTab from "./SupplierHistoryTab";
 import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
 import { SelectItem } from "@/components/ui/select";
 import { ERROR, ROUTES } from "@/utils/definitions";
 import CombinationModal from "./CombinationModal";
 import { Button } from "@/components/ui/button";
-import SupplierHistory from "./SupplierHistory";
 import ProductHistory from "./ProductHistory";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import Combinations from "./Combinations";
-import { productSchema } from "@/schemas";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import ProductForm from "./ProductForm";
@@ -350,7 +350,7 @@ export default function ProductEdit() {
                     <CardTitle>Supplier History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <SupplierHistory
+                    <SupplierHistoryTab
                       productId={id ?? ""}
                       selectedCombination={selectedCombo}
                       isBreakPackFilter={!!breakPackFilter}

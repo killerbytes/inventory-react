@@ -11,7 +11,7 @@ import { SelectItem } from "@/components/ui/select";
 import ColorBadge from "@/components/ColorBadge";
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Category, Product } from "@/types";
+import { Category, Product } from "@/schemas";
 import Select from "@/components/Select";
 import React from "react";
 

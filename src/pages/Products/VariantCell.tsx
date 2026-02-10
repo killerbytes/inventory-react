@@ -1,4 +1,4 @@
-import { ProductCombinationUpdate, VariantTypes } from "@/types";
+import { ProductCombinationUpdate, VariantTypes } from "@/schemas";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { SelectItem } from "@/components/ui/select";
 import { cx } from "class-variance-authority";

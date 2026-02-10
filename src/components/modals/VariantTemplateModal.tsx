@@ -1,8 +1,7 @@
+import { ApiErrorResponse, VariantTypes, variantTypesSchema } from "@/schemas";
 import VariantTypesForm from "../forms/VariantTypesForm";
-import { ApiErrorResponse, VariantTypes } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { variantTypesServices } from "@/services";
-import { variantTypesSchema } from "@/schemas";
 import { cx } from "class-variance-authority";
 import { useForm } from "react-hook-form";
 import { PlusIcon } from "lucide-react";
@@ -37,7 +36,7 @@ export default function VariantTemplateModal({
 
   const getData = React.useCallback(async () => {
     try {
-      const data = await variantTypesServices.getAll({ q: null });
+      const data = await variantTypesServices.getAll({ q: undefined });
       setVariantTypes(data);
     } catch (error) {
       const apiError = error as ApiErrorResponse;

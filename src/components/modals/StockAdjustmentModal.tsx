@@ -1,4 +1,10 @@
 import {
+  ApiErrorResponse,
+  ProductCombinations,
+  StockAdjustment,
+  stockAdjustmentSchema,
+} from "@/schemas";
+import {
   Form,
   FormControl,
   FormField,
@@ -11,14 +17,8 @@ import {
   STOCK_ADJUSTMENT_TYPE_OPTIONS,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import {
-  ApiErrorResponse,
-  ProductCombinations,
-  StockAdjustment,
-} from "@/types";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { stockAdjustmentSchema } from "@/schemas";
 import ConfirmDialog from "../ConfirmDialog";
 import { DialogFooter } from "../ui/dialog";
 import { useForm } from "react-hook-form";

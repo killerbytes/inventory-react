@@ -3,7 +3,7 @@ import {
   filterProps,
   InventoryMovement,
   PaginatedResponse,
-} from "@/types";
+} from "@/schemas";
 import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
 import Movements from "@/components/Movements";
 import { inventoryServices } from "@/services";

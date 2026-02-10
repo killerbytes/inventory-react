@@ -1,11 +1,11 @@
 import { formatCurrency, formatDate } from "@/utils/formatters";
+import { Invoice, PaymentApplication } from "@/schemas";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import AddPaymentModal from "./AddPaymentModal";
 import useToggle from "@/hooks/useToggle";
 import { Plus } from "lucide-react";
-import { Invoice } from "@/types";
 import React from "react";
 
 export default function PaymentTab({
@@ -19,7 +19,7 @@ export default function PaymentTab({
     addPaymentModal: false,
   });
 
-  const columns: ColumnDef<Invoice>[] = React.useMemo(
+  const columns: ColumnDef<PaymentApplication>[] = React.useMemo(
     () => [
       {
         accessorKey: "payment.referenceNo",

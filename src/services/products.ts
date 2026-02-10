@@ -1,4 +1,4 @@
-import { Product } from "@/types";
+import { Product } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 

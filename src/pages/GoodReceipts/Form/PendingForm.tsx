@@ -4,7 +4,7 @@ import {
   GoodReceiptUpdate,
   ProductCombinations,
   Supplier,
-} from "@/types";
+} from "@/schemas";
 import {
   Form,
   FormControl,
@@ -39,6 +39,8 @@ import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/stores";
 import React from "react";
 
+type GoodReceiptItemCreate = Omit<GoodReceiptItem, "id" | "combinations">;
+
 export default function PendingForm({
   form,
 }: {
@@ -51,6 +53,11 @@ export default function PendingForm({
     name: "goodReceiptLines",
     keyName: "fieldId",
   });
+
+  const watchGoodReceiptLines = useWatch({
+    control: form?.control,
+    name: "goodReceiptLines",
+  }) as GoodReceiptItemCreate[];
 
   const footerValues = useWatch({
     control: form?.control,
@@ -79,7 +86,7 @@ export default function PendingForm({
     getData();
   }, [productCombinationState]);
 
-  const columns = React.useMemo<ColumnDef<GoodReceiptItem>[]>(
+  const columns = React.useMemo<ColumnDef<GoodReceiptItemCreate>[]>(
     () => [
       {
         accessorKey: "index",
@@ -166,7 +173,6 @@ export default function PendingForm({
                       noBreakPacks
                       onChange={(value) => {
                         field.onChange(value.id);
-
                         form.setValue(
                           `goodReceiptLines.${row.index}.combinations`,
                           value,
@@ -185,7 +191,6 @@ export default function PendingForm({
           );
         },
       },
-
       {
         accessorKey: "discount",
         header: "Discount",
@@ -244,12 +249,11 @@ export default function PendingForm({
         ),
       },
       {
-        accessorKey: "amount",
+        accessorKey: "totalAmount",
         header: () => <div className="text-right">Amount</div>,
         meta: {
           className: "text-right w-20",
         },
-
         cell: ({ row }) => (
           <LineColumn
             index={row.index}
@@ -267,8 +271,13 @@ export default function PendingForm({
         ),
       },
     ],
-    [fields.length, form, remove],
+    [form, remove],
   );
+
+  const tableData = fields.map((field, index) => ({
+    ...field,
+    ...watchGoodReceiptLines?.[index],
+  }));
 
   return (
     <Form {...form}>
@@ -356,9 +365,8 @@ export default function PendingForm({
             <FormItem className="w-full">
               <FormControl>
                 <DataTable
-                  data={fields}
+                  data={tableData}
                   columns={columns}
-                  showFooter
                   renderFooter={() => {
                     const total = getTotalAmountTableFooter(footerValues);
                     return (

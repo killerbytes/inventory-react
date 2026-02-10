@@ -1,27 +1,16 @@
-import {
-  createProductCombinationSlice,
-  ProductCombinationState,
-} from "./productCombinationSlice";
-import { createGoodReceiptSlice, GoodRecieptState } from "./goodReceiptSlice";
-import { createSalesOrderSlice, SalesOrderState } from "./salesOrderSlice";
-import { createSupplierSlice, SupplierState } from "./supplierSlice";
-import { createCustomerSlice, CustomerState } from "./customerSlice";
-import { CategoryState, createCategorySlice } from "./categorySlice";
-import { createProductSlice, ProductState } from "./productSlice";
-import { AuthState, createAuthSlice } from "./authSlice";
+import { createProductCombinationSlice } from "./productCombinationSlice";
+import { createGoodReceiptSlice } from "./goodReceiptSlice";
+import { createSalesOrderSlice } from "./salesOrderSlice";
+import { createSupplierSlice } from "./supplierSlice";
+import { createCustomerSlice } from "./customerSlice";
+import { createCategorySlice } from "./categorySlice";
+import { createProductSlice } from "./productSlice";
 import { immer } from "zustand/middleware/immer";
+import { createAuthSlice } from "./authSlice";
+import { StoreState } from "./store.types";
 import { create } from "zustand";
 
-export const useStore = create<
-  AuthState &
-    SupplierState &
-    CategoryState &
-    CustomerState &
-    GoodRecieptState &
-    ProductCombinationState &
-    ProductState &
-    SalesOrderState
->()(
+export const useStore = create<StoreState>()(
   immer((...a) => ({
     ...createAuthSlice(...a),
     ...createSupplierSlice(...a),

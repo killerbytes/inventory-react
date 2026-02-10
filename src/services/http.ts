@@ -1,11 +1,11 @@
 import { ROUTES } from "@/utils/definitions";
-import { ApiErrorResponse } from "@/types";
+import { ApiErrorResponse } from "@/schemas";
+import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
-import axios from "axios";
 
 const baseURL = import.meta.env.VITE_API_URL;
 
-const errorParser = (error) => {
+const errorParser = (error: AxiosError) => {
   if (axios.isAxiosError(error) && error.response) {
     throw error.response.data;
   }
@@ -123,7 +123,8 @@ export default class Http {
       });
       return res.data;
     } catch (error) {
-      errorParser(error);
+      const apiError = error as AxiosError;
+      errorParser(apiError);
     }
   };
   post = async (url: string, payload: object, options: object = {}) => {
@@ -135,7 +136,8 @@ export default class Http {
       const res = await this.axiosInstance.post(url, payload, config);
       return res.data;
     } catch (error) {
-      errorParser(error);
+      const apiError = error as AxiosError;
+      errorParser(apiError);
     }
   };
   patch = async (url: string, data: object) => {
@@ -146,7 +148,8 @@ export default class Http {
       const res = await this.axiosInstance.patch(url, data, config);
       return res.data;
     } catch (error) {
-      errorParser(error);
+      const apiError = error as AxiosError;
+      errorParser(apiError);
     }
   };
   delete = async (url: string) => {
@@ -157,7 +160,8 @@ export default class Http {
       const res = await this.axiosInstance.delete(url, config);
       return res.data;
     } catch (error) {
-      errorParser(error);
+      const apiError = error as AxiosError;
+      errorParser(apiError);
     }
   };
 }

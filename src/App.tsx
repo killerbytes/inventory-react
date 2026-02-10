@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router";
 import Popular from "./pages/Reports/Popular";
 import NoSales from "./pages/Reports/NoSales";
 import { ROUTES } from "./utils/definitions";
@@ -9,8 +9,7 @@ import NotFound from "./pages/NotFound";
 import { lazy, Suspense } from "react";
 import Test from "./pages/Test";
 
-const Login = lazy(() => import("./pages/Login"));
-const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/LoginForm"));
 const Suppliers = lazy(() => import("./pages/Suppliers"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Categories = lazy(() => import("./pages/Categories"));
@@ -30,7 +29,7 @@ const SalesOrders = lazy(() => import("./pages/SalesOrders"));
 const InvoiceDetails = lazy(() => import("./pages/Invoices/Details"));
 const Invoices = lazy(() => import("./pages/Invoices"));
 const Payments = lazy(() => import("./pages/Payments"));
-const PriceHistory = lazy(() => import("./pages/Inventory/PriceHistory"));
+const PriceHistory = lazy(() => import("./pages/Inventory/PriceHistoryPage"));
 const Reorders = lazy(() => import("./pages/Inventory/Reorders"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ProductSearch = lazy(() => import("./pages/ProductSearch"));

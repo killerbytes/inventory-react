@@ -1,5 +1,6 @@
+import { StoreState } from "./store.types";
 import { StateCreator } from "zustand";
-import { User } from "@/types";
+import { User } from "@/schemas";
 
 export type AuthState = {
   authState: {
@@ -10,7 +11,7 @@ export type AuthState = {
 };
 
 export const createAuthSlice: StateCreator<
-  AuthState,
+  StoreState,
   [["zustand/immer", never]],
   [],
   AuthState

@@ -6,7 +6,7 @@ import {
 } from "@/utils/definitions";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import { ColumnDef } from "@tanstack/react-table";
-import { InventoryMovement } from "@/types";
+import { InventoryMovement } from "@/schemas";
 import { DataTable } from "./DataTable";
 import ColorBadge from "./ColorBadge";
 import { Link } from "react-router";
@@ -139,7 +139,6 @@ export default function Movements({ data }: { data: InventoryMovement[] }) {
       <DataTable
         data={data}
         columns={columns}
-        showFooter={false}
         meta={{
           disabledRow: {
             "combination.deletedAt": true,

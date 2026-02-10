@@ -1,12 +1,12 @@
 import {
   ApiErrorResponse,
-  GoodReceipt,
   Invoice,
   invoiceForm,
+  invoiceFormSchema,
   InvoiceGoodReceipt,
   InvoiceLine,
   Supplier,
-} from "@/types";
+} from "@/schemas";
 import {
   Form,
   FormControl,
@@ -34,7 +34,6 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import { invoiceFormSchema } from "@/schemas";
 import useToggle from "@/hooks/useToggle";
 import Modal from "@/components/Modal";
 import { Plus } from "lucide-react";
@@ -42,7 +41,6 @@ import { addWeeks } from "date-fns";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
 import React from "react";
-import { z } from "zod";
 
 export default function InvoiceModal({
   data,
@@ -81,6 +79,13 @@ export default function InvoiceModal({
     keyName: "fieldId",
   });
 
+  const watchGr = form.watch("gr");
+
+  const tableData = fields.map((field, index) => ({
+    ...field,
+    ...watchGr?.[index],
+  }));
+
   React.useEffect(() => {
     const getData = async () => {
       const res = await invoiceServices.get(Number(data.id));
@@ -112,7 +117,7 @@ export default function InvoiceModal({
     form.setValue("gr", selected);
   };
 
-  const onSubmit = async (values: z.infer<typeof invoiceFormSchema>) => {
+  const onSubmit = async (values: invoiceForm) => {
     try {
       const { gr, ...rest } = values;
       const invoiceLines = gr.map((item) => ({
@@ -149,7 +154,7 @@ export default function InvoiceModal({
       }
     }
   };
-  const columns: ColumnDef<GoodReceipt>[] = React.useMemo(
+  const columns: ColumnDef<InvoiceGoodReceipt>[] = React.useMemo(
     () => [
       {
         accessorKey: "referenceNo",
@@ -304,17 +309,16 @@ export default function InvoiceModal({
                     autoFocus={false}
                   >
                     <DataTable
-                      data={fields}
+                      data={tableData}
                       columns={columns}
-                      showFooter
-                      renderFooter={(rows: GoodReceipt[]) => {
+                      renderFooter={(rows: InvoiceGoodReceipt[]) => {
                         return (
                           <TableRow className="font-bold">
                             <TableCell>Total Amount</TableCell>
                             <TableCell colSpan={10} className="text-right">
                               {formatCurrency(
                                 rows?.reduce(
-                                  (acc: number, item: GoodReceipt) =>
+                                  (acc: number, item: InvoiceGoodReceipt) =>
                                     acc +
                                     Number(item.totalAmount) -
                                     Number(item.totalReturnAmount),

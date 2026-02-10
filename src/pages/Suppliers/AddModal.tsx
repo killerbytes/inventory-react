@@ -6,14 +6,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ApiError, ApiErrorResponse, Supplier } from "@/types";
+import {
+  ApiError,
+  ApiErrorResponse,
+  Supplier,
+  supplierSchema,
+} from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supplierServices } from "@/services";
 import { ERROR } from "@/utils/definitions";
-import { supplierSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { useStore } from "@/stores";

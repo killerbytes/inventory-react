@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter, CardTitle } from "./ui/card";
 import { formatCurrency } from "@/utils/formatters";
-import { Summary } from "@/types";
+import { Summary } from "@/schemas";
 
 export default function SectionCards({
   data,

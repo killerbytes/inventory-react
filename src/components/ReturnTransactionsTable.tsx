@@ -6,7 +6,7 @@ import {
 } from "./ui/accordion";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { ReturnItem, ReturnTransaction } from "@/types";
+import { ReturnItem, ReturnTransaction } from "@/schemas";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCell, TableRow } from "./ui/table";
 import { cx } from "class-variance-authority";
@@ -145,7 +145,6 @@ export default function ReturnTransactionsTable({
                     <DataTable
                       data={returns}
                       columns={columns}
-                      showFooter
                       renderFooter={(data) => {
                         const total = data.reduce(
                           (acc, item) => (acc += Number(item.totalAmount)),
@@ -172,7 +171,6 @@ export default function ReturnTransactionsTable({
                     <DataTable
                       data={exchanges}
                       columns={columns}
-                      showFooter
                       renderFooter={(data) => {
                         const total = data.reduce(
                           (acc, item) => (acc += Number(item.totalAmount)),

@@ -1,6 +1,5 @@
-import { ProductCommandSelectedItemProps } from "@/components/ProductCommand";
-import { CategorizedProductList } from "@/types";
-import { flattenedProduct } from "@/lib/utils";
+import { CategorizedProductList } from "@/schemas";
+import { StoreState } from "./store.types";
 import { StateCreator } from "zustand";
 
 export type ProductState = {
@@ -8,13 +7,12 @@ export type ProductState = {
     hasLoaded: boolean;
     invalidate: () => void;
     products: CategorizedProductList[];
-    flatProducts: ProductCommandSelectedItemProps[];
     setProducts: (products: CategorizedProductList[]) => void;
   };
 };
 
 export const createProductSlice: StateCreator<
-  ProductState,
+  StoreState,
   [["zustand/immer", never]],
   [],
   ProductState
@@ -26,11 +24,9 @@ export const createProductSlice: StateCreator<
         productState.hasLoaded = false;
       }),
     products: [],
-    flatProducts: [],
     setProducts: (products: CategorizedProductList[]) =>
       set(({ productState }) => {
         productState.products = products;
-        productState.flatProducts = flattenedProduct(products);
         productState.hasLoaded = true;
       }),
   },

@@ -5,7 +5,7 @@ import React from "react";
 
 interface NumberInputProps {
   tabIndex?: number;
-  value: number | null | undefined;
+  value?: number | null | undefined;
   onChange: (value: number) => void;
   type?: "number" | "currency";
   decimalScale?: number;

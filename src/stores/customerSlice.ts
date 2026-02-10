@@ -1,5 +1,6 @@
+import { StoreState } from "./store.types";
 import { StateCreator } from "zustand";
-import { Customer } from "@/types";
+import { Customer } from "@/schemas";
 
 export type CustomerState = {
   customerState: {
@@ -11,7 +12,7 @@ export type CustomerState = {
 };
 
 export const createCustomerSlice: StateCreator<
-  CustomerState,
+  StoreState,
   [["zustand/immer", never]],
   [],
   CustomerState

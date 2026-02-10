@@ -19,20 +19,19 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { ApiErrorResponse, Login, loginSchema } from "@/schemas";
 import { useNavigate, useSearchParams } from "react-router";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ApiErrorResponse } from "@/types";
 import { authServices } from "@/services";
-import { loginSchema } from "@/schemas";
 import { cn } from "@/lib/utils";
 
-export default function Login() {
+export default function LoginForm() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const form = useForm<Login>({
     resolver: zodResolver(loginSchema),
   });
   const redirect = params.get("callbackUrl") || "/";

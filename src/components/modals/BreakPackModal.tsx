@@ -1,4 +1,11 @@
 import {
+  ApiErrorResponse,
+  BreakPack,
+  breakPackSchema,
+  ProductCombinations,
+  VariantTypes,
+} from "@/schemas";
+import {
   AlertCircleIcon,
   Equal,
   Loader2Icon,
@@ -6,12 +13,6 @@ import {
   PackageOpen,
   PackagePlus,
 } from "lucide-react";
-import {
-  ApiErrorResponse,
-  BreakPack,
-  ProductCombinations,
-  VariantTypes,
-} from "@/types";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { productCombinationServices, productServices } from "@/services";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
@@ -19,7 +20,6 @@ import { useController, useForm } from "react-hook-form";
 import { ERROR, UNIT_COLOR } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "../ui/dialog";
-import { breakPackSchema } from "@/schemas";
 import { SelectItem } from "../ui/select";
 import NumberInput from "../NumberInput";
 import ColorBadge from "../ColorBadge";

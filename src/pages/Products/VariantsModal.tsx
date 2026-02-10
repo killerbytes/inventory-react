@@ -1,12 +1,11 @@
 import VariantCopyTemplateModal from "@/components/modals/VariantCopyTemplateModal";
 import VariantTemplatePickerDialog from "@/components/VariantTemplatePickerDialog";
+import { ApiErrorResponse, VariantTypes, variantTypesSchema } from "@/schemas";
 import VariantTypesForm from "@/components/forms/VariantTypesForm";
-import { ApiErrorResponse, VariantTypes } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, Save, Search } from "lucide-react";
 import { variantTypesServices } from "@/services";
 import { Button } from "@/components/ui/button";
-import { variantTypesSchema } from "@/schemas";
 import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
 import { ERROR } from "@/utils/definitions";

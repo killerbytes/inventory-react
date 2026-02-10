@@ -1,4 +1,4 @@
-import { Login, User } from "@/types";
+import { ChangePassword, Login, User } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 
@@ -16,7 +16,7 @@ export default class UserService extends BaseService<User> {
     const response = await this.http.get(`${this.url}/me`);
     return response;
   };
-  changePassword = async (data: User) => {
+  changePassword = async (data: ChangePassword) => {
     const response = await this.http.post(`${this.url}/changePassword`, data);
     return response;
   };

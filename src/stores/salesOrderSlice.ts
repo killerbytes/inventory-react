@@ -1,3 +1,4 @@
+import { StoreState } from "./store.types";
 import { StateCreator } from "zustand";
 
 export interface SalesOrderState {
@@ -8,7 +9,7 @@ export interface SalesOrderState {
 }
 
 export const createSalesOrderSlice: StateCreator<
-  SalesOrderState,
+  StoreState,
   [["zustand/immer", never]],
   [],
   SalesOrderState

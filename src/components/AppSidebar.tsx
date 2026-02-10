@@ -1,24 +1,23 @@
 import {
+  Annoyed,
+  BadgeDollarSign,
+  Banknote,
   BanknoteArrowDown,
   BanknoteArrowUp,
-  Home,
-  ClipboardList,
-  ChevronUp,
-  Users,
-  ShoppingCart,
-  Boxes,
   BookUser,
-  Container,
-  PackageOpen,
-  Diff,
-  Banknote,
-  CreditCard,
+  Boxes,
   ChartCandlestick,
+  ChevronUp,
+  ClipboardList,
+  Container,
+  CreditCard,
+  Diff,
   Gauge,
+  Home,
+  PackageOpen,
+  ShoppingCart,
   TrendingUp,
-  TrendingDown,
-  BadgeDollarSign,
-  Annoyed,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,7 +42,7 @@ import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
 import { productServices } from "@/services";
-import { ApiErrorResponse } from "@/types";
+import { ApiErrorResponse } from "@/schemas";
 import useToggle from "@/hooks/useToggle";
 import { Button } from "./ui/button";
 import { useStore } from "@/stores";

@@ -1,4 +1,4 @@
-import { Category } from "@/types";
+import { Category } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 
