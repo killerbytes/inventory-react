@@ -46,10 +46,15 @@ const MemoizedCommandItem = memo(
           <HighlightMatch text={item.name} query={search} />
         </div>
 
-        <div className="ml-auto flex gap-2">
-          <Badge>{Number(item.inventory.quantity)}</Badge>
-          <span className="font-bold">{formatCurrency(item.price)}</span>
-        </div>
+        <Badge
+          className="ml-auto"
+          variant={item.inventory.quantity === 0 ? "destructive" : "default"}
+        >
+          {Number(item.inventory.quantity)}
+        </Badge>
+        <span className="w-1/4 text-right font-bold">
+          {formatCurrency(item.price)}
+        </span>
       </CommandItem>
     );
   },
