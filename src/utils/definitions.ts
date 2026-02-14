@@ -117,6 +117,7 @@ export const ORDER_STATUS = {
   RECEIVED: "RECEIVED",
   COMPLETED: "COMPLETED",
   CANCELLED: "CANCELLED",
+  VOID: "VOID",
 };
 export const ORDER_STATUS_OPTIONS = Object.values(ORDER_STATUS).map(
   (value) => ({

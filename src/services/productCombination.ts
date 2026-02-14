@@ -1,5 +1,5 @@
 import {
-  BreakPack,
+  BreakPackInput,
   ProductCombinations,
   ProductCombinationUpdate,
   StockAdjustment,
@@ -27,7 +27,7 @@ export default class ProductCombinationService extends BaseService<ProductCombin
     return response;
   };
 
-  breakPack = async (payload: BreakPack) => {
+  breakPack = async (payload: BreakPackInput) => {
     const response = await this.http.post(`${this.url}/breakPack`, payload);
     return response;
   };

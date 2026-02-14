@@ -9,6 +9,14 @@ import {
   useWatch,
 } from "react-hook-form";
 import {
+  ApiErrorResponse,
+  ExchangeItemInput,
+  returnBaseSchema,
+  ReturnInput,
+  ReturnItem,
+  ReturnItemInput,
+} from "@/schemas";
+import {
   Form,
   FormControl,
   FormField,
@@ -16,13 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import {
-  ApiErrorResponse,
-  ExchangeItem,
-  Return,
-  ReturnItem,
-  returnSchema,
-} from "@/schemas";
 import { goodReceiptServices, salesOrderServices } from "@/services";
 import ProductLookupInput from "../forms/ProductLookupInput";
 import LineColumn from "../forms/OrderItemForm/LineColumn";
@@ -51,12 +52,12 @@ export default function ReturnExchangeModal({
   salesOrder = false,
 }: {
   onClose: () => void;
-  returns: ReturnItem[] | undefined;
+  returns: ReturnItemInput[] | undefined;
   referenceId: number;
   salesOrder?: boolean;
 }) {
-  const form = useForm<Return>({
-    resolver: zodResolver(returnSchema),
+  const form = useForm<ReturnInput>({
+    resolver: zodResolver(returnBaseSchema),
     defaultValues: {
       returns,
       exchanges: [],
@@ -76,7 +77,7 @@ export default function ReturnExchangeModal({
   const fieldReturns = useWatch({ control: form.control, name: "returns" });
   const fieldExchanges = useWatch({ control: form.control, name: "exchanges" });
 
-  const handleReturn = async (values: Return) => {
+  const handleReturn = async (values: ReturnInput) => {
     try {
       const returns = values.returns.map((i) => ({
         combinationId: i.combinationId,
@@ -102,7 +103,7 @@ export default function ReturnExchangeModal({
     }
   };
 
-  const returnColumns = React.useMemo<ColumnDef<ReturnItem>[]>(
+  const returnColumns = React.useMemo<ColumnDef<ReturnItemInput>[]>(
     () => [
       {
         header: () => "Quantity",
@@ -191,7 +192,7 @@ export default function ReturnExchangeModal({
     [form.control],
   );
 
-  const exchangeColumns = React.useMemo<ColumnDef<ExchangeItem>[]>(
+  const exchangeColumns = React.useMemo<ColumnDef<ExchangeItemInput>[]>(
     () => [
       {
         accessorKey: "index",
@@ -251,9 +252,9 @@ export default function ReturnExchangeModal({
               {(value) => {
                 console.log(value);
                 return (
-                  value.combinations?.unit && (
+                  value.combination?.unit && (
                     <ColorBadge colorMap={UNIT_COLOR}>
-                      {value.combinations?.unit}
+                      {value.combination?.unit}
                     </ColorBadge>
                   )
                 );
@@ -296,7 +297,7 @@ export default function ReturnExchangeModal({
                             );
 
                             form.setValue(
-                              `exchanges.${row.index}.combinations`,
+                              `exchanges.${row.index}.combination`,
                               value,
                             );
 
@@ -453,7 +454,9 @@ export default function ReturnExchangeModal({
                       data={exchange.fields}
                       columns={exchangeColumns}
                       renderFooter={() => {
-                        const total = getTotalAmountTableFooter(fieldExchanges);
+                        const total = getTotalAmountTableFooter(
+                          fieldExchanges || [],
+                        );
 
                         return (
                           <>

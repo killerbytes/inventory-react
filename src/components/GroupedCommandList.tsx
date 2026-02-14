@@ -6,14 +6,14 @@ import HighlightMatch from "./HighlightMatch";
 import ColorBadge from "./ColorBadge";
 import { Badge } from "./ui/badge";
 
-interface BaseProps {
+export type BaseProps = {
   group?: string | null;
   name: string;
   price: number;
   unit: string;
   inventory: { quantity: number };
   id: number;
-}
+};
 
 const MemoizedCommandItem = memo(
   <T extends BaseProps>({
@@ -84,7 +84,7 @@ export default function GroupedCommandList<T extends BaseProps>({
       const score = getScore(item.name, search);
       if (score <= 0) continue;
 
-      const key = item.group ?? "Others";
+      const key = "Others";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(item);
     }

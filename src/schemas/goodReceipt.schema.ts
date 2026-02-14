@@ -2,7 +2,7 @@ import {
   productCombinationBaseSchema,
   productCombinationsSchema,
 } from "./productCombination.schema";
-import { returnTransactionSchema } from "./returnItem.schema";
+import { returnTransactionBaseSchema } from "./returnItem.schema";
 import { ORDER_STATUS } from "@/utils/definitions";
 import { statusHistorySchema } from "./others";
 import z from "zod";
@@ -79,7 +79,7 @@ export const goodReceiptSchema = goodReceiptBaseSchema
       message: "At least one product is required.",
     }),
     goodReceiptStatusHistory: z.array(statusHistorySchema),
-    returnTransactions: z.array(returnTransactionSchema).nullish(),
+    returnTransactions: z.array(returnTransactionBaseSchema).nullish(),
     totalReturnAmount: z.coerce.number().nullish(),
   })
   .superRefine((data, ctx) => {

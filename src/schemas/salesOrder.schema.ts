@@ -1,6 +1,6 @@
 import { productCombinationBaseSchema } from "./productCombination.schema";
 import { MODE_OF_PAYMENT, ORDER_STATUS } from "../utils/definitions";
-import { returnTransactionSchema } from "./returnItem.schema";
+import { returnTransactionBaseSchema } from "./returnItem.schema";
 import { statusHistorySchema } from "./others";
 import * as z from "zod";
 
@@ -80,7 +80,7 @@ export const salesOrderSchema = salesOrderBaseSchema
     totalAmount: z.string().optional(),
     customer: z.any(),
     cancellationReason: z.string().nullish(),
-    returnTransactions: z.array(returnTransactionSchema),
+    returnTransactions: z.array(returnTransactionBaseSchema),
     totalReturnAmount: z.string().optional(),
     totalExchangeAmount: z.string().optional(),
     salesOrderStatusHistory: z.array(statusHistorySchema),

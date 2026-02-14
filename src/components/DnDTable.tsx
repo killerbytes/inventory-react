@@ -16,21 +16,20 @@ import {
 import { cx } from "class-variance-authority";
 import * as React from "react";
 
-// needed for table body level scope DnD setup
 import {
   DndContext,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
   closestCenter,
-  type DragEndEvent,
-  type UniqueIdentifier,
   useSensor,
   useSensors,
+  type DragEndEvent,
+  type UniqueIdentifier,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
+  arrayMove,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
@@ -40,9 +39,12 @@ import { GripHorizontal } from "lucide-react";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "./ui/button";
 
+type Props = {
+  id: number;
+};
 const RowDragHandleCell = ({ rowId }: { rowId: string }) => {
   const { attributes, listeners } = useSortable({
-    id: rowId,
+    id: String(rowId),
   });
   return (
     <Button {...attributes} {...listeners} variant="ghost" size="icon">
@@ -51,12 +53,12 @@ const RowDragHandleCell = ({ rowId }: { rowId: string }) => {
   );
 };
 
-const DraggableRow = ({ row }: { row: Row<T> }) => {
+const DraggableRow = <T extends Props>({ row }: { row: Row<T> }) => {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.original.id,
+    id: String(row.original.id),
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform), //let dnd-kit do its thing
     transition: transition,
     opacity: isDragging ? 0.8 : 1,
@@ -78,8 +80,7 @@ const DraggableRow = ({ row }: { row: Row<T> }) => {
   );
 };
 
-// Table Component
-export default function DnDTable<T>({
+export default function DnDTable<T extends Props>({
   className,
   tableClassname,
   columns: _columns,
@@ -94,7 +95,6 @@ export default function DnDTable<T>({
 }) {
   const columns = React.useMemo<ColumnDef<T>[]>(
     () => [
-      // Create a dedicated drag handle column. Alternatively, you could just set up dnd events on the rows themselves.
       {
         id: "drag-handle",
         header: "Move",
@@ -105,11 +105,11 @@ export default function DnDTable<T>({
       },
       ..._columns,
     ],
-    [],
+    [_columns],
   );
   const [data, setData] = React.useState(_data);
   const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => data?.map(({ id }) => id),
+    () => data?.map(({ id }) => String(id)),
     [data],
   );
 
@@ -117,21 +117,16 @@ export default function DnDTable<T>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getRowId: (row) => row.id, //required because row indexes will change
-    // debugTable: true,
-    // debugHeaders: true,
-    // debugColumns: true,
+    getRowId: (row) => String(row.id),
   });
 
-  // reorder rows after drag & drop
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
       setData((data) => {
         const oldIndex = dataIds.indexOf(active.id);
         const newIndex = dataIds.indexOf(over.id);
-        // onSubmit(data);
-        return arrayMove(data, oldIndex, newIndex); //this is just a splice util
+        return arrayMove(data, oldIndex, newIndex);
       });
     }
   }
@@ -147,7 +142,6 @@ export default function DnDTable<T>({
   }, [data, onSubmit]);
 
   return (
-    // NOTE: This provider creates div elements, so don't nest inside of <table> elements
     <DndContext
       collisionDetection={closestCenter}
       modifiers={[restrictToVerticalAxis]}
@@ -167,7 +161,7 @@ export default function DnDTable<T>({
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id} className={header.className}>
+                      <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
                           : flexRender(

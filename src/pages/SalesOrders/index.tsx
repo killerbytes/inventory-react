@@ -267,7 +267,7 @@ export default function SalesOrders() {
                 columns={columns}
                 meta={{
                   disabledRow: {
-                    status: ORDER_STATUS.CANCELLED,
+                    status: ORDER_STATUS.VOID,
                   },
                 }}
                 onRowClick={(item: SalesOrder) => {

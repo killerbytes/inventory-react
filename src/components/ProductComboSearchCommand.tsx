@@ -5,13 +5,13 @@ import {
   CommandInput,
   CommandList,
 } from "@/components/ui/command";
-import GroupedCommandList from "./GroupedCommandList";
+import GroupedCommandList, { BaseProps } from "./GroupedCommandList";
 import useDebounce from "@/hooks/useDebounce";
 import { Button } from "./ui/button";
 import * as React from "react";
 import Loader from "./Loader";
 
-function ProductComboSearchCommandComponent<T>({
+function ProductComboSearchCommandComponent<T extends BaseProps>({
   onSelect,
   onSearch,
   children,

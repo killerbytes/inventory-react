@@ -1,7 +1,7 @@
 import { productCombinationBaseSchema } from "./productCombination.schema";
 import z from "zod";
 
-export const returnItemSchema = z.object({
+export const returnItemBaseSchema = z.object({
   combinationId: z.number(),
   combination: productCombinationBaseSchema.nullish(),
   returnQuantity: z.coerce.number(),
@@ -14,28 +14,80 @@ export const returnItemSchema = z.object({
   type: z.string().optional(),
 });
 
-export const returnTransactionSchema = z.object({
+export const returnTransactionBaseSchema = z.object({
   id: z.number().optional(),
   totalReturnAmount: z.coerce.number(),
   totalExchangeAmount: z.coerce.number(),
   sourceType: z.string(),
   updatedAt: z.string(),
-  returnItems: z.array(returnItemSchema),
+  returnItems: z.array(returnItemBaseSchema),
 });
 
-export const exchangeItemSchema = returnItemSchema.omit({
+export const exchangeItemBaseSchema = returnItemBaseSchema.omit({
   returnQuantity: true,
   totalAmount: true,
   unit: true,
 });
 
-export const returnSchema = z.object({
-  returns: z.array(returnItemSchema),
-  exchanges: z.array(exchangeItemSchema).optional(),
+export const returnBaseSchema = z.object({
+  returns: z.array(returnItemBaseSchema),
+  exchanges: z.array(exchangeItemBaseSchema).optional(),
   reason: z.string(),
 });
 
-export type ReturnItem = z.infer<typeof returnItemSchema>;
-export type ReturnTransaction = z.infer<typeof returnTransactionSchema>;
-export type ExchangeItem = z.infer<typeof exchangeItemSchema>;
-export type Return = z.infer<typeof returnSchema>;
+export type ReturnItemInput = z.infer<typeof returnItemBaseSchema>;
+export type ExchangeItemInput = z.infer<typeof exchangeItemBaseSchema>;
+export type ReturnTransactionInput = z.infer<
+  typeof returnTransactionBaseSchema
+>;
+export type ReturnInput = z.infer<typeof returnBaseSchema>;
+
+export type ReturnItem = Omit<ReturnItemInput, "combination"> & {
+  combinationSnapshot: ReturnItemInput["combination"];
+};
+export type ExchangeItem = Omit<ExchangeItemInput, "combination"> & {
+  combinationSnapshot: ExchangeItemInput["combination"];
+};
+export type ReturnTransaction = Omit<ReturnTransactionInput, "returnItems"> & {
+  returnItems: ReturnItem[];
+};
+export type Return = {
+  returns: ReturnItem[];
+  exchanges: ExchangeItem[];
+  reason: string;
+};
+
+export function mapReturnItemToDomain(input: ReturnItemInput): ReturnItem {
+  const { combination, ...rest } = input;
+
+  return {
+    ...rest,
+    combinationSnapshot: combination,
+  };
+}
+export function mapExchangeItemToDomain(
+  input: ExchangeItemInput,
+): ExchangeItem {
+  const { combination, ...rest } = input;
+
+  return {
+    ...rest,
+    combinationSnapshot: combination,
+  };
+}
+export function mapReturnTransactionToDomain(
+  input: ReturnTransactionInput,
+): ReturnTransaction {
+  return {
+    ...input,
+    returnItems: input.returnItems.map(mapReturnItemToDomain),
+  };
+}
+
+export function mapReturnToDomain(input: ReturnInput): Return {
+  return {
+    reason: input.reason,
+    returns: input.returns.map(mapReturnItemToDomain),
+    exchanges: input.exchanges?.map(mapExchangeItemToDomain) || [],
+  };
+}

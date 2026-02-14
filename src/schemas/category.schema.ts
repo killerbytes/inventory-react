@@ -1,7 +1,6 @@
 import z from "zod";
 
 export const categoryBaseSchema = z.object({
-  id: z.number().nullish(),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
@@ -10,8 +9,13 @@ export const categoryBaseSchema = z.object({
   order: z.number().nullish(),
 });
 
-export const categorySchema = categoryBaseSchema.extend({
-  subCategories: z.array(categoryBaseSchema).nullish(),
-});
+export type CategoryInput = z.infer<typeof categoryBaseSchema>;
+export type Category = z.infer<typeof categoryBaseSchema> & {
+  id: number;
+  subCategories?: Category[];
+};
 
-export type Category = z.infer<typeof categorySchema>;
+export const categorySchema: z.ZodType<Category> = categoryBaseSchema.extend({
+  id: z.number(),
+  subCategories: z.lazy(() => z.array(categorySchema)).optional(),
+});

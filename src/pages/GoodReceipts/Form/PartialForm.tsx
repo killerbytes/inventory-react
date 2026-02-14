@@ -2,7 +2,7 @@ import {
   GoodReceipt,
   GoodReceiptItem,
   GoodReceiptUpdate,
-  ReturnItem,
+  ReturnItemInput,
   ReturnTransaction,
 } from "@/schemas";
 import {
@@ -47,7 +47,7 @@ export default function PartialForm({
     name: "goodReceiptLines",
   });
   const [toggle, handleToggle] = useToggle({ supplierReturnsModal: false });
-  const [returns, setReturns] = React.useState<ReturnItem[]>([]);
+  const [returns, setReturns] = React.useState<ReturnItemInput[]>([]);
   React.useState<ReturnTransaction[]>();
   const {
     goodReceiptState: { returnEnabled, setReturnEnabled },
@@ -246,8 +246,9 @@ export default function PartialForm({
               setReturns(
                 selectedItems.map((i) => ({
                   ...i,
+                  combination: i.combinations,
                   returnQuantity: i.quantity,
-                })) as ReturnItem[],
+                })) as ReturnItemInput[],
               );
             }}
             renderFooter={(data) => {

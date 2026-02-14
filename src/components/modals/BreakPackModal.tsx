@@ -1,7 +1,7 @@
 import {
   ApiErrorResponse,
-  BreakPack,
-  breakPackSchema,
+  breakPackBaseSchema,
+  BreakPackInput,
   ProductCombinations,
   VariantTypes,
 } from "@/schemas";
@@ -45,8 +45,8 @@ export default function BreakPackModal({
   const [selected, setSelected] = React.useState<ProductCombinations>();
   const [loading, setLoading] = React.useState(false);
   const { productCombinationState } = useStore();
-  const form = useForm<BreakPack>({
-    resolver: zodResolver(breakPackSchema),
+  const form = useForm<BreakPackInput>({
+    resolver: zodResolver(breakPackBaseSchema),
     defaultValues: {
       fromCombinationId: combination.id,
       quantity: 1,
@@ -123,7 +123,7 @@ export default function BreakPackModal({
     }
   }, [combination, getData]);
 
-  const handleBreakPack = async (values: BreakPack) => {
+  const handleBreakPack = async (values: BreakPackInput) => {
     try {
       setLoading(true);
       await productCombinationServices.breakPack(values);
@@ -135,7 +135,7 @@ export default function BreakPackModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof BreakPack, {
+            form.setError(err.field as keyof BreakPackInput, {
               type: "server",
               message: err.message,
             });
