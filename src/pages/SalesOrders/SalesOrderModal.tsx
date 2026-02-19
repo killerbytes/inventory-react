@@ -792,7 +792,7 @@ export default function SalesOrderModal({
         </ConfirmDialog>
       </DialogFooter>
 
-      {JSON.stringify(tableData, null, 2)}
+      {/* {JSON.stringify(tableData, null, 2)} */}
     </Modal>
   );
 }
