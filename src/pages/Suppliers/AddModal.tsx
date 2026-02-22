@@ -9,8 +9,8 @@ import {
 import {
   ApiError,
   ApiErrorResponse,
-  Supplier,
-  supplierSchema,
+  SupplierInput,
+  supplierBaseSchema,
 } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -33,11 +33,11 @@ export default function AddModal({
   cb: () => void;
 }) {
   const { supplierState } = useStore();
-  const form = useForm<Supplier>({
-    resolver: zodResolver(supplierSchema),
+  const form = useForm<SupplierInput>({
+    resolver: zodResolver(supplierBaseSchema),
   });
 
-  const onSubmit = async (values: Supplier) => {
+  const onSubmit = async (values: SupplierInput) => {
     try {
       const { name, address, contact, phone, email } = values;
       await supplierServices.create({
@@ -56,8 +56,7 @@ export default function AddModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err: ApiError) => {
           if (err.field) {
-            console.log(err.field);
-            form.setError(err.field as keyof Supplier, {
+            form.setError(err.field as keyof SupplierInput, {
               type: "server",
               message: err.message,
             });
