@@ -1,10 +1,8 @@
 import {
   ApiErrorResponse,
-  Invoice,
-  invoiceForm,
+  InvoiceForm,
   invoiceFormSchema,
   InvoiceGoodReceipt,
-  InvoiceLine,
   Supplier,
 } from "@/schemas";
 import {
@@ -43,11 +41,9 @@ import { toast } from "sonner";
 import React from "react";
 
 export default function InvoiceModal({
-  data,
   isOpen,
   onClose,
 }: {
-  data: Invoice;
   isOpen: boolean;
   onClose: (boolean: boolean) => void;
 }) {
@@ -58,7 +54,7 @@ export default function InvoiceModal({
     goodReceiptPickerModal: false,
   });
 
-  const form = useForm({
+  const form = useForm<InvoiceForm>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
       invoiceNumber: "",
@@ -88,22 +84,6 @@ export default function InvoiceModal({
 
   React.useEffect(() => {
     const getData = async () => {
-      const res = await invoiceServices.get(Number(data.id));
-      const gr = res.invoiceLines.map((i: InvoiceLine) => ({
-        ...i.goodReceipt,
-      }));
-      form.reset({
-        ...res,
-        gr,
-      });
-    };
-    if (data) {
-      getData();
-    }
-  }, [data, form]);
-
-  React.useEffect(() => {
-    const getData = async () => {
       const data: Supplier[] = await supplierServices.list();
       setSuppliers(data);
     };
@@ -117,7 +97,7 @@ export default function InvoiceModal({
     form.setValue("gr", selected);
   };
 
-  const onSubmit = async (values: invoiceForm) => {
+  const onSubmit = async (values: InvoiceForm) => {
     try {
       const { gr, ...rest } = values;
       const invoiceLines = gr.map((item) => ({
@@ -143,7 +123,7 @@ export default function InvoiceModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof invoiceForm, {
+            form.setError(err.field as keyof InvoiceForm, {
               type: "server",
               message: err.message,
             });

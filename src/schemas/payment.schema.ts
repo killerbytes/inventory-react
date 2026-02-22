@@ -21,5 +21,5 @@ export const paymentSchema = paymentBaseSchema.extend({
     }),
 });
 
-export type PaymentBase = z.infer<typeof paymentBaseSchema>;
+export type PaymentInput = z.infer<typeof paymentBaseSchema>;
 export type Payment = z.infer<typeof paymentSchema>;

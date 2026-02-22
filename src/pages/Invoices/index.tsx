@@ -34,7 +34,6 @@ export default function Invoices() {
   const [toggle, handleToggle] = useToggle({
     addInvoiceModal: false,
   });
-  const [selected, setSelected] = React.useState<Invoice>();
   const [data, setData] =
     React.useState<PaginatedResponse<Invoice>>(PAGINATION_RESPONSE);
 
@@ -190,7 +189,6 @@ export default function Invoices() {
           <Button
             className="shadow-sm"
             onClick={() => {
-              setSelected(undefined);
               handleToggle({ addInvoiceModal: true });
             }}
           >
@@ -223,7 +221,6 @@ export default function Invoices() {
                   handleToggle({
                     addInvoiceModal: true,
                   });
-                  setSelected(item);
                 } else {
                   navigate(`${ROUTES.INVOICES}/${item.id}`);
                 }
@@ -256,7 +253,6 @@ export default function Invoices() {
       </CardContent>
       {toggle.addInvoiceModal && (
         <InvoiceModal
-          data={selected as Invoice}
           isOpen={true}
           onClose={(reload) => {
             handleToggle({ addInvoiceModal: false });

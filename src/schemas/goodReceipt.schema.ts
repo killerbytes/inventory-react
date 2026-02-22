@@ -113,3 +113,4 @@ export type GoodReceiptCreate = z.infer<typeof goodReceiptCreateSchema>;
 export type GoodReceiptUpdate = z.infer<typeof goodReceiptUpdateSchema>;
 export type GoodReceiptItem = z.infer<typeof goodReceiptLineSchema>;
 export type SupplierHistory = z.infer<typeof supplierHistorySchema>;
+export type InvoiceGoodReceipt = z.infer<typeof invoiceGoodReceiptSchema>;
