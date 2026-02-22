@@ -15,9 +15,10 @@ import {
 
 import {
   ApiErrorResponse,
-  Product,
+  productBaseSchema,
   ProductCombinations,
-  productSchema,
+  ProductInput,
+  ProductWithCombinations,
   VariantTypes,
 } from "@/schemas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -65,9 +66,10 @@ export default function ProductEdit() {
     [],
   );
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
+  const [product, setProduct] = React.useState<ProductWithCombinations>();
   const navigate = useNavigate();
-  const form = useForm<Product>({
-    resolver: zodResolver(productSchema),
+  const form = useForm<ProductInput>({
+    resolver: zodResolver(productBaseSchema),
     defaultValues: {
       name: "",
     },
@@ -77,7 +79,7 @@ export default function ProductEdit() {
     combinationModal: false,
     createProductModal: false,
   });
-  async function onSubmit(values: Product) {
+  async function onSubmit(values: ProductInput) {
     try {
       setLoading(true);
       await productServices.update(Number(id), values);
@@ -89,7 +91,7 @@ export default function ProductEdit() {
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof Product, {
+            form.setError(err.field as keyof ProductInput, {
               type: "server",
               message: err.message,
             });
@@ -103,10 +105,13 @@ export default function ProductEdit() {
   const getData = React.useCallback(async () => {
     try {
       setLoading(true);
-      const product: Product = await productServices.get(Number(id));
-      const { combinations, variants, ...rest }: Product = product;
+      const product: ProductWithCombinations = await productServices.get(
+        Number(id),
+      );
+      const { combinations, variants, ...rest } = product;
       setCombinations(combinations ?? []);
       setVariants(variants ?? []);
+      setProduct(product);
 
       form.reset({
         ...rest,
@@ -377,9 +382,9 @@ export default function ProductEdit() {
         </Form>
       )}
       {/* {JSON.stringify(x)} */}
-      {toggle.combinationModal && (
+      {toggle.combinationModal && product && (
         <CombinationModal
-          product={form.getValues()}
+          product={product}
           isOpen={true}
           onSubmit={onSubmit}
           onClose={(shouldReload) => {

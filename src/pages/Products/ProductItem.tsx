@@ -1,5 +1,5 @@
+import { ProductCombinations, ProductWithCombinations } from "@/schemas";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
-import { Product, ProductCombinations } from "@/schemas";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -8,7 +8,11 @@ import { cx } from "class-variance-authority";
 import { Link } from "react-router";
 import React from "react";
 
-export default function ProductItem({ item }: { item: Product }) {
+export default function ProductItem({
+  item,
+}: {
+  item: ProductWithCombinations;
+}) {
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
       {

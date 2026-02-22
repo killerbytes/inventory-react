@@ -1,5 +1,5 @@
+import { ProductWithCombinations } from "./product.schema";
 import { Inventory } from "./inventory.schema";
-import { Product } from "./product.schema";
 import z from "zod";
 
 export const statusHistorySchema = z.object({
@@ -75,7 +75,7 @@ export interface CategorizedProductList {
   categoryId: number;
   categoryName: string;
   categoryOrder: number;
-  products: Product[];
+  products: ProductWithCombinations[];
 }
 
 export interface CategorizedInventoryList {

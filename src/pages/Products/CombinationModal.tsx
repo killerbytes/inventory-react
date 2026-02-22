@@ -5,6 +5,7 @@ import {
   productCombinationBaseSchema,
   ProductCombinationInput,
   ProductCombinations,
+  ProductWithCombinations,
   VariantTypes,
   VariantValues,
 } from "@/schemas";
@@ -48,7 +49,7 @@ export default function CombinationModal({
   onClose,
   isOpen,
 }: {
-  product: Product;
+  product: ProductWithCombinations;
   onSubmit: (e: Product) => Promise<void>;
   onClose: (shouldReload: boolean) => void;
   isOpen: boolean;

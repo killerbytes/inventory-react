@@ -1,16 +1,16 @@
 import { variantValuesSchema } from "./variant.schema";
 import { inventorySchema } from "./inventory.schema";
-import { productBaseSchema } from "./product.schema";
+import { productSchema } from "./product.schema";
 import z from "zod";
 
 export const productCombinationBaseSchema = z.object({
   id: z.number().optional().nullish(),
   productId: z.number(),
   unit: z.string(),
-  conversionFactor: z.number().min(1, {
+  conversionFactor: z.coerce.number().min(1, {
     message: "Conversion Factor must be at least 1.",
   }),
-  price: z.number().optional(),
+  price: z.coerce.number().optional(),
   reorderLevel: z.number(),
   isBreakPack: z.boolean().nullish(),
   isActive: z.boolean().nullish(),
@@ -23,7 +23,7 @@ export const productCombinationsSchema = productCombinationBaseSchema.extend({
   id: z.number(),
   name: z.string(),
   inventory: inventorySchema,
-  product: productBaseSchema,
+  product: z.lazy(() => productSchema),
 });
 
 export type ProductCombinationInput = z.infer<

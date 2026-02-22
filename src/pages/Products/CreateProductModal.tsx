@@ -1,4 +1,9 @@
-import { ApiError, ApiErrorResponse, Product, productSchema } from "@/schemas";
+import {
+  ApiError,
+  ApiErrorResponse,
+  productBaseSchema,
+  ProductInput,
+} from "@/schemas";
 import { categoryServices, productServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ROUTES, UNIT } from "@/utils/definitions";
@@ -24,8 +29,8 @@ export default function CreateProductModal({
   const {
     categoryState: { categories, setCategories },
   } = useStore();
-  const form = useForm<Product>({
-    resolver: zodResolver(productSchema),
+  const form = useForm<ProductInput>({
+    resolver: zodResolver(productBaseSchema),
 
     defaultValues: {
       categoryId,
@@ -35,7 +40,7 @@ export default function CreateProductModal({
   });
   const navigate = useNavigate();
 
-  async function onSubmit(values: Product) {
+  async function onSubmit(values: ProductInput) {
     try {
       const product = await productServices.create(values);
       navigate(`${ROUTES.PRODUCTS}/${product.id}`);
@@ -45,7 +50,7 @@ export default function CreateProductModal({
       );
       errors?.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof Product, {
+          form.setError(err.field as keyof ProductInput, {
             type: "server",
             message: err.message,
           });
