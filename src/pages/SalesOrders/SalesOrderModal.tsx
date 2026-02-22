@@ -328,7 +328,7 @@ export default function SalesOrderModal({
                             field.onChange(value.id);
                             form.setValue(
                               `salesOrderItems.${row.index}.purchasePrice`,
-                              value.price,
+                              value.price ?? 0,
                             );
                             form.setValue(
                               `salesOrderItems.${row.index}.combinations`,

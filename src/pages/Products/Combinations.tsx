@@ -86,7 +86,7 @@ export default function Combinations({
                 "text-red-500": row.original.price == 0,
               })}
             >
-              {formatCurrency(row.original.price)}
+              {formatCurrency(row.original.price ?? 0)}
             </div>
           );
         },

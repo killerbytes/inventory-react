@@ -1,9 +1,10 @@
 import {
   ApiErrorResponse,
+  Inventory,
   Product,
+  productCombinationBaseSchema,
+  ProductCombinationInput,
   ProductCombinations,
-  ProductCombinationUpdate,
-  productCombinationUpdateSchema,
   VariantTypes,
   VariantValues,
 } from "@/schemas";
@@ -38,11 +39,8 @@ import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
 
-type CombinationTableRow = ProductCombinationUpdate & {
-  fieldId: string;
-  inventory?: {
-    quantity?: number;
-  };
+type CombinationTableRow = ProductCombinationInput & {
+  inventory?: Inventory;
 };
 
 export default function CombinationModal({
@@ -61,21 +59,24 @@ export default function CombinationModal({
     productCombinationState: { invalidate },
   } = useStore();
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
+  const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
+    [],
+  );
 
   const form = useForm<{
-    combinations: ProductCombinationUpdate[];
+    combinations: ProductCombinationInput[];
   }>({
     defaultValues: {
       combinations: [],
     },
     resolver: zodResolver(
       z.object({
-        combinations: z.array(productCombinationUpdateSchema),
+        combinations: z.array(productCombinationBaseSchema),
       }),
     ),
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { append, remove } = useFieldArray({
     control: form.control,
     name: "combinations",
     keyName: "fieldId",
@@ -86,12 +87,12 @@ export default function CombinationModal({
     name: "combinations",
   });
 
-  const tableData: CombinationTableRow[] = fields.map((field, index) => ({
-    ...field,
-    ...watchCombinations?.[index],
-  }));
+  const tableData: CombinationTableRow[] = watchCombinations.map((i) => {
+    const row = combinations.find((f) => f.id === i.id);
+    return { ...i, inventory: row?.inventory };
+  });
 
-  const productCombinationDefaultValue: ProductCombinationUpdate = {
+  const productCombinationDefaultValue: ProductCombinationInput = {
     productId: Number(product.id),
     reorderLevel: 10,
     unit: product.baseUnit,
@@ -127,10 +128,12 @@ export default function CombinationModal({
         });
         return { ...i };
       });
+
       form.reset({
         combinations: xx,
       });
       setVariants(variants);
+      setCombinations(combinations);
     }
   }, [form, product.id]);
 
@@ -139,7 +142,7 @@ export default function CombinationModal({
   }, [getData]);
 
   const handleSubmit = async (data: {
-    combinations: ProductCombinationUpdate[];
+    combinations: ProductCombinationInput[];
   }) => {
     const { combinations } = data;
 
@@ -159,7 +162,7 @@ export default function CombinationModal({
           if (err.field) {
             form.setError(
               `combinations.${index}.${err.field}` as FieldPath<{
-                combinations: ProductCombinationUpdate[];
+                combinations: ProductCombinationInput[];
               }>,
               {
                 type: "server",
@@ -277,7 +280,7 @@ export default function CombinationModal({
           const type = variants.find(
             (item: VariantTypes) => item.isBreakpackFilter,
           );
-          let options: ProductCombinationUpdate[] = [];
+          let options: CombinationTableRow[] = [];
           const allOriginalData = table
             .getRowModel()
             .rows.map((row) => row.original);
@@ -304,6 +307,9 @@ export default function CombinationModal({
                       {...field}
                       tabIndex={-1}
                       value={String(field.value)}
+                      onChange={(value) => {
+                        field.onChange(Number(value));
+                      }}
                       options={options.filter((o) => o.id !== row.original.id)}
                       renderOption={(option) => (
                         <SelectItem key={option.id} value={String(option.id)}>
@@ -373,7 +379,7 @@ export default function CombinationModal({
                       {...field}
                       decimalScale={2}
                       tabIndex={-1}
-                      value={Number(field.value)}
+                      value={field.value}
                     />
                   </FormControl>
                 </FormItem>
@@ -515,7 +521,7 @@ export default function CombinationModal({
               size="icon"
               autoFocus
               onClick={() => {
-                const lastItem = last(tableData);
+                const lastItem = last(watchCombinations);
                 const unit = lastItem
                   ? lastItem.unit
                   : productCombinationDefaultValue.unit;

@@ -7,7 +7,6 @@ import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
 import { lazy, Suspense } from "react";
-import Test from "./pages/Test";
 
 const Login = lazy(() => import("./pages/LoginForm"));
 const Suppliers = lazy(() => import("./pages/Suppliers"));
@@ -250,8 +249,6 @@ function App() {
             />
 
             <Route path={ROUTES.SEARCH} element={<ProductSearch />} />
-
-            <Route path={ROUTES.TEST} element={<Test />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

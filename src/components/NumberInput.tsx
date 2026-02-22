@@ -48,7 +48,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         onValueChange={(values) => {
           const { floatValue, formattedValue } = values;
           setDisplayValue(formattedValue);
-          debouncedUpdate(floatValue ?? 0);
+          debouncedUpdate(floatValue);
         }}
         style={{ textAlign: "inherit" }}
         customInput={Input}

@@ -293,7 +293,7 @@ export default function ReturnExchangeModal({
                             field.onChange(value.id);
                             form.setValue(
                               `exchanges.${row.index}.purchasePrice`,
-                              value.price,
+                              value.price ?? 0,
                             );
 
                             form.setValue(

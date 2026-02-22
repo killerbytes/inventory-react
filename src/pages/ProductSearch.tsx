@@ -115,15 +115,16 @@ export default function ProductSearch() {
           className: "w-20 text-right font-bold",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          const error =
-            Number(row.original.inventory?.averagePrice) >= row.original.price;
+          const price = row.original.price ?? 0;
+          const avgPrice = Number(row.original.inventory?.averagePrice ?? 0);
+          const error = price > 0 && avgPrice >= price;
           return (
             <span
               className={cx({
                 "text-red-500 font-bold": error,
               })}
             >
-              {formatCurrency(row.original.price)}
+              {formatCurrency(row.original.price || 0)}
             </span>
           );
         },

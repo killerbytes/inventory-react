@@ -43,7 +43,7 @@ export default function ProductItem({ item }: { item: Product }) {
           className: "w-20",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return formatCurrency(row.original.price);
+          return formatCurrency(row.original.price ?? 0);
         },
       },
 

@@ -1,9 +1,9 @@
-import { productCombinationBaseSchema } from "./productCombination.schema";
+import { productCombinationsSchema } from "./productCombination.schema";
 import z from "zod";
 
 export const returnItemBaseSchema = z.object({
   combinationId: z.number(),
-  combination: productCombinationBaseSchema.nullish(),
+  combination: productCombinationsSchema.nullish(),
   returnQuantity: z.coerce.number(),
   purchasePrice: z.coerce.number(),
   discount: z.coerce.number(),
