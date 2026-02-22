@@ -1,7 +1,7 @@
 import {
   GoodReceipt,
+  GoodReceiptInput,
   GoodReceiptItem,
-  GoodReceiptUpdate,
   ReturnItemInput,
   ReturnTransaction,
 } from "@/schemas";
@@ -38,7 +38,7 @@ import { useStore } from "@/stores";
 export default function PartialForm({
   form,
 }: {
-  form: UseFormReturn<GoodReceiptUpdate>;
+  form: UseFormReturn<GoodReceiptInput>;
 }) {
   const { id } = useParams();
   const { control } = form;

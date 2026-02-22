@@ -41,9 +41,10 @@ export const goodReceiptLineSchema = goodReceiptLineBaseSchema.extend({
   skuSnapshot: z.string(),
   nameSnapshot: z.string(),
   unit: z.string(),
+  combinations: productCombinationBaseSchema.nullish(),
 });
 
-const goodReceiptBaseSchema = z.object({
+export const goodReceiptBaseSchema = z.object({
   supplierId: z.coerce
     .number({
       required_error: "Supplier is required",
@@ -53,15 +54,6 @@ const goodReceiptBaseSchema = z.object({
   internalNotes: z.string().nullish(),
   referenceNo: z.string().min(1, { message: "Reference Number is required." }),
   receiptDate: z.string(),
-});
-
-export const goodReceiptCreateSchema = goodReceiptBaseSchema.extend({
-  goodReceiptLines: z.array(goodReceiptLineBaseSchema).min(1, {
-    message: "At least one product is required.",
-  }),
-});
-
-export const goodReceiptUpdateSchema = goodReceiptBaseSchema.extend({
   goodReceiptLines: z.array(goodReceiptLineBaseSchema).min(1, {
     message: "At least one product is required.",
   }),
@@ -108,9 +100,9 @@ export const supplierHistorySchema = goodReceiptLineSchema.extend({
   combinations: productCombinationsSchema,
 });
 
+export type GoodReceiptInput = z.infer<typeof goodReceiptBaseSchema>;
 export type GoodReceipt = z.infer<typeof goodReceiptSchema>;
-export type GoodReceiptCreate = z.infer<typeof goodReceiptCreateSchema>;
-export type GoodReceiptUpdate = z.infer<typeof goodReceiptUpdateSchema>;
 export type GoodReceiptItem = z.infer<typeof goodReceiptLineSchema>;
+export type GoodReceiptItemInput = z.infer<typeof goodReceiptLineBaseSchema>;
 export type SupplierHistory = z.infer<typeof supplierHistorySchema>;
 export type InvoiceGoodReceipt = z.infer<typeof invoiceGoodReceiptSchema>;

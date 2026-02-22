@@ -1,11 +1,4 @@
 import {
-  GoodReceiptCreate,
-  GoodReceiptItem,
-  GoodReceiptUpdate,
-  ProductCombinations,
-  Supplier,
-} from "@/schemas";
-import {
   Form,
   FormControl,
   FormField,
@@ -13,6 +6,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  GoodReceiptInput,
+  GoodReceiptItem,
+  ProductCombinations,
+  Supplier,
+} from "@/schemas";
 import {
   Controller,
   useFieldArray,
@@ -39,12 +38,10 @@ import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/stores";
 import React from "react";
 
-type GoodReceiptItemCreate = Omit<GoodReceiptItem, "id" | "combinations">;
-
 export default function PendingForm({
   form,
 }: {
-  form: UseFormReturn<GoodReceiptCreate | GoodReceiptUpdate>;
+  form: UseFormReturn<GoodReceiptInput>;
 }) {
   const { supplierState } = useStore();
   const { productCombinationState } = useStore();
@@ -57,7 +54,7 @@ export default function PendingForm({
   const watchGoodReceiptLines = useWatch({
     control: form?.control,
     name: "goodReceiptLines",
-  }) as GoodReceiptItemCreate[];
+  }) as GoodReceiptItem[];
 
   const footerValues = useWatch({
     control: form?.control,
@@ -86,7 +83,7 @@ export default function PendingForm({
     getData();
   }, [productCombinationState]);
 
-  const columns = React.useMemo<ColumnDef<GoodReceiptItemCreate>[]>(
+  const columns = React.useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
       {
         accessorKey: "index",
@@ -173,6 +170,8 @@ export default function PendingForm({
                       noBreakPacks
                       onChange={(value) => {
                         field.onChange(value.id);
+                        console.log(value);
+
                         form.setValue(
                           `goodReceiptLines.${row.index}.combinations`,
                           value,

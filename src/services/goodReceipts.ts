@@ -1,9 +1,9 @@
-import { CancelOrder, GoodReceipt, GoodReceiptUpdate } from "@/schemas";
+import { CancelOrder, GoodReceipt, GoodReceiptInput } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 
 export default class GoodReceiptService extends BaseService<
-  GoodReceipt | GoodReceiptUpdate
+  GoodReceipt | GoodReceiptInput
 > {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/good-receipt" });

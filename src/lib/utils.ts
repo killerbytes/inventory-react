@@ -119,5 +119,7 @@ export const getMappedSearchProductCombinations = async (params: {
       result.push(...productCombinations);
     }
   }
+  console.log(result);
+
   return result;
 };
