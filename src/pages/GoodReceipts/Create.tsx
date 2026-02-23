@@ -6,6 +6,7 @@ import {
   ApiError,
   ApiErrorResponse,
   goodReceiptBaseSchema,
+  GoodReceiptForm,
   GoodReceiptInput,
 } from "@/schemas";
 import {
@@ -47,7 +48,7 @@ export default function Create() {
       )
     : goodReceiptDefault;
 
-  const form = useForm<GoodReceiptInput>({
+  const form = useForm<GoodReceiptForm>({
     resolver: zodResolver(goodReceiptBaseSchema),
     defaultValues,
   });

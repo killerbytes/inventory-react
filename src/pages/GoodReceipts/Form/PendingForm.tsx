@@ -7,17 +7,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  GoodReceiptInput,
-  GoodReceiptItem,
-  ProductCombinations,
-  Supplier,
-} from "@/schemas";
-import {
   Controller,
   useFieldArray,
   UseFormReturn,
   useWatch,
 } from "react-hook-form";
+import {
+  GoodReceiptForm,
+  GoodReceiptItem,
+  ProductCombinations,
+  Supplier,
+} from "@/schemas";
 import { productCombinationServices, supplierServices } from "@/services";
 import { goodReceiptItemDefault, UNIT_COLOR } from "@/utils/definitions";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
@@ -41,7 +41,7 @@ import React from "react";
 export default function PendingForm({
   form,
 }: {
-  form: UseFormReturn<GoodReceiptInput>;
+  form: UseFormReturn<GoodReceiptForm>;
 }) {
   const { supplierState } = useStore();
   const { productCombinationState } = useStore();
