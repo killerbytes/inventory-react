@@ -171,12 +171,13 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         columns={columns}
         renderFooter={() => renderFooter(data)}
         onSelectionChange={(selectedItems) => {
-          setReturns(
-            selectedItems.map((i) => ({
-              ...i,
-              returnQuantity: i.quantity,
-            })) as ReturnItem[],
-          );
+          const returns = selectedItems.map(({ combinations, ...i }) => ({
+            ...i,
+            combinationSnapshot: combinations,
+            returnQuantity: i.quantity,
+          })) as ReturnItem[];
+
+          setReturns(returns);
         }}
       />
       {returnEnabled && (

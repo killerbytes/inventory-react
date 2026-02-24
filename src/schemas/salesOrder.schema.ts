@@ -16,48 +16,50 @@ export const salesOrderItemBaseSchema = z.object({
   }),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),
-  combinations: productCombinationBaseSchema.nullish(),
 });
 
 export const salesOrderItemSchema = salesOrderItemBaseSchema.extend({
-  id: z.coerce.number().optional(),
-
-  originalPrice: z.coerce.number().nullish(),
-  totalAmount: z.coerce.number().nullish(),
-  variantSnapshot: z.any().nullish(),
-  skuSnapshot: z.string().nullish(),
-  nameSnapshot: z.string().nullish(),
+  id: z.number(),
+  originalPrice: z.coerce.number(),
+  totalAmount: z.coerce.number(),
+  variantSnapshot: z.any(),
+  skuSnapshot: z.string(),
+  nameSnapshot: z.string(),
   unit: z.string().nullish(),
+  combinations: productCombinationBaseSchema.nullish(),
 });
 
-const salesOrderBaseSchema = z.object({
-  id: z.number().optional(),
-  status: z.string(),
-  salesOrderNumber: z.string().nullish(),
+export const salesOrderItemFormSchema = salesOrderItemBaseSchema.extend({
+  combinations: productCombinationBaseSchema.nullish(),
+});
+
+export const salesOrderBaseSchema = z.object({
   customerId: z.coerce.number().min(1, {
     message: "Customer is required.",
   }),
   orderDate: z.string(),
+  status: z.string(),
+  modeOfPayment: z.enum(
+    Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
+  ),
   isDelivery: z.boolean().optional(),
-  isDeliveryCompleted: z.boolean().nullish(),
   deliveryAddress: z.string().nullish(),
   deliveryInstructions: z.string().nullish(),
   deliveryDate: z.string().nullish(),
   internalNotes: z.string().nullish(),
   notes: z.string().nullish(),
   dueDate: z.string().nullish(),
-  modeOfPayment: z.enum(
-    Object.values(MODE_OF_PAYMENT) as [string, ...string[]],
-  ),
   checkNumber: z.string().nullish(),
-
   salesOrderItems: z.array(salesOrderItemBaseSchema).min(1, {
     message: "At least one product is required.",
   }),
 });
 
-export const salesOrderFormSchema = salesOrderBaseSchema.superRefine(
-  (data, ctx) => {
+export const salesOrderFormSchema = salesOrderBaseSchema
+  .extend({
+    salesOrderItems: z.array(salesOrderItemFormSchema),
+  })
+  .superRefine((data, ctx) => {
     if (data.isDelivery && !data.deliveryDate) {
       ctx.addIssue({
         path: ["deliveryDate"],
@@ -72,18 +74,23 @@ export const salesOrderFormSchema = salesOrderBaseSchema.superRefine(
         message: "Delivery address is required when delivery is selected",
       });
     }
-  },
-);
+  });
 
 export const salesOrderSchema = salesOrderBaseSchema
   .extend({
-    totalAmount: z.string().optional(),
+    id: z.number(),
+    salesOrderNumber: z.string(),
+    isDeliveryCompleted: z.boolean().nullish(),
+    totalAmount: z.string(),
     customer: z.any(),
     cancellationReason: z.string().nullish(),
     returnTransactions: z.array(returnTransactionBaseSchema),
-    totalReturnAmount: z.string().optional(),
-    totalExchangeAmount: z.string().optional(),
+    totalReturnAmount: z.string(),
+    totalExchangeAmount: z.string(),
     salesOrderStatusHistory: z.array(statusHistorySchema),
+    salesOrderItems: z.array(salesOrderItemSchema).min(1, {
+      message: "At least one product is required.",
+    }),
   })
   .superRefine((data, ctx) => {
     if (
@@ -105,6 +112,8 @@ export const salesOrderSchema = salesOrderBaseSchema
     }
   });
 
+export type SalesOrderInput = z.infer<typeof salesOrderBaseSchema>;
 export type SalesOrder = z.infer<typeof salesOrderSchema>;
 export type SalesOrderForm = z.infer<typeof salesOrderFormSchema>;
 export type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
+export type SalesOrderItemForm = z.infer<typeof salesOrderItemFormSchema>;

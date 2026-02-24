@@ -3,8 +3,8 @@ import {
   ApiErrorResponse,
   Customer,
   SalesOrder,
+  salesOrderBaseSchema,
   SalesOrderForm,
-  salesOrderFormSchema,
   SalesOrderItem,
 } from "@/schemas";
 import {
@@ -100,7 +100,7 @@ export default function SalesOrderModal({
     : salesOrderDefalt;
 
   const form = useForm<SalesOrderForm>({
-    resolver: zodResolver(salesOrderFormSchema),
+    resolver: zodResolver(salesOrderBaseSchema),
     defaultValues,
   });
 
@@ -143,7 +143,7 @@ export default function SalesOrderModal({
   async function onSubmit(values: SalesOrderForm) {
     try {
       setLoading(true);
-      await salesOrderServices.create(values as SalesOrder);
+      await salesOrderServices.create(values);
       localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
       toast.success(`Sales Order submitted successfully`);
       onClose(true);
@@ -752,7 +752,7 @@ export default function SalesOrderModal({
           type="button"
           disabled={loading}
           onClick={(e) => {
-            console.log(form.formState.errors);
+            console.log(form.getValues(), form.formState.errors);
             form.handleSubmit((props) =>
               data
                 ? onSave({ ...props, status: ORDER_STATUS.DRAFT })
