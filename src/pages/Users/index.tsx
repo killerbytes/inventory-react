@@ -155,6 +155,30 @@ export default function Users() {
           );
         },
       },
+      {
+        accessorKey: "isAdmin",
+        header: ({ column }) => {
+          return (
+            <ColumnSort
+              filter={filter}
+              handleFilterChange={handleFilterChange}
+              column={column}
+            >
+              Role
+            </ColumnSort>
+          );
+        },
+        meta: {
+          className: "w-50",
+        },
+        cell: ({ row }) => {
+          return (
+            <Badge variant={row.original.isAdmin ? "default" : "secondary"}>
+              {row.original.isAdmin ? "Admin" : ""}
+            </Badge>
+          );
+        },
+      },
     ],
     [filter, handleFilterChange, handleToggle],
   );
