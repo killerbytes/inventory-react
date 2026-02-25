@@ -15,6 +15,7 @@ export const userSchema = z.object({
     message: "Please enter a valid email address.",
   }),
   isActive: z.boolean(),
+  isAdmin: z.boolean(),
   // .min(8, {
   //   message: "Password must be at least 8 characters.",
   // })

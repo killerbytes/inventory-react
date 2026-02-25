@@ -37,8 +37,13 @@ export default function EditModal({
 
   async function onSubmit(values: User) {
     try {
-      const { name, email, isActive } = values;
-      await userServices.update(data.id ?? 0, { name, email, isActive });
+      const { name, email, isActive, isAdmin } = values;
+      await userServices.update(data.id ?? 0, {
+        name,
+        email,
+        isActive,
+        isAdmin,
+      });
       toast.success(`Submitted: ${values.name} (${values.email})`);
       form.reset();
       onClose();
@@ -121,6 +126,24 @@ export default function EditModal({
                       />
                     </FormControl>
                     <FormLabel>Is Active</FormLabel>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isAdmin"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel>Is Admin</FormLabel>
                   </div>
                   <FormMessage />
                 </FormItem>
