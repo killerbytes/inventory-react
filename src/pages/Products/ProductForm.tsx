@@ -8,10 +8,10 @@ import {
 import { UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectItem } from "@/components/ui/select";
+import { Category, ProductInput } from "@/schemas";
 import ColorBadge from "@/components/ColorBadge";
 import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Category, Product } from "@/types";
 import Select from "@/components/Select";
 import React from "react";
 
@@ -19,8 +19,8 @@ export default function ProductForm({
   form,
   categories,
 }: {
-  form: UseFormReturn<Product>;
-  onSubmit: (e: Product) => Promise<void>;
+  form: UseFormReturn<ProductInput>;
+  onSubmit: (e: ProductInput) => Promise<void>;
   categories: Category[];
 }) {
   React.useEffect(() => {

@@ -4,18 +4,18 @@ import {
   PAGINATION_RESPONSE,
 } from "@/utils/definitions";
 import {
+  ApiErrorResponse,
+  filterProps,
+  InventoryMovement,
+  PaginatedResponse,
+} from "@/schemas";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ApiErrorResponse,
-  filterProps,
-  InventoryMovement,
-  PaginatedResponse,
-} from "@/types";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";

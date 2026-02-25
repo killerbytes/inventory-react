@@ -12,9 +12,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
+import { CategorizedProductList, ProductWithCombinations } from "@/schemas";
 import { categoryServices, productCombinationServices } from "@/services";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
-import { CategorizedProductList, Product } from "@/types";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateProductModal from "./CreateProductModal";
@@ -68,13 +68,13 @@ export default function Products() {
       categories.length > 0 &&
       productCombinationState.productCombinations.length > 0
     ) {
-      const productMap = new Map<number, Product>();
+      const productMap = new Map<number, ProductWithCombinations>();
       productCombinationState.productCombinations.forEach((item) => {
-        const productId = item.product.id ?? 0;
+        const productId = item.product.id;
         if (!productMap.has(productId)) {
           productMap.set(productId, {
-            id: productId,
             ...item.product,
+            id: productId,
             combinations: [],
           });
         }
@@ -202,7 +202,10 @@ export default function Products() {
             data.length > 0 && (
               <Accordion type="multiple" className="w-full">
                 {data?.map((item) => (
-                  <AccordionItem value={item.categoryId} key={item.categoryId}>
+                  <AccordionItem
+                    value={String(item.categoryId)}
+                    key={item.categoryId}
+                  >
                     <AccordionTrigger
                       className={cx(
                         "uppercase text-right",
@@ -216,19 +219,6 @@ export default function Products() {
                         {item.products.map((product) => (
                           <Fragment key={product.id}>
                             <ProductItem item={product} />
-                          </Fragment>
-                        ))}
-                        {item.subCategories?.map((i) => (
-                          <Fragment key={i.id}>
-                            <div className="flex gap-2 justify-start items-center">
-                              {i.categoryName}
-                            </div>
-
-                            <div className="flex gap-2 justify-start items-center">
-                              {i.products.map((product: Product) => (
-                                <ProductItem item={product} />
-                              ))}
-                            </div>
                           </Fragment>
                         ))}
                       </>

@@ -3,8 +3,8 @@ import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
 import useExcludeExistToList from "@/hooks/useExcludeExists";
 import GroupedCommandList from "../GroupedCommandList";
+import { ProductCombinations } from "@/schemas";
 import { ChevronsUpDown } from "lucide-react";
-import { ProductCombinations } from "@/types";
 import { Button } from "../ui/button";
 import React from "react";
 

@@ -6,8 +6,11 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import {
+  ChangePassword,
+  formChangePasswordSchema,
+} from "@/schemas/user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formChangePasswordSchema } from "@/schemas";
 import { DialogFooter } from "../ui/dialog";
 import { useForm } from "react-hook-form";
 import { authServices } from "@/services";
@@ -15,7 +18,6 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
 import Modal from "../Modal";
-import * as z from "zod";
 
 export default function ChangePasswordModal({
   onClose,
@@ -24,11 +26,11 @@ export default function ChangePasswordModal({
   onClose: () => void;
   isOpen: boolean;
 }) {
-  const form = useForm<z.infer<typeof formChangePasswordSchema>>({
+  const form = useForm<ChangePassword>({
     resolver: zodResolver(formChangePasswordSchema),
   });
 
-  const onSubmit = async (values: z.infer<typeof formChangePasswordSchema>) => {
+  const onSubmit = async (values: ChangePassword) => {
     try {
       await authServices.changePassword(values);
       toast.success("Password changed successfully");

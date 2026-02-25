@@ -1,17 +1,5 @@
 // Add 'React' to the import for forwardRef and useImperativeHandle
 import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
-  type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
-} from "@tanstack/react-table";
-import {
   Table,
   TableBody,
   TableCell,
@@ -20,72 +8,40 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency } from "@/utils/formatters";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { cx } from "class-variance-authority";
-import * as React from "react"; // Ensure React is imported
+import React from "react";
 
-type DataTableProps<T> = {
+type Props<T> = {
+  data: T[];
   columns: ColumnDef<T>[];
-  data: object[];
-  defaultColumn?: ColumnDef<T>;
-  meta?: {
-    disabledRow?: Record<string, any>;
-  };
-  emptyText?: string;
-  tableClassname?: string;
-  className?: string;
-  onRowClick?: (item: T) => void;
-  onUpdate?: (data: T[]) => void;
-  showHeader?: boolean;
-  showFooter?: boolean;
   renderFooter?: (data: T[]) => React.ReactNode;
+  meta?: {
+    disabledRow?: Record<string, boolean | string | number>;
+    emptyText?: string;
+  };
+  onRowClick?: (item: T) => void;
   onSelectionChange?: (selectedItems: T[]) => void;
   defaultSelected?: T[];
 };
 
-const defaultRenderFooter = <T,>(data: T[]) => {
-  console.log(data);
-  return (
-    <TableRow>
-      <TableCell className="font-semibold">Total</TableCell>
-      <TableCell colSpan={99} className="font-semibold text-right">
-        {formatCurrency(
-          data.reduce(
-            (acc: number, item: T) =>
-              acc + Number((item as any).totalAmount ?? "0"),
-            0,
-          ),
-        )}
-      </TableCell>
-    </TableRow>
-  );
-};
-
-// Wrap the component with React.forwardRef and add `ref` to the arguments
-const DataTable = <T,>(props: DataTableProps<T>) => {
+const DataTable = <T,>(props: Props<T>) => {
   const {
     data,
     columns,
-    defaultColumn,
+    renderFooter,
     meta,
-    emptyText = "No results found",
-    tableClassname,
-    className,
     onRowClick,
-    onUpdate,
-    showHeader = true,
-    showFooter = false,
-    renderFooter = defaultRenderFooter,
     onSelectionChange,
     defaultSelected = [],
   } = props;
+  const onSelectionChangeRef = React.useRef(onSelectionChange);
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState(() => {
     const initialSelectedRows = defaultSelected?.reduce<
       Record<string, boolean>
@@ -99,56 +55,42 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
   const table = useReactTable({
     data,
     columns,
-    defaultColumn,
-    meta,
-    getRowId: (row: any) => row.id, // or customize if your type has a different id
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    getRowId: (row: any) => {
+      return row.id;
+    },
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
       rowSelection,
     },
-    manualPagination: true,
   });
 
   React.useEffect(() => {
-    if (!onSelectionChange) return;
+    onSelectionChangeRef.current = onSelectionChange;
+  }, [onSelectionChange]);
 
+  React.useEffect(() => {
+    if (!onSelectionChangeRef.current) return;
     const selectedItems = table
       .getFilteredSelectedRowModel()
       .rows.map((row) => row.original);
-
-    onSelectionChange(selectedItems);
-  }, [rowSelection]);
+    onSelectionChangeRef.current?.(selectedItems);
+  }, [rowSelection, table]);
 
   const [disabledKey, disabledValue] = meta?.disabledRow
     ? Object.entries(meta.disabledRow)[0]
     : [null, null];
 
   return (
-    <div className={cx("w-full overflow-auto", className)}>
-      <div
-        className={cx(
-          "rounded-md border overflow-hidden",
-          tableClassname && tableClassname,
-        )}
-      >
+    <div className={cx("w-full overflow-auto ")}>
+      <div className={cx("rounded-md border overflow-hidden")}>
         <Table className="overflow ">
-          {showHeader && (
+          {
             <TableHeader className="text-xs ">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead
-                      // style={{ width: `${header.getSize()}px` }}
                       key={header.id}
                       className={
                         header.column.columnDef?.meta?.headerClassName ?? ""
@@ -165,18 +107,18 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
                 </TableRow>
               ))}
             </TableHeader>
-          )}
+          }
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const isDisabled = disabledKey
-                  ? (disabledKey
+                  ? disabledKey
                       .split(".")
                       .reduce(
                         (acc: unknown, key) =>
                           (acc as Record<string, unknown>)?.[key],
                         row.original,
-                      ) as any) === disabledValue
+                      ) === disabledValue
                   : null;
 
                 return (
@@ -184,13 +126,13 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
                     className={cx(
                       { "cursor-pointer": onRowClick && !isDisabled },
                       isDisabled
-                        ? "pointer-events-none bg-muted text-muted-foreground opacity-50 text-red-500"
+                        ? "pointer-events-none bg-muted text-muted-foreground opacity-50"
                         : "hover:bg-muted/50",
                     )}
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
-                      if (!isDisabled) {
+                      if (onRowClick) {
                         onRowClick?.(row.original);
                       }
                     }}
@@ -215,12 +157,12 @@ const DataTable = <T,>(props: DataTableProps<T>) => {
                   colSpan={columns.length}
                   className="h-12 text-center"
                 >
-                  {emptyText}
+                  {meta?.emptyText || "No results found"}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
-          {showFooter && <TableFooter>{renderFooter(data)}</TableFooter>}
+          {renderFooter && <TableFooter>{renderFooter(data)}</TableFooter>}
         </Table>
       </div>
     </div>

@@ -5,13 +5,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Customer, filterProps, Invoice, PaginatedResponse } from "@/types";
 import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
+import { filterProps, PaginatedResponse } from "@/schemas/others";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
+import { Invoice } from "@/schemas/invoice.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
+import { PaymentApplication } from "@/schemas";
 import { Input } from "@/components/ui/input";
 import { paymentServices } from "@/services";
 import Pager from "@/components/Pager";
@@ -20,7 +22,7 @@ import React from "react";
 
 export default function Payments() {
   const [data, setData] =
-    React.useState<PaginatedResponse<Customer[]>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<PaymentApplication>>(PAGINATION_RESPONSE);
 
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
@@ -51,7 +53,7 @@ export default function Payments() {
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
 
-  const columns: ColumnDef<Invoice>[] = React.useMemo(
+  const columns: ColumnDef<PaymentApplication>[] = React.useMemo(
     () => [
       {
         accessorKey: "payment.referenceNo",
@@ -115,10 +117,10 @@ export default function Payments() {
         }) => {
           return (
             <Link
-              to={`${ROUTES.SUPPLIERS}/${payment.supplier.id}`}
+              to={`${ROUTES.SUPPLIERS}/${payment.supplier?.id}`}
               className="text-primary"
             >
-              {payment.supplier.name}
+              {payment.supplier?.name}
             </Link>
           );
         },

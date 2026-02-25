@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ApiErrorResponse } from "@/schemas";
 import { Loader2Icon } from "lucide-react";
-import { ApiErrorResponse } from "@/types";
 import Http from "@/services/http";
 import { toast } from "sonner";
 import React from "react";

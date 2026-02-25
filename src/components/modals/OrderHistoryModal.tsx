@@ -8,7 +8,7 @@ import {
 } from "../ui/table";
 import { formatDateTime } from "@/utils/formatters";
 import { STATUS_COLOR } from "@/utils/definitions";
-import { StatusHistory } from "@/types";
+import { StatusHistory } from "@/schemas";
 import ColorBadge from "../ColorBadge";
 import Modal from "../Modal";
 

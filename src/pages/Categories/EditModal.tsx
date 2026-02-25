@@ -6,7 +6,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ApiError, ApiErrorResponse, Category } from "@/types";
+import {
+  ApiError,
+  ApiErrorResponse,
+  Category,
+  categoryBaseSchema,
+  CategoryInput,
+} from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
-import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
@@ -35,12 +40,12 @@ export default function EditModal({
   const {
     categoryState: { invalidate },
   } = useStore();
-  const form = useForm<Category>({
-    resolver: zodResolver(categorySchema),
+  const form = useForm<CategoryInput>({
+    resolver: zodResolver(categoryBaseSchema),
     defaultValues: { ...data },
   });
 
-  async function onSubmit(values: Category) {
+  async function onSubmit(values: CategoryInput) {
     try {
       const { name, description } = values;
       await categoryServices.update(Number(data.id), { name, description });
@@ -52,7 +57,7 @@ export default function EditModal({
       const { errors } = getErrorMessage(error as ApiErrorResponse);
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          form.setError(err.field as keyof Category, {
+          form.setError(err.field as keyof CategoryInput, {
             type: "server",
             message: err.message,
           });

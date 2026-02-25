@@ -9,15 +9,14 @@ import {
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { ApiErrorResponse, Signup, signupSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ApiErrorResponse, Signup } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ERROR } from "@/utils/definitions";
 import { userServices } from "@/services";
-import { signupSchema } from "@/schemas";
 import Modal from "@/components/Modal";
 
 export default function AddModal({

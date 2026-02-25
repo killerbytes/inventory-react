@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Customer, filterProps, PaginatedResponse } from "@/types";
+import { Customer, filterProps, PaginatedResponse } from "@/schemas";
 import { PAGINATION_RESPONSE } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";

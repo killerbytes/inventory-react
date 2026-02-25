@@ -11,7 +11,7 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import { Customer, filterProps, Invoice, PaginatedResponse } from "@/types";
+import { filterProps, Invoice, PaginatedResponse } from "@/schemas";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -34,9 +34,8 @@ export default function Invoices() {
   const [toggle, handleToggle] = useToggle({
     addInvoiceModal: false,
   });
-  const [selected, setSelected] = React.useState<Invoice>();
   const [data, setData] =
-    React.useState<PaginatedResponse<Customer[]>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<Invoice>>(PAGINATION_RESPONSE);
 
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
@@ -105,11 +104,11 @@ export default function Invoices() {
         }) => {
           return (
             <Link
-              to={`${ROUTES.SUPPLIERS}/${supplier.id}`}
+              to={`${ROUTES.SUPPLIERS}/${supplier?.id}`}
               className="text-primary"
               onClick={(e) => e.stopPropagation()}
             >
-              {supplier.name}
+              {supplier?.name}
             </Link>
           );
         },
@@ -190,7 +189,6 @@ export default function Invoices() {
           <Button
             className="shadow-sm"
             onClick={() => {
-              setSelected(undefined);
               handleToggle({ addInvoiceModal: true });
             }}
           >
@@ -223,14 +221,12 @@ export default function Invoices() {
                   handleToggle({
                     addInvoiceModal: true,
                   });
-                  setSelected(item);
                 } else {
                   navigate(`${ROUTES.INVOICES}/${item.id}`);
                 }
               }}
               data={data.data || []}
               columns={columns}
-              showFooter={true}
               renderFooter={(rows: Invoice[]) => {
                 return (
                   <TableRow>
@@ -257,7 +253,6 @@ export default function Invoices() {
       </CardContent>
       {toggle.addInvoiceModal && (
         <InvoiceModal
-          data={selected as Invoice}
           isOpen={true}
           onClose={(reload) => {
             handleToggle({ addInvoiceModal: false });

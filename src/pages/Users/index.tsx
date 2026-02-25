@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, User } from "@/types";
+import { filterProps, PaginatedResponse } from "@/schemas/others";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -16,6 +16,7 @@ import ColumnSort from "@/components/ColumnSort";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { User } from "@/schemas/user.schema";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import { userServices } from "@/services";

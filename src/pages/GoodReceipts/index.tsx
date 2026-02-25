@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { GoodReceipt, PaginatedResponse, filterProps } from "@/types";
+import { GoodReceipt, PaginatedResponse, filterProps } from "@/schemas";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";

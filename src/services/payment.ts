@@ -1,4 +1,4 @@
-import { Payment } from "@/types";
+import { Payment } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 

@@ -15,10 +15,12 @@ import {
 
 import {
   ApiErrorResponse,
-  Product,
+  productBaseSchema,
   ProductCombinations,
+  ProductInput,
+  ProductWithCombinations,
   VariantTypes,
-} from "@/types";
+} from "@/schemas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { Loader2Icon, Pencil, PlusIcon, Save, Search } from "lucide-react";
@@ -26,20 +28,19 @@ import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { categoryServices, productServices } from "@/services";
 import PriceHistory from "@/pages/Products/PriceHistory";
 import { zodResolver } from "@hookform/resolvers/zod";
+import SupplierHistoryTab from "./SupplierHistoryTab";
 import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
 import { SelectItem } from "@/components/ui/select";
 import { ERROR, ROUTES } from "@/utils/definitions";
 import CombinationModal from "./CombinationModal";
 import { Button } from "@/components/ui/button";
-import SupplierHistory from "./SupplierHistory";
 import ProductHistory from "./ProductHistory";
 import { Form } from "@/components/ui/form";
 import VariantsModal from "./VariantsModal";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import Combinations from "./Combinations";
-import { productSchema } from "@/schemas";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import ProductForm from "./ProductForm";
@@ -65,9 +66,10 @@ export default function ProductEdit() {
     [],
   );
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
+  const [product, setProduct] = React.useState<ProductWithCombinations>();
   const navigate = useNavigate();
-  const form = useForm<Product>({
-    resolver: zodResolver(productSchema),
+  const form = useForm<ProductInput>({
+    resolver: zodResolver(productBaseSchema),
     defaultValues: {
       name: "",
     },
@@ -77,7 +79,7 @@ export default function ProductEdit() {
     combinationModal: false,
     createProductModal: false,
   });
-  async function onSubmit(values: Product) {
+  async function onSubmit(values: ProductInput) {
     try {
       setLoading(true);
       await productServices.update(Number(id), values);
@@ -89,7 +91,7 @@ export default function ProductEdit() {
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof Product, {
+            form.setError(err.field as keyof ProductInput, {
               type: "server",
               message: err.message,
             });
@@ -103,10 +105,13 @@ export default function ProductEdit() {
   const getData = React.useCallback(async () => {
     try {
       setLoading(true);
-      const product: Product = await productServices.get(Number(id));
-      const { combinations, variants, ...rest }: Product = product;
+      const product: ProductWithCombinations = await productServices.get(
+        Number(id),
+      );
+      const { combinations, variants, ...rest } = product;
       setCombinations(combinations ?? []);
       setVariants(variants ?? []);
+      setProduct(product);
 
       form.reset({
         ...rest,
@@ -350,7 +355,7 @@ export default function ProductEdit() {
                     <CardTitle>Supplier History</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <SupplierHistory
+                    <SupplierHistoryTab
                       productId={id ?? ""}
                       selectedCombination={selectedCombo}
                       isBreakPackFilter={!!breakPackFilter}
@@ -377,9 +382,9 @@ export default function ProductEdit() {
         </Form>
       )}
       {/* {JSON.stringify(x)} */}
-      {toggle.combinationModal && (
+      {toggle.combinationModal && product && (
         <CombinationModal
-          product={form.getValues()}
+          product={product}
           isOpen={true}
           onSubmit={onSubmit}
           onClose={(shouldReload) => {

@@ -8,7 +8,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { PAGINATION } from "@/utils/definitions";
-import { pagerProps } from "@/types";
+import { pagerProps } from "@/schemas";
 import Select from "./Select";
 
 export default function Pager({ meta, filter, setFilter }: pagerProps) {

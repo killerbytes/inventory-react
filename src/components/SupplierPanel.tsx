@@ -1,6 +1,6 @@
 import { ROUTES } from "@/utils/definitions";
+import { Supplier } from "@/schemas";
 import { Link } from "react-router";
-import { Supplier } from "@/types";
 
 export default function SupplierPanel({
   supplier,

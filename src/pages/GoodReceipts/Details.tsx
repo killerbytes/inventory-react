@@ -5,6 +5,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  ApiErrorResponse,
+  CancelOrder,
+  GoodReceipt,
+  goodReceiptBaseSchema,
+  GoodReceiptInput,
+} from "@/schemas";
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,12 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ApiErrorResponse,
-  CancelOrder,
-  GoodReceipt,
-  GoodReceiptUpdate,
-} from "@/types";
 import {
   BUTTON_COLOR,
   ORDER_STATUS,
@@ -46,7 +47,6 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
-import { goodReceiptUpdateSchema } from "@/schemas";
 import PendingOrderForm from "./Form/PendingForm";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
@@ -60,7 +60,7 @@ import { useForm } from "react-hook-form";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
 
-export default function Create() {
+export default function Details() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [data, setData] = React.useState<GoodReceipt>();
@@ -72,11 +72,11 @@ export default function Create() {
     goodReceiptState: { returnEnabled, setReturnEnabled },
   } = useStore();
 
-  const form = useForm<GoodReceiptUpdate>({
-    resolver: zodResolver(goodReceiptUpdateSchema),
+  const form = useForm<GoodReceiptInput>({
+    resolver: zodResolver(goodReceiptBaseSchema),
   });
 
-  async function onSaveOrder(values: GoodReceiptUpdate) {
+  async function onSaveOrder(values: GoodReceiptInput) {
     try {
       await goodReceiptServices.update(Number(id), {
         ...values,
@@ -90,7 +90,7 @@ export default function Create() {
     handleToggle({ dropdownMenu: false });
   }
 
-  async function onReceiveOrder(form: GoodReceiptUpdate) {
+  async function onReceiveOrder(form: GoodReceiptInput) {
     try {
       await goodReceiptServices.update(Number(id), {
         ...form,

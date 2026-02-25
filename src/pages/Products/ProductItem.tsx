@@ -1,6 +1,6 @@
+import { ProductCombinations, ProductWithCombinations } from "@/schemas";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { Product, ProductCombinations } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import ColorBadge from "@/components/ColorBadge";
@@ -8,7 +8,11 @@ import { cx } from "class-variance-authority";
 import { Link } from "react-router";
 import React from "react";
 
-export default function ProductItem({ item }: { item: Product }) {
+export default function ProductItem({
+  item,
+}: {
+  item: ProductWithCombinations;
+}) {
   const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
     () => [
       {
@@ -34,21 +38,6 @@ export default function ProductItem({ item }: { item: Product }) {
           headerClassName: cx("flex items-center gap-2"),
         },
       },
-      // ...(item.variants?.map((variant, idx) => ({
-      //   accessorKey: "values.values." + variant.name,
-      //   header: variant.name,
-      //   meta: {
-      //     headerClassName: "h-0",
-      //     className: "w-20",
-      //   },
-      //   cell: ({ row }: { row: Row<ProductCombinations> }) => {
-      //     const x = row.original.values.findIndex(
-      //       (i) => i.variantTypeId === item.variants?.[idx].id,
-      //     );
-
-      //     return row.original.values[x]?.value;
-      //   },
-      // })) || []),
 
       {
         accessorKey: "price",
@@ -58,7 +47,7 @@ export default function ProductItem({ item }: { item: Product }) {
           className: "w-20",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          return formatCurrency(row.original.price);
+          return formatCurrency(row.original.price ?? 0);
         },
       },
 
@@ -95,31 +84,18 @@ export default function ProductItem({ item }: { item: Product }) {
         },
       },
     ],
-    [item.variants],
+    [item.id, item.name, item.sku],
   );
 
   return (
     <div className="flex flex-col gap-2 py-2">
-      {/* <div className="flex gap-2 items-center">
-        <div className="ml-auto flex gap-2 items-center">
-          <Button
-            asChild
-            variant="outline"
-            size="icon"
-            className="size-8 shadow-sm"
-          >
-            <Link to={`${ROUTES.PRODUCTS}/${item.id}`}>
-              <Pencil />
-            </Link>
-          </Button>
-        </div>
-      </div> */}
       <DataTable
         data={item.combinations || []}
         columns={columns}
-        showFooter={false}
-        emptyText="No combinations found"
-        meta={{ disabledRow: { isActive: false } }}
+        meta={{
+          disabledRow: { isActive: false },
+          emptyText: "No combinations found",
+        }}
       />
     </div>
   );

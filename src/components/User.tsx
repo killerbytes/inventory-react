@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { authServices } from "@/services";
 import { useStore } from "@/stores";
-import { User } from "@/types";
+import { User } from "@/schemas";
 import React from "react";
 
 export default function UserIcon() {

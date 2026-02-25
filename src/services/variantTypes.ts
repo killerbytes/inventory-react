@@ -1,4 +1,4 @@
-import { VariantTypes } from "@/types";
+import { VariantTypes } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 

@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, Supplier } from "@/types";
+import { filterProps, PaginatedResponse, Supplier } from "@/schemas";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";

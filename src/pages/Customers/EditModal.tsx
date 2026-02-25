@@ -16,14 +16,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ApiErrorResponse, Customer, customerSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
-import { ApiErrorResponse, Customer } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { customerServices } from "@/services";
 import { ERROR } from "@/utils/definitions";
-import { customerSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";

@@ -4,7 +4,7 @@ import {
   PAGINATION_RESPONSE,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import { filterProps, InvoiceGoodReceipt, PaginatedResponse } from "@/types";
+import { filterProps, InvoiceGoodReceipt, PaginatedResponse } from "@/schemas";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogFooter } from "@/components/ui/dialog";

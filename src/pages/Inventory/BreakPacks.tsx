@@ -11,7 +11,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { BreakPack, filterProps, PaginatedResponse } from "@/types";
+import { BreakPack, filterProps, PaginatedResponse } from "@/schemas";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { formatDateTime } from "@/utils/formatters";
@@ -25,7 +25,7 @@ import React from "react";
 
 export default function BreakPacks() {
   const [data, setData] =
-    React.useState<PaginatedResponse<BreakPack[]>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<BreakPack>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -36,6 +36,7 @@ export default function BreakPacks() {
 
   const getData = React.useCallback(async () => {
     const data = await inventoryServices.getBreakPacks(filter);
+
     setData(data);
   }, [filter]);
 
@@ -93,7 +94,7 @@ export default function BreakPacks() {
         },
       },
       {
-        accessorKey: "conversionFactor",
+        accessorKey: "fromCombination.conversionFactor",
         header: "Conversion Factor",
         meta: {
           className: "text-center",
@@ -107,7 +108,10 @@ export default function BreakPacks() {
           className: "text-center",
         },
         cell: ({ row }) => {
-          return row.original.quantity * row.original.conversionFactor;
+          return (
+            row.original.quantity *
+            row.original.fromCombination.conversionFactor
+          );
         },
       },
       {

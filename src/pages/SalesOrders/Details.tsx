@@ -1,8 +1,8 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -18,7 +18,7 @@ import {
   CategorizedProductList,
   Customer,
   SalesOrder,
-} from "@/types";
+} from "@/schemas";
 import {
   Card,
   CardAction,

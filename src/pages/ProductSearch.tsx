@@ -12,9 +12,9 @@ import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { Spinner } from "@/components/ui/spinner";
 import ColorBadge from "@/components/ColorBadge";
+import { ProductCombinations } from "@/schemas";
 import { cx } from "class-variance-authority";
 import useDebounce from "@/hooks/useDebounce";
-import { ProductCombinations } from "@/types";
 import { Search, X } from "lucide-react";
 import React from "react";
 
@@ -115,15 +115,16 @@ export default function ProductSearch() {
           className: "w-20 text-right font-bold",
         },
         cell: ({ row }: { row: Row<ProductCombinations> }) => {
-          const error =
-            Number(row.original.inventory?.averagePrice) >= row.original.price;
+          const price = row.original.price ?? 0;
+          const avgPrice = Number(row.original.inventory?.averagePrice ?? 0);
+          const error = price > 0 && avgPrice >= price;
           return (
             <span
               className={cx({
                 "text-red-500 font-bold": error,
               })}
             >
-              {formatCurrency(row.original.price)}
+              {formatCurrency(row.original.price || 0)}
             </span>
           );
         },

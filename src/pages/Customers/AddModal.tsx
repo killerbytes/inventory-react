@@ -6,14 +6,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  ApiErrorResponse,
+  CustomerInput,
+  customerInputSchema,
+} from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
-import { ApiErrorResponse, Customer } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { customerServices } from "@/services";
 import { ERROR } from "@/utils/definitions";
-import { customerSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { toast } from "sonner";
@@ -27,12 +30,12 @@ export default function AddModal({
   onClose: () => void;
   cb: () => void;
 }) {
-  const form = useForm<Customer>({
-    resolver: zodResolver(customerSchema),
+  const form = useForm<CustomerInput>({
+    resolver: zodResolver(customerInputSchema),
     defaultValues: {},
   });
 
-  async function onSubmit(values: Customer) {
+  async function onSubmit(values: CustomerInput) {
     try {
       const { name, address, contact, phone, email } = values;
       await customerServices.create({
@@ -50,7 +53,7 @@ export default function AddModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof Customer, {
+            form.setError(err.field as keyof CustomerInput, {
               type: "server",
               message: err.message,
             });

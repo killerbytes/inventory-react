@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { filterProps, PaginatedResponse, SalesOrder } from "@/types";
+import { filterProps, PaginatedResponse, SalesOrder } from "@/schemas";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -267,7 +267,7 @@ export default function SalesOrders() {
                 columns={columns}
                 meta={{
                   disabledRow: {
-                    status: ORDER_STATUS.CANCELLED,
+                    status: ORDER_STATUS.VOID,
                   },
                 }}
                 onRowClick={(item: SalesOrder) => {

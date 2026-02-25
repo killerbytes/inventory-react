@@ -6,18 +6,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ApiError, ApiErrorResponse, Category } from "@/types";
+import {
+  ApiError,
+  ApiErrorResponse,
+  Category,
+  categoryBaseSchema,
+  CategoryInput,
+} from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
-import { categorySchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
+import z from "zod";
 
 export default function AddModal({
   isOpen,
@@ -33,8 +39,8 @@ export default function AddModal({
   const {
     categoryState: { invalidate },
   } = useStore();
-  const form = useForm<Category>({
-    resolver: zodResolver(categorySchema),
+  const form = useForm<z.infer<typeof categoryBaseSchema>>({
+    resolver: zodResolver(categoryBaseSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -42,7 +48,7 @@ export default function AddModal({
     },
   });
 
-  async function onSubmit(values: Category) {
+  async function onSubmit(values: CategoryInput) {
     try {
       await categoryServices.create({ ...values, parentId: selected?.id });
       toast.success(`Submitted: ${values.name} (${values.description})`);
@@ -53,7 +59,7 @@ export default function AddModal({
       const { errors } = getErrorMessage(error as ApiErrorResponse);
       errors.forEach((err: ApiError) => {
         if (err.field) {
-          const field = err.field as keyof Category;
+          const field = err.field as keyof CategoryInput;
           form.setError(field, {
             type: "server",
             message: err.message,

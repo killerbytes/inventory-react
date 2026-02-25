@@ -1,6 +1,6 @@
 import { formatDate } from "@/utils/formatters";
 import { Label } from "@/components/ui/label";
-import { SalesOrder } from "@/types";
+import { SalesOrder } from "@/schemas";
 
 export default function Static({ data }: { data: SalesOrder }) {
   return (

@@ -1,8 +1,10 @@
-import { Product } from "@/types";
+import { Product, ProductInput } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 
-export default class ProductService extends BaseService<Product> {
+export default class ProductService extends BaseService<
+  Product | ProductInput
+> {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/products" });
   }

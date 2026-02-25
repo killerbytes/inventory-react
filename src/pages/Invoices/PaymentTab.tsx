@@ -1,5 +1,5 @@
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { Payment, PaymentApplication } from "@/types";
+import { Invoice, PaymentApplication } from "@/schemas";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,8 @@ export default function PaymentTab({
   data,
   cb,
 }: {
-  data: Payment;
-  cb: () => void;
+  data: Invoice;
+  cb: (id: number) => Promise<void>;
 }) {
   const { toggle, handleToggle } = useToggle({
     addPaymentModal: false,
@@ -69,14 +69,14 @@ export default function PaymentTab({
           <Plus /> Add Payment
         </Button>
       </div>
-      <DataTable data={data.applications || []} columns={columns} />
+      <DataTable data={data?.applications || []} columns={columns} />
       {toggle.addPaymentModal && (
         <AddPaymentModal
           data={data}
           isOpen={true}
           onClose={() => {
             handleToggle({ addPaymentModal: false });
-            cb(data.id);
+            cb(Number(data.id));
           }}
         />
       )}

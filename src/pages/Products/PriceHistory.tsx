@@ -4,7 +4,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, priceHistory } from "@/types";
+import { filterProps, PaginatedResponse, PriceHistory } from "@/schemas";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -14,6 +14,10 @@ import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
 import { Link } from "react-router";
 import React from "react";
+
+interface filterPropTypes extends filterProps {
+  productId: string;
+}
 
 export default function PriceHistoryTab({
   productId,
@@ -25,9 +29,9 @@ export default function PriceHistoryTab({
   isBreakPackFilter: boolean;
 }) {
   const [data, setData] =
-    React.useState<PaginatedResponse<priceHistory>>(PAGINATION_RESPONSE);
+    React.useState<PaginatedResponse<PriceHistory>>(PAGINATION_RESPONSE);
 
-  const [filter, setFilter] = React.useState<filterProps>({
+  const [filter, setFilter] = React.useState<filterPropTypes>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "changedAt",
@@ -50,7 +54,7 @@ export default function PriceHistoryTab({
     setFilter((prevState) => ({ ...prevState, ...data }));
   }, []);
 
-  const columns = React.useMemo<ColumnDef<priceHistory>[]>(
+  const columns = React.useMemo<ColumnDef<PriceHistory>[]>(
     () => [
       {
         accessorKey: "combinations.name",

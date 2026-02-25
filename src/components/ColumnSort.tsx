@@ -2,12 +2,10 @@ import {
   ArrowDownUp,
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { cx } from "class-variance-authority";
-import { filterProps } from "@/types";
+import { filterProps } from "@/schemas";
 import { last } from "lodash";
 
 const size = 14;

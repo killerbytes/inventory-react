@@ -1,4 +1,11 @@
 import {
+  ApiErrorResponse,
+  breakPackBaseSchema,
+  BreakPackInput,
+  ProductCombinations,
+  VariantTypes,
+} from "@/schemas";
+import {
   AlertCircleIcon,
   Equal,
   Loader2Icon,
@@ -6,12 +13,6 @@ import {
   PackageOpen,
   PackagePlus,
 } from "lucide-react";
-import {
-  ApiErrorResponse,
-  BreakPack,
-  ProductCombinations,
-  VariantTypes,
-} from "@/types";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { productCombinationServices, productServices } from "@/services";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
@@ -19,7 +20,6 @@ import { useController, useForm } from "react-hook-form";
 import { ERROR, UNIT_COLOR } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "../ui/dialog";
-import { breakPackSchema } from "@/schemas";
 import { SelectItem } from "../ui/select";
 import NumberInput from "../NumberInput";
 import ColorBadge from "../ColorBadge";
@@ -45,8 +45,8 @@ export default function BreakPackModal({
   const [selected, setSelected] = React.useState<ProductCombinations>();
   const [loading, setLoading] = React.useState(false);
   const { productCombinationState } = useStore();
-  const form = useForm<BreakPack>({
-    resolver: zodResolver(breakPackSchema),
+  const form = useForm<BreakPackInput>({
+    resolver: zodResolver(breakPackBaseSchema),
     defaultValues: {
       fromCombinationId: combination.id,
       quantity: 1,
@@ -123,7 +123,7 @@ export default function BreakPackModal({
     }
   }, [combination, getData]);
 
-  const handleBreakPack = async (values: BreakPack) => {
+  const handleBreakPack = async (values: BreakPackInput) => {
     try {
       setLoading(true);
       await productCombinationServices.breakPack(values);
@@ -135,7 +135,7 @@ export default function BreakPackModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof BreakPack, {
+            form.setError(err.field as keyof BreakPackInput, {
               type: "server",
               message: err.message,
             });

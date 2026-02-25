@@ -11,14 +11,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { ApiErrorResponse, User, userSchema } from "@/schemas";
 import { DialogFooter } from "@/components/ui/dialog";
-import { ApiErrorResponse, User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ERROR } from "@/utils/definitions";
 import { userServices } from "@/services";
 import Modal from "@/components/Modal";
-import { userSchema } from "@/schemas";
 
 export default function EditModal({
   isOpen,

@@ -1,3 +1,4 @@
+import { StoreState } from "./store.types";
 import { StateCreator } from "zustand";
 
 export interface GoodRecieptState {
@@ -8,7 +9,7 @@ export interface GoodRecieptState {
 }
 
 export const createGoodReceiptSlice: StateCreator<
-  GoodRecieptState,
+  StoreState,
   [["zustand/immer", never]],
   [],
   GoodRecieptState

@@ -1,4 +1,15 @@
 import {
+  ApiErrorResponse,
+  Inventory,
+  Product,
+  productCombinationBaseSchema,
+  ProductCombinationInput,
+  ProductCombinations,
+  ProductWithCombinations,
+  VariantTypes,
+  VariantValues,
+} from "@/schemas";
+import {
   Form,
   FormControl,
   FormField,
@@ -6,16 +17,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Product,
-  VariantValues,
-  VariantTypes,
-  ApiErrorResponse,
-  ProductCombinations,
-} from "@/types";
+import { FieldPath, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2Icon, Plus, Trash2 } from "lucide-react";
 import { productCombinationServices } from "@/services";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +30,6 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { variantValuesSchema } from "@/schemas";
 import { cx } from "class-variance-authority";
 import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
@@ -38,27 +40,16 @@ import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
 
-const formSchema = z.object({
-  id: z.number().nullish(),
-  productId: z.number(),
-  unit: z.string(),
-  conversionFactor: z.coerce.number().min(1, {
-    message: "Conversion Factor must be at least 1.",
-  }),
-  price: z.coerce.number().nullish(),
-  reorderLevel: z.coerce.number(),
-  isBreakPack: z.boolean().nullish(),
-  isActive: z.boolean().nullish(),
-  isBreakPackOfId: z.coerce.number().nullish(),
-  values: z.array(variantValuesSchema),
-});
+type CombinationTableRow = ProductCombinationInput & {
+  inventory?: Inventory;
+};
 
 export default function CombinationModal({
   product,
   onClose,
   isOpen,
 }: {
-  product: Product;
+  product: ProductWithCombinations;
   onSubmit: (e: Product) => Promise<void>;
   onClose: (shouldReload: boolean) => void;
   isOpen: boolean;
@@ -69,40 +60,50 @@ export default function CombinationModal({
     productCombinationState: { invalidate },
   } = useStore();
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
+  const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
+    [],
+  );
+
   const form = useForm<{
-    combinations: z.infer<typeof formSchema>[];
+    combinations: ProductCombinationInput[];
   }>({
     defaultValues: {
       combinations: [],
     },
     resolver: zodResolver(
       z.object({
-        combinations: z.array(formSchema),
+        combinations: z.array(productCombinationBaseSchema),
       }),
     ),
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { append, remove } = useFieldArray({
     control: form.control,
     name: "combinations",
     keyName: "fieldId",
   });
 
-  const x: z.infer<typeof formSchema>[] = useWatch({
+  const watchCombinations = useWatch({
     control: form.control,
     name: "combinations",
   });
 
-  const productCombinationDefaultValue: z.infer<typeof formSchema> = {
+  const tableData: CombinationTableRow[] = watchCombinations.map((i) => {
+    const row = combinations.find((f) => f.id === i.id);
+    return { ...i, inventory: row?.inventory };
+  });
+
+  const productCombinationDefaultValue: ProductCombinationInput = {
     productId: Number(product.id),
     reorderLevel: 10,
     unit: product.baseUnit,
     price: 0,
     conversionFactor: 1,
     isActive: true,
-    quantity: 0,
-    values: variants.map((i) => ({
-      variantTypeId: i.id,
+    values: variants.map(() => ({
+      value: "",
+      variantTypeId: null,
+      id: null,
     })),
   };
 
@@ -128,10 +129,12 @@ export default function CombinationModal({
         });
         return { ...i };
       });
+
       form.reset({
         combinations: xx,
       });
       setVariants(variants);
+      setCombinations(combinations);
     }
   }, [form, product.id]);
 
@@ -139,12 +142,16 @@ export default function CombinationModal({
     getData();
   }, [getData]);
 
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (data: {
+    combinations: ProductCombinationInput[];
+  }) => {
+    const { combinations } = data;
+
     try {
       setLoading(true);
       await productCombinationServices.updateByProductId(
         Number(product.id),
-        values,
+        combinations,
       );
       invalidate();
       setShouldReload(true);
@@ -152,9 +159,17 @@ export default function CombinationModal({
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors.forEach((err) => {
+        apiError.errors.forEach((err, index) => {
           if (err.field) {
-            form.setError(err.field, err.message);
+            form.setError(
+              `combinations.${index}.${err.field}` as FieldPath<{
+                combinations: ProductCombinationInput[];
+              }>,
+              {
+                type: "server",
+                message: err.message,
+              },
+            );
           }
         });
       } else {
@@ -165,7 +180,7 @@ export default function CombinationModal({
     }
   };
 
-  const columns = useMemo<ColumnDef<ProductCombinations>[]>(
+  const columns = useMemo<ColumnDef<CombinationTableRow>[]>(
     () => [
       {
         accessorKey: "id",
@@ -261,19 +276,25 @@ export default function CombinationModal({
           className: "text-right w-0",
         },
 
-        cell: ({ row }) => {
+        cell: (props) => {
+          const { row, table } = props;
           const type = variants.find(
             (item: VariantTypes) => item.isBreakpackFilter,
           );
-          let options: z.infer<typeof formSchema>[] = [];
+          let options: CombinationTableRow[] = [];
+          const allOriginalData = table
+            .getRowModel()
+            .rows.map((row) => row.original);
 
           if (type) {
             const f = row.original.values.find(
               (v) => v.variantTypeId === type.id,
             );
-            options = x.filter((i) => i.values.find((v) => v.id === f?.id));
+            options = allOriginalData.filter((i) =>
+              i.values.find((v) => v.id === f?.id),
+            );
           } else {
-            options = x.filter((i) => i.id !== row.original.id);
+            options = allOriginalData.filter((i) => i.id !== row.original.id);
           }
 
           return (
@@ -287,6 +308,9 @@ export default function CombinationModal({
                       {...field}
                       tabIndex={-1}
                       value={String(field.value)}
+                      onChange={(value) => {
+                        field.onChange(Number(value));
+                      }}
                       options={options.filter((o) => o.id !== row.original.id)}
                       renderOption={(option) => (
                         <SelectItem key={option.id} value={String(option.id)}>
@@ -356,7 +380,7 @@ export default function CombinationModal({
                       {...field}
                       decimalScale={2}
                       tabIndex={-1}
-                      value={Number(field.value)}
+                      value={field.value}
                     />
                   </FormControl>
                 </FormItem>
@@ -404,7 +428,7 @@ export default function CombinationModal({
                     <Checkbox
                       {...field}
                       tabIndex={-1}
-                      checked={field.value}
+                      checked={field.value || false}
                       onCheckedChange={(value) => {
                         field.onChange(value);
                       }}
@@ -435,7 +459,7 @@ export default function CombinationModal({
                     <Checkbox
                       {...field}
                       tabIndex={-1}
-                      checked={field.value}
+                      checked={field.value || false}
                       onCheckedChange={(value) => {
                         field.onChange(value);
                       }}
@@ -480,13 +504,7 @@ export default function CombinationModal({
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
                   <div className="rounded-md border   max-h-[50vh] overflow-y-auto ">
-                    <DataTable
-                      data={fields}
-                      columns={columns}
-                      errors={form.formState.errors}
-                      showFooter={false}
-                      tableClassname="border-none"
-                    />
+                    <DataTable data={tableData} columns={columns} />
                   </div>
                 </FormControl>
                 <div></div>
@@ -504,7 +522,7 @@ export default function CombinationModal({
               size="icon"
               autoFocus
               onClick={() => {
-                const lastItem = last(x);
+                const lastItem = last(watchCombinations);
                 const unit = lastItem
                   ? lastItem.unit
                   : productCombinationDefaultValue.unit;

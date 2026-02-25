@@ -1,13 +1,21 @@
 import {
-  Path,
   Control,
+  Controller,
   FieldValues,
+  Path,
   useController,
   useFieldArray,
   useForm,
   useWatch,
-  Controller,
 } from "react-hook-form";
+import {
+  ApiErrorResponse,
+  ExchangeItemInput,
+  returnBaseSchema,
+  ReturnInput,
+  ReturnItem,
+  ReturnItemInput,
+} from "@/schemas";
 import {
   Form,
   FormControl,
@@ -16,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { ApiErrorResponse, ExchangeItem, Return, ReturnItem } from "@/types";
 import { goodReceiptServices, salesOrderServices } from "@/services";
 import ProductLookupInput from "../forms/ProductLookupInput";
 import LineColumn from "../forms/OrderItemForm/LineColumn";
@@ -32,7 +39,6 @@ import { DialogFooter } from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
 import NumberInput from "../NumberInput";
 import { DataTable } from "../DataTable";
-import { returnSchema } from "@/schemas";
 import ColorBadge from "../ColorBadge";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
@@ -46,12 +52,12 @@ export default function ReturnExchangeModal({
   salesOrder = false,
 }: {
   onClose: () => void;
-  returns: ReturnItem[] | undefined;
+  returns: ReturnItemInput[] | undefined;
   referenceId: number;
   salesOrder?: boolean;
 }) {
-  const form = useForm<Return>({
-    resolver: zodResolver(returnSchema),
+  const form = useForm<ReturnInput>({
+    resolver: zodResolver(returnBaseSchema),
     defaultValues: {
       returns,
       exchanges: [],
@@ -71,7 +77,7 @@ export default function ReturnExchangeModal({
   const fieldReturns = useWatch({ control: form.control, name: "returns" });
   const fieldExchanges = useWatch({ control: form.control, name: "exchanges" });
 
-  const handleReturn = async (values: Return) => {
+  const handleReturn = async (values: ReturnInput) => {
     try {
       const returns = values.returns.map((i) => ({
         combinationId: i.combinationId,
@@ -97,7 +103,7 @@ export default function ReturnExchangeModal({
     }
   };
 
-  const returnColumns = React.useMemo<ColumnDef<ReturnItem>[]>(
+  const returnColumns = React.useMemo<ColumnDef<ReturnItemInput>[]>(
     () => [
       {
         header: () => "Quantity",
@@ -186,7 +192,7 @@ export default function ReturnExchangeModal({
     [form.control],
   );
 
-  const exchangeColumns = React.useMemo<ColumnDef<ExchangeItem>[]>(
+  const exchangeColumns = React.useMemo<ColumnDef<ExchangeItemInput>[]>(
     () => [
       {
         accessorKey: "index",
@@ -243,13 +249,16 @@ export default function ReturnExchangeModal({
               control={form.control}
               name="exchanges"
             >
-              {(value) =>
-                value.combinations?.unit && (
-                  <ColorBadge colorMap={UNIT_COLOR}>
-                    {value.combinations?.unit}
-                  </ColorBadge>
-                )
-              }
+              {(value) => {
+                console.log(value);
+                return (
+                  value.combination?.unit && (
+                    <ColorBadge colorMap={UNIT_COLOR}>
+                      {value.combination?.unit}
+                    </ColorBadge>
+                  )
+                );
+              }}
             </LineColumn>
           );
         },
@@ -284,11 +293,11 @@ export default function ReturnExchangeModal({
                             field.onChange(value.id);
                             form.setValue(
                               `exchanges.${row.index}.purchasePrice`,
-                              value.price,
+                              value.price ?? 0,
                             );
 
                             form.setValue(
-                              `exchanges.${row.index}.combinations`,
+                              `exchanges.${row.index}.combination`,
                               value,
                             );
 
@@ -399,7 +408,6 @@ export default function ReturnExchangeModal({
                   <DataTable
                     data={returnsFieldArray.fields}
                     columns={returnColumns}
-                    showFooter
                     renderFooter={() => {
                       const total = fieldReturns.reduce(
                         (acc, item) => {
@@ -445,9 +453,10 @@ export default function ReturnExchangeModal({
                     <DataTable
                       data={exchange.fields}
                       columns={exchangeColumns}
-                      showFooter
                       renderFooter={() => {
-                        const total = getTotalAmountTableFooter(fieldExchanges);
+                        const total = getTotalAmountTableFooter(
+                          fieldExchanges || [],
+                        );
 
                         return (
                           <>

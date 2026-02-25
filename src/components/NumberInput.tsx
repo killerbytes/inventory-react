@@ -5,7 +5,7 @@ import React from "react";
 
 interface NumberInputProps {
   tabIndex?: number;
-  value: number | null | undefined;
+  value?: number | null | undefined;
   onChange: (value: number) => void;
   type?: "number" | "currency";
   decimalScale?: number;
@@ -48,7 +48,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         onValueChange={(values) => {
           const { floatValue, formattedValue } = values;
           setDisplayValue(formattedValue);
-          debouncedUpdate(floatValue ?? 0);
+          debouncedUpdate(floatValue);
         }}
         style={{ textAlign: "inherit" }}
         customInput={Input}

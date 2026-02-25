@@ -1,10 +1,10 @@
 import {
   GoodReceipt,
+  GoodReceiptInput,
   GoodReceiptItem,
-  GoodReceiptUpdate,
-  ReturnItem,
+  ReturnItemInput,
   ReturnTransaction,
-} from "@/types";
+} from "@/schemas";
 import {
   Form,
   FormControl,
@@ -21,8 +21,8 @@ import {
 } from "@/utils/definitions";
 import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
+import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { TableCell, TableRow } from "@/components/ui/table";
 import SupplierPanel from "@/components/SupplierPanel";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,7 +38,7 @@ import { useStore } from "@/stores";
 export default function PartialForm({
   form,
 }: {
-  form: UseFormReturn<GoodReceiptUpdate>;
+  form: UseFormReturn<GoodReceiptInput>;
 }) {
   const { id } = useParams();
   const { control } = form;
@@ -47,12 +47,22 @@ export default function PartialForm({
     name: "goodReceiptLines",
   });
   const [toggle, handleToggle] = useToggle({ supplierReturnsModal: false });
-  const [returns, setReturns] = React.useState<ReturnItem[]>([]);
+  const [returns, setReturns] = React.useState<ReturnItemInput[]>([]);
   React.useState<ReturnTransaction[]>();
   const {
     goodReceiptState: { returnEnabled, setReturnEnabled },
   } = useStore();
   const data = form.getValues() as GoodReceipt;
+
+  const watchGoodReceiptLines = useWatch({
+    control: form?.control,
+    name: "goodReceiptLines",
+  }) as GoodReceiptItem[];
+
+  const tableData = fields.map((field, index) => ({
+    ...field, // id (structure)
+    ...watchGoodReceiptLines?.[index], // values (reactive)
+  }));
 
   const columns = useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
@@ -230,17 +240,17 @@ export default function PartialForm({
 
         <div className="flex flex-col gap-4">
           <DataTable
-            data={fields}
+            data={tableData}
             columns={columns}
             onSelectionChange={(selectedItems) => {
               setReturns(
                 selectedItems.map((i) => ({
                   ...i,
+                  combination: i.combinations,
                   returnQuantity: i.quantity,
-                })) as ReturnItem[],
+                })) as ReturnItemInput[],
               );
             }}
-            showFooter
             renderFooter={(data) => {
               const total = data.reduce(
                 (acc, item) => (acc += Number(item.totalAmount)),

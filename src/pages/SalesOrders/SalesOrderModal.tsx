@@ -1,18 +1,19 @@
 import {
+  ApiError,
+  ApiErrorResponse,
+  Customer,
+  SalesOrder,
+  salesOrderBaseSchema,
+  SalesOrderForm,
+  SalesOrderItem,
+} from "@/schemas";
+import {
   ERROR,
   MODE_OF_PAYMENT_OPTIONS,
   ORDER_STATUS,
   UNIT_COLOR,
   WHOLESALE_UNITS,
 } from "@/utils/definitions";
-import {
-  ApiError,
-  ApiErrorResponse,
-  Customer,
-  SalesOrder,
-  SalesOrderForm,
-  SalesOrderItem,
-} from "@/types";
 import {
   Form,
   FormControl,
@@ -49,7 +50,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
-import { salesOrderFormSchema } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
@@ -100,14 +100,24 @@ export default function SalesOrderModal({
     : salesOrderDefalt;
 
   const form = useForm<SalesOrderForm>({
-    resolver: zodResolver(salesOrderFormSchema),
+    resolver: zodResolver(salesOrderBaseSchema),
     defaultValues,
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "salesOrderItems",
+    keyName: "formId",
   });
+  const watchSalesOrderItems = useWatch({
+    control: form?.control,
+    name: "salesOrderItems",
+  }) as SalesOrderItem[];
+
+  const tableData = fields.map((field, index) => ({
+    ...field,
+    ...watchSalesOrderItems?.[index],
+  }));
   const modeOfPayment = form.watch("modeOfPayment");
 
   React.useEffect(() => {
@@ -133,7 +143,7 @@ export default function SalesOrderModal({
   async function onSubmit(values: SalesOrderForm) {
     try {
       setLoading(true);
-      await salesOrderServices.create(values as SalesOrder);
+      await salesOrderServices.create(values);
       localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
       toast.success(`Sales Order submitted successfully`);
       onClose(true);
@@ -318,7 +328,7 @@ export default function SalesOrderModal({
                             field.onChange(value.id);
                             form.setValue(
                               `salesOrderItems.${row.index}.purchasePrice`,
-                              value.price,
+                              value.price ?? 0,
                             );
                             form.setValue(
                               `salesOrderItems.${row.index}.combinations`,
@@ -602,13 +612,10 @@ export default function SalesOrderModal({
                 <FormItem className="w-full mb-4">
                   <FormControl>
                     <DataTable
-                      data={fields}
+                      data={tableData}
                       columns={columns}
-                      showFooter
-                      renderFooter={() => {
-                        const total = getTotalAmountTableFooter(
-                          formData.salesOrderItems,
-                        );
+                      renderFooter={(data) => {
+                        const total = getTotalAmountTableFooter(data);
                         return (
                           <>
                             <TableRow>
@@ -745,7 +752,7 @@ export default function SalesOrderModal({
           type="button"
           disabled={loading}
           onClick={(e) => {
-            console.log(form.formState.errors);
+            console.log(form.getValues(), form.formState.errors);
             form.handleSubmit((props) =>
               data
                 ? onSave({ ...props, status: ORDER_STATUS.DRAFT })
@@ -785,7 +792,7 @@ export default function SalesOrderModal({
         </ConfirmDialog>
       </DialogFooter>
 
-      {/* {JSON.stringify(formData, null, 2)} */}
+      {/* {JSON.stringify(tableData, null, 2)} */}
     </Modal>
   );
 }

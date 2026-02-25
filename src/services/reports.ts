@@ -1,4 +1,4 @@
-import { filterProps, Payment } from "@/types";
+import { filterProps, Payment } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 

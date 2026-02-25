@@ -1,6 +1,6 @@
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
 import BreakPackModal from "@/components/modals/BreakPackModal";
-import { ProductCombinations, VariantTypes } from "@/types";
+import { ProductCombinations, VariantTypes } from "@/schemas";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -86,7 +86,7 @@ export default function Combinations({
                 "text-red-500": row.original.price == 0,
               })}
             >
-              {formatCurrency(row.original.price)}
+              {formatCurrency(row.original.price ?? 0)}
             </div>
           );
         },

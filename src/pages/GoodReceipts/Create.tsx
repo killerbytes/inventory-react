@@ -3,21 +3,21 @@ import { useForm, useWatch } from "react-hook-form";
 import { goodReceiptServices } from "@/services";
 
 import {
+  ApiError,
+  ApiErrorResponse,
+  goodReceiptBaseSchema,
+  GoodReceiptForm,
+  GoodReceiptInput,
+} from "@/schemas";
+import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ApiError,
-  ApiErrorResponse,
-  GoodReceipt,
-  GoodReceiptCreate,
-} from "@/types";
 import { ERROR, goodReceiptItemDefault, ROUTES } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { goodReceiptCreateSchema } from "@/schemas";
 import PendingOrderForm from "./Form/PendingForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,8 +48,8 @@ export default function Create() {
       )
     : goodReceiptDefault;
 
-  const form = useForm<GoodReceiptCreate>({
-    resolver: zodResolver(goodReceiptCreateSchema),
+  const form = useForm<GoodReceiptForm>({
+    resolver: zodResolver(goodReceiptBaseSchema),
     defaultValues,
   });
 
@@ -59,9 +59,9 @@ export default function Create() {
     });
   }, [form]);
 
-  async function onSubmit(values: GoodReceiptCreate) {
+  async function onSubmit(values: GoodReceiptInput) {
     try {
-      await goodReceiptServices.create(values as GoodReceipt);
+      await goodReceiptServices.create(values);
       toast.success(`Purchase Order created successfully`);
       localStorage.removeItem(
         `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
@@ -73,7 +73,7 @@ export default function Create() {
         apiError.errors?.forEach((err: ApiError) => {
           if (err.field) {
             console.log(err.field);
-            form.setError(err.field as keyof GoodReceiptCreate, {
+            form.setError(err.field as keyof GoodReceiptInput, {
               type: "server",
               message: err.message,
             });
@@ -166,6 +166,7 @@ export default function Create() {
                 onClick={(e) => {
                   e.preventDefault();
                   console.log(form.getValues(), form.formState.errors);
+
                   form
                     .handleSubmit(onSubmit)(e)
                     .catch((error) => {

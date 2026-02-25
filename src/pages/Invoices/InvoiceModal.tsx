@@ -1,24 +1,24 @@
 import {
   ApiErrorResponse,
-  GoodReceipt,
-  Invoice,
-  invoiceForm,
+  InvoiceForm,
+  invoiceFormSchema,
   InvoiceGoodReceipt,
-  InvoiceLine,
   Supplier,
-} from "@/types";
+} from "@/schemas";
 import {
+  Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ERROR, INVOICE_STATUS, STATUS_COLOR } from "@/utils/definitions";
+import { useController, useFieldArray, useForm } from "react-hook-form";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { useController, useFieldArray } from "react-hook-form";
+import { invoiceServices, supplierServices } from "@/services";
 import GoodReceiptPickerModal from "./GoodReceiptPickerModal";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ERROR, INVOICE_STATUS } from "@/utils/definitions";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,33 +26,24 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
 import { DataTable } from "@/components/DataTable";
-import { STATUS_COLOR } from "@/utils/definitions";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import { supplierServices } from "@/services";
-import { invoiceFormSchema } from "@/schemas";
-import { invoiceServices } from "@/services";
-import { Form } from "@/components/ui/form";
 import useToggle from "@/hooks/useToggle";
-import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Plus } from "lucide-react";
 import { addWeeks } from "date-fns";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
 import React from "react";
-import { z } from "zod";
 
 export default function InvoiceModal({
-  data,
   isOpen,
   onClose,
 }: {
-  data: Invoice;
   isOpen: boolean;
   onClose: (boolean: boolean) => void;
 }) {
@@ -63,7 +54,7 @@ export default function InvoiceModal({
     goodReceiptPickerModal: false,
   });
 
-  const form = useForm({
+  const form = useForm<InvoiceForm>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
       invoiceNumber: "",
@@ -84,21 +75,12 @@ export default function InvoiceModal({
     keyName: "fieldId",
   });
 
-  React.useEffect(() => {
-    const getData = async () => {
-      const res = await invoiceServices.get(Number(data.id));
-      const gr = res.invoiceLines.map((i: InvoiceLine) => ({
-        ...i.goodReceipt,
-      }));
-      form.reset({
-        ...res,
-        gr,
-      });
-    };
-    if (data) {
-      getData();
-    }
-  }, [data, form]);
+  const watchGr = form.watch("gr");
+
+  const tableData = fields.map((field, index) => ({
+    ...field,
+    ...watchGr?.[index],
+  }));
 
   React.useEffect(() => {
     const getData = async () => {
@@ -115,7 +97,7 @@ export default function InvoiceModal({
     form.setValue("gr", selected);
   };
 
-  const onSubmit = async (values: z.infer<typeof invoiceFormSchema>) => {
+  const onSubmit = async (values: InvoiceForm) => {
     try {
       const { gr, ...rest } = values;
       const invoiceLines = gr.map((item) => ({
@@ -141,7 +123,7 @@ export default function InvoiceModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors?.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof invoiceForm, {
+            form.setError(err.field as keyof InvoiceForm, {
               type: "server",
               message: err.message,
             });
@@ -152,7 +134,7 @@ export default function InvoiceModal({
       }
     }
   };
-  const columns: ColumnDef<GoodReceipt>[] = React.useMemo(
+  const columns: ColumnDef<InvoiceGoodReceipt>[] = React.useMemo(
     () => [
       {
         accessorKey: "referenceNo",
@@ -307,17 +289,16 @@ export default function InvoiceModal({
                     autoFocus={false}
                   >
                     <DataTable
-                      data={fields}
+                      data={tableData}
                       columns={columns}
-                      showFooter
-                      renderFooter={(rows: GoodReceipt[]) => {
+                      renderFooter={(rows: InvoiceGoodReceipt[]) => {
                         return (
                           <TableRow className="font-bold">
                             <TableCell>Total Amount</TableCell>
                             <TableCell colSpan={10} className="text-right">
                               {formatCurrency(
                                 rows?.reduce(
-                                  (acc: number, item: GoodReceipt) =>
+                                  (acc: number, item: InvoiceGoodReceipt) =>
                                     acc +
                                     Number(item.totalAmount) -
                                     Number(item.totalReturnAmount),
