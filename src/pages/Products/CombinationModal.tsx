@@ -503,7 +503,7 @@ export default function CombinationModal({
               <FormItem className="mb-2">
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
-                  <div className="rounded-md border   max-h-[50vh] overflow-y-auto ">
+                  <div className="rounded-md border max-h-[50vh] overflow-y-auto ">
                     <DataTable data={tableData} columns={columns} />
                   </div>
                 </FormControl>

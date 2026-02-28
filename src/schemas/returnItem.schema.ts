@@ -1,4 +1,7 @@
-import { productCombinationsSchema } from "./productCombination.schema";
+import {
+  productCombinationBaseSchema,
+  productCombinationsSchema,
+} from "./productCombination.schema";
 import z from "zod";
 
 export const returnItemBaseSchema = z.object({
@@ -35,6 +38,17 @@ export const returnBaseSchema = z.object({
   reason: z.string(),
 });
 
+export const returnItemFormSchema = returnItemBaseSchema.extend({
+  combination: productCombinationBaseSchema.nullish(),
+});
+export const exchangeItemFormSchema = exchangeItemBaseSchema.extend({
+  combination: productCombinationBaseSchema.nullish(),
+});
+export const returnFormSchema = returnBaseSchema.extend({
+  returns: z.array(returnItemFormSchema),
+  exchanges: z.array(exchangeItemFormSchema).optional(),
+});
+
 export type ReturnItemInput = z.infer<typeof returnItemBaseSchema>;
 export type ExchangeItemInput = z.infer<typeof exchangeItemBaseSchema>;
 export type ReturnTransactionInput = z.infer<
@@ -51,11 +65,13 @@ export type ExchangeItem = Omit<ExchangeItemInput, "combination"> & {
 export type ReturnTransaction = Omit<ReturnTransactionInput, "returnItems"> & {
   returnItems: ReturnItem[];
 };
-export type Return = {
-  returns: ReturnItem[];
-  exchanges: ExchangeItem[];
-  reason: string;
-};
+// export type Return = {
+//   returns: ReturnItem[];
+//   exchanges: ExchangeItem[];
+//   reason: string;
+// };
+
+export type ReturnForm = z.infer<typeof returnFormSchema>;
 
 export function mapReturnItemToDomain(input: ReturnItemInput): ReturnItem {
   const { combination, ...rest } = input;

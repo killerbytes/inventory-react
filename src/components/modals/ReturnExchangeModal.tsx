@@ -1,4 +1,13 @@
 import {
+  ApiErrorResponse,
+  ExchangeItemInput,
+  ReturnForm,
+  returnFormSchema,
+  ReturnInput,
+  ReturnItem,
+  ReturnItemInput,
+} from "@/schemas";
+import {
   Control,
   Controller,
   FieldValues,
@@ -8,14 +17,6 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
-import {
-  ApiErrorResponse,
-  ExchangeItemInput,
-  returnBaseSchema,
-  ReturnInput,
-  ReturnItem,
-  ReturnItemInput,
-} from "@/schemas";
 import {
   Form,
   FormControl,
@@ -52,12 +53,12 @@ export default function ReturnExchangeModal({
   salesOrder = false,
 }: {
   onClose: () => void;
-  returns: ReturnItemInput[] | undefined;
+  returns: ReturnItem[];
   referenceId: number;
   salesOrder?: boolean;
 }) {
-  const form = useForm<ReturnInput>({
-    resolver: zodResolver(returnBaseSchema),
+  const form = useForm<ReturnForm>({
+    resolver: zodResolver(returnFormSchema),
     defaultValues: {
       returns,
       exchanges: [],
@@ -250,7 +251,6 @@ export default function ReturnExchangeModal({
               name="exchanges"
             >
               {(value) => {
-                console.log(value);
                 return (
                   value.combination?.unit && (
                     <ColorBadge colorMap={UNIT_COLOR}>
@@ -280,6 +280,7 @@ export default function ReturnExchangeModal({
                     <FormItem>
                       <FormControl>
                         <ProductLookupInput
+                          valueKey="combination"
                           ariaInvalid={Boolean(
                             form.formState.errors?.exchanges?.[row.index]
                               ?.combinationId,
@@ -387,7 +388,7 @@ export default function ReturnExchangeModal({
     >
       <Form {...form}>
         <form
-          className="flex gap-4 items-end flex-col"
+          className="flex gap-4 items-endx flex-col"
           onSubmit={(e) => {
             e.preventDefault();
             console.log(form.getValues(), form.formState.errors);
@@ -398,93 +399,39 @@ export default function ReturnExchangeModal({
               });
           }}
         >
-          <FormField
-            control={form.control}
-            name="returns"
-            render={() => (
-              <FormItem className="w-full">
-                <FormLabel>Returns</FormLabel>
-                <FormControl>
-                  <DataTable
-                    data={returnsFieldArray.fields}
-                    columns={returnColumns}
-                    renderFooter={() => {
-                      const total = fieldReturns.reduce(
-                        (acc, item) => {
-                          const total =
-                            acc.amount +
-                              (Number(item.purchasePrice) -
-                                item.discount / item.quantity) *
-                                item.returnQuantity || 0;
-                          return {
-                            amount: total,
-                          };
-                        },
-                        {
-                          amount: 0,
-                        },
-                      );
-                      return (
-                        <>
-                          <TableRow className="font-bold">
-                            <TableCell>Total</TableCell>
-                            <TableCell colSpan={10} className="text-right">
-                              {formatCurrency(total.amount)}
-                            </TableCell>
-                          </TableRow>
-                        </>
-                      );
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {salesOrder && (
+          <div className="max-h-[70vh] overflow-y-auto">
             <FormField
               control={form.control}
-              name="exchanges"
+              name="returns"
               render={() => (
-                <FormItem className="w-full mb-4">
-                  <FormLabel>Exchanges</FormLabel>
-
+                <FormItem className="w-full">
+                  <FormLabel>Returns</FormLabel>
                   <FormControl>
                     <DataTable
-                      data={exchange.fields}
-                      columns={exchangeColumns}
+                      data={returnsFieldArray.fields}
+                      columns={returnColumns}
                       renderFooter={() => {
-                        const total = getTotalAmountTableFooter(
-                          fieldExchanges || [],
+                        const total = fieldReturns.reduce(
+                          (acc, item) => {
+                            const total =
+                              acc.amount +
+                                (Number(item.purchasePrice) -
+                                  item.discount / item.quantity) *
+                                  item.returnQuantity || 0;
+                            return {
+                              amount: total,
+                            };
+                          },
+                          {
+                            amount: 0,
+                          },
                         );
-
                         return (
                           <>
-                            <TableRow>
-                              <TableCell colSpan={8}>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  className="shadow-sm append-btn"
-                                  onClick={() =>
-                                    exchange.append({
-                                      quantity: 1,
-                                      purchasePrice: 0,
-                                      discount: 0,
-                                      combinationId: -1,
-                                    })
-                                  }
-                                >
-                                  <Plus />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
                             <TableRow className="font-bold">
                               <TableCell>Total</TableCell>
                               <TableCell colSpan={10} className="text-right">
-                                {formatCurrency(
-                                  total?.amount - total?.discount,
-                                )}
+                                {formatCurrency(total.amount)}
                               </TableCell>
                             </TableRow>
                           </>
@@ -496,25 +443,81 @@ export default function ReturnExchangeModal({
                 </FormItem>
               )}
             />
-          )}
-          <FormField
-            control={form.control}
-            name="reason"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter some internal notes..."
-                    className="resize-none"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            {salesOrder && (
+              <FormField
+                control={form.control}
+                name="exchanges"
+                render={() => (
+                  <FormItem className="w-full mb-4">
+                    <FormLabel>Exchanges</FormLabel>
+
+                    <FormControl>
+                      <DataTable
+                        data={exchange.fields}
+                        columns={exchangeColumns}
+                        renderFooter={() => {
+                          const total = getTotalAmountTableFooter(
+                            fieldExchanges || [],
+                          );
+
+                          return (
+                            <>
+                              <TableRow>
+                                <TableCell colSpan={8}>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="shadow-sm append-btn"
+                                    onClick={() =>
+                                      exchange.append({
+                                        quantity: 1,
+                                        purchasePrice: 0,
+                                        discount: 0,
+                                        combinationId: -1,
+                                      })
+                                    }
+                                  >
+                                    <Plus />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                              <TableRow className="font-bold">
+                                <TableCell>Total</TableCell>
+                                <TableCell colSpan={10} className="text-right">
+                                  {formatCurrency(
+                                    total?.amount - total?.discount,
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            </>
+                          );
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
+            <FormField
+              control={form.control}
+              name="reason"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter some internal notes..."
+                      className="resize-none"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <DialogFooter className="flex justify-between">
             <Button>Submit</Button>
