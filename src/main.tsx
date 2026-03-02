@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import * as Sentry from "@sentry/react";
+import { logger } from "@sentry/react";
 import { StrictMode } from "react";
 import App from "./App";
 import "./default.css";
@@ -32,3 +33,8 @@ createRoot(document.getElementById("root")!).render(
     <App />,
   </StrictMode>,
 );
+
+window.addEventListener("vite:preloadError", (event) => {
+  logger.info(JSON.stringify(event));
+  window.location.reload();
+});
