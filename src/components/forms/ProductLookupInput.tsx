@@ -16,6 +16,7 @@ export default function ProductLookupInput<T extends FieldValues>({
   ariaInvalid,
   disableNoQuantity,
   noBreakPacks = false,
+  valueKey = "combinations",
 }: {
   form: UseFormReturn<T>;
   onChange: (value: ProductCombinations) => void;
@@ -24,6 +25,7 @@ export default function ProductLookupInput<T extends FieldValues>({
   ariaInvalid?: boolean;
   disableNoQuantity?: boolean;
   noBreakPacks?: boolean;
+  valueKey?: string;
 }) {
   const [items, setItems] = React.useState<ProductCombinations[]>([]);
   const onSearch = React.useCallback(
@@ -64,7 +66,7 @@ export default function ProductLookupInput<T extends FieldValues>({
         type="button"
         aria-invalid={ariaInvalid}
       >
-        {form.getValues()[name][index]?.combinations?.name}
+        {form.getValues()[name][index]?.[valueKey]?.name}
         <ChevronsUpDown className="ml-auto" />
       </Button>
     </ProductComboSearchCommand>

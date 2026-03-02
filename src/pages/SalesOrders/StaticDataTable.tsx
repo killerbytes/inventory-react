@@ -184,6 +184,7 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         <div className="flex justify-end">
           <Button
             type="button"
+            disabled={returns?.length === 0}
             onClick={() => handleToggle({ returnExchangeModal: true })}
           >
             Returns/Exchange
