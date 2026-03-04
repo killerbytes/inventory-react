@@ -1,13 +1,12 @@
 import {
   BreakPackInput,
-  ProductCombinationInput,
-  ProductCombinations,
+  ProductCombinationsForm,
   StockAdjustment,
 } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 
-export default class ProductCombinationService extends BaseService<ProductCombinations> {
+export default class ProductCombinationService extends BaseService<ProductCombinationsForm> {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/product-combinations" });
   }
@@ -19,7 +18,7 @@ export default class ProductCombinationService extends BaseService<ProductCombin
 
   updateByProductId = async (
     id: number,
-    combinations: ProductCombinationInput[],
+    combinations: ProductCombinationsForm[],
   ) => {
     const response = await this.http.patch(`${this.url}/product/${id}`, {
       combinations,

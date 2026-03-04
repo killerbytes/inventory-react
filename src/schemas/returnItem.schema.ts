@@ -51,6 +51,10 @@ export const returnFormSchema = returnBaseSchema.extend({
 
 export type ReturnItemInput = z.infer<typeof returnItemBaseSchema>;
 export type ExchangeItemInput = z.infer<typeof exchangeItemBaseSchema>;
+
+export type ReturnItemForm = z.infer<typeof returnItemFormSchema>;
+export type ExchangeItemForm = z.infer<typeof exchangeItemFormSchema>;
+
 export type ReturnTransactionInput = z.infer<
   typeof returnTransactionBaseSchema
 >;
@@ -100,7 +104,7 @@ export function mapReturnTransactionToDomain(
   };
 }
 
-export function mapReturnToDomain(input: ReturnInput): Return {
+export function mapReturnToDomain(input: ReturnInput): ReturnInput {
   return {
     reason: input.reason,
     returns: input.returns.map(mapReturnItemToDomain),

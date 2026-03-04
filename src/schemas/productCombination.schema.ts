@@ -6,35 +6,43 @@ import z from "zod";
 export const productCombinationBaseSchema = z.object({
   productId: z.number(),
   unit: z.string(),
-  id: z.number().optional().nullish(),
+  conversionFactor: z.coerce.number().min(1, {
+    message: "Conversion Factor must be at least 1.",
+  }),
+  price: z.coerce.number().optional(),
+  reorderLevel: z.number(),
+  isBreakPack: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+  values: z.array(variantValuesSchema),
+  isBreakPackOfId: z.number().optional().nullish(),
 });
 
-export const productCombinationFormSchema = productCombinationBaseSchema.extend(
-  {
-    conversionFactor: z.coerce.number().min(1, {
-      message: "Conversion Factor must be at least 1.",
-    }),
-    price: z.coerce.number().optional(),
-    reorderLevel: z.number(),
+export const productCombinationInputSchema =
+  productCombinationBaseSchema.extend({
+    id: z.number().optional(),
+  });
+
+export const productCombinationsFormSchema =
+  productCombinationBaseSchema.extend({
+    id: z.number().optional(),
     isBreakPack: z.boolean().nullish(),
     isActive: z.boolean().nullish(),
-    values: z.array(variantValuesSchema),
-    isBreakPackOfId: z.number().nullish(),
-  },
-);
+    inventory: inventorySchema.nullish(),
+    product: z.lazy(() => productSchema).nullish(),
+  });
 
-export const productCombinationsSchema = productCombinationBaseSchema.extend({
+export const productCombinationsSchema = productCombinationsFormSchema.extend({
   sku: z.string(),
-  id: z.number(),
   name: z.string(),
   inventory: inventorySchema,
   product: z.lazy(() => productSchema),
 });
 
 export type ProductCombinationInput = z.infer<
-  typeof productCombinationBaseSchema
+  typeof productCombinationInputSchema
 >;
+
 export type ProductCombinationsForm = z.infer<
-  typeof productCombinationFormSchema
+  typeof productCombinationsFormSchema
 >;
 export type ProductCombinations = z.infer<typeof productCombinationsSchema>;

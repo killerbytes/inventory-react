@@ -7,17 +7,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  GoodReceiptForm,
+  GoodReceiptItem,
+  ProductCombinationsForm,
+  Supplier,
+} from "@/schemas";
+import {
   Controller,
   useFieldArray,
   UseFormReturn,
   useWatch,
 } from "react-hook-form";
-import {
-  GoodReceiptForm,
-  GoodReceiptItem,
-  ProductCombinations,
-  Supplier,
-} from "@/schemas";
 import { productCombinationServices, supplierServices } from "@/services";
 import { goodReceiptItemDefault, UNIT_COLOR } from "@/utils/definitions";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
@@ -76,7 +76,7 @@ export default function PendingForm({
       if (!productCombinationState.noBreakPackHasLoaded) {
         const data = await productCombinationServices.list();
         productCombinationState.setNoBreakPack(
-          data.filter((i: ProductCombinations) => i.isBreakPack === false),
+          data.filter((i: ProductCombinationsForm) => i.isBreakPack === false),
         );
       }
     };
@@ -139,7 +139,7 @@ export default function PendingForm({
               {(value) =>
                 value.combinations?.unit && (
                   <ColorBadge colorMap={UNIT_COLOR}>
-                    {value.combinations?.unit}
+                    {value.combinations.unit}
                   </ColorBadge>
                 )
               }

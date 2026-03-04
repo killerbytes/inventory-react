@@ -1,13 +1,4 @@
 import {
-  ApiErrorResponse,
-  ExchangeItemInput,
-  ReturnForm,
-  returnFormSchema,
-  ReturnInput,
-  ReturnItem,
-  ReturnItemInput,
-} from "@/schemas";
-import {
   Control,
   Controller,
   FieldValues,
@@ -17,6 +8,14 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
+import {
+  ApiErrorResponse,
+  ExchangeItemForm,
+  ReturnForm,
+  returnFormSchema,
+  ReturnItem,
+  ReturnItemForm,
+} from "@/schemas";
 import {
   Form,
   FormControl,
@@ -53,7 +52,7 @@ export default function ReturnExchangeModal({
   salesOrder = false,
 }: {
   onClose: () => void;
-  returns: ReturnItem[];
+  returns: ReturnItemForm[];
   referenceId: number;
   salesOrder?: boolean;
 }) {
@@ -78,7 +77,7 @@ export default function ReturnExchangeModal({
   const fieldReturns = useWatch({ control: form.control, name: "returns" });
   const fieldExchanges = useWatch({ control: form.control, name: "exchanges" });
 
-  const handleReturn = async (values: ReturnInput) => {
+  const handleReturn = async (values: ReturnForm) => {
     try {
       const returns = values.returns.map((i) => ({
         combinationId: i.combinationId,
@@ -104,7 +103,7 @@ export default function ReturnExchangeModal({
     }
   };
 
-  const returnColumns = React.useMemo<ColumnDef<ReturnItemInput>[]>(
+  const returnColumns = React.useMemo<ColumnDef<ReturnItemForm>[]>(
     () => [
       {
         header: () => "Quantity",
@@ -193,7 +192,7 @@ export default function ReturnExchangeModal({
     [form.control],
   );
 
-  const exchangeColumns = React.useMemo<ColumnDef<ExchangeItemInput>[]>(
+  const exchangeColumns = React.useMemo<ColumnDef<ExchangeItemForm>[]>(
     () => [
       {
         accessorKey: "index",

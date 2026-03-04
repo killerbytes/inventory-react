@@ -1,9 +1,4 @@
-import {
-  CancelOrder,
-  ReturnInput,
-  SalesOrder,
-  SalesOrderForm,
-} from "@/schemas";
+import { CancelOrder, ReturnForm, SalesOrder, SalesOrderForm } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 
@@ -17,7 +12,7 @@ export default class SalesOrderService extends BaseService<
     const response = await this.http.patch(`${this.url}/${id}/cancel`, payload);
     return response;
   };
-  returnExchange = async (id: number, payload: ReturnInput) => {
+  returnExchange = async (id: number, payload: ReturnForm) => {
     const response = await this.http.post(
       `${this.url}/${id}/return-exchange`,
       payload,

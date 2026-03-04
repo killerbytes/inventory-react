@@ -1,4 +1,7 @@
-import { productCombinationBaseSchema } from "./productCombination.schema";
+import {
+  productCombinationBaseSchema,
+  productCombinationsFormSchema,
+} from "./productCombination.schema";
 import { MODE_OF_PAYMENT, ORDER_STATUS } from "../utils/definitions";
 import { returnTransactionBaseSchema } from "./returnItem.schema";
 import { statusHistorySchema } from "./others";
@@ -30,7 +33,7 @@ export const salesOrderItemSchema = salesOrderItemBaseSchema.extend({
 });
 
 export const salesOrderItemFormSchema = salesOrderItemBaseSchema.extend({
-  combinations: productCombinationBaseSchema.nullish(),
+  combinations: productCombinationsFormSchema.nullish(),
 });
 
 export const salesOrderBaseSchema = z.object({

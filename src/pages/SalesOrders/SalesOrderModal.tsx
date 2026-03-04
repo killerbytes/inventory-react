@@ -5,7 +5,7 @@ import {
   SalesOrder,
   salesOrderBaseSchema,
   SalesOrderForm,
-  SalesOrderItem,
+  SalesOrderItemForm,
 } from "@/schemas";
 import {
   ERROR,
@@ -112,7 +112,7 @@ export default function SalesOrderModal({
   const watchSalesOrderItems = useWatch({
     control: form?.control,
     name: "salesOrderItems",
-  }) as SalesOrderItem[];
+  }) as SalesOrderItemForm[];
 
   const tableData = fields.map((field, index) => ({
     ...field,
@@ -228,7 +228,7 @@ export default function SalesOrderModal({
     }
   }
 
-  const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
+  const columns = React.useMemo<ColumnDef<SalesOrderItemForm>[]>(
     () => [
       {
         accessorKey: "index",
