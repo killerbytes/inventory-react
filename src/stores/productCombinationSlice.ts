@@ -1,4 +1,4 @@
-import { ProductCombinations } from "@/schemas";
+import { ProductCombination } from "@/schemas";
 import { StoreState } from "./store.types";
 import { StateCreator } from "zustand";
 
@@ -7,12 +7,12 @@ export type ProductCombinationState = {
     hasLoaded: boolean;
     noBreakPackHasLoaded: boolean;
     invalidate: () => void;
-    productCombinations: ProductCombinations[];
-    noBreakPack: ProductCombinations[];
+    ProductCombination: ProductCombination[];
+    noBreakPack: ProductCombination[];
     setProductsCombinations: (
-      productsCombinations: ProductCombinations[],
+      productsCombinations: ProductCombination[],
     ) => void;
-    setNoBreakPack: (NoBreakPack: ProductCombinations[]) => void;
+    setNoBreakPack: (NoBreakPack: ProductCombination[]) => void;
   };
 };
 
@@ -23,17 +23,17 @@ export const createProductCombinationSlice: StateCreator<
   ProductCombinationState
 > = (set) => ({
   productCombinationState: {
-    productCombinations: [],
+    ProductCombination: [],
     hasLoaded: false,
     noBreakPack: [],
     noBreakPackHasLoaded: false,
-    setProductsCombinations: (productCombinations: ProductCombinations[]) => {
+    setProductsCombinations: (ProductCombination: ProductCombination[]) => {
       set(({ productCombinationState }) => {
-        productCombinationState.productCombinations = productCombinations;
+        productCombinationState.ProductCombination = ProductCombination;
         productCombinationState.hasLoaded = true;
       });
     },
-    setNoBreakPack: (NoBreakPack: ProductCombinations[]) =>
+    setNoBreakPack: (NoBreakPack: ProductCombination[]) =>
       set(({ productCombinationState }) => {
         productCombinationState.noBreakPack = NoBreakPack;
         productCombinationState.noBreakPackHasLoaded = true;

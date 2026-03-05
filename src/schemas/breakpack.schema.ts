@@ -1,4 +1,4 @@
-import { productCombinationsSchema } from "./productCombination.schema";
+import { productCombinationSchema } from "./productCombination.schema";
 import * as z from "zod";
 
 export const breakPackBaseSchema = z.object({
@@ -10,8 +10,8 @@ export const breakPackBaseSchema = z.object({
 });
 
 export const breakPackSchema = breakPackBaseSchema.extend({
-  fromCombination: productCombinationsSchema,
-  toCombination: productCombinationsSchema,
+  fromCombination: productCombinationSchema,
+  toCombination: productCombinationSchema,
   user: z.any(),
   createdAt: z.string().nullish(),
 });

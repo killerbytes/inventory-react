@@ -66,10 +66,10 @@ export default function Products() {
   React.useEffect(() => {
     if (
       categories.length > 0 &&
-      productCombinationState.productCombinations.length > 0
+      productCombinationState.ProductCombination.length > 0
     ) {
       const productMap = new Map<number, ProductWithCombinations>();
-      productCombinationState.productCombinations.forEach((item) => {
+      productCombinationState.ProductCombination.forEach((item) => {
         const productId = item.product.id;
         if (!productMap.has(productId)) {
           productMap.set(productId, {
@@ -95,7 +95,7 @@ export default function Products() {
 
       setData(categorizedProductList);
     }
-  }, [categories, productCombinationState.productCombinations]);
+  }, [categories, productCombinationState.ProductCombination]);
 
   React.useEffect(() => {
     const getData = async () => {

@@ -1,4 +1,4 @@
-import { ProductCombinationsForm, VariantTypes } from "@/schemas";
+import { ProductCombinationInput, VariantTypes } from "@/schemas";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { SelectItem } from "@/components/ui/select";
 import { cx } from "class-variance-authority";
@@ -11,7 +11,7 @@ export default function VariantCell({
   idx,
   variant,
 }: {
-  form: UseFormReturn<{ combinations: ProductCombinationsForm[] }>;
+  form: UseFormReturn<{ combinations: ProductCombinationInput[] }>;
   index: number;
   idx: number;
   variant: VariantTypes;

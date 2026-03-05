@@ -1,7 +1,4 @@
-import {
-  productCombinationBaseSchema,
-  productCombinationsFormSchema,
-} from "./productCombination.schema";
+import { productCombinationSearchSchema } from "./productCombination.schema";
 import { MODE_OF_PAYMENT, ORDER_STATUS } from "../utils/definitions";
 import { returnTransactionBaseSchema } from "./returnItem.schema";
 import { statusHistorySchema } from "./others";
@@ -19,6 +16,7 @@ export const salesOrderItemBaseSchema = z.object({
   }),
   discount: z.coerce.number().nullish(),
   discountNote: z.string().nullish(),
+  combinations: productCombinationSearchSchema.nullish(),
 });
 
 export const salesOrderItemSchema = salesOrderItemBaseSchema.extend({
@@ -29,11 +27,6 @@ export const salesOrderItemSchema = salesOrderItemBaseSchema.extend({
   skuSnapshot: z.string(),
   nameSnapshot: z.string(),
   unit: z.string().nullish(),
-  combinations: productCombinationBaseSchema.nullish(),
-});
-
-export const salesOrderItemFormSchema = salesOrderItemBaseSchema.extend({
-  combinations: productCombinationsFormSchema.nullish(),
 });
 
 export const salesOrderBaseSchema = z.object({
@@ -60,7 +53,7 @@ export const salesOrderBaseSchema = z.object({
 
 export const salesOrderFormSchema = salesOrderBaseSchema
   .extend({
-    salesOrderItems: z.array(salesOrderItemFormSchema),
+    salesOrderItems: z.array(salesOrderItemBaseSchema),
   })
   .superRefine((data, ctx) => {
     if (data.isDelivery && !data.deliveryDate) {
@@ -119,4 +112,3 @@ export type SalesOrderInput = z.infer<typeof salesOrderBaseSchema>;
 export type SalesOrder = z.infer<typeof salesOrderSchema>;
 export type SalesOrderForm = z.infer<typeof salesOrderFormSchema>;
 export type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
-export type SalesOrderItemForm = z.infer<typeof salesOrderItemFormSchema>;

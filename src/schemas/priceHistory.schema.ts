@@ -1,10 +1,10 @@
-import { productCombinationsSchema } from "./productCombination.schema";
+import { productCombinationSchema } from "./productCombination.schema";
 import z from "zod";
 
 export const priceHistorySchema = z.object({
   id: z.number().optional(),
   productId: z.number(),
-  combinations: productCombinationsSchema,
+  combinations: productCombinationSchema,
   fromPrice: z.number(),
   toPrice: z.number(),
   changedBy: z.number(),

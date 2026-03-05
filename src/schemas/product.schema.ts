@@ -1,4 +1,4 @@
-import { productCombinationsSchema } from "./productCombination.schema";
+import { productCombinationSchema } from "./productCombination.schema";
 import { variantTypesSchema } from "./variant.schema";
 import z from "zod";
 
@@ -19,7 +19,7 @@ export const productSchema = productBaseSchema.extend({
 });
 
 export const productSchemaWithCombinations = productSchema.extend({
-  combinations: z.array(z.lazy(() => productCombinationsSchema)),
+  combinations: z.array(z.lazy(() => productCombinationSchema)),
 });
 
 export type Product = z.infer<typeof productSchema>;

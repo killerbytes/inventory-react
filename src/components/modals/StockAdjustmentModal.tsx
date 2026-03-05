@@ -1,6 +1,6 @@
 import {
   ApiErrorResponse,
-  ProductCombinations,
+  ProductCombination,
   StockAdjustment,
   stockAdjustmentSchema,
 } from "@/schemas";
@@ -44,7 +44,7 @@ export default function StockAdjustmentModal({
   onSubmit: (values: StockAdjustment) => Promise<void>;
 }) {
   const [loading, setLoading] = React.useState(false);
-  const [data, setData] = React.useState<ProductCombinations>();
+  const [data, setData] = React.useState<ProductCombination>();
   const { productCombinationState } = useStore();
   const form = useForm<StockAdjustment>({
     resolver: zodResolver(stockAdjustmentSchema),

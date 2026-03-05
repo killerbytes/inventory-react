@@ -3,9 +3,9 @@ import {
   ApiErrorResponse,
   Customer,
   SalesOrder,
-  salesOrderBaseSchema,
   SalesOrderForm,
-  SalesOrderItemForm,
+  salesOrderFormSchema,
+  SalesOrderItem,
 } from "@/schemas";
 import {
   ERROR,
@@ -67,8 +67,7 @@ const salesOrderItemDefault = {
   discountNote: "",
   combinationId: -1,
 };
-const salesOrderDefalt = {
-  // deliveryDate: new Date().toISOString(),
+const salesOrderDefault = {
   orderDate: new Date().toISOString(),
   customerId: 1,
   modeOfPayment: "CASH",
@@ -97,10 +96,10 @@ export default function SalesOrderModal({
           `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
         ) as string,
       )
-    : salesOrderDefalt;
+    : salesOrderDefault;
 
   const form = useForm<SalesOrderForm>({
-    resolver: zodResolver(salesOrderBaseSchema),
+    resolver: zodResolver(salesOrderFormSchema),
     defaultValues,
   });
 
@@ -112,7 +111,7 @@ export default function SalesOrderModal({
   const watchSalesOrderItems = useWatch({
     control: form?.control,
     name: "salesOrderItems",
-  }) as SalesOrderItemForm[];
+  }) as SalesOrderItem[];
 
   const tableData = fields.map((field, index) => ({
     ...field,
@@ -228,7 +227,7 @@ export default function SalesOrderModal({
     }
   }
 
-  const columns = React.useMemo<ColumnDef<SalesOrderItemForm>[]>(
+  const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
     () => [
       {
         accessorKey: "index",

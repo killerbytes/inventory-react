@@ -16,7 +16,7 @@ export default function ProductHistory({
   isBreakPackFilter,
 }: {
   productName: string;
-  selectedCombination: { id: number | string; name: string };
+  selectedCombination: { id: number; name: string };
   isBreakPackFilter: boolean;
 }) {
   const [data, setData] =

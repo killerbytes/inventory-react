@@ -11,7 +11,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, ProductCombinations } from "@/schemas";
+import { filterProps, PaginatedResponse, ProductCombination } from "@/schemas";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
@@ -29,7 +29,7 @@ import React from "react";
 
 type Props = {
   name: string;
-  combinations: ProductCombinations;
+  combinations: ProductCombination;
   totalProfit: number;
   totalQuantity: number;
   nameSnapshot: string;

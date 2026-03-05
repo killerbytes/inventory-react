@@ -1,10 +1,10 @@
-import { productCombinationsSchema } from "./productCombination.schema";
+import { productCombinationSchema } from "./productCombination.schema";
 import z from "zod";
 
 export const stockAdjustmentSchema = z.object({
   referenceNo: z.string().nullish(),
   combinationId: z.number(),
-  combination: productCombinationsSchema.optional(),
+  combination: productCombinationSchema.optional(),
   systemQuantity: z.number().nullish(),
   newQuantity: z.coerce.number().min(0, {
     message: "New Quantity must be at least 0.",

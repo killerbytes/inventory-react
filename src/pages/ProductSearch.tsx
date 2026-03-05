@@ -12,14 +12,14 @@ import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { Spinner } from "@/components/ui/spinner";
 import ColorBadge from "@/components/ColorBadge";
-import { ProductCombinations } from "@/schemas";
+import { ProductCombination } from "@/schemas";
 import { cx } from "class-variance-authority";
 import useDebounce from "@/hooks/useDebounce";
 import { Search, X } from "lucide-react";
 import React from "react";
 
 export default function ProductSearch() {
-  const [data, setData] = React.useState<ProductCombinations[]>([]);
+  const [data, setData] = React.useState<ProductCombination[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
   const [search, setSearch] = React.useState(initialSearch);
@@ -46,14 +46,14 @@ export default function ProductSearch() {
         .filter((i) => i.length > 0);
 
       for (const item of res) {
-        const productCombinations = item.combinations.filter(
-          (i: ProductCombinations) => {
+        const ProductCombination = item.combinations.filter(
+          (i: ProductCombination) => {
             const name = i.name.toLowerCase();
             return words.every((word) => name.includes(word.toLowerCase()));
           },
         );
 
-        result.push(...productCombinations);
+        result.push(...ProductCombination);
       }
 
       setData(result);
@@ -78,7 +78,7 @@ export default function ProductSearch() {
     }
   }, [debouncedQuery, setSearchParams]);
 
-  const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
+  const columns = React.useMemo<ColumnDef<ProductCombination>[]>(
     () => [
       {
         header: "Unit",
@@ -87,7 +87,7 @@ export default function ProductSearch() {
           headerClassName: "h-0",
           className: "w-20 text-xs",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return (
             <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
           );
@@ -95,7 +95,7 @@ export default function ProductSearch() {
       },
       {
         accessorKey: "Product",
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return (
             <Link
               className={GLOBAL_COLOR.PRODUCT}
@@ -114,7 +114,7 @@ export default function ProductSearch() {
           headerClassName: "h-0 text-right",
           className: "w-20 text-right font-bold",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           const price = row.original.price ?? 0;
           const avgPrice = Number(row.original.inventory?.averagePrice ?? 0);
           const error = price > 0 && avgPrice >= price;
@@ -136,7 +136,7 @@ export default function ProductSearch() {
           headerClassName: "h-0 text-right",
           className: "w-20 text-right text-gray-500 text-xs",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return formatCurrency(Number(row.original.inventory?.averagePrice));
         },
       },
@@ -147,7 +147,7 @@ export default function ProductSearch() {
           headerClassName: "h-0 text-right",
           className: "w-20 text-right",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return Number(row.original.inventory?.quantity);
         },
       },

@@ -1,6 +1,6 @@
 import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
 import BreakPackModal from "@/components/modals/BreakPackModal";
-import { ProductCombinations, VariantTypes } from "@/schemas";
+import { ProductCombination, VariantTypes } from "@/schemas";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -22,7 +22,7 @@ export default function Combinations({
   selectedCombination,
   isBreakPackFilter,
 }: {
-  combinations: ProductCombinations[];
+  combinations: ProductCombination[];
   variants: VariantTypes[];
   getData: () => void;
   selectedCombination: { id: number | string; name: string };
@@ -30,7 +30,7 @@ export default function Combinations({
 }) {
   const [combinations, setCombinations] = React.useState(_combinations);
   const { productCombinationState } = useStore();
-  const [selected, setSelected] = React.useState<ProductCombinations | null>(
+  const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
   );
 
@@ -39,7 +39,7 @@ export default function Combinations({
     stockAdjustmentModal: false,
   });
 
-  const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
+  const columns = React.useMemo<ColumnDef<ProductCombination>[]>(
     () => [
       {
         accessorKey: "name",
@@ -59,7 +59,7 @@ export default function Combinations({
             "italic underline font-bold": variant.isBreakpackFilter,
           }),
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           const x = row.original.values.findIndex(
             (i) => i.variantTypeId === variants[idx].id,
           );
@@ -70,7 +70,7 @@ export default function Combinations({
       {
         accessorKey: "unit",
         header: "Unit",
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return (
             <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
           );
@@ -79,7 +79,7 @@ export default function Combinations({
       {
         accessorKey: "price",
         header: "Price",
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return (
             <div
               className={cx("font-bold", {
@@ -94,7 +94,7 @@ export default function Combinations({
       {
         accessorKey: "averagePrice",
         header: "Average Price",
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return formatCurrency(Number(row.original.inventory.averagePrice));
         },
       },
@@ -105,7 +105,7 @@ export default function Combinations({
           headerClassName: "text-right",
           className: "w-0 text-right",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => (
+        cell: ({ row }: { row: Row<ProductCombination> }) => (
           <span
             className={cx({
               "font-bold text-red-500": row.original.inventory.quantity == 0,
@@ -122,7 +122,7 @@ export default function Combinations({
           headerClassName: "text-right",
           className: "w-0 text-right text-xs",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => (
+        cell: ({ row }: { row: Row<ProductCombination> }) => (
           <div>{Number(row.original.conversionFactor)}</div>
         ),
       },
@@ -140,7 +140,7 @@ export default function Combinations({
         meta: {
           className: "w-0",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => (
+        cell: ({ row }: { row: Row<ProductCombination> }) => (
           <div className="flex gap-2">
             <Button
               type="button"
@@ -233,7 +233,7 @@ export default function Combinations({
           onClose={() => {
             handleToggle({ breakPackModal: false });
           }}
-          combination={selected as ProductCombinations}
+          combination={selected as ProductCombination}
           onSubmit={async () => {
             getData();
             productCombinationState.invalidate();

@@ -20,18 +20,24 @@ export const productCombinationBaseSchema = z.object({
 export const productCombinationInputSchema =
   productCombinationBaseSchema.extend({
     id: z.number().optional(),
-  });
-
-export const productCombinationsFormSchema =
-  productCombinationBaseSchema.extend({
-    id: z.number().optional(),
     isBreakPack: z.boolean().nullish(),
     isActive: z.boolean().nullish(),
     inventory: inventorySchema.nullish(),
     product: z.lazy(() => productSchema).nullish(),
   });
 
-export const productCombinationsSchema = productCombinationsFormSchema.extend({
+export const productCombinationSearchSchema = z.object({
+  id: z.number(),
+  productId: z.number(),
+  name: z.string(),
+  price: z.number().optional(),
+  unit: z.string(),
+  isBreakPack: z.boolean().optional(),
+  inventory: inventorySchema,
+});
+
+export const productCombinationSchema = productCombinationInputSchema.extend({
+  id: z.number(),
   sku: z.string(),
   name: z.string(),
   inventory: inventorySchema,
@@ -42,7 +48,8 @@ export type ProductCombinationInput = z.infer<
   typeof productCombinationInputSchema
 >;
 
-export type ProductCombinationsForm = z.infer<
-  typeof productCombinationsFormSchema
+export type ProductCombination = z.infer<typeof productCombinationSchema>;
+
+export type ProductCombinationSearch = z.infer<
+  typeof productCombinationSearchSchema
 >;
-export type ProductCombinations = z.infer<typeof productCombinationsSchema>;

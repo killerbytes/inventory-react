@@ -1,12 +1,4 @@
 import {
-  GoodReceipt,
-  GoodReceiptInput,
-  GoodReceiptItem,
-  ReturnItemForm,
-  ReturnItemInput,
-  ReturnTransaction,
-} from "@/schemas";
-import {
   Form,
   FormControl,
   FormField,
@@ -20,6 +12,12 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
+import {
+  GoodReceipt,
+  GoodReceiptForm,
+  GoodReceiptItem,
+  ReturnItem,
+} from "@/schemas";
 import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
 import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
@@ -39,7 +37,7 @@ import { useStore } from "@/stores";
 export default function PartialForm({
   form,
 }: {
-  form: UseFormReturn<GoodReceiptInput>;
+  form: UseFormReturn<GoodReceiptForm>;
 }) {
   const { id } = useParams();
   const { control } = form;
@@ -48,8 +46,8 @@ export default function PartialForm({
     name: "goodReceiptLines",
   });
   const [toggle, handleToggle] = useToggle({ supplierReturnsModal: false });
-  const [returns, setReturns] = React.useState<ReturnItemForm[]>([]);
-  React.useState<ReturnTransaction[]>();
+  const [returns, setReturns] = React.useState<ReturnItem[]>([]);
+
   const {
     goodReceiptState: { returnEnabled, setReturnEnabled },
   } = useStore();
@@ -247,9 +245,10 @@ export default function PartialForm({
               setReturns(
                 selectedItems.map((i) => ({
                   ...i,
-                  combination: i.combinations,
+                  combinationSnapshot: i.combinations,
                   returnQuantity: i.quantity,
-                })) as ReturnItemInput[],
+                  discount: i.discount ?? 0,
+                })),
               );
             }}
             renderFooter={(data) => {

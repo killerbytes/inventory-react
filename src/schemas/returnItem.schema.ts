@@ -1,12 +1,9 @@
-import {
-  productCombinationBaseSchema,
-  productCombinationsSchema,
-} from "./productCombination.schema";
+import { productCombinationSearchSchema } from "./productCombination.schema";
 import z from "zod";
 
 export const returnItemBaseSchema = z.object({
   combinationId: z.number(),
-  combination: productCombinationsSchema.nullish(),
+  combination: productCombinationSearchSchema.nullish(),
   returnQuantity: z.coerce.number(),
   purchasePrice: z.coerce.number(),
   discount: z.coerce.number(),
@@ -39,11 +36,19 @@ export const returnBaseSchema = z.object({
 });
 
 export const returnItemFormSchema = returnItemBaseSchema.extend({
-  combination: productCombinationBaseSchema.nullish(),
+  combination: productCombinationSearchSchema.nullish(),
+});
+export const returnItemSchema = returnItemBaseSchema.extend({
+  combination: productCombinationSearchSchema.nullish(),
 });
 export const exchangeItemFormSchema = exchangeItemBaseSchema.extend({
-  combination: productCombinationBaseSchema.nullish(),
+  combination: productCombinationSearchSchema.nullish(),
 });
+
+export const exchangeItemSchema = exchangeItemBaseSchema.extend({
+  combination: productCombinationSearchSchema.nullish(),
+});
+
 export const returnFormSchema = returnBaseSchema.extend({
   returns: z.array(returnItemFormSchema),
   exchanges: z.array(exchangeItemFormSchema).optional(),
@@ -60,15 +65,9 @@ export type ReturnTransactionInput = z.infer<
 >;
 export type ReturnInput = z.infer<typeof returnBaseSchema>;
 
-export type ReturnItem = Omit<ReturnItemInput, "combination"> & {
-  combinationSnapshot: ReturnItemInput["combination"];
-};
-export type ExchangeItem = Omit<ExchangeItemInput, "combination"> & {
-  combinationSnapshot: ExchangeItemInput["combination"];
-};
-export type ReturnTransaction = Omit<ReturnTransactionInput, "returnItems"> & {
-  returnItems: ReturnItem[];
-};
+export type ReturnItem = z.infer<typeof returnItemSchema>;
+export type ExchangeItem = z.infer<typeof exchangeItemSchema>;
+export type ReturnTransaction = z.infer<typeof returnTransactionBaseSchema>;
 // export type Return = {
 //   returns: ReturnItem[];
 //   exchanges: ExchangeItem[];
@@ -77,37 +76,37 @@ export type ReturnTransaction = Omit<ReturnTransactionInput, "returnItems"> & {
 
 export type ReturnForm = z.infer<typeof returnFormSchema>;
 
-export function mapReturnItemToDomain(input: ReturnItemInput): ReturnItem {
-  const { combination, ...rest } = input;
+// export function mapReturnItemToDomain(input: ReturnItemInput): ReturnItem {
+//   const { combination, ...rest } = input;
 
-  return {
-    ...rest,
-    combinationSnapshot: combination,
-  };
-}
-export function mapExchangeItemToDomain(
-  input: ExchangeItemInput,
-): ExchangeItem {
-  const { combination, ...rest } = input;
+//   return {
+//     ...rest,
+//     combinationSnapshot: combination,
+//   };
+// }
+// export function mapExchangeItemToDomain(
+//   input: ExchangeItemInput,
+// ): ExchangeItem {
+//   const { combination, ...rest } = input;
 
-  return {
-    ...rest,
-    combinationSnapshot: combination,
-  };
-}
-export function mapReturnTransactionToDomain(
-  input: ReturnTransactionInput,
-): ReturnTransaction {
-  return {
-    ...input,
-    returnItems: input.returnItems.map(mapReturnItemToDomain),
-  };
-}
+//   return {
+//     ...rest,
+//     combinationSnapshot: combination,
+//   };
+// }
+// export function mapReturnTransactionToDomain(
+//   input: ReturnTransactionInput,
+// ): ReturnTransaction {
+//   return {
+//     ...input,
+//     returnItems: input.returnItems.map(mapReturnItemToDomain),
+//   };
+// }
 
-export function mapReturnToDomain(input: ReturnInput): ReturnInput {
-  return {
-    reason: input.reason,
-    returns: input.returns.map(mapReturnItemToDomain),
-    exchanges: input.exchanges?.map(mapExchangeItemToDomain) || [],
-  };
-}
+// export function mapReturnToDomain(input: ReturnInput): ReturnInput {
+//   return {
+//     reason: input.reason,
+//     returns: input.returns.map(mapReturnItemToDomain),
+//     exchanges: input.exchanges?.map(mapExchangeItemToDomain) || [],
+//   };
+// }

@@ -9,7 +9,7 @@ import {
 import {
   GoodReceiptForm,
   GoodReceiptItem,
-  ProductCombinationsForm,
+  ProductCombinationSearch,
   Supplier,
 } from "@/schemas";
 import {
@@ -76,7 +76,7 @@ export default function PendingForm({
       if (!productCombinationState.noBreakPackHasLoaded) {
         const data = await productCombinationServices.list();
         productCombinationState.setNoBreakPack(
-          data.filter((i: ProductCombinationsForm) => i.isBreakPack === false),
+          data.filter((i: ProductCombinationSearch) => i.isBreakPack === false),
         );
       }
     };

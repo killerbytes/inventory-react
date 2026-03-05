@@ -52,7 +52,7 @@ export default function ReturnExchangeModal({
   salesOrder = false,
 }: {
   onClose: () => void;
-  returns: ReturnItemForm[];
+  returns: ReturnItem[];
   referenceId: number;
   salesOrder?: boolean;
 }) {

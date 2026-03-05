@@ -192,7 +192,7 @@ export default function StaticDataTable({ data }: { data: SalesOrder }) {
         </div>
       )}
 
-      {toggle.returnExchangeModal && (
+      {toggle.returnExchangeModal && returns && (
         <ReturnExchangeModal
           onClose={() => {
             handleToggle({ returnExchangeModal: false });

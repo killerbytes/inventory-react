@@ -11,7 +11,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, ProductCombinations } from "@/schemas";
+import { filterProps, PaginatedResponse, ProductCombination } from "@/schemas";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -27,7 +27,7 @@ import React from "react";
 
 type Props = {
   combinationId: number;
-  combinations: ProductCombinations;
+  combinations: ProductCombination;
   id: number;
   lastSoldAt: string;
   quantity: number;

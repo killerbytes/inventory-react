@@ -1,7 +1,7 @@
 import {
   ApiErrorResponse,
   GoodReceipt,
-  ProductCombinations,
+  ProductCombination,
   StatusHistory,
 } from "@/schemas";
 import { productCombinationServices } from "@/services";
@@ -32,12 +32,6 @@ export function getErrorMessage(error: ApiErrorResponse): ApiErrorResponse {
     default:
       return { errors, message, ...rest };
   }
-}
-
-export function getSKU(combination: ProductCombinations) {
-  console.log(combination);
-
-  // return `${combination.product.name}-${combination.product.id}`;
 }
 
 export const mappedStatusHistory = (
@@ -95,7 +89,7 @@ export const getMappedSearchProductCombinations = async (params: {
     return [];
   }
 
-  const productCombinations = await productCombinationServices.search({
+  const ProductCombination = await productCombinationServices.search({
     limit: params.limit ?? 20,
     ...params,
   });
@@ -106,20 +100,19 @@ export const getMappedSearchProductCombinations = async (params: {
     .split(" ")
     .filter((i) => i.length > 0);
 
-  for (const item of productCombinations) {
+  for (const item of ProductCombination) {
     if (item?.description?.indexOf(search) > -1) {
       result.push(...item.combinations);
     } else {
-      const productCombinations = item.combinations?.filter(
-        (i: ProductCombinations) => {
+      const ProductCombination = item.combinations?.filter(
+        (i: ProductCombination) => {
           const name = i.name.toLowerCase();
           return words.every((word) => name.includes(word));
         },
       );
-      result.push(...productCombinations);
+      result.push(...ProductCombination);
     }
   }
-  console.log(result);
 
   return result;
 };

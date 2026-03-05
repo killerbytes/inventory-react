@@ -2,7 +2,7 @@ import {
   ApiErrorResponse,
   breakPackBaseSchema,
   BreakPackInput,
-  ProductCombinations,
+  ProductCombination,
   VariantTypes,
 } from "@/schemas";
 import {
@@ -36,13 +36,13 @@ export default function BreakPackModal({
   onClose,
   onSubmit,
 }: Readonly<{
-  combination: ProductCombinations;
+  combination: ProductCombination;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => Promise<void>;
 }>) {
-  const [options, setOptions] = React.useState<ProductCombinations[]>([]);
-  const [selected, setSelected] = React.useState<ProductCombinations>();
+  const [options, setOptions] = React.useState<ProductCombination[]>([]);
+  const [selected, setSelected] = React.useState<ProductCombination>();
   const [loading, setLoading] = React.useState(false);
   const { productCombinationState } = useStore();
   const form = useForm<BreakPackInput>({
@@ -76,10 +76,10 @@ export default function BreakPackModal({
   }, [combination, form, packType, selected?.conversionFactor]);
 
   const filterOptionsByVariant = (
-    options: ProductCombinations[],
+    options: ProductCombination[],
     variant: string,
   ) => {
-    return options.filter((o: ProductCombinations) =>
+    return options.filter((o: ProductCombination) =>
       o.values.some((v) => v.value === variant),
     );
   };
@@ -90,7 +90,7 @@ export default function BreakPackModal({
         combination?.productId,
       );
       const options = combinations.filter(
-        (c: ProductCombinations) =>
+        (c: ProductCombination) =>
           c.id != combination.id &&
           (c.isBreakPackOfId === combination.id ||
             combination.isBreakPackOfId === c.id),
@@ -155,7 +155,7 @@ export default function BreakPackModal({
     form.setValue("toCombinationId", Number(value));
   };
 
-  const renderSelectOption = (option: ProductCombinations) => (
+  const renderSelectOption = (option: ProductCombination) => (
     <SelectItem
       key={option.id}
       value={String(option.id)}
@@ -307,8 +307,8 @@ export default function BreakPackModal({
 }
 
 function getPackRelationType(
-  fromCombo: ProductCombinations,
-  toCombo?: ProductCombinations,
+  fromCombo: ProductCombination,
+  toCombo?: ProductCombination,
 ) {
   if (toCombo?.isBreakPackOfId === fromCombo.id) return "BREAK_PACK";
   if (fromCombo.isBreakPackOfId === toCombo?.id) return "RE_PACK";

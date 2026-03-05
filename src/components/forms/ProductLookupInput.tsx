@@ -3,7 +3,7 @@ import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
 import useExcludeExistToList from "@/hooks/useExcludeExists";
 import GroupedCommandList from "../GroupedCommandList";
-import { ProductCombinations } from "@/schemas";
+import { ProductCombinationSearch } from "@/schemas";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import React from "react";
@@ -19,7 +19,7 @@ export default function ProductLookupInput<T extends FieldValues>({
   valueKey = "combinations",
 }: {
   form: UseFormReturn<T>;
-  onChange: (value: ProductCombinations) => void;
+  onChange: (value: ProductCombinationSearch) => void;
   index: number;
   name: Path<T>;
   ariaInvalid?: boolean;
@@ -27,7 +27,7 @@ export default function ProductLookupInput<T extends FieldValues>({
   noBreakPacks?: boolean;
   valueKey?: string;
 }) {
-  const [items, setItems] = React.useState<ProductCombinations[]>([]);
+  const [items, setItems] = React.useState<ProductCombinationSearch[]>([]);
   const onSearch = React.useCallback(
     async (search: string) => {
       const combinations = await getMappedSearchProductCombinations({

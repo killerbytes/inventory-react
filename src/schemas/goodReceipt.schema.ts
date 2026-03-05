@@ -1,4 +1,7 @@
-import { productCombinationsFormSchema } from "./productCombination.schema";
+import {
+  productCombinationSchema,
+  productCombinationSearchSchema,
+} from "./productCombination.schema";
 import { returnTransactionBaseSchema } from "./returnItem.schema";
 import { ORDER_STATUS } from "@/utils/definitions";
 import { statusHistorySchema } from "./others";
@@ -37,11 +40,11 @@ export const goodReceiptLineSchema = goodReceiptLineBaseSchema.extend({
   skuSnapshot: z.string(),
   nameSnapshot: z.string(),
   unit: z.string(),
-  combinations: productCombinationsFormSchema.nullish(),
+  combinations: productCombinationSearchSchema.nullish(),
 });
 
 export const goodReceiptLineFormSchema = goodReceiptLineBaseSchema.extend({
-  combinations: productCombinationsFormSchema.nullish(),
+  combinations: productCombinationSearchSchema.nullish(),
 });
 
 export const goodReceiptBaseSchema = z.object({
@@ -103,7 +106,7 @@ export const invoiceGoodReceiptSchema = goodReceiptBaseSchema.extend({
 
 export const supplierHistorySchema = goodReceiptLineSchema.extend({
   goodReceipt: goodReceiptSchema,
-  combinations: productCombinationsFormSchema,
+  combinations: productCombinationSchema,
 });
 
 export type GoodReceiptInput = z.infer<typeof goodReceiptBaseSchema>;

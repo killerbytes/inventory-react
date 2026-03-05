@@ -2,8 +2,7 @@ import {
   ApiErrorResponse,
   Product,
   ProductCombinationInput,
-  ProductCombinationsForm,
-  productCombinationsFormSchema,
+  productCombinationInputSchema,
   ProductWithCombinations,
   VariantTypes,
   VariantValues,
@@ -56,18 +55,18 @@ export default function CombinationModal({
   } = useStore();
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const [combinations, setCombinations] = React.useState<
-    ProductCombinationsForm[]
+    ProductCombinationInput[]
   >([]);
 
   const form = useForm<{
-    combinations: ProductCombinationsForm[];
+    combinations: ProductCombinationInput[];
   }>({
     defaultValues: {
       combinations: [],
     },
     resolver: zodResolver(
       z.object({
-        combinations: z.array(productCombinationsFormSchema),
+        combinations: z.array(productCombinationInputSchema),
       }),
     ),
   });
@@ -83,7 +82,7 @@ export default function CombinationModal({
     name: "combinations",
   });
 
-  const tableData: ProductCombinationsForm[] = watchCombinations.map((i) => {
+  const tableData: ProductCombinationInput[] = watchCombinations.map((i) => {
     const row = combinations.find((f) => f.id === i.id);
     return { ...i, inventory: row?.inventory };
   });
@@ -107,7 +106,7 @@ export default function CombinationModal({
       const {
         combinations,
         variants,
-      }: { combinations: ProductCombinationsForm[]; variants: VariantTypes[] } =
+      }: { combinations: ProductCombinationInput[]; variants: VariantTypes[] } =
         await productCombinationServices.getByProductId(product.id);
       const map = combinations.map((i) => i.values);
       const x = combinations.map((i) => {
@@ -138,7 +137,7 @@ export default function CombinationModal({
   }, [getData]);
 
   const handleSubmit = async (data: {
-    combinations: ProductCombinationsForm[];
+    combinations: ProductCombinationInput[];
   }) => {
     const { combinations } = data;
 
@@ -175,7 +174,7 @@ export default function CombinationModal({
     }
   };
 
-  const columns = useMemo<ColumnDef<ProductCombinationsForm>[]>(
+  const columns = useMemo<ColumnDef<ProductCombinationInput>[]>(
     () => [
       {
         accessorKey: "id",
@@ -276,7 +275,7 @@ export default function CombinationModal({
           const type = variants.find(
             (item: VariantTypes) => item.isBreakpackFilter,
           );
-          let options: ProductCombinationsForm[] = [];
+          let options: ProductCombinationInput[] = [];
           const allOriginalData = table
             .getRowModel()
             .rows.map((row) => row.original);

@@ -4,13 +4,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import {
-  mapReturnTransactionToDomain,
-  ReturnItem,
-  ReturnTransactionInput,
-} from "@/schemas";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
+import { ReturnItem, ReturnTransactionInput } from "@/schemas";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCell, TableRow } from "./ui/table";
 import { cx } from "class-variance-authority";
@@ -21,13 +17,13 @@ import { Label } from "./ui/label";
 import React from "react";
 
 export default function ReturnTransactionsTable({
-  data: _data,
+  data,
 }: {
   data: ReturnTransactionInput[];
 }) {
-  const data = _data.map((item) => {
-    return mapReturnTransactionToDomain(item);
-  });
+  // const data = _data.map((item) => {
+  //   return mapReturnTransactionToDomain(item);
+  // });
 
   const columns = React.useMemo<ColumnDef<ReturnItem>[]>(
     () => [
@@ -58,7 +54,7 @@ export default function ReturnTransactionsTable({
         cell: ({ row }) => {
           return (
             <ColorBadge colorMap={UNIT_COLOR}>
-              {String(row.original.combinationSnapshot?.unit)}
+              {String(row.original.combination?.unit)}
             </ColorBadge>
           );
         },
@@ -73,10 +69,10 @@ export default function ReturnTransactionsTable({
           return (
             <div className="flex gap-1">
               <Link
-                to={`${ROUTES.PRODUCTS}/${row.original.combinationSnapshot?.productId}`}
+                to={`${ROUTES.PRODUCTS}/${row.original.combination?.productId}`}
                 className={cx("font-medium", GLOBAL_COLOR.PRODUCT)}
               >
-                {row.original.combinationSnapshot?.name}
+                {row.original.combination?.name}
               </Link>
             </div>
           );

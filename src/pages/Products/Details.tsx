@@ -16,7 +16,7 @@ import {
 import {
   ApiErrorResponse,
   productBaseSchema,
-  ProductCombinations,
+  ProductCombination,
   ProductInput,
   ProductWithCombinations,
   VariantTypes,
@@ -62,7 +62,7 @@ export default function ProductEdit() {
   const [selectedCombination, setSelectedCombination] = React.useState<string>(
     String(defaultOption.id),
   );
-  const [combinations, setCombinations] = React.useState<ProductCombinations[]>(
+  const [combinations, setCombinations] = React.useState<ProductCombination[]>(
     [],
   );
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
@@ -156,10 +156,7 @@ export default function ProductEdit() {
     return variants.find((item) => item.isBreakpackFilter);
   }, [variants]);
 
-  const selectedCombo = React.useMemo<{
-    id: number;
-    name: string;
-  }>(() => {
+  const selectedCombo = React.useMemo(() => {
     if (breakPackFilter) {
       const found = breakPackFilter?.values.find(
         (i) => i.id === Number(selectedCombination),

@@ -1,4 +1,4 @@
-import { ProductCombinations, ProductWithCombinations } from "@/schemas";
+import { ProductCombination, ProductWithCombinations } from "@/schemas";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
@@ -13,7 +13,7 @@ export default function ProductItem({
 }: {
   item: ProductWithCombinations;
 }) {
-  const columns = React.useMemo<ColumnDef<ProductCombinations>[]>(
+  const columns = React.useMemo<ColumnDef<ProductCombination>[]>(
     () => [
       {
         accessorKey: "name",
@@ -46,7 +46,7 @@ export default function ProductItem({
           headerClassName: "h-0",
           className: "w-20",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return formatCurrency(row.original.price ?? 0);
         },
       },
@@ -58,7 +58,7 @@ export default function ProductItem({
           headerClassName: "h-0",
           className: "w-20",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return Number(row.original.inventory?.quantity);
         },
       },
@@ -69,7 +69,7 @@ export default function ProductItem({
           headerClassName: "h-0",
           className: "w-20",
         },
-        cell: ({ row }: { row: Row<ProductCombinations> }) => {
+        cell: ({ row }: { row: Row<ProductCombination> }) => {
           return (
             <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
           );

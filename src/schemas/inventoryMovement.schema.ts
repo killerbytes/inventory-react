@@ -1,11 +1,11 @@
-import { productCombinationsSchema } from "./productCombination.schema";
+import { productCombinationSchema } from "./productCombination.schema";
 import z from "zod";
 
 export const inventoryMovementSchema = z.object({
   id: z.number().optional(),
   // inventoryId: z.number(),
   // inventory: z.any(),
-  combination: productCombinationsSchema,
+  combination: productCombinationSchema,
   quantity: z.number(),
   costPerUnit: z.number(),
   totalCost: z.number(),

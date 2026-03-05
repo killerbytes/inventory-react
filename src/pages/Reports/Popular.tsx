@@ -11,7 +11,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, ProductCombinations } from "@/schemas";
+import { filterProps, PaginatedResponse, ProductCombination } from "@/schemas";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { endOfMonth, startOfMonth } from "date-fns";
@@ -28,7 +28,7 @@ import React from "react";
 
 type Props = {
   name: string;
-  combinations: ProductCombinations;
+  combinations: ProductCombination;
   lastSoldAt: string;
   quantity: number;
 };
