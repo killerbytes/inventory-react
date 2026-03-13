@@ -122,7 +122,19 @@ export default function SalesOrderModal({
   React.useEffect(() => {
     const getData = async () => {
       const res = await salesOrderServices.get(Number(data.id));
-      form.reset(res);
+
+      const mapped = {
+        ...res,
+        salesOrderItems: res.salesOrderItems.map((item: SalesOrderItem) => ({
+          ...item,
+          combinations: {
+            ...item.combinations,
+            price: Number(item.combinations?.price),
+          },
+        })),
+      };
+
+      form.reset(mapped);
     };
     if (data) {
       getData();
@@ -604,49 +616,52 @@ export default function SalesOrderModal({
                 />
               </TabsContent>
             </Tabs>
-            <FormField
-              control={form.control}
-              name="salesOrderItems"
-              render={() => (
-                <FormItem className="w-full mb-4">
-                  <FormControl>
-                    <DataTable
-                      data={tableData}
-                      columns={columns}
-                      renderFooter={(data) => {
-                        const total = getTotalAmountTableFooter(data);
-                        return (
-                          <>
-                            <TableRow>
-                              <TableCell colSpan={8}>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  className="shadow-sm append-btn"
-                                  onClick={() => append(salesOrderItemDefault)}
-                                >
-                                  <Plus />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                            <TableRow className="font-bold">
-                              <TableCell>Total</TableCell>
-                              <TableCell colSpan={10} className="text-right">
-                                {formatCurrency(
-                                  total?.amount - total?.discount,
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          </>
-                        );
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
+              <FormField
+                control={form.control}
+                name="salesOrderItems"
+                render={() => (
+                  <FormItem className="w-full mb-4">
+                    <FormControl>
+                      <DataTable
+                        data={tableData}
+                        columns={columns}
+                        renderFooter={(data) => {
+                          const total = getTotalAmountTableFooter(data);
+                          return (
+                            <>
+                              <TableRow>
+                                <TableCell colSpan={8}>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="shadow-sm append-btn"
+                                    onClick={() =>
+                                      append(salesOrderItemDefault)
+                                    }
+                                  >
+                                    <Plus />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                              <TableRow className="font-bold">
+                                <TableCell>Total</TableCell>
+                                <TableCell colSpan={10} className="text-right">
+                                  {formatCurrency(
+                                    total?.amount - total?.discount,
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            </>
+                          );
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="isDelivery"

@@ -111,4 +111,5 @@ export const salesOrderSchema = salesOrderBaseSchema
 export type SalesOrderInput = z.infer<typeof salesOrderBaseSchema>;
 export type SalesOrder = z.infer<typeof salesOrderSchema>;
 export type SalesOrderForm = z.infer<typeof salesOrderFormSchema>;
+export type SalesOrderItemBase = z.infer<typeof salesOrderItemBaseSchema>;
 export type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
