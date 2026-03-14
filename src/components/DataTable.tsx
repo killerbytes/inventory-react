@@ -1,5 +1,13 @@
 // Add 'React' to the import for forwardRef and useImperativeHandle
 import {
+  ColumnDef,
+  ExpandedState,
+  flexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
   Table,
   TableBody,
   TableCell,
@@ -8,12 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import { cx } from "class-variance-authority";
 import React from "react";
 
@@ -24,6 +26,7 @@ type Props<T> = {
   meta?: {
     disabledRow?: Record<string, boolean | string | number>;
     emptyText?: string;
+    subRows?: string;
   };
   onRowClick?: (item: T) => void;
   onSelectionChange?: (selectedItems: T[]) => void;
@@ -41,6 +44,7 @@ const DataTable = <T,>(props: Props<T>) => {
     defaultSelected = [],
   } = props;
   const onSelectionChangeRef = React.useRef(onSelectionChange);
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
   const [rowSelection, setRowSelection] = React.useState(() => {
     const initialSelectedRows = defaultSelected?.reduce<
@@ -60,10 +64,20 @@ const DataTable = <T,>(props: Props<T>) => {
     },
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
+    onExpandedChange: setExpanded,
+    getSubRows: (row) => (meta?.subRows ? row[meta.subRows] : []),
+    getExpandedRowModel: getExpandedRowModel(),
     state: {
       rowSelection,
+      expanded,
     },
   });
+
+  React.useEffect(() => {
+    if (data.length > 0 && meta?.subRows) {
+      table.toggleAllRowsExpanded(true);
+    }
+  }, [data, table]);
 
   React.useEffect(() => {
     onSelectionChangeRef.current = onSelectionChange;

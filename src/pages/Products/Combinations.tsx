@@ -15,6 +15,33 @@ import useToggle from "@/hooks/useToggle";
 import { useStore } from "@/stores";
 import React from "react";
 
+interface ProductCombinationWithSubItem extends ProductCombination {
+  subItem?: ProductCombinationWithSubItem[];
+}
+
+const groupSubItems = (
+  items: ProductCombination[],
+): ProductCombinationWithSubItem[] => {
+  const itemRecord: Record<number, ProductCombinationWithSubItem> = {};
+  items.forEach((item) => {
+    itemRecord[item.id] = {
+      ...item,
+      subItem: undefined,
+    };
+  });
+  const rootItems: ProductCombinationWithSubItem[] = [];
+  Object.values(itemRecord).forEach((item) => {
+    const parentId = item.isBreakPackOfId;
+    if (parentId && itemRecord[parentId]) {
+      itemRecord[parentId].subItem = [item];
+    } else {
+      rootItems.push(item);
+    }
+  });
+
+  return rootItems;
+};
+
 export default function Combinations({
   combinations: _combinations,
   variants,
@@ -28,7 +55,9 @@ export default function Combinations({
   selectedCombination: { id: number | string; name: string };
   isBreakPackFilter: boolean;
 }) {
-  const [combinations, setCombinations] = React.useState(_combinations);
+  const [combinations, setCombinations] = React.useState(
+    groupSubItems(_combinations),
+  );
   const { productCombinationState } = useStore();
   const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
@@ -44,6 +73,18 @@ export default function Combinations({
       {
         accessorKey: "name",
         header: "Name",
+        cell: ({ row }: { row: Row<ProductCombination> }) => (
+          <div
+            style={{
+              paddingLeft: `${row.depth}rem`,
+            }}
+          >
+            <div className="flex items-center gap-1">
+              <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
+              {row.original.name}
+            </div>
+          </div>
+        ),
       },
       ...variants.map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
@@ -67,15 +108,6 @@ export default function Combinations({
           return row.original.values[x]?.value;
         },
       })),
-      {
-        accessorKey: "unit",
-        header: "Unit",
-        cell: ({ row }: { row: Row<ProductCombination> }) => {
-          return (
-            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
-          );
-        },
-      },
       {
         accessorKey: "price",
         header: "Price",
@@ -209,7 +241,7 @@ export default function Combinations({
       combinations = _combinations;
     }
 
-    setCombinations(combinations);
+    setCombinations(groupSubItems(combinations));
   }, [
     _combinations,
     isBreakPackFilter,
@@ -224,6 +256,7 @@ export default function Combinations({
         columns={columns}
         meta={{
           disabledRow: { isActive: false },
+          subRows: "subItem",
         }}
       />
 
