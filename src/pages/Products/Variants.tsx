@@ -1,17 +1,16 @@
 import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldLabel,
-  FieldTitle,
-} from "@/components/ui/field";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Field,
+  FieldContent,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { VariantTypes } from "@/schemas";
@@ -58,17 +57,15 @@ export default function Variants({
             className="flex"
           >
             {variants.map((variant) => (
-              <FieldLabel htmlFor={variant.id?.toString()}>
+              <FieldLabel key={variant.id} htmlFor={variant.id?.toString()}>
                 <Field orientation="horizontal">
                   <FieldContent>
                     <FieldTitle>{variant.name}</FieldTitle>
-                    <FieldDescription>
-                      <ul className="text-sm flex gap-1 flex-col">
-                        {variant.values.map((i) => (
-                          <li>{i.value}</li>
-                        ))}
-                      </ul>
-                    </FieldDescription>
+                    <ul className="text-sm flex gap-1 flex-col text-muted-foreground">
+                      {variant.values.map((i) => (
+                        <li key={i.id}>{i.value}</li>
+                      ))}
+                    </ul>
                   </FieldContent>
                   <RadioGroupItem
                     value={variant.id?.toString() || ""}

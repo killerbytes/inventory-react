@@ -3,6 +3,7 @@ import {
   filterProps,
   InventoryMovement,
   PaginatedResponse,
+  ProductCombination,
 } from "@/schemas";
 import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
 import Movements from "@/components/Movements";
@@ -10,20 +11,25 @@ import { inventoryServices } from "@/services";
 import Pager from "@/components/Pager";
 import React from "react";
 
-export default function ProductHistory({
+export default function ProductHistory<T extends { id: number | string }>({
   productName,
   selectedCombination,
-  isBreakPackFilter,
+  combinations: _combinations,
 }: {
   productName: string;
-  selectedCombination: { id: number; name: string };
-  isBreakPackFilter: boolean;
+  selectedCombination: T | undefined;
+  combinations: ProductCombination[];
 }) {
+  const combinations = React.useMemo(() => {
+    if (!selectedCombination) return _combinations;
+    return _combinations.filter((item) => item.id === selectedCombination?.id);
+  }, [selectedCombination, _combinations]);
+
   const [data, setData] =
     React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
 
   const [filter, setFilter] = React.useState<filterProps>({
-    limit: 999,
+    limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     type: "ALL",
   });
@@ -32,12 +38,7 @@ export default function ProductHistory({
     try {
       const payload = {
         ...filter,
-        q:
-          selectedCombination.id === -1
-            ? productName
-            : isBreakPackFilter
-              ? productName
-              : selectedCombination.name,
+        ids: combinations.map((i) => i.id),
         type: filter.type === "ALL" ? undefined : filter.type,
       };
 
@@ -47,42 +48,15 @@ export default function ProductHistory({
       const apiError = error as ApiErrorResponse;
       console.error("Error fetching data:", apiError.message);
     }
-  }, [
-    filter,
-    selectedCombination.id,
-    selectedCombination.name,
-    productName,
-    isBreakPackFilter,
-  ]);
+  }, [filter, selectedCombination, productName]);
 
   React.useEffect(() => {
     getData();
   }, [getData]);
 
-  const filterData = React.useMemo(() => {
-    if (selectedCombination.id === -1) {
-      return data.data || [];
-    }
-
-    return isBreakPackFilter
-      ? data.data?.filter((item) =>
-          item.combination.values.find(
-            (item) => item.id === selectedCombination.id,
-          ),
-        )
-      : data.data?.filter(
-          (item) => item.combination.name === selectedCombination.name,
-        ) || [];
-  }, [
-    data,
-    isBreakPackFilter,
-    selectedCombination.id,
-    selectedCombination.name,
-  ]);
-
   return (
     <>
-      <Movements data={filterData} />
+      <Movements data={data.data || []} />
       {data.meta.totalPages > 1 && (
         <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
       )}

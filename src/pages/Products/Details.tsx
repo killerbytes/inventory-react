@@ -21,19 +21,27 @@ import {
   ProductWithCombinations,
   VariantTypes,
 } from "@/schemas";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { Loader2Icon, Pencil, PlusIcon, Save, Search } from "lucide-react";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
+import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { categoryServices, productServices } from "@/services";
 import PriceHistory from "@/pages/Products/PriceHistory";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SupplierHistoryTab from "./SupplierHistoryTab";
 import CreateProductModal from "./CreateProductModal";
 import { useNavigate, useParams } from "react-router";
-import { SelectItem } from "@/components/ui/select";
-import { ERROR, ROUTES } from "@/utils/definitions";
 import CombinationModal from "./CombinationModal";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import ProductHistory from "./ProductHistory";
 import { Form } from "@/components/ui/form";
@@ -41,7 +49,6 @@ import VariantsModal from "./VariantsModal";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import Combinations from "./Combinations";
-import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
@@ -49,7 +56,11 @@ import { useStore } from "@/stores";
 import Variants from "./Variants";
 import { toast } from "sonner";
 
-const defaultOption = { id: -1, name: "ALL" };
+type ComboboxItem = {
+  id: number;
+  name?: string;
+  value?: string;
+};
 
 export default function ProductEdit() {
   const { id } = useParams();
@@ -59,9 +70,9 @@ export default function ProductEdit() {
   } = useStore();
   const [loading, setLoading] = React.useState(false);
   const { productCombinationState } = useStore();
-  const [selectedCombination, setSelectedCombination] = React.useState<string>(
-    String(defaultOption.id),
-  );
+  const [selectedCombination, setSelectedCombination] = React.useState<
+    ComboboxItem | undefined
+  >();
   const [combinations, setCombinations] = React.useState<ProductCombination[]>(
     [],
   );
@@ -156,28 +167,6 @@ export default function ProductEdit() {
     return variants.find((item) => item.isBreakpackFilter);
   }, [variants]);
 
-  const selectedCombo = React.useMemo(() => {
-    if (breakPackFilter) {
-      const found = breakPackFilter?.values.find(
-        (i) => i.id === Number(selectedCombination),
-      );
-
-      if (found) {
-        return {
-          id: found.id!,
-          name: found.value,
-        };
-      }
-    }
-
-    return (
-      uniqueCombinations.find((i) => i.id === Number(selectedCombination)) || {
-        id: -1,
-        name: "ALL",
-      }
-    );
-  }, [breakPackFilter, selectedCombination, uniqueCombinations]);
-
   return (
     <Fragment key={id}>
       <PageHeader>
@@ -263,38 +252,36 @@ export default function ProductEdit() {
                   Product History
                 </TabsTrigger>
               </TabsList>
-              {!breakPackFilter && uniqueCombinations.length > 1 && (
-                <Select
-                  options={[defaultOption, ...uniqueCombinations]}
-                  value={String(selectedCombination)}
-                  onChange={(value) => {
-                    setSelectedCombination(value);
+
+              {uniqueCombinations.length > 1 && (
+                <Combobox<ComboboxItem>
+                  items={[...uniqueCombinations]}
+                  itemToStringLabel={(item) => item?.name || ""}
+                  value={selectedCombination}
+                  onValueChange={(value) => {
+                    setSelectedCombination(value || undefined);
                   }}
-                  renderOption={(option) => (
-                    <SelectItem key={option.id} value={String(option.id)}>
-                      {option.name}
-                    </SelectItem>
-                  )}
-                />
+                >
+                  <ComboboxInput
+                    placeholder="Filter by combination"
+                    showClear
+                  />
+                  <ComboboxContent>
+                    <ComboboxEmpty>No items found.</ComboboxEmpty>
+                    <ComboboxList>
+                      {(item) => (
+                        <ComboboxItem key={item.id} value={item}>
+                          <ColorBadge colorMap={UNIT_COLOR}>
+                            {item.unit}
+                          </ColorBadge>
+                          {item.name}
+                        </ComboboxItem>
+                      )}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
               )}
 
-              {breakPackFilter && breakPackFilter.values.length > 1 && (
-                <Select
-                  options={[
-                    { id: -1, value: "ALL" },
-                    ...breakPackFilter.values,
-                  ]}
-                  value={String(selectedCombination)}
-                  onChange={(value) => {
-                    setSelectedCombination(value);
-                  }}
-                  renderOption={(option) => (
-                    <SelectItem key={option.id} value={String(option.id)}>
-                      {breakPackFilter.name}: {option.value}
-                    </SelectItem>
-                  )}
-                />
-              )}
               <TabsContent value="product_combination">
                 <Card>
                   <CardHeader>
@@ -316,8 +303,8 @@ export default function ProductEdit() {
                       combinations={combinations}
                       variants={variants}
                       getData={getData}
-                      selectedCombination={selectedCombo}
-                      isBreakPackFilter={!!breakPackFilter}
+                      selectedCombination={selectedCombination}
+                      // isBreakPackFilter={!!breakPackFilter}
                     />
                   </CardContent>
                 </Card>
@@ -340,8 +327,7 @@ export default function ProductEdit() {
                   <CardContent className="grid gap-6">
                     <PriceHistory
                       productId={id ?? ""}
-                      selectedCombination={selectedCombo}
-                      isBreakPackFilter={!!breakPackFilter}
+                      selectedCombination={selectedCombination}
                     />
                   </CardContent>
                 </Card>
@@ -354,8 +340,7 @@ export default function ProductEdit() {
                   <CardContent className="grid gap-6">
                     <SupplierHistoryTab
                       productId={id ?? ""}
-                      selectedCombination={selectedCombo}
-                      isBreakPackFilter={!!breakPackFilter}
+                      selectedCombination={selectedCombination}
                     />
                   </CardContent>
                 </Card>
@@ -368,8 +353,8 @@ export default function ProductEdit() {
                   <CardContent className="grid gap-6">
                     <ProductHistory
                       productName={form.getValues().name}
-                      selectedCombination={selectedCombo}
-                      isBreakPackFilter={!!breakPackFilter}
+                      selectedCombination={selectedCombination}
+                      combinations={combinations}
                     />
                   </CardContent>
                 </Card>
