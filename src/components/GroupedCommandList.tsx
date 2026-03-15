@@ -30,6 +30,7 @@ const MemoizedCommandItem = memo(
     disableNoQuantity: boolean;
   }) => {
     const ref = useRef<HTMLDivElement>(null);
+    const name = item.name.replace(/[***].+[***]/g, "");
 
     return (
       <CommandItem
@@ -43,7 +44,7 @@ const MemoizedCommandItem = memo(
         <ColorBadge colorMap={UNIT_COLOR}>{item.unit}</ColorBadge>
 
         <div>
-          <HighlightMatch text={item.name} query={search} />
+          <HighlightMatch text={name} query={search} />
         </div>
 
         <Badge

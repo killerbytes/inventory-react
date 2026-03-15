@@ -89,7 +89,7 @@ export const getMappedSearchProductCombinations = async (params: {
     return [];
   }
 
-  const ProductCombination = await productCombinationServices.search({
+  const searchResults = await productCombinationServices.search({
     limit: params.limit ?? 20,
     ...params,
   });
@@ -100,18 +100,21 @@ export const getMappedSearchProductCombinations = async (params: {
     .split(" ")
     .filter((i) => i.length > 0);
 
-  for (const item of ProductCombination) {
-    if (item?.description?.indexOf(search) > -1) {
-      result.push(...item.combinations);
-    } else {
-      const ProductCombination = item.combinations?.filter(
-        (i: ProductCombination) => {
-          const name = i.name.toLowerCase();
-          return words.every((word) => name.includes(word));
-        },
-      );
-      result.push(...ProductCombination);
-    }
+  for (const item of searchResults) {
+    const isMatch = words.some((word) => item.description?.includes(word));
+
+    const combinations = isMatch
+      ? item.combinations.map((i: ProductCombination) => ({
+          ...i,
+          name: `${i.name} ***${item.description}***`,
+        }))
+      : item.combinations;
+
+    const filtered = (combinations ?? []).filter((i: ProductCombination) => {
+      const name = i.name.toLowerCase();
+      return words.every((word) => name.includes(word));
+    });
+    result.push(...filtered);
   }
 
   return result;

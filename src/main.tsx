@@ -6,7 +6,7 @@ import App from "./App";
 import "./default.css";
 
 const env = import.meta.env.VITE_ENV;
-if (env === "PRODUCTION") {
+if (env === "production") {
   Sentry.init({
     dsn: "https://1f3157d1a4c16c0fcf969f738237a72c@o4510944413483008.ingest.us.sentry.io/4510944414990336",
     // Setting this option to true will send default PII data to Sentry.
