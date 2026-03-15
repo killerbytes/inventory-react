@@ -4,55 +4,73 @@ import {
   PAGINATION_RESPONSE,
 } from "@/utils/definitions";
 import {
-  ApiErrorResponse,
-  filterProps,
-  InventoryMovement,
-  PaginatedResponse,
-} from "@/schemas";
-import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  ApiErrorResponse,
+  InventoryMovement,
+  PaginatedResponse,
+} from "@/schemas";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
 import { endOfMonth, startOfMonth } from "date-fns";
 import Movements from "@/components/Movements";
+import { useSearchParams } from "react-router";
 import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
-import { DateRange } from "react-day-picker";
+import useDebounce from "@/hooks/useDebounce";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import React from "react";
 
+interface FilterProps {
+  limit: number;
+  page: number;
+  type: string;
+  q: string;
+  from?: Date;
+  to?: Date;
+}
+
+const parseParamsToFilter = (params: URLSearchParams): FilterProps => {
+  return {
+    limit: Number(params.get("limit")) || PAGINATION.PAGE_SIZE,
+    page: Number(params.get("page")) || PAGINATION.PAGE,
+    type: params.get("type") || "ALL",
+    q: params.get("q") || "",
+    from: params.get("from")
+      ? new Date(params.get("from")!)
+      : startOfMonth(new Date()),
+    to: params.get("to") ? new Date(params.get("to")!) : endOfMonth(new Date()),
+  };
+};
+
 export default function InventoryMovements() {
-  const [range, setRange] = React.useState<DateRange>({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [loading, setLoading] = React.useState(true);
   const [data, setData] =
     React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
-  const [filter, setFilter] = React.useState<filterProps>({
-    limit: PAGINATION.PAGE_SIZE,
-    page: PAGINATION.PAGE,
-    type: "ALL",
-    q: "",
-  });
-  const getData = React.useCallback(async () => {
+
+  const [filter, setFilter] = React.useState<FilterProps>(() =>
+    parseParamsToFilter(searchParams),
+  );
+
+  const getData = React.useCallback(async (currentFilter: FilterProps) => {
     setLoading(true);
     try {
       const payload = {
-        ...filter,
-        ...(range?.from && range?.to && { startDate: range.from }),
-        ...(range?.from && range?.to && { endDate: range.to }),
-        q: filter.q === "" ? undefined : filter.q,
-        type: filter.type === "ALL" ? undefined : filter.type,
+        ...currentFilter,
+        q: currentFilter.q === "" ? undefined : currentFilter.q,
+        type: currentFilter.type === "ALL" ? undefined : currentFilter.type,
+        startDate: currentFilter.from?.toISOString(),
+        endDate: currentFilter.to?.toISOString(),
       };
 
       const data = await inventoryServices.getMovements(payload);
@@ -63,11 +81,47 @@ export default function InventoryMovements() {
     } finally {
       setLoading(false);
     }
-  }, [filter, range.from, range.to]);
+  }, []);
 
+  const debouncedQuery = useDebounce(filter, 300);
+
+  // Sync state to URL
   React.useEffect(() => {
-    getData();
-  }, [getData]);
+    const params = new URLSearchParams();
+    Object.entries(debouncedQuery).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        if (value instanceof Date) {
+          params.set(key, value.toISOString());
+        } else {
+          params.set(key, String(value));
+        }
+      }
+    });
+    setSearchParams(params, { replace: true });
+  }, [debouncedQuery, setSearchParams]);
+
+  // Sync state from URL (Back/Forward navigation)
+  React.useEffect(() => {
+    const newFilter = parseParamsToFilter(searchParams);
+
+    // Deep comparison to avoid infinite loop
+    const isDifferent =
+      newFilter.q !== filter.q ||
+      newFilter.type !== filter.type ||
+      newFilter.page !== filter.page ||
+      newFilter.limit !== filter.limit ||
+      newFilter.from?.getTime() !== filter.from?.getTime() ||
+      newFilter.to?.getTime() !== filter.to?.getTime();
+
+    if (isDifferent) {
+      setFilter(newFilter);
+    }
+  }, [searchParams]);
+
+  // Fetch data on filter change
+  React.useEffect(() => {
+    getData(debouncedQuery);
+  }, [debouncedQuery, getData]);
 
   return (
     <Card>
@@ -95,7 +149,17 @@ export default function InventoryMovements() {
             }}
           />
           <div className="w-full">
-            <DateRangePicker value={range} onChange={setRange} />
+            <DateRangePicker
+              value={{ from: filter.from, to: filter.to }}
+              onChange={(range) => {
+                setFilter((prev) => ({
+                  ...prev,
+                  from: range.from,
+                  to: range.to,
+                  page: 1,
+                }));
+              }}
+            />
           </div>
           <div className="w-full">
             <Select

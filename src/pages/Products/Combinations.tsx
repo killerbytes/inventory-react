@@ -15,18 +15,16 @@ import useToggle from "@/hooks/useToggle";
 import { useStore } from "@/stores";
 import React from "react";
 
-export default function Combinations({
+export default function Combinations<T extends { id: number; name?: string }>({
   combinations: _combinations,
   variants,
   getData,
   selectedCombination,
-  isBreakPackFilter,
 }: {
   combinations: ProductCombination[];
   variants: VariantTypes[];
   getData: () => void;
-  selectedCombination: { id: number | string; name: string };
-  isBreakPackFilter: boolean;
+  selectedCombination: T | undefined;
 }) {
   const [combinations, setCombinations] = React.useState(_combinations);
   const { productCombinationState } = useStore();
@@ -193,29 +191,17 @@ export default function Combinations({
   );
 
   React.useEffect(() => {
-    let combinations = [];
-
-    if (selectedCombination.name !== "ALL") {
-      if (isBreakPackFilter) {
-        combinations = _combinations.filter((v) =>
-          v.values.find((v) => v.id === selectedCombination.id),
-        );
-      } else {
-        combinations = _combinations.filter(
-          (v) => v.name === selectedCombination.name,
-        );
-      }
-    } else {
-      combinations = _combinations;
+    if (!selectedCombination) {
+      setCombinations(_combinations);
+      return;
     }
 
+    let combinations = _combinations.filter(
+      (v) => v.id === selectedCombination.id,
+    );
+
     setCombinations(combinations);
-  }, [
-    _combinations,
-    isBreakPackFilter,
-    selectedCombination,
-    selectedCombination.name,
-  ]);
+  }, [_combinations, selectedCombination]);
 
   return (
     <>

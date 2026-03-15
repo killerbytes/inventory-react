@@ -7,11 +7,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { filterProps, pagerProps } from "@/schemas";
 import { PAGINATION } from "@/utils/definitions";
-import { pagerProps } from "@/schemas";
 import Select from "./Select";
 
-export default function Pager({ meta, filter, setFilter }: pagerProps) {
+export default function Pager<T extends filterProps>({
+  meta,
+  filter,
+  setFilter,
+}: pagerProps<T>) {
   const { page = 0, limit } = filter;
   const pageCount = meta.totalPages;
   const paginationLimits = PAGINATION.PAGE_SIZE_OPTIONS.map((i) => ({

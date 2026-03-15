@@ -59,10 +59,10 @@ export interface filterProps {
   order?: "ASC" | "DESC";
 }
 
-export interface pagerProps {
+export interface pagerProps<T> {
   meta: { totalPages: number };
-  filter: filterProps;
-  setFilter: React.Dispatch<React.SetStateAction<filterProps>>;
+  filter: T;
+  setFilter: React.Dispatch<React.SetStateAction<T>>;
 }
 
 export interface CategorizedItemList<T> {
