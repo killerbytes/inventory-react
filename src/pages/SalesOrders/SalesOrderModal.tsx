@@ -1,7 +1,6 @@
 import {
   ApiError,
   ApiErrorResponse,
-  Customer,
   SalesOrder,
   SalesOrderForm,
   salesOrderFormSchema,
@@ -34,7 +33,6 @@ import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import LineColumn from "@/components/forms/OrderItemForm/LineColumn";
 import { BanknoteArrowUp, Plus, Save, Trash2 } from "lucide-react";
-import { customerServices, salesOrderServices } from "@/services";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -43,6 +41,7 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
+import { useCustomers } from "@/hooks/useCustomers";
 import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
@@ -51,12 +50,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
+import { salesOrderServices } from "@/services";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import Select from "@/components/Select";
 import Modal from "@/components/Modal";
-import { useStore } from "@/stores";
 import { toast } from "sonner";
 import React from "react";
 
@@ -86,7 +85,8 @@ export default function SalesOrderModal({
   onClose: (reload: boolean) => void;
 }) {
   const [loading, setLoading] = React.useState(false);
-  const { customerState } = useStore();
+  // const { customerState } = useStore();
+  const { data: customers, isLoading: customersLoading } = useCustomers();
 
   const defaultValues = localStorage.getItem(
     `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
@@ -140,16 +140,6 @@ export default function SalesOrderModal({
       getData();
     }
   }, [data, form]);
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const data: Customer[] = await customerServices.list();
-      customerState.setCustomers(data);
-    };
-    if (!customerState.hasLoaded) {
-      getData();
-    }
-  }, [customerState]);
 
   async function onSubmit(values: SalesOrderForm) {
     try {
@@ -483,11 +473,10 @@ export default function SalesOrderModal({
                   <FormLabel>Customer</FormLabel>
                   <Autocomplete
                     value={
-                      customerState.customers.find(
-                        (customer) => customer.id === field.value,
-                      )?.name
+                      customers?.find((customer) => customer.id === field.value)
+                        ?.name
                     }
-                    options={customerState.customers}
+                    options={customers ?? []}
                     placeholder="Customer"
                     onChange={(value) => {
                       form.setValue("customerId", Number(value.id), {

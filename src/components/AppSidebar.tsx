@@ -14,7 +14,6 @@ import {
   Diff,
   Gauge,
   Home,
-  PackageOpen,
   ShoppingCart,
   TrendingUp,
   Users,
@@ -85,11 +84,6 @@ const reports = [
     title: "Inventory Movements",
     url: ROUTES.INVENTORY_MOVEMENTS,
     icon: ClipboardList,
-  },
-  {
-    title: "Break Packs",
-    url: ROUTES.BREAK_PACKS,
-    icon: PackageOpen,
   },
   {
     title: "Stock Adjustments",

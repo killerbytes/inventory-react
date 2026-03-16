@@ -7,21 +7,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  GoodReceiptForm,
-  GoodReceiptItem,
-  ProductCombinationSearch,
-  Supplier,
-} from "@/schemas";
-import {
   Controller,
   useFieldArray,
   UseFormReturn,
   useWatch,
 } from "react-hook-form";
-import { productCombinationServices, supplierServices } from "@/services";
 import { goodReceiptItemDefault, UNIT_COLOR } from "@/utils/definitions";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import LineColumn from "@/components/forms/OrderItemForm/LineColumn";
+import { GoodReceiptForm, GoodReceiptItem } from "@/schemas";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +23,7 @@ import Autocomplete from "@/components/Autcomplete";
 import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
+import { useSuppliers } from "@/hooks/useSupplier";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
@@ -43,7 +38,7 @@ export default function PendingForm({
 }: {
   form: UseFormReturn<GoodReceiptForm>;
 }) {
-  const { supplierState } = useStore();
+  const { data: suppliers } = useSuppliers();
   const { productCombinationState } = useStore();
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -60,28 +55,6 @@ export default function PendingForm({
     control: form?.control,
     name: "goodReceiptLines",
   });
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const data: Supplier[] = await supplierServices.list();
-      supplierState.setSuppliers(data);
-    };
-    if (!supplierState.hasLoaded) {
-      getData();
-    }
-  }, [supplierState]);
-
-  React.useEffect(() => {
-    const getData = async () => {
-      if (!productCombinationState.noBreakPackHasLoaded) {
-        const data = await productCombinationServices.list();
-        productCombinationState.setNoBreakPack(
-          data.filter((i: ProductCombinationSearch) => i.isBreakPack === false),
-        );
-      }
-    };
-    getData();
-  }, [productCombinationState]);
 
   const columns = React.useMemo<ColumnDef<GoodReceiptItem>[]>(
     () => [
@@ -289,11 +262,10 @@ export default function PendingForm({
               <FormLabel>Supplier</FormLabel>
               <Autocomplete
                 value={
-                  supplierState.suppliers.find(
-                    (supplier) => supplier.id === field.value,
-                  )?.name
+                  suppliers?.find((supplier) => supplier.id === field.value)
+                    ?.name
                 }
-                options={supplierState.suppliers}
+                options={suppliers || []}
                 placeholder="Supplier"
                 onChange={(value) => {
                   form.setValue("supplierId", Number(value.id), {
