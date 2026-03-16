@@ -19,14 +19,12 @@ interface filterPropTypes extends filterProps {
   productId: string;
 }
 
-export default function PriceHistoryTab({
+export default function PriceHistoryTab<T extends { id: number | string }>({
   productId,
   selectedCombination,
-  isBreakPackFilter,
 }: {
   productId: string;
-  selectedCombination: { id: number | string; name: string };
-  isBreakPackFilter: boolean;
+  selectedCombination: T | undefined;
 }) {
   const [data, setData] =
     React.useState<PaginatedResponse<PriceHistory>>(PAGINATION_RESPONSE);
@@ -141,25 +139,15 @@ export default function PriceHistoryTab({
   );
 
   const filterData = React.useMemo(() => {
-    if (selectedCombination.id === -1) {
+    if (!selectedCombination) {
       return data.data || [];
     }
-
-    return isBreakPackFilter
-      ? data.data?.filter((item) =>
-          item.combinations.values.find(
-            (item) => item.id === selectedCombination.id,
-          ),
-        )
-      : data.data?.filter(
-          (item) => item.combinations.name === selectedCombination.name,
-        ) || [];
-  }, [
-    data,
-    isBreakPackFilter,
-    selectedCombination.id,
-    selectedCombination.name,
-  ]);
+    return (
+      data.data?.filter(
+        (item) => item.combinations.id === selectedCombination.id,
+      ) || []
+    );
+  }, [data, selectedCombination]);
 
   return (
     <DataTable

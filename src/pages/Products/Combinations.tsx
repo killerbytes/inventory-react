@@ -47,13 +47,11 @@ export default function Combinations({
   variants,
   getData,
   selectedCombination,
-  isBreakPackFilter,
 }: {
   combinations: ProductCombination[];
   variants: VariantTypes[];
   getData: () => void;
-  selectedCombination: { id: number | string; name: string };
-  isBreakPackFilter: boolean;
+  selectedCombination: T | undefined;
 }) {
   const [combinations, setCombinations] = React.useState(
     groupSubItems(_combinations),
@@ -225,29 +223,17 @@ export default function Combinations({
   );
 
   React.useEffect(() => {
-    let combinations = [];
-
-    if (selectedCombination.name !== "ALL") {
-      if (isBreakPackFilter) {
-        combinations = _combinations.filter((v) =>
-          v.values.find((v) => v.id === selectedCombination.id),
-        );
-      } else {
-        combinations = _combinations.filter(
-          (v) => v.name === selectedCombination.name,
-        );
-      }
-    } else {
-      combinations = _combinations;
+    if (!selectedCombination) {
+      setCombinations(groupSubItems(_combinations));
+      return;
     }
 
+    let combinations = _combinations.filter(
+      (v) => v.id === selectedCombination.id,
+    );
+
     setCombinations(groupSubItems(combinations));
-  }, [
-    _combinations,
-    isBreakPackFilter,
-    selectedCombination,
-    selectedCombination.name,
-  ]);
+  }, [_combinations, selectedCombination]);
 
   return (
     <>
