@@ -30,12 +30,12 @@ const MemoizedCommandItem = memo(
     disableNoQuantity: boolean;
   }) => {
     const ref = useRef<HTMLDivElement>(null);
-    const name = item.name.replace(/[***].+[***]/g, "");
+    const name = item.name.replace(/\*\*\*[\s\S]*?\*\*\*/g, "").trim();
 
     return (
       <CommandItem
         key={item.id}
-        value={item.name + item.unit}
+        value={name + item.unit}
         onSelect={onSelect}
         className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-default select-none"
         ref={selected ? ref : undefined}
