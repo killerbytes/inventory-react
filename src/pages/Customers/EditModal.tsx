@@ -16,12 +16,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useDeleteCustomer, useUpdateCustomer } from "@/hooks/useCustomers";
 import { ApiErrorResponse, Customer, customerSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { customerServices } from "@/services";
 import { ERROR } from "@/utils/definitions";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
@@ -32,14 +32,14 @@ import React from "react";
 export default function EditModal({
   isOpen,
   onClose,
-  cb,
   data,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  cb: () => void;
   data: Customer;
 }) {
+  const { mutate: updateCustomer } = useUpdateCustomer();
+  const { mutate: deleteCustomer } = useDeleteCustomer();
   const [confirm, setConfirm] = React.useState(false);
   const form = useForm<Customer>({
     resolver: zodResolver(customerSchema),
@@ -47,51 +47,53 @@ export default function EditModal({
   });
 
   async function onSubmit(values: Customer) {
-    try {
-      await customerServices.update(Number(data.id), values);
-      toast.success(`Submitted: ${values.name}`);
-      form.reset();
-      onClose();
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof Customer, {
-              type: "server",
-              message: err.message,
+    updateCustomer(
+      { id: Number(data.id), data: values },
+      {
+        onSuccess: () => {
+          toast.success(`Submitted: ${values.name}`);
+          form.reset();
+          onClose();
+        },
+        onError: (error) => {
+          const apiError = error as unknown as ApiErrorResponse;
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors?.forEach((err) => {
+              if (err.field) {
+                form.setError(err.field as keyof Customer, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
             });
           }
-        });
-      }
-      toast.error("Submission failed");
-    } finally {
-      cb();
-    }
+          toast.error("Submission failed");
+        },
+      },
+    );
   }
 
   const handleDelete = async () => {
-    try {
-      await customerServices.delete(Number(data.id));
-      toast.success(`Deleted: ${data.name}`);
-      onClose();
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof Customer, {
-              type: "server",
-              message: err.message,
-            });
-          }
-        });
-      }
-
-      toast.error("Deletion failed");
-    } finally {
-      cb();
-    }
+    await deleteCustomer(Number(data.id), {
+      onSuccess: () => {
+        toast.success(`Deleted: ${data.name}`);
+        onClose();
+      },
+      onError: (error) => {
+        const apiError = error as unknown as ApiErrorResponse;
+        if (apiError.code === ERROR.VALIDATION_ERROR) {
+          apiError.errors?.forEach((err) => {
+            if (err.field) {
+              form.setError(err.field as keyof Customer, {
+                type: "server",
+                message: err.message,
+              });
+            }
+          });
+        }
+        toast.error("Deletion failed");
+      },
+    });
   };
 
   return (

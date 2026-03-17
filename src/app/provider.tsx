@@ -10,7 +10,6 @@ type AppProviderProps = {
 };
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  console.log(import.meta.env.DEV);
   return (
     <React.Suspense fallback={<Loader />}>
       <QueryClientProvider client={queryClient}>
