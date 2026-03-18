@@ -1,5 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { endOfDay, format, startOfDay } from "date-fns";
+import { MAX_START_DATE } from "@/utils/definitions";
 import type { DateRange } from "react-day-picker";
 import { CalendarIcon, X } from "lucide-react";
 import { Calendar } from "./ui/calendar";
@@ -92,7 +93,7 @@ export default function DateRangePicker({
           }}
           onSelect={handleSelect}
           numberOfMonths={numberOfMonths}
-          disabled={disabled}
+          disabled={disabled || { before: new Date(MAX_START_DATE) }}
         />
       </PopoverContent>
     </Popover>

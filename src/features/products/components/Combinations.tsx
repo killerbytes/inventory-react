@@ -1,6 +1,5 @@
-import StockAdjustmentModal from "@/components/modals/StockAdjustmentModal";
-import BreakPackModal from "@/components/modals/BreakPackModal";
 import { ProductCombination, VariantTypes } from "@/schemas";
+import StockAdjustmentModal from "./StockAdjustmentModal";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -10,6 +9,7 @@ import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
+import BreakPackModal from "./BreakPackModal";
 import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
 import { useStore } from "@/stores";
@@ -45,12 +45,10 @@ const groupSubItems = (
 export default function Combinations({
   combinations: _combinations,
   variants,
-  getData,
   selectedCombination,
 }: {
   combinations: ProductCombination[];
   variants: VariantTypes[];
-  getData: () => void;
   selectedCombination: T | undefined;
 }) {
   const [combinations, setCombinations] = React.useState(
@@ -246,7 +244,7 @@ export default function Combinations({
         }}
       />
 
-      {toggle.breakPackModal && ( // && selected
+      {toggle.breakPackModal && (
         <BreakPackModal
           isOpen={true}
           onClose={() => {
@@ -254,7 +252,6 @@ export default function Combinations({
           }}
           combination={selected as ProductCombination}
           onSubmit={async () => {
-            getData();
             productCombinationState.invalidate();
             handleToggle({ breakPackModal: false });
           }}
@@ -264,14 +261,10 @@ export default function Combinations({
         <StockAdjustmentModal
           isOpen={true}
           onClose={() => {
-            getData();
             handleToggle({ stockAdjustmentModal: false });
           }}
           combinationId={Number(selected?.id)}
-          onSubmit={async () => {
-            // handleToggle({ stockAdjustmentModal: false });
-            // navigate(`${ROUTES.PRODUCTS}/${productId}`);
-          }}
+          onSubmit={async () => {}}
         />
       )}
     </>

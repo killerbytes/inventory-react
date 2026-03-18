@@ -13,13 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  ApiErrorResponse,
-  CancelOrder,
-  CategorizedProductList,
-  Customer,
-  SalesOrder,
-} from "@/schemas";
-import {
   Card,
   CardAction,
   CardContent,
@@ -33,15 +26,12 @@ import {
   EllipsisVertical,
   Undo,
 } from "lucide-react";
-import {
-  customerServices,
-  productServices,
-  salesOrderServices,
-} from "@/services";
 import { ERROR, ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
+import { ApiErrorResponse, CancelOrder, Customer, SalesOrder } from "@/schemas";
 import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
+import { customerServices, salesOrderServices } from "@/services";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useNavigate, useParams } from "react-router";
@@ -66,20 +56,8 @@ export default function SalesOrderDetails() {
   const {
     customerState: { customers, setCustomers },
     salesOrderState: { returnEnabled, setReturnEnabled },
-    productState,
   } = useStore();
   const [data, setData] = React.useState<SalesOrder>();
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const data: CategorizedProductList[] = await productServices.list();
-      productState.setProducts(data);
-    };
-
-    if (!productState.hasLoaded) {
-      getData();
-    }
-  }, [productState, productState.setProducts, returnEnabled]);
 
   const getData = useCallback(async () => {
     try {

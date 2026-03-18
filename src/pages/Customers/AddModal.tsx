@@ -11,11 +11,11 @@ import {
   CustomerInput,
   customerInputSchema,
 } from "@/schemas";
+import { useCreateCustomer } from "@/hooks/useCustomers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { customerServices } from "@/services";
 import { ERROR } from "@/utils/definitions";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
@@ -24,46 +24,48 @@ import { toast } from "sonner";
 export default function AddModal({
   isOpen,
   onClose,
-  cb,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  cb: () => void;
 }) {
+  const { mutate: createCustomer } = useCreateCustomer();
   const form = useForm<CustomerInput>({
     resolver: zodResolver(customerInputSchema),
     defaultValues: {},
   });
 
   async function onSubmit(values: CustomerInput) {
-    try {
-      const { name, address, contact, phone, email } = values;
-      await customerServices.create({
+    const { name, address, contact, phone, email } = values;
+    createCustomer(
+      {
         name,
         address,
         contact,
         phone,
         email,
-      });
-      toast.success(`Submitted: ${values.name}`);
-      form.reset();
-      onClose();
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof CustomerInput, {
-              type: "server",
-              message: err.message,
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Submitted: ${values.name}`);
+          form.reset();
+          onClose();
+        },
+        onError: (error) => {
+          const apiError = error as unknown as ApiErrorResponse;
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors?.forEach((err) => {
+              if (err.field) {
+                form.setError(err.field as keyof CustomerInput, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
             });
           }
-        });
-      }
-      toast.error("Submission failed");
-    } finally {
-      cb();
-    }
+          toast.error("Submission failed");
+        },
+      },
+    );
   }
 
   return (

@@ -14,14 +14,6 @@ import {
 } from "@/components/ui/card";
 
 import {
-  ApiErrorResponse,
-  productBaseSchema,
-  ProductCombination,
-  ProductInput,
-  ProductWithCombinations,
-  VariantTypes,
-} from "@/schemas";
-import {
   Combobox,
   ComboboxContent,
   ComboboxEmpty,
@@ -29,31 +21,42 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import {
+  ApiErrorResponse,
+  productBaseSchema,
+  ProductCombination,
+  ProductInput,
+  VariantTypes,
+} from "@/schemas";
+import { useProductCombinationByProductId } from "@/features/products/hooks/useProductCombination";
+import {
+  useProduct,
+  useUpdateProduct,
+} from "@/features/products/hooks/useProducts";
+import SupplierHistoryTab from "@/features/products/components/SupplierHistoryTab";
+import CreateProductModal from "@/features/products/components/CreateProductModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CombinationModal from "@/features/products/components/CombinationModal";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
+import ProductHistory from "@/features/products/components/ProductHistory";
 import { Loader2Icon, Pencil, PlusIcon, Save, Search } from "lucide-react";
+import VariantsModal from "@/features/products/components/VariantsModal";
+import PriceHistory from "@/features/products/components/PriceHistory";
+import Combinations from "@/features/products/components/Combinations";
+import ProductForm from "@/features/products/components/ProductForm";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
-import { categoryServices, productServices } from "@/services";
-import PriceHistory from "@/pages/Products/PriceHistory";
+import Variants from "@/features/products/components/Variants";
 import { zodResolver } from "@hookform/resolvers/zod";
-import SupplierHistoryTab from "./SupplierHistoryTab";
-import CreateProductModal from "./CreateProductModal";
+import { useCategories } from "@/hooks/useCategories";
 import { useNavigate, useParams } from "react-router";
-import CombinationModal from "./CombinationModal";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import ProductHistory from "./ProductHistory";
 import { Form } from "@/components/ui/form";
-import VariantsModal from "./VariantsModal";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
-import Combinations from "./Combinations";
 import Loader from "@/components/Loader";
-import ProductForm from "./ProductForm";
 import React, { Fragment } from "react";
-import { useStore } from "@/stores";
-import Variants from "./Variants";
 import { toast } from "sonner";
 
 type ComboboxItem = {
@@ -64,26 +67,30 @@ type ComboboxItem = {
 
 export default function ProductEdit() {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = React.useState("product_combination");
+
+  const { data } = useProductCombinationByProductId(Number(id));
+  const { mutate: updateProduct, isPending } = useUpdateProduct();
   const {
-    categoryState: { hasLoaded: categoryHasLoaded, categories, setCategories },
-  } = useStore();
-  const [loading, setLoading] = React.useState(false);
-  const { productCombinationState } = useStore();
-  const [selectedCombination, setSelectedCombination] = React.useState<
-    ComboboxItem | undefined
-  >();
+    data: product,
+    isError,
+    error,
+    isLoading,
+    isFetching,
+  } = useProduct(Number(id));
+
   const [combinations, setCombinations] = React.useState<ProductCombination[]>(
     [],
   );
+  const [activeTab, setActiveTab] = React.useState("product_combination");
+  const { data: categories } = useCategories();
+  const [selectedCombination, setSelectedCombination] = React.useState<
+    ComboboxItem | undefined
+  >();
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
-  const [product, setProduct] = React.useState<ProductWithCombinations>();
   const navigate = useNavigate();
   const form = useForm<ProductInput>({
     resolver: zodResolver(productBaseSchema),
-    defaultValues: {
-      name: "",
-    },
+    values: product,
   });
   const [toggle, handleToggle] = useToggle({
     variantModal: false,
@@ -91,81 +98,66 @@ export default function ProductEdit() {
     createProductModal: false,
   });
   async function onSubmit(values: ProductInput) {
-    try {
-      setLoading(true);
-      await productServices.update(Number(id), values);
-      getData();
-      productCombinationState.invalidate();
-      toast.success("Product updated successfully");
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof ProductInput, {
-              type: "server",
-              message: err.message,
+    updateProduct(
+      {
+        id: Number(id),
+        data: values,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Product updated successfully");
+        },
+        onError: (error) => {
+          const apiError = error as unknown as ApiErrorResponse;
+
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors.forEach((err) => {
+              if (err.field) {
+                form.setError(err.field as keyof ProductInput, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
             });
           }
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
+        },
+      },
+    );
   }
-  const getData = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      const product: ProductWithCombinations = await productServices.get(
-        Number(id),
-      );
-      const { combinations, variants, ...rest } = product;
+
+  // React.useEffect(() => {
+  //   if (product) {
+  //     form.reset(product);
+  //   }
+  // }, [product]);
+
+  React.useEffect(() => {
+    if (data) {
+      const { combinations, variants } = data;
       setCombinations(combinations ?? []);
       setVariants(variants ?? []);
-      setProduct(product);
-
-      form.reset({
-        ...rest,
-      });
-    } catch (error: unknown) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.NOT_FOUND) {
-        navigate(`${ROUTES.PRODUCTS}`);
-      }
-      toast.error(apiError.message);
-    } finally {
-      setLoading(false);
     }
-  }, [form, id, navigate]);
+  }, [data]);
 
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
-
-  React.useEffect(() => {
-    const getData = async () => {
-      if (!categoryHasLoaded) {
-        const data = await categoryServices.list();
-        setCategories(data);
-      }
-    };
-    getData();
-  }, [categories.length, categoryHasLoaded, setCategories]);
+  if (isError) {
+    if (error.code === ERROR.NOT_FOUND) {
+      navigate(`${ROUTES.PRODUCTS}`);
+    }
+    toast.error(error.message);
+  }
 
   const onSearch = React.useCallback(async (search: string) => {
     return await getMappedSearchProductCombinations({ search });
   }, []);
 
   const uniqueCombinations = React.useMemo(() => {
-    return combinations.filter(
-      (item, index) =>
-        combinations.findIndex((i) => i.name === item.name) === index,
+    return (
+      combinations.filter(
+        (item, index) =>
+          combinations.findIndex((i) => i.name === item.name) === index,
+      ) || []
     );
-  }, [combinations]);
-
-  const breakPackFilter = React.useMemo(() => {
-    return variants.find((item) => item.isBreakpackFilter);
-  }, [variants]);
+  }, [data]);
 
   return (
     <Fragment key={id}>
@@ -198,7 +190,7 @@ export default function ProductEdit() {
           </Button>
         </PageHeaderActions>
       </PageHeader>
-      {loading ? (
+      {isLoading ? (
         <Loader />
       ) : (
         <Form {...form}>
@@ -219,15 +211,15 @@ export default function ProductEdit() {
                 <ProductForm
                   form={form}
                   onSubmit={onSubmit}
-                  categories={categories}
+                  categories={categories || []}
                 />
                 <div className="flex justify-end">
                   <Button
                     className="shadow-sm"
                     type="submit"
-                    disabled={loading}
+                    disabled={isPending || isFetching}
                   >
-                    {loading ? (
+                    {isPending || isFetching ? (
                       <Loader2Icon className="animate-spin" />
                     ) : (
                       <Save />
@@ -302,7 +294,6 @@ export default function ProductEdit() {
                     <Combinations
                       combinations={combinations}
                       variants={variants}
-                      getData={getData}
                       selectedCombination={selectedCombination}
                       // isBreakPackFilter={!!breakPackFilter}
                     />
@@ -369,11 +360,7 @@ export default function ProductEdit() {
           product={product}
           isOpen={true}
           onSubmit={onSubmit}
-          onClose={(shouldReload) => {
-            if (shouldReload) {
-              getData();
-              productCombinationState.invalidate();
-            }
+          onClose={() => {
             handleToggle({ combinationModal: false });
             setActiveTab("product_combination");
           }}
