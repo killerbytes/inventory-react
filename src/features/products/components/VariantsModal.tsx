@@ -1,10 +1,15 @@
+import {
+  useCreateVariantType,
+  useDeleteVariantType,
+  useUpdateVariantType,
+  useVariantType,
+} from "@/features/products/hooks/useVariants";
 import VariantCopyTemplateModal from "@/components/modals/VariantCopyTemplateModal";
 import VariantTemplatePickerDialog from "@/components/VariantTemplatePickerDialog";
 import { ApiErrorResponse, VariantTypes, variantTypesSchema } from "@/schemas";
 import VariantTypesForm from "@/components/forms/VariantTypesForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, Save, Search } from "lucide-react";
-import { variantTypesServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Badge } from "@/components/ui/badge";
@@ -28,11 +33,15 @@ export default function VariantsModal({
   isOpen: boolean;
   onClose: (shouldOpenComboModal: boolean) => void;
 }) {
+  const { data: variantTypes } = useVariantType(productId);
+  const { mutate: createVariantType } = useCreateVariantType();
+  const { mutate: updateVariantType } = useUpdateVariantType();
+  const { mutate: deleteVariantType } = useDeleteVariantType();
+
   const [toggle, handleToggle] = useToggle({
     variantTemplatePicker: false,
   });
   const [selected, setSelected] = React.useState<VariantTypes>();
-  const [variantTypes, setVariantTypes] = React.useState<VariantTypes[]>([]);
   const [shouldOpenComboModal, setShouldOpenComboModal] = React.useState(false);
   const form = useForm<VariantTypes>({
     defaultValues,
@@ -40,24 +49,14 @@ export default function VariantsModal({
   });
 
   const handleSubmit = async (values: VariantTypes) => {
-    try {
-      const payload = {
-        ...values,
-        productId: Number(productId),
-      };
-      if (values.id) {
-        await variantTypesServices.update(values.id, payload);
-        toast.success("Variant updated successfully");
-      } else {
-        await variantTypesServices.create(payload);
-        toast.success("Variant created successfully");
-      }
-      getData();
+    const onSuccess = (action: "create" | "update") => {
+      toast.success(`Variant ${action}d successfully`);
       setSelected(undefined);
       form.reset(defaultValues);
       form.setFocus("name");
       setShouldOpenComboModal(true);
-    } catch (error) {
+    };
+    const onError = (error: unknown) => {
       const apiError = error as ApiErrorResponse;
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors.forEach((err) => {
@@ -71,6 +70,28 @@ export default function VariantsModal({
       } else {
         toast.error("Submission failed: " + apiError.message);
       }
+    };
+    const payload = {
+      ...values,
+      productId: Number(productId),
+    };
+    if (values.id) {
+      updateVariantType(
+        { id: values.id, data: payload },
+        {
+          onSuccess: () => {
+            onSuccess("update");
+          },
+          onError,
+        },
+      );
+    } else {
+      createVariantType(payload, {
+        onSuccess: () => {
+          onSuccess("create");
+        },
+        onError,
+      });
     }
   };
 
@@ -83,20 +104,18 @@ export default function VariantsModal({
     form.reset(defaultValues);
   }, [form]);
 
-  const getData = React.useCallback(async () => {
-    if (!productId) return;
-    const data = await variantTypesServices.get(productId);
-    setVariantTypes(data);
-  }, [productId]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
-
   const handleDelete = async () => {
-    await variantTypesServices.delete(Number(selected?.id));
-    form.reset(defaultValues);
-    getData();
+    deleteVariantType(Number(selected?.id), {
+      onSuccess: () => {
+        toast.success("Variant deleted successfully");
+        setSelected(undefined);
+        form.reset(defaultValues);
+      },
+      onError: (error: unknown) => {
+        const apiError = error as ApiErrorResponse;
+        toast.error("Deletion failed: " + apiError.message);
+      },
+    });
   };
 
   return (
@@ -108,21 +127,22 @@ export default function VariantsModal({
     >
       <div className="flex justify-between items-center">
         <div className="flex gap-2 flex-wrap justify-start">
-          {variantTypes.map((v, index) => (
-            <Badge
-              variant="secondary"
-              className={cx("cursor-pointer outline", {
-                "bg-orange-500 text-white": selected?.id === v.id,
-                "font-bold underline italic ": v.isBreakpackFilter,
-              })}
-              key={index}
-              onClick={() => {
-                setSelected(v);
-              }}
-            >
-              {v.name}
-            </Badge>
-          ))}
+          {variantTypes &&
+            variantTypes.map((v, index) => (
+              <Badge
+                variant="secondary"
+                className={cx("cursor-pointer outline", {
+                  "bg-orange-500 text-white": selected?.id === v.id,
+                  "font-bold underline italic ": v.isBreakpackFilter,
+                })}
+                key={index}
+                onClick={() => {
+                  setSelected(v);
+                }}
+              >
+                {v.name}
+              </Badge>
+            ))}
           <Button
             type="button"
             variant="outline"
@@ -151,7 +171,7 @@ export default function VariantsModal({
             <Search />
           </Button>
 
-          {selected && variantTypes.includes(selected) && (
+          {selected && variantTypes?.includes(selected) && (
             <Button
               variant="outline"
               className="shadow-sm"

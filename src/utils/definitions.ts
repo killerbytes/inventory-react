@@ -1,6 +1,8 @@
 import { formatLabel } from "@/lib/utils";
 import { titleCase } from "title-case";
 
+export const MAX_START_DATE = "2025-08-12";
+
 export const ROUTES = {
   DASHBOARD: "/",
   LOGIN: "/login",

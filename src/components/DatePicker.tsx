@@ -5,6 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { MAX_START_DATE } from "@/utils/definitions";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
@@ -42,6 +43,7 @@ export default function DatePicker({
       <PopoverContent className={cn("w-auto p-0", className)} align={align}>
         <Calendar
           mode="single"
+          disabled={disabled || { before: new Date(MAX_START_DATE) }}
           selected={value ? new Date(value) : undefined}
           onSelect={(value) => {
             setOpen(false);

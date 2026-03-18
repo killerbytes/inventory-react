@@ -11,13 +11,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import CreateProductModal from "../../features/products/components/CreateProductModal";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { CategorizedProductList, ProductWithCombinations } from "@/schemas";
-import { categoryServices, productCombinationServices } from "@/services";
+import ProductItem from "../../features/products/components/ProductItem";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
-import CreateProductModal from "./CreateProductModal";
+import { useCategories } from "@/hooks/useCategories";
 import { SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, Search } from "lucide-react";
@@ -28,7 +29,6 @@ import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
-import ProductItem from "./ProductItem";
 import React, { Fragment } from "react";
 import { useStore } from "@/stores";
 
@@ -38,10 +38,8 @@ interface filterProps {
 }
 
 export default function Products() {
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
   const navigate = useNavigate();
-  const {
-    categoryState: { hasLoaded: categoryHasLoaded, categories, setCategories },
-  } = useStore();
   const { productCombinationState } = useStore();
   const [query, setQuery] = React.useState("");
   const [data, setData] = React.useState<CategorizedProductList[]>([]);
@@ -65,7 +63,8 @@ export default function Products() {
 
   React.useEffect(() => {
     if (
-      categories.length > 0 &&
+      categories &&
+      categories?.length > 0 &&
       productCombinationState.ProductCombination.length > 0
     ) {
       const productMap = new Map<number, ProductWithCombinations>();
@@ -82,7 +81,7 @@ export default function Products() {
         product!.combinations?.push(item);
       });
 
-      const categorizedProductList = categories.map((category) => {
+      const categorizedProductList = categories?.map((category) => {
         return {
           categoryId: category.id ?? 0,
           categoryName: category.name,
@@ -96,33 +95,6 @@ export default function Products() {
       setData(categorizedProductList);
     }
   }, [categories, productCombinationState.ProductCombination]);
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const res = await categoryServices.list();
-      setCategories(res);
-    };
-    if (!categoryHasLoaded) {
-      getData();
-    }
-  }, [categoryHasLoaded, setCategories]);
-
-  React.useEffect(() => {
-    const getData = async () => {
-      setLoading(true);
-      try {
-        const data = await productCombinationServices.list();
-        productCombinationState.setProductsCombinations(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (!productCombinationState.hasLoaded) {
-      getData();
-    }
-  }, [productCombinationState]);
 
   const onSearch = React.useCallback(async (search: string) => {
     return await getMappedSearchProductCombinations({ search });
@@ -179,7 +151,7 @@ export default function Products() {
               <div className="text-sm font-semibold mb-1">Category</div>
               <Select
                 value={filter.categoryId}
-                options={[{ id: "ALL", name: "ALL" }, ...categories]}
+                options={[{ id: "ALL", name: "ALL" }, ...(categories ?? [])]}
                 className="w-full mb-4"
                 onChange={(value) => {
                   const categoryId = value;

@@ -1,4 +1,3 @@
-// Add 'React' to the import for forwardRef and useImperativeHandle
 import {
   Table,
   TableBody,
@@ -56,7 +55,7 @@ const DataTable = <T,>(props: Props<T>) => {
     data,
     columns,
     getRowId: (row: any) => {
-      return row.id;
+      return row.id || row.fieldId;
     },
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,

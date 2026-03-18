@@ -15,24 +15,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Customer, filterProps, PaginatedResponse } from "@/schemas";
-import { PAGINATION_RESPONSE } from "@/utils/definitions";
+import { useCustomersPaginated } from "@/hooks/useCustomers";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Customer, filterProps } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { customerServices } from "@/services";
+import useDebounce from "@/hooks/useDebounce";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import EditModal from "./EditModal";
 import AddModal from "./AddModal";
+import { toast } from "sonner";
 
 export default function Customers() {
-  const [data, setData] =
-    React.useState<PaginatedResponse<Customer>>(PAGINATION_RESPONSE);
-
   const [selected, setSelected] = React.useState<Customer | null>();
-  const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: 10,
     page: 1,
@@ -40,26 +38,21 @@ export default function Customers() {
     order: "ASC",
     q: "",
   });
+  const debouncedQuery = useDebounce(filter, 300);
+
+  const { data, isLoading, isError, error } =
+    useCustomersPaginated(debouncedQuery);
+
   const [toggle, handleToggle] = useToggle({
     addModal: false,
     editModal: false,
   });
 
-  const getData = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await customerServices.getAll(filter);
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
-
   React.useEffect(() => {
-    getData();
-  }, [filter, getData]);
+    if (isError) {
+      toast.error(error?.message);
+    }
+  }, [isError, error]);
 
   const requestSort = (sort: string) => {
     setFilter((prev) => ({
@@ -122,8 +115,8 @@ export default function Customers() {
               }}
             />
           </div>
-          {loading ? (
-            <p>Loading...</p>
+          {isLoading ? (
+            <Loader />
           ) : (
             <>
               <Table>
@@ -178,7 +171,7 @@ export default function Customers() {
                   ))}
                 </TableBody>
               </Table>
-              {data.meta.totalPages > 1 && (
+              {data && data.meta.totalPages > 1 && (
                 <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
               )}
             </>
@@ -192,7 +185,7 @@ export default function Customers() {
           onClose={() => {
             handleToggle({ addModal: false });
           }}
-          cb={getData}
+          // cb={getData}
         />
       )}
 
@@ -202,7 +195,7 @@ export default function Customers() {
           onClose={() => {
             handleToggle({ editModal: false });
           }}
-          cb={getData}
+          // cb={getData}
           data={selected as Customer}
         />
       )}

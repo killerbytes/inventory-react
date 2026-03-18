@@ -1,13 +1,8 @@
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { authServices } from "@/services";
-import { useStore } from "@/stores";
-import { User } from "@/schemas";
-import React from "react";
 
 export default function UserIcon() {
-  const {
-    authState: { user, setUser, logout },
-  } = useStore();
+  const { data: user } = useCurrentUser();
 
   const getInitials = (name: string) => {
     const names = name.split(" ");
@@ -17,22 +12,6 @@ export default function UserIcon() {
     }
     return initials;
   };
-
-  React.useEffect(() => {
-    const getData = async () => {
-      try {
-        const res: User = await authServices.me();
-        setUser(res);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    if (localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`)) {
-      getData();
-    } else {
-      logout();
-    }
-  }, [logout, setUser]);
 
   return (
     <>

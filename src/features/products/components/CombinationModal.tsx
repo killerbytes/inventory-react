@@ -8,6 +8,10 @@ import {
   VariantValues,
 } from "@/schemas";
 import {
+  useProductCombinationByProductId,
+  useUpdateProductCombination,
+} from "@/features/products/hooks/useProductCombination";
+import {
   Form,
   FormControl,
   FormField,
@@ -15,10 +19,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { FieldPath, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
-import { Loader2Icon, Plus, Trash2 } from "lucide-react";
-import { productCombinationServices } from "@/services";
+import { FieldPath, useFieldArray, useForm } from "react-hook-form";
+import { Loader2Icon, Plus, Save, Trash2 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,7 +36,6 @@ import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
 import Modal from "@/components/Modal";
 import React, { useMemo } from "react";
-import { useStore } from "@/stores";
 import last from "lodash/last";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -45,46 +47,55 @@ export default function CombinationModal({
 }: {
   product: ProductWithCombinations;
   onSubmit: (e: Product) => Promise<void>;
-  onClose: (shouldReload: boolean) => void;
+  onClose: () => void;
   isOpen: boolean;
 }) {
-  const [loading, setLoading] = React.useState(false);
-  const [shouldReload, setShouldReload] = React.useState(false);
-  const {
-    productCombinationState: { invalidate },
-  } = useStore();
+  const { data, isFetching } = useProductCombinationByProductId(product.id);
+  const { mutate: updateProductCombination, isPending } =
+    useUpdateProductCombination();
+
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
-  const [combinations, setCombinations] = React.useState<
-    ProductCombinationInput[]
-  >([]);
+
+  const values = React.useMemo(() => {
+    if (!data) return;
+    const { combinations, variants } = data;
+    setVariants(variants);
+    const map = combinations.map((i) => i.values);
+    const x = combinations.map((i) => {
+      return {
+        ...i,
+        values: Array(variants.length).fill({ id: "" }),
+      };
+    });
+
+    const xx = x.map((i, index) => {
+      map[index].forEach((j) => {
+        const idx = variants.findIndex((v) => v.id === j.variantTypeId);
+        i.values[idx] = j;
+      });
+      return { ...i };
+    });
+
+    return {
+      combinations: xx,
+    };
+  }, [data]);
 
   const form = useForm<{
     combinations: ProductCombinationInput[];
   }>({
-    defaultValues: {
-      combinations: [],
-    },
     resolver: zodResolver(
       z.object({
         combinations: z.array(productCombinationInputSchema),
       }),
     ),
+    values,
   });
 
-  const { append, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "combinations",
     keyName: "fieldId",
-  });
-
-  const watchCombinations = useWatch({
-    control: form.control,
-    name: "combinations",
-  });
-
-  const tableData: ProductCombinationInput[] = watchCombinations.map((i) => {
-    const row = combinations.find((f) => f.id === i.id);
-    return { ...i, inventory: row?.inventory };
   });
 
   const productCombinationDefaultValue: ProductCombinationInput = {
@@ -101,77 +112,42 @@ export default function CombinationModal({
     })),
   };
 
-  const getData = React.useCallback(async () => {
-    if (product.id) {
-      const {
-        combinations,
-        variants,
-      }: { combinations: ProductCombinationInput[]; variants: VariantTypes[] } =
-        await productCombinationServices.getByProductId(product.id);
-      const map = combinations.map((i) => i.values);
-      const x = combinations.map((i) => {
-        return {
-          ...i,
-          values: Array(variants.length).fill({ id: "" }),
-        };
-      });
-
-      const xx = x.map((i, index) => {
-        map[index].forEach((j) => {
-          const idx = variants.findIndex((v) => v.id === j.variantTypeId);
-          i.values[idx] = j;
-        });
-        return { ...i };
-      });
-
-      form.reset({
-        combinations: xx,
-      });
-      setVariants(variants);
-      setCombinations(combinations);
-    }
-  }, [form, product.id]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
-
   const handleSubmit = async (data: {
     combinations: ProductCombinationInput[];
   }) => {
     const { combinations } = data;
 
-    try {
-      setLoading(true);
-      await productCombinationServices.updateByProductId(
-        Number(product.id),
-        combinations,
-      );
-      invalidate();
-      setShouldReload(true);
-      toast.success("Variants saved successfully");
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors.forEach((err, index) => {
-          if (err.field) {
-            form.setError(
-              `combinations.${index}.${err.field}` as FieldPath<{
-                combinations: ProductCombinationInput[];
-              }>,
-              {
-                type: "server",
-                message: err.message,
-              },
-            );
+    updateProductCombination(
+      {
+        productId: product.id,
+        data: combinations,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Variants saved successfully");
+        },
+        onError: (error) => {
+          const apiError = error as unknown as ApiErrorResponse;
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors.forEach((err, index) => {
+              if (err.field) {
+                form.setError(
+                  `combinations.${index}.${err.field}` as FieldPath<{
+                    combinations: ProductCombinationInput[];
+                  }>,
+                  {
+                    type: "server",
+                    message: err.message,
+                  },
+                );
+              }
+            });
+          } else {
+            toast.error("Submission failed: " + apiError.message);
           }
-        });
-      } else {
-        toast.error("Submission failed: " + apiError.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+        },
+      },
+    );
   };
 
   const columns = useMemo<ColumnDef<ProductCombinationInput>[]>(
@@ -467,13 +443,13 @@ export default function CombinationModal({
         },
       },
     ],
-    [form, remove, variants],
+    [form, remove, variants, fields],
   );
 
   return (
     <Modal
       isOpen={isOpen}
-      onOpenChange={() => onClose(shouldReload)}
+      onOpenChange={onClose}
       title={`Product: ${product.name}`}
       description="Manage product variants"
       className="!max-w-[90%]"
@@ -498,7 +474,7 @@ export default function CombinationModal({
                 <FormLabel>Product Variants</FormLabel>
                 <FormControl>
                   <div className="rounded-md border max-h-[50vh] overflow-y-auto ">
-                    <DataTable data={tableData} columns={columns} />
+                    <DataTable data={fields} columns={columns} />
                   </div>
                 </FormControl>
                 <div></div>
@@ -516,7 +492,9 @@ export default function CombinationModal({
               size="icon"
               autoFocus
               onClick={() => {
-                const lastItem = last(watchCombinations);
+                console.log(fields);
+
+                const lastItem = last(fields);
                 const unit = lastItem
                   ? lastItem.unit
                   : productCombinationDefaultValue.unit;
@@ -529,14 +507,21 @@ export default function CombinationModal({
             >
               <Plus />
             </Button>
-            <Button className="shadow-sm" type="submit" disabled={loading}>
-              {loading && <Loader2Icon className="animate-spin" />}
+            <Button
+              className="shadow-sm"
+              type="submit"
+              disabled={isPending || isFetching}
+            >
+              {isPending || isFetching ? (
+                <Loader2Icon className="animate-spin" />
+              ) : (
+                <Save />
+              )}
               Save changes
             </Button>
           </DialogFooter>
         </form>
       </Form>
-      {/* {JSON.stringify(x)} */}
     </Modal>
   );
 }
