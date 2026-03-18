@@ -11,13 +11,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import CreateProductModal from "../../features/products/components/CreateProductModal";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { CategorizedProductList, ProductWithCombinations } from "@/schemas";
+import ProductItem from "../../features/products/components/ProductItem";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCategories } from "@/hooks/useCategories";
-import CreateProductModal from "./CreateProductModal";
 import { SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, Search } from "lucide-react";
@@ -28,7 +29,6 @@ import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
-import ProductItem from "./ProductItem";
 import React, { Fragment } from "react";
 import { useStore } from "@/stores";
 

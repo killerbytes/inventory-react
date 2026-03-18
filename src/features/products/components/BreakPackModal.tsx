@@ -13,21 +13,27 @@ import {
   PackageOpen,
   PackagePlus,
 } from "lucide-react";
-import { Form, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { productCombinationServices, productServices } from "@/services";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useCreateBreakPack } from "../hooks/useProductCombination";
 import { useController, useForm } from "react-hook-form";
 import { ERROR, UNIT_COLOR } from "@/utils/definitions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogFooter } from "../ui/dialog";
-import { SelectItem } from "../ui/select";
-import NumberInput from "../NumberInput";
-import ColorBadge from "../ColorBadge";
-import { Button } from "../ui/button";
-import { useStore } from "@/stores";
-import Select from "../Select";
+import { DialogFooter } from "@/components/ui/dialog";
+import { SelectItem } from "@/components/ui/select";
+import NumberInput from "@/components/NumberInput";
+import { useProduct } from "../hooks/useProducts";
+import ColorBadge from "@/components/ColorBadge";
+import { Button } from "@/components/ui/button";
+import Select from "@/components/Select";
+import Modal from "@/components/Modal";
 import { toast } from "sonner";
-import Modal from "../Modal";
 import React from "react";
 
 export default function BreakPackModal({
@@ -41,10 +47,15 @@ export default function BreakPackModal({
   onClose: () => void;
   onSubmit: () => Promise<void>;
 }>) {
+  const { data: product, isError, error } = useProduct(combination.productId);
+  const { mutateAsync: createBreakPack, isPending: createBreakPackPending } =
+    useCreateBreakPack();
+  const apiError = error as unknown as ApiErrorResponse;
+  if (isError) {
+    toast.error("Error fetching products: " + apiError.message);
+  }
   const [options, setOptions] = React.useState<ProductCombination[]>([]);
   const [selected, setSelected] = React.useState<ProductCombination>();
-  const [loading, setLoading] = React.useState(false);
-  const { productCombinationState } = useStore();
   const form = useForm<BreakPackInput>({
     resolver: zodResolver(breakPackBaseSchema),
     defaultValues: {
@@ -84,69 +95,58 @@ export default function BreakPackModal({
     );
   };
 
-  const getData = React.useCallback(async () => {
-    try {
-      const { combinations, variants } = await productServices.get(
-        combination?.productId,
-      );
-      const options = combinations.filter(
-        (c: ProductCombination) =>
-          c.id != combination.id &&
-          (c.isBreakPackOfId === combination.id ||
-            combination.isBreakPackOfId === c.id),
-      );
+  React.useEffect(() => {
+    const { combinations, variants } = product || {};
+    if (!combinations || !variants) return;
+    const options = combinations.filter(
+      (c: ProductCombination) =>
+        c.id != combination.id &&
+        (c.isBreakPackOfId === combination.id ||
+          combination.isBreakPackOfId === c.id),
+    );
 
-      const result = variants.find((item: VariantTypes) =>
-        /^\[.*\]$/.test(item.name),
-      );
-      if (result?.id) {
-        const variant = combination.values.find(
-          (i) => i.variantTypeId === result.id,
-        )?.value;
-        if (variant) {
-          setOptions(filterOptionsByVariant(options, variant));
-        } else {
-          setOptions(options);
-        }
+    const result = variants.find((item: VariantTypes) =>
+      /^\[.*\]$/.test(item.name),
+    );
+    if (result?.id) {
+      const variant = combination.values.find(
+        (i) => i.variantTypeId === result.id,
+      )?.value;
+      if (variant) {
+        setOptions(filterOptionsByVariant(options, variant));
       } else {
         setOptions(options);
       }
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Error fetching products: " + apiError.message);
+    } else {
+      setOptions(options);
     }
-  }, [combination]);
-
-  React.useEffect(() => {
-    if (combination) {
-      getData();
-    }
-  }, [combination, getData]);
+  }, [product]);
 
   const handleBreakPack = async (values: BreakPackInput) => {
-    try {
-      setLoading(true);
-      await productCombinationServices.breakPack(values);
-      productCombinationState.invalidate();
-      onSubmit();
-      toast.success("Break Pack successful");
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof BreakPackInput, {
-              type: "server",
-              message: err.message,
+    createBreakPack(
+      { values },
+      {
+        onSuccess: () => {
+          onSubmit();
+          toast.success("Break Pack successful");
+        },
+        onError: (error) => {
+          const apiError = error as unknown as ApiErrorResponse;
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors.forEach((err) => {
+              if (err.field) {
+                form.setError(err.field as keyof BreakPackInput, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
             });
+          } else {
+            toast.error("Break Pack failed: " + apiError.message);
           }
-        });
-      } else {
-        toast.error("Break Pack failed: " + apiError.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+        },
+      },
+    );
   };
 
   const handleSelectChange = (value: string) => {
@@ -280,10 +280,12 @@ export default function BreakPackModal({
                 <Button
                   className="ml-auto"
                   type="button"
-                  disabled={!selected || loading}
+                  disabled={!selected || createBreakPackPending}
                   onClick={handleFormSubmit}
                 >
-                  {loading && <Loader2Icon className="animate-spin" />}
+                  {createBreakPackPending && (
+                    <Loader2Icon className="animate-spin" />
+                  )}
                   {packType === "BREAK_PACK" ? (
                     <>
                       <PackageOpen className="text-red-500" /> Break Pack

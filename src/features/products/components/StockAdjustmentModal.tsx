@@ -1,35 +1,37 @@
 import {
-  ApiErrorResponse,
-  ProductCombination,
-  StockAdjustment,
-  stockAdjustmentSchema,
-} from "@/schemas";
-import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
+} from "@/components/ui/form";
+import {
+  useCreateStockAdjustment,
+  useProductCombination,
+} from "../hooks/useProductCombination";
 import {
   ERROR,
   STOCK_ADJUSTMENT_TYPE_OPTIONS,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { productCombinationServices } from "@/services";
+import {
+  ApiErrorResponse,
+  StockAdjustment,
+  stockAdjustmentSchema,
+} from "@/schemas";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
-import ConfirmDialog from "../ConfirmDialog";
-import { DialogFooter } from "../ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import NumberInput from "@/components/NumberInput";
+import ColorBadge from "@/components/ColorBadge";
+import { Button } from "@/components/ui/button";
+import { Loader2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Textarea } from "../ui/textarea";
-import NumberInput from "../NumberInput";
-import ColorBadge from "../ColorBadge";
-import { Button } from "../ui/button";
-import { useStore } from "@/stores";
-import Select from "../Select";
+import Select from "@/components/Select";
+import Modal from "@/components/Modal";
 import { toast } from "sonner";
-import Modal from "../Modal";
 import React from "react";
 
 export default function StockAdjustmentModal({
@@ -43,9 +45,12 @@ export default function StockAdjustmentModal({
   combinationId: number;
   onSubmit: (values: StockAdjustment) => Promise<void>;
 }) {
-  const [loading, setLoading] = React.useState(false);
-  const [data, setData] = React.useState<ProductCombination>();
-  const { productCombinationState } = useStore();
+  const { data, isError, error } = useProductCombination(combinationId);
+  const {
+    mutate: createStockAdjustment,
+    isPending: createStockAdjustmentPending,
+  } = useCreateStockAdjustment();
+
   const form = useForm<StockAdjustment>({
     resolver: zodResolver(stockAdjustmentSchema),
     defaultValues: {
@@ -54,45 +59,43 @@ export default function StockAdjustmentModal({
     },
   });
 
-  const getData = React.useCallback(async () => {
-    try {
-      const data = await productCombinationServices.get(combinationId);
-      setData(data);
-      form.setValue("newQuantity", data.inventory?.quantity);
-    } catch (error: unknown) {
-      const apiError = error as ApiErrorResponse;
-      toast.error(apiError.message);
-    }
-  }, []);
+  if (isError) {
+    const apiError = error as unknown as ApiErrorResponse;
+    toast.error(apiError.message);
+  }
 
   React.useEffect(() => {
-    getData();
-  }, []);
+    if (data) {
+      form.setValue("newQuantity", data.inventory?.quantity);
+    }
+  }, [data]);
 
   const handleSubmit = async (values: StockAdjustment) => {
-    try {
-      setLoading(true);
-      await productCombinationServices.stockAdjustment(values);
-      toast.success("Stock Adjustment successful");
-      onClose();
-      productCombinationState.invalidate();
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof StockAdjustment, {
-              type: "server",
-              message: err.message,
+    if (!data) return;
+    createStockAdjustment(
+      { values },
+      {
+        onSuccess: () => {
+          toast.success("Stock Adjustment successful");
+          onClose();
+        },
+        onError: (error: unknown) => {
+          const apiError = error as ApiErrorResponse;
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors.forEach((err) => {
+              if (err.field) {
+                form.setError(err.field as keyof StockAdjustment, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
             });
+          } else {
+            toast.error("Stock Adjustment failed: " + apiError.message);
           }
-        });
-      } else {
-        toast.error("Stock Adjustment failed: " + apiError.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+        },
+      },
+    );
   };
 
   return (
@@ -167,7 +170,7 @@ export default function StockAdjustmentModal({
 
           <DialogFooter>
             <ConfirmDialog
-              isLoading={loading}
+              isLoading={createStockAdjustmentPending}
               title="Stock Adjustment"
               onConfirm={async (e) => {
                 e.preventDefault();
@@ -179,7 +182,14 @@ export default function StockAdjustmentModal({
                   });
               }}
             >
-              <Button type="button" className="shadow-sm">
+              <Button
+                type="button"
+                className="shadow-sm"
+                disabled={createStockAdjustmentPending}
+              >
+                {createStockAdjustmentPending && (
+                  <Loader2Icon className="animate-spin" />
+                )}
                 Submit Adjustment
               </Button>
             </ConfirmDialog>
