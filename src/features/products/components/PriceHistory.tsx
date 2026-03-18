@@ -4,8 +4,8 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
+import { usePriceHistory } from "@/features/inventory/hooks/useInventory";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
-import { usePriceHistory } from "@/hooks/usePriceHistory";
 import { filterProps, PriceHistory } from "@/schemas";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";

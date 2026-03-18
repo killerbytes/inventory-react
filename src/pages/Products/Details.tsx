@@ -21,18 +21,12 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
-import {
-  ApiErrorResponse,
-  productBaseSchema,
-  ProductCombination,
-  ProductInput,
-  VariantTypes,
-} from "@/schemas";
 import { useProductCombinationByProductId } from "@/features/products/hooks/useProductCombination";
 import {
   useProduct,
   useUpdateProduct,
 } from "@/features/products/hooks/useProducts";
+import { ApiErrorResponse, productBaseSchema, ProductInput } from "@/schemas";
 import SupplierHistoryTab from "@/features/products/components/SupplierHistoryTab";
 import CreateProductModal from "@/features/products/components/CreateProductModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -69,6 +63,7 @@ export default function ProductEdit() {
   const { id } = useParams();
 
   const { data } = useProductCombinationByProductId(Number(id));
+
   const { mutate: updateProduct, isPending } = useUpdateProduct();
   const {
     data: product,
@@ -78,15 +73,11 @@ export default function ProductEdit() {
     isFetching,
   } = useProduct(Number(id));
 
-  const [combinations, setCombinations] = React.useState<ProductCombination[]>(
-    [],
-  );
   const [activeTab, setActiveTab] = React.useState("product_combination");
   const { data: categories } = useCategories();
   const [selectedCombination, setSelectedCombination] = React.useState<
     ComboboxItem | undefined
   >();
-  const [variants, setVariants] = React.useState<VariantTypes[]>([]);
   const navigate = useNavigate();
   const form = useForm<ProductInput>({
     resolver: zodResolver(productBaseSchema),
@@ -125,20 +116,6 @@ export default function ProductEdit() {
     );
   }
 
-  // React.useEffect(() => {
-  //   if (product) {
-  //     form.reset(product);
-  //   }
-  // }, [product]);
-
-  React.useEffect(() => {
-    if (data) {
-      const { combinations, variants } = data;
-      setCombinations(combinations ?? []);
-      setVariants(variants ?? []);
-    }
-  }, [data]);
-
   if (isError) {
     if (error.code === ERROR.NOT_FOUND) {
       navigate(`${ROUTES.PRODUCTS}`);
@@ -152,9 +129,9 @@ export default function ProductEdit() {
 
   const uniqueCombinations = React.useMemo(() => {
     return (
-      combinations.filter(
+      data?.combinations.filter(
         (item, index) =>
-          combinations.findIndex((i) => i.name === item.name) === index,
+          data?.combinations.findIndex((i) => i.name === item.name) === index,
       ) || []
     );
   }, [data]);
@@ -244,7 +221,6 @@ export default function ProductEdit() {
                   Product History
                 </TabsTrigger>
               </TabsList>
-
               {uniqueCombinations.length > 1 && (
                 <Combobox<ComboboxItem>
                   items={[...uniqueCombinations]}
@@ -292,8 +268,8 @@ export default function ProductEdit() {
                   </CardHeader>
                   <CardContent className="grid gap-6">
                     <Combinations
-                      combinations={combinations}
-                      variants={variants}
+                      combinations={data?.combinations || []}
+                      variants={data?.variants || []}
                       selectedCombination={selectedCombination}
                       // isBreakPackFilter={!!breakPackFilter}
                     />
@@ -306,7 +282,10 @@ export default function ProductEdit() {
                     <CardTitle>Variants</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-6">
-                    <Variants variants={variants} handleToggle={handleToggle} />
+                    <Variants
+                      variants={data?.variants || []}
+                      handleToggle={handleToggle}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -345,7 +324,7 @@ export default function ProductEdit() {
                     <ProductHistory
                       productName={form.getValues().name}
                       selectedCombination={selectedCombination}
-                      combinations={combinations}
+                      combinations={data?.combinations || []}
                     />
                   </CardContent>
                 </Card>

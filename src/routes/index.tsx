@@ -19,17 +19,15 @@ const GoodReceiptCreate = lazy(() => import("@/pages/GoodReceipts/Create"));
 const GoodReceiptDetails = lazy(() => import("@/pages/GoodReceipts/Details"));
 const GoodReceipts = lazy(() => import("@/pages/GoodReceipts"));
 const BreakPacks = lazy(() => import("@/pages/Inventory/BreakPacks"));
-const StockAdjustments = lazy(
-  () => import("@/pages/Inventory/StockAdjustments"),
-);
-const Movements = lazy(() => import("@/pages/Inventory/Movements"));
+const StockAdjustments = lazy(() => import("@/pages/Reports/StockAdjustments"));
+const Movements = lazy(() => import("@/pages/Reports/Movements"));
 const SalesDetails = lazy(() => import("@/pages/SalesOrders/Details"));
 const SalesOrders = lazy(() => import("@/pages/SalesOrders"));
 const InvoiceDetails = lazy(() => import("@/pages/Invoices/Details"));
 const Invoices = lazy(() => import("@/pages/Invoices"));
 const Payments = lazy(() => import("@/pages/Payments"));
 const PriceHistory = lazy(() => import("@/pages/Reports/PriceHistoryPage"));
-const Reorders = lazy(() => import("@/pages/Inventory/Reorders"));
+const Reorders = lazy(() => import("@/pages/Reports/ReorderLevels"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const ProductSearch = lazy(() => import("@/pages/ProductSearch"));
 const SupplierDetails = lazy(() => import("@/pages/Suppliers/Details"));

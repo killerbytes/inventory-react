@@ -5,38 +5,33 @@ import {
   STOCK_ADJUSTMENT_TYPE_COLOR,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, StockAdjustment } from "@/schemas";
+import { useStockAdjustments } from "@/features/inventory/hooks/useInventory";
 import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
+import { filterProps, StockAdjustment } from "@/schemas";
 import { formatDateTime } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
 export default function StockAdjustments() {
-  const [data, setData] =
-    React.useState<PaginatedResponse<StockAdjustment>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     type: "ALL",
     q: "",
   });
-  const getData = React.useCallback(async () => {
-    const data = await inventoryServices.getStockAdjustments(filter);
-    setData(data);
-  }, [filter]);
-
-  React.useEffect(() => {
-    getData();
-  }, [filter, getData]);
+  const {
+    data = PAGINATION_RESPONSE,
+    isLoading,
+    error,
+  } = useStockAdjustments(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));

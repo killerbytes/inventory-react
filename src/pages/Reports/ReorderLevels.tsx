@@ -11,31 +11,22 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, ProductCombination } from "@/schemas";
+import { useReorderLevels } from "@/features/inventory/hooks/useInventory";
+import { Reorder } from "@/features/inventory/schema/inventory.schema";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { formatDate } from "@/utils/formatters";
-import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
+import { filterProps } from "@/schemas";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import { last } from "lodash";
 import React from "react";
 
-type Props = {
-  combinationId: number;
-  combinations: ProductCombination;
-  id: number;
-  lastSoldAt: string;
-  quantity: number;
-};
-
 export default function Reorders() {
-  const [data, setData] =
-    React.useState<PaginatedResponse<Props>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -44,14 +35,7 @@ export default function Reorders() {
     q: "",
   });
 
-  const getData = React.useCallback(async () => {
-    const data = await inventoryServices.getReorderLevels(filter);
-    setData(data);
-  }, [filter]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  const { data = PAGINATION_RESPONSE } = useReorderLevels(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     const { sort } = data;
@@ -63,7 +47,7 @@ export default function Reorders() {
     }));
   }, []);
 
-  const columns = React.useMemo<ColumnDef<Props>[]>(
+  const columns = React.useMemo<ColumnDef<Reorder>[]>(
     () => [
       {
         accessorKey: "name",

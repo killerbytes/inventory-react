@@ -11,44 +11,27 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse } from "@/schemas";
+import { NoSales } from "@/features/inventory/schema/inventory.schema";
+import { useNoSales } from "@/features/inventory/hooks/useInventory";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { reportServices } from "@/services";
+import { filterProps } from "@/schemas";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import { last } from "lodash";
 import React from "react";
 
-type Props = {
-  name: string;
-  productId: string;
-  unit: string;
-  inventory: {
-    quantity: number;
-  };
-};
-
-export default function NoSales() {
-  const [data, setData] =
-    React.useState<PaginatedResponse<Props>>(PAGINATION_RESPONSE);
+export default function NoSalesPage() {
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "quantity",
   });
 
-  const getData = React.useCallback(async () => {
-    const data = await reportServices.noSales(filter);
-    setData(data);
-  }, [filter]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  const { data = PAGINATION_RESPONSE, isLoading, error } = useNoSales(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     const { sort } = data;
@@ -59,7 +42,7 @@ export default function NoSales() {
       sort: last(sort?.split("_")),
     }));
   }, []);
-  const columns = React.useMemo<ColumnDef<Props>[]>(
+  const columns = React.useMemo<ColumnDef<NoSales>[]>(
     () => [
       {
         accessorKey: "name",

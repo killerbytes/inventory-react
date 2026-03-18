@@ -10,18 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ApiErrorResponse,
-  InventoryMovement,
-  PaginatedResponse,
-} from "@/schemas";
+import { useMovements } from "@/features/inventory/hooks/useInventory";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
 import { endOfMonth, startOfMonth } from "date-fns";
 import Movements from "@/components/Movements";
 import { useSearchParams } from "react-router";
-import { inventoryServices } from "@/services";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import Select from "@/components/Select";
@@ -54,38 +49,24 @@ const parseParamsToFilter = (params: URLSearchParams): FilterProps => {
 export default function InventoryMovements() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [loading, setLoading] = React.useState(true);
-  const [data, setData] =
-    React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
-
   const [filter, setFilter] = React.useState<FilterProps>(() =>
     parseParamsToFilter(searchParams),
   );
 
-  const getData = React.useCallback(async (currentFilter: FilterProps) => {
-    setLoading(true);
-    try {
-      const payload = {
-        ...currentFilter,
-        q: currentFilter.q === "" ? undefined : currentFilter.q,
-        type: currentFilter.type === "ALL" ? undefined : currentFilter.type,
-        startDate: currentFilter.from?.toISOString(),
-        endDate: currentFilter.to?.toISOString(),
-      };
-
-      const data = await inventoryServices.getMovements(payload);
-      setData(data);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      console.error("Error fetching data:", apiError.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const debouncedQuery = useDebounce(filter, 300);
 
-  // Sync state to URL
+  const payload = React.useMemo(() => {
+    return {
+      ...debouncedQuery,
+      q: debouncedQuery.q === "" ? undefined : debouncedQuery.q,
+      type: debouncedQuery.type === "ALL" ? undefined : debouncedQuery.type,
+      startDate: debouncedQuery.from?.toISOString(),
+      endDate: debouncedQuery.to?.toISOString(),
+    };
+  }, [debouncedQuery]);
+
+  const { data = PAGINATION_RESPONSE, isLoading } = useMovements(payload);
+
   React.useEffect(() => {
     const params = new URLSearchParams();
     Object.entries(debouncedQuery).forEach(([key, value]) => {
@@ -100,11 +81,9 @@ export default function InventoryMovements() {
     setSearchParams(params, { replace: true });
   }, [debouncedQuery, setSearchParams]);
 
-  // Sync state from URL (Back/Forward navigation)
   React.useEffect(() => {
     const newFilter = parseParamsToFilter(searchParams);
 
-    // Deep comparison to avoid infinite loop
     const isDifferent =
       newFilter.q !== filter.q ||
       newFilter.type !== filter.type ||
@@ -117,11 +96,6 @@ export default function InventoryMovements() {
       setFilter(newFilter);
     }
   }, [searchParams]);
-
-  // Fetch data on filter change
-  React.useEffect(() => {
-    getData(debouncedQuery);
-  }, [debouncedQuery, getData]);
 
   return (
     <Card>
@@ -171,7 +145,7 @@ export default function InventoryMovements() {
             />
           </div>
         </div>
-        <Loader isLoading={loading} />
+        <Loader isLoading={isLoading} />
         <Movements data={data.data} />
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />

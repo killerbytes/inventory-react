@@ -1,13 +1,7 @@
-import {
-  ApiErrorResponse,
-  filterProps,
-  InventoryMovement,
-  PaginatedResponse,
-  ProductCombination,
-} from "@/schemas";
+import { useMovements } from "@/features/inventory/hooks/useInventory";
 import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
+import { filterProps, ProductCombination } from "@/schemas";
 import Movements from "@/components/Movements";
-import { inventoryServices } from "@/services";
 import Pager from "@/components/Pager";
 import React from "react";
 
@@ -25,34 +19,18 @@ export default function ProductHistory<T extends { id: number | string }>({
     return _combinations.filter((item) => item.id === selectedCombination?.id);
   }, [selectedCombination, _combinations]);
 
-  const [data, setData] =
-    React.useState<PaginatedResponse<InventoryMovement>>(PAGINATION_RESPONSE);
-
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     type: "ALL",
   });
+  const payload = {
+    ...filter,
+    ids: combinations.map((i) => i.id),
+    type: filter.type === "ALL" ? undefined : filter.type,
+  };
 
-  const getData = React.useCallback(async () => {
-    try {
-      const payload = {
-        ...filter,
-        ids: combinations.map((i) => i.id),
-        type: filter.type === "ALL" ? undefined : filter.type,
-      };
-
-      const data = await inventoryServices.getMovements(payload);
-      setData(data);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      console.error("Error fetching data:", apiError.message);
-    }
-  }, [filter, selectedCombination, productName, combinations]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  const { data = PAGINATION_RESPONSE, isLoading } = useMovements(payload);
 
   return (
     <>
