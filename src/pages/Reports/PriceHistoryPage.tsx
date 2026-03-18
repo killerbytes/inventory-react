@@ -11,23 +11,22 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, PriceHistory } from "@/schemas";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
+import { usePriceHistory } from "@/hooks/usePriceHistory";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { filterProps, PriceHistory } from "@/schemas";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
 export default function PriceHistoryPage() {
-  const [data, setData] =
-    React.useState<PaginatedResponse<PriceHistory>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -35,15 +34,16 @@ export default function PriceHistoryPage() {
     order: "DESC",
     q: "",
   });
+  const { data = PAGINATION_RESPONSE, isLoading } = usePriceHistory(filter);
 
-  const getData = React.useCallback(async () => {
-    const data = await inventoryServices.getPriceHistory(filter);
-    setData(data);
-  }, [filter]);
+  // const getData = React.useCallback(async () => {
+  //   const data = await inventoryServices.getPriceHistory(filter);
+  //   setData(data);
+  // }, [filter]);
 
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  // React.useEffect(() => {
+  //   getData();
+  // }, [getData]);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -119,7 +119,7 @@ export default function PriceHistoryPage() {
       },
 
       {
-        accessorKey: "createdAt",
+        accessorKey: "changedAt",
         header: ({ column }) => {
           return (
             <ColumnSort
@@ -170,15 +170,19 @@ export default function PriceHistoryPage() {
             }}
           />
         </div>
-        <DataTable
-          data={data.data || []}
-          columns={columns}
-          meta={{
-            disabledRow: {
-              "combinations.deletedAt": true,
-            },
-          }}
-        />
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <DataTable
+            data={data.data || []}
+            columns={columns}
+            meta={{
+              disabledRow: {
+                "combinations.deletedAt": true,
+              },
+            }}
+          />
+        )}
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}

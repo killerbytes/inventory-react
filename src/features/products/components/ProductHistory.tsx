@@ -48,7 +48,7 @@ export default function ProductHistory<T extends { id: number | string }>({
       const apiError = error as ApiErrorResponse;
       console.error("Error fetching data:", apiError.message);
     }
-  }, [filter, selectedCombination, productName]);
+  }, [filter, selectedCombination, productName, combinations]);
 
   React.useEffect(() => {
     getData();

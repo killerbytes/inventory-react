@@ -12,7 +12,12 @@ import { AxiosError } from "axios";
 
 export const productCombinationKeys = {
   all: ["product-combination"],
-  get: (id: number) => ["product-combination", id],
+  get: (id: number) => [...productCombinationKeys.all, id],
+  byProductId: (id: number) => [
+    ...productCombinationKeys.all,
+    "by-product",
+    id,
+  ],
 };
 
 export const useProductCombination = (id: number) => {
@@ -32,7 +37,7 @@ export const useProductCombinationByProductId = (id: number) => {
     },
     AxiosError
   >({
-    queryKey: productCombinationKeys.all,
+    queryKey: productCombinationKeys.byProductId(id),
     queryFn: () => productCombinationServices.getByProductId(id),
     staleTime: 1000 * 60 * 5,
     enabled: !!id,

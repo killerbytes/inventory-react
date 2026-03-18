@@ -28,7 +28,7 @@ const SalesOrders = lazy(() => import("@/pages/SalesOrders"));
 const InvoiceDetails = lazy(() => import("@/pages/Invoices/Details"));
 const Invoices = lazy(() => import("@/pages/Invoices"));
 const Payments = lazy(() => import("@/pages/Payments"));
-const PriceHistory = lazy(() => import("@/pages/Inventory/PriceHistoryPage"));
+const PriceHistory = lazy(() => import("@/pages/Reports/PriceHistoryPage"));
 const Reorders = lazy(() => import("@/pages/Inventory/Reorders"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const ProductSearch = lazy(() => import("@/pages/ProductSearch"));

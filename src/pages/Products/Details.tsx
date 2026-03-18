@@ -59,7 +59,7 @@ import Loader from "@/components/Loader";
 import React, { Fragment } from "react";
 import { toast } from "sonner";
 
-type ComboboxItem = {
+export type ComboboxItem = {
   id: number;
   name?: string;
   value?: string;

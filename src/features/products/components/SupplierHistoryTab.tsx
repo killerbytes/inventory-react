@@ -1,9 +1,9 @@
+import { useSupplierHistory } from "@/hooks/useSupplierHistory";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
-import { supplierServices } from "@/services";
 import { SupplierHistory } from "@/schemas";
 import { Link } from "react-router";
 import React from "react";
@@ -15,16 +15,7 @@ export default function SupplierHistoryTab<T extends { id: number | string }>({
   productId: string;
   selectedCombination: T | undefined;
 }) {
-  const [data, setData] = React.useState<SupplierHistory[]>([]);
-
-  const getData = React.useCallback(async () => {
-    const res = await supplierServices.getByProductId(Number(productId));
-    setData(res);
-  }, [productId]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  const { data = [] } = useSupplierHistory(Number(productId));
 
   const columns = React.useMemo<ColumnDef<SupplierHistory>[]>(
     () => [
