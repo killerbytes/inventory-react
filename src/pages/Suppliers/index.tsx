@@ -5,29 +5,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useSuppliersPaginated } from "@/features/suppliers/hooks/useSuppliers";
 import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, Supplier } from "@/schemas";
+import EditModal from "../../features/suppliers/components/EditModal";
+import AddModal from "../../features/suppliers/components/AddModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import { filterProps, Supplier } from "@/schemas";
 import ColumnSort from "@/components/ColumnSort";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supplierServices } from "@/services";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
-import EditModal from "./EditModal";
-import AddModal from "./AddModal";
 import React from "react";
 
 export default function Suppliers() {
-  const [data, setData] =
-    React.useState<PaginatedResponse<Supplier>>(PAGINATION_RESPONSE);
-
   const [selected, setSelected] = React.useState<Supplier | null>();
-  const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -39,22 +36,8 @@ export default function Suppliers() {
     addModal: false,
     editModal: false,
   });
-
-  const getData = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await supplierServices.getAll(filter);
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
-
-  React.useEffect(() => {
-    getData();
-  }, [filter, getData]);
+  const { data = PAGINATION_RESPONSE, isLoading } =
+    useSuppliersPaginated(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -168,8 +151,8 @@ export default function Suppliers() {
               }}
             />
           </div>
-          {loading ? (
-            <p>Loading...</p>
+          {isLoading ? (
+            <Loader />
           ) : (
             <>
               <DataTable data={data.data || []} columns={columns} />
@@ -188,7 +171,6 @@ export default function Suppliers() {
           onClose={() => {
             handleToggle({ addModal: false });
           }}
-          cb={getData}
         />
       )}
 
@@ -198,7 +180,6 @@ export default function Suppliers() {
           onClose={() => {
             handleToggle({ editModal: false });
           }}
-          cb={getData}
           data={selected as Supplier}
         />
       )}
