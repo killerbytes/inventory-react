@@ -7,25 +7,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ApiErrorResponse,
-  filterProps,
-  GoodReceipt,
-  PaginatedResponse,
-  Supplier,
-} from "@/schemas";
-import {
   PAGINATION,
   PAGINATION_RESPONSE,
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import { goodReceiptServices, supplierServices } from "@/services";
+import {
+  ApiErrorResponse,
+  filterProps,
+  GoodReceipt,
+  PaginatedResponse,
+} from "@/schemas";
+import { useSupplier } from "@/features/suppliers/hooks/useSuppliers";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import SectionCards from "@/components/SectionCards";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
+import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
 import { cx } from "class-variance-authority";
@@ -38,7 +38,7 @@ export default function SupplierDetails() {
   const { id } = useParams();
   const [data, setData] =
     React.useState<PaginatedResponse<GoodReceipt>>(PAGINATION_RESPONSE);
-  const [supplier, setSupplier] = React.useState<Supplier>();
+  const { data: supplier } = useSupplier(Number(id));
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -62,14 +62,6 @@ export default function SupplierDetails() {
   React.useEffect(() => {
     getData();
   }, [getData]);
-
-  React.useEffect(() => {
-    const getSupplier = async () => {
-      const supplier = await supplierServices.get(Number(id));
-      setSupplier(supplier);
-    };
-    getSupplier();
-  }, [id]);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));

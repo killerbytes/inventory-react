@@ -1,5 +1,5 @@
+import { supplierSchema } from "../features/suppliers/schemas/supplier.schema";
 import { paymentApplicationSchema } from "./paymentApplication.schema";
-import { supplierSchema } from "./supplier.schema";
 import z from "zod";
 
 export const paymentBaseSchema = z.object({

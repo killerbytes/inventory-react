@@ -16,13 +16,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useDeleteSupplier, useUpdateSupplier } from "../hooks/useSuppliers";
 import { ApiErrorResponse, Supplier, supplierSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supplierServices } from "@/services";
 import { ERROR } from "@/utils/definitions";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
@@ -34,14 +34,14 @@ import React from "react";
 export default function EditModal({
   isOpen,
   onClose,
-  cb,
   data,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  cb: () => void;
   data: Supplier;
 }) {
+  const { mutate: updateSupplier, isPending: isUpdating } = useUpdateSupplier();
+  const { mutate: deleteSupplier, isPending: isDeleting } = useDeleteSupplier();
   const [confirm, setConfirm] = React.useState(false);
   const { supplierState } = useStore();
   const form = useForm<Supplier>({
@@ -50,52 +50,54 @@ export default function EditModal({
   });
 
   const onSubmit = async (values: Supplier) => {
-    try {
-      await supplierServices.update(Number(data.id), values);
-      toast.success(`Submitted: ${values.name}`);
-      supplierState.invalidate();
-      form.reset();
-      onClose();
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof Supplier, {
-              type: "server",
-              message: err.message,
+    updateSupplier(
+      { id: Number(data.id), data: values },
+      {
+        onSuccess: () => {
+          toast.success(`Submitted: ${values.name}`);
+          form.reset();
+          onClose();
+        },
+        onError: (error: unknown) => {
+          const apiError = error as ApiErrorResponse;
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors?.forEach((err) => {
+              if (err.field) {
+                form.setError(err.field as keyof Supplier, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
             });
           }
-        });
-      }
-      toast.error("Submission failed");
-    } finally {
-      cb();
-    }
+          toast.error("Submission failed");
+        },
+      },
+    );
   };
 
   const handleDelete = async () => {
-    try {
-      await supplierServices.delete(Number(data.id));
-      toast.success(`Deleted: ${data.name}`);
-      onClose();
-      supplierState.invalidate();
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof Supplier, {
-              type: "server",
-              message: err.message,
-            });
-          }
-        });
-      }
-      toast.error("Deletion failed");
-    } finally {
-      cb();
-    }
+    deleteSupplier(Number(data.id), {
+      onSuccess: () => {
+        toast.success(`Deleted: ${data.name}`);
+        onClose();
+        supplierState.invalidate();
+      },
+      onError: (error: unknown) => {
+        const apiError = error as ApiErrorResponse;
+        if (apiError.code === ERROR.VALIDATION_ERROR) {
+          apiError.errors?.forEach((err) => {
+            if (err.field) {
+              form.setError(err.field as keyof Supplier, {
+                type: "server",
+                message: err.message,
+              });
+            }
+          });
+        }
+        toast.error("Deletion failed");
+      },
+    });
   };
 
   return (

@@ -12,62 +12,62 @@ import {
   SupplierInput,
   supplierBaseSchema,
 } from "@/schemas";
+import { useCreateSupplier } from "../hooks/useSuppliers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { Loader2Icon, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supplierServices } from "@/services";
 import { ERROR } from "@/utils/definitions";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { useStore } from "@/stores";
 import { toast } from "sonner";
 
 export default function AddModal({
   isOpen,
   onClose,
-  cb,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  cb: () => void;
 }) {
-  const { supplierState } = useStore();
+  const { mutate: createSupplier, isPending } = useCreateSupplier();
   const form = useForm<SupplierInput>({
     resolver: zodResolver(supplierBaseSchema),
   });
 
   const onSubmit = async (values: SupplierInput) => {
-    try {
-      const { name, address, contact, phone, email } = values;
-      await supplierServices.create({
+    const { name, address, contact, phone, email } = values;
+    createSupplier(
+      {
         name,
         address,
         contact,
         phone,
         email,
-      });
-      supplierState.invalidate();
-      toast.success(`Submitted: ${values.name}`);
-      form.reset();
-      onClose();
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err: ApiError) => {
-          if (err.field) {
-            form.setError(err.field as keyof SupplierInput, {
-              type: "server",
-              message: err.message,
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Submitted: ${values.name}`);
+          form.reset();
+          onClose();
+        },
+        onError: (error: unknown) => {
+          const apiError = error as ApiErrorResponse;
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors?.forEach((err: ApiError) => {
+              if (err.field) {
+                form.setError(err.field as keyof SupplierInput, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
             });
+          } else {
+            toast.error("Submission failed");
           }
-        });
-      } else {
-        toast.error("Submission failed");
-      }
-    } finally {
-      cb();
-    }
+        },
+      },
+    );
   };
 
   return (
@@ -168,7 +168,8 @@ export default function AddModal({
           />
 
           <DialogFooter>
-            <Button className="shadow-sm" type="submit">
+            <Button className="shadow-sm" type="submit" disabled={isPending}>
+              {isPending ? <Loader2Icon className="animate-spin" /> : <Save />}
               Save changes
             </Button>
           </DialogFooter>

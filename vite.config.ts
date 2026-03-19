@@ -40,8 +40,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5300,
     strictPort: true,
     host: true,
+    port: 8081,
   },
 });

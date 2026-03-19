@@ -1,4 +1,4 @@
-import { supplierSchema } from "./supplier.schema";
+import { supplierSchema } from "../features/suppliers/schemas/supplier.schema";
 import z from "zod";
 
 export const customerSchema = supplierSchema;

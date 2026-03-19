@@ -16,14 +16,14 @@ export default class InventoryService extends BaseService<Inventory> {
   };
 
   getStockAdjustments = async (data: filterProps) => {
-    return await this.http.post(`${this.url}/stockAdjustments`, data);
+    return await this.http.post(`${this.url}/stock-adjustments`, data);
   };
 
   getPriceHistory = async (data: filterProps) => {
-    return await this.http.post(`${this.url}/priceHistory`, data);
+    return await this.http.post(`${this.url}/price-history`, data);
   };
   getReorderLevels = async (data: filterProps) => {
-    return await this.http.get(`${this.url}/reorderLevels`, { params: data });
+    return await this.http.get(`${this.url}/reorder-levels`, { params: data });
   };
   getReturnTransaction = async (id: number): Promise<ReturnTransaction[]> => {
     return await this.http.get(`${this.url}/${id}/return-transaction`);

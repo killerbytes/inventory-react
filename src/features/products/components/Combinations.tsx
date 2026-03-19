@@ -1,5 +1,6 @@
 import { ProductCombination, VariantTypes } from "@/schemas";
 import StockAdjustmentModal from "./StockAdjustmentModal";
+import { ComboboxItem } from "@/pages/Products/Details";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -49,7 +50,7 @@ export default function Combinations({
 }: {
   combinations: ProductCombination[];
   variants: VariantTypes[];
-  selectedCombination: T | undefined;
+  selectedCombination: ComboboxItem | undefined;
 }) {
   const [combinations, setCombinations] = React.useState(
     groupSubItems(_combinations),

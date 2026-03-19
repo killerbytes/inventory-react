@@ -1,3 +1,4 @@
+export * from "../features/suppliers/schemas/supplier.schema";
 export * from "./breakpack.schema";
 export * from "./category.schema";
 export * from "./customer.schema";
@@ -14,6 +15,5 @@ export * from "./productCombination.schema";
 export * from "./returnItem.schema";
 export * from "./salesOrder.schema";
 export * from "./stockAdjustment.schema";
-export * from "./supplier.schema";
 export * from "./user.schema";
 export * from "./variant.schema";

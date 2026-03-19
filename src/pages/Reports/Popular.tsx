@@ -11,7 +11,8 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, ProductCombination } from "@/schemas";
+import { usePopularProducts } from "@/features/inventory/hooks/useInventory";
+import { Popular } from "@/features/inventory/schema/inventory.schema";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { endOfMonth, startOfMonth } from "date-fns";
@@ -20,45 +21,34 @@ import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { DateRange } from "react-day-picker";
-import { reportServices } from "@/services";
+import Loader from "@/components/Loader";
+import { filterProps } from "@/schemas";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import { last } from "lodash";
 import React from "react";
 
-type Props = {
-  name: string;
-  combinations: ProductCombination;
-  lastSoldAt: string;
-  quantity: number;
-};
-
-export default function Popular() {
+export default function PopularPage() {
   const [range, setRange] = React.useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-  const [data, setData] =
-    React.useState<PaginatedResponse<Props>>(PAGINATION_RESPONSE);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "transactionCount",
   });
+  const payload = {
+    ...filter,
+    ...(range?.from && range?.to && { startDate: range.from }),
+    ...(range?.from && range?.to && { endDate: range.to }),
+  };
 
-  const getData = React.useCallback(async () => {
-    const payload = {
-      ...filter,
-      ...(range?.from && range?.to && { startDate: range.from }),
-      ...(range?.from && range?.to && { endDate: range.to }),
-    };
-    const data = await reportServices.popular(payload);
-    setData(data);
-  }, [filter, range]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  const {
+    data = PAGINATION_RESPONSE,
+    isLoading,
+    error,
+  } = usePopularProducts(payload);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     const { sort } = data;
@@ -70,7 +60,7 @@ export default function Popular() {
     }));
   }, []);
 
-  const columns = React.useMemo<ColumnDef<Props>[]>(
+  const columns = React.useMemo<ColumnDef<Popular>[]>(
     () => [
       {
         accessorKey: "combinations.name",
@@ -134,12 +124,15 @@ export default function Popular() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <DateRangePicker value={range} onChange={setRange} />
-
-        <DataTable
-          data={data.data || []}
-          columns={columns}
-          meta={{ disabledRow: { "combinations.isActive": false } }}
-        />
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <DataTable
+            data={data.data || []}
+            columns={columns}
+            meta={{ disabledRow: { "combinations.isActive": false } }}
+          />
+        )}
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}

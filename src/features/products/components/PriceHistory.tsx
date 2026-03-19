@@ -4,13 +4,13 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, PriceHistory } from "@/schemas";
+import { usePriceHistory } from "@/features/inventory/hooks/useInventory";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
+import { filterProps, PriceHistory } from "@/schemas";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { inventoryServices } from "@/services";
 import { cx } from "class-variance-authority";
 import { Link } from "react-router";
 import React from "react";
@@ -26,9 +26,6 @@ export default function PriceHistoryTab<T extends { id: number | string }>({
   productId: string;
   selectedCombination: T | undefined;
 }) {
-  const [data, setData] =
-    React.useState<PaginatedResponse<PriceHistory>>(PAGINATION_RESPONSE);
-
   const [filter, setFilter] = React.useState<filterPropTypes>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -38,15 +35,11 @@ export default function PriceHistoryTab<T extends { id: number | string }>({
     productId,
   });
 
-  const getData = React.useCallback(async () => {
-    const data = await inventoryServices.getPriceHistory(filter);
-
-    setData(data);
-  }, [filter]);
+  const { data = PAGINATION_RESPONSE } = usePriceHistory(filter);
 
   React.useEffect(() => {
-    getData();
-  }, [getData]);
+    setFilter((prev) => ({ ...prev, productId }));
+  }, [productId]);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -111,7 +104,7 @@ export default function PriceHistoryTab<T extends { id: number | string }>({
       },
 
       {
-        accessorKey: "createdAt",
+        accessorKey: "changedAt",
         header: ({ column }) => {
           return (
             <ColumnSort

@@ -11,7 +11,8 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { filterProps, PaginatedResponse, ProductCombination } from "@/schemas";
+import { Profit } from "@/features/inventory/schema/inventory.schema";
+import { useProfit } from "@/features/inventory/hooks/useInventory";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
@@ -21,47 +22,31 @@ import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { DateRange } from "react-day-picker";
-import { reportServices } from "@/services";
+import { filterProps } from "@/schemas";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import { last } from "lodash";
 import React from "react";
 
-type Props = {
-  name: string;
-  combinations: ProductCombination;
-  totalProfit: number;
-  totalQuantity: number;
-  nameSnapshot: string;
-  unit: string;
-};
-
-export default function Profit() {
+export default function ProfitPage() {
   const [range, setRange] = React.useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-  const [data, setData] =
-    React.useState<PaginatedResponse<Props>>(PAGINATION_RESPONSE);
+
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     sort: "totalProfit",
   });
 
-  const getData = React.useCallback(async () => {
-    const payload = {
-      ...filter,
-      ...(range?.from && range?.to && { startDate: range.from }),
-      ...(range?.from && range?.to && { endDate: range.to }),
-    };
-    const data = await reportServices.profit(payload);
-    setData(data);
-  }, [filter, range]);
+  const payload = {
+    ...filter,
+    ...(range?.from && range?.to && { startDate: range.from }),
+    ...(range?.from && range?.to && { endDate: range.to }),
+  };
 
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  const { data = PAGINATION_RESPONSE, isLoading, error } = useProfit(payload);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     const { sort } = data;
@@ -73,7 +58,7 @@ export default function Profit() {
     }));
   }, []);
 
-  const columns = React.useMemo<ColumnDef<Props>[]>(
+  const columns = React.useMemo<ColumnDef<Profit>[]>(
     () => [
       {
         accessorKey: "nameSnapshot",
