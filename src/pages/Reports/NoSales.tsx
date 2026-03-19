@@ -11,9 +11,9 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { NoSales } from "@/features/inventory/schema/inventory.schema";
 import { useNoSales } from "@/features/inventory/hooks/useInventory";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { NoSales } from "@/schemas/reports.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";

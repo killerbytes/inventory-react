@@ -24,7 +24,8 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { goodReceiptServices, salesOrderServices } from "@/services";
+import { useCreateSupplierReturns } from "@/features/good-receipts/hooks/useGoodReceipts";
+import { Loader2Icon, Plus, Trash2, Undo2 } from "lucide-react";
 import ProductLookupInput from "../forms/ProductLookupInput";
 import LineColumn from "../forms/OrderItemForm/LineColumn";
 import { getTotalAmountTableFooter } from "@/lib/utils";
@@ -33,8 +34,8 @@ import { formatCurrency } from "@/utils/formatters";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCell, TableRow } from "../ui/table";
 import { UNIT_COLOR } from "@/utils/definitions";
+import { salesOrderServices } from "@/services";
 import { cx } from "class-variance-authority";
-import { Plus, Trash2 } from "lucide-react";
 import { DialogFooter } from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
 import NumberInput from "../NumberInput";
@@ -56,6 +57,8 @@ export default function ReturnExchangeModal({
   referenceId: number;
   salesOrder?: boolean;
 }) {
+  const { mutate: createSupplierReturns, isPending } =
+    useCreateSupplierReturns();
   const form = useForm<ReturnForm>({
     resolver: zodResolver(returnFormSchema),
     defaultValues: {
@@ -90,13 +93,26 @@ export default function ReturnExchangeModal({
           returns,
         });
       } else {
-        await goodReceiptServices.supplierReturns(referenceId, {
-          ...values,
-          returns,
-        });
+        createSupplierReturns(
+          {
+            id: referenceId,
+            data: {
+              ...values,
+              returns,
+            },
+          },
+          {
+            onSuccess: () => {
+              toast.success("Supplier Returns submitted successfully");
+              onClose();
+            },
+            onError: (error: unknown) => {
+              const apiError = error as ApiErrorResponse;
+              toast.error("Submission failed - " + apiError.message);
+            },
+          },
+        );
       }
-      toast.success("Supplier Returns submitted successfully");
-      onClose();
     } catch (error) {
       const apiError = error as ApiErrorResponse;
       toast.error("Submission failed - " + apiError.message);
@@ -387,7 +403,7 @@ export default function ReturnExchangeModal({
     >
       <Form {...form}>
         <form
-          className="flex gap-4 items-endx flex-col"
+          className="flex gap-4  flex-col"
           onSubmit={(e) => {
             e.preventDefault();
             console.log(form.getValues(), form.formState.errors);
@@ -398,7 +414,7 @@ export default function ReturnExchangeModal({
               });
           }}
         >
-          <div className="max-h-[70vh] overflow-y-auto">
+          <div className="max-h-[70vh] overflow-y-auto flex gap-4  flex-col">
             <FormField
               control={form.control}
               name="returns"
@@ -519,7 +535,10 @@ export default function ReturnExchangeModal({
           </div>
 
           <DialogFooter className="flex justify-between">
-            <Button>Submit</Button>
+            <Button disabled={isPending}>
+              {isPending ? <Loader2Icon /> : <Undo2 />}
+              Return
+            </Button>
           </DialogFooter>
         </form>
       </Form>

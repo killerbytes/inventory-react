@@ -5,7 +5,12 @@ import {
   PriceHistory,
   StockAdjustment,
 } from "@/schemas";
-import { NoSales, Popular, Profit, Reorder } from "../schema/inventory.schema";
+import {
+  NoSales,
+  Popular,
+  Profit,
+  Reorder,
+} from "../../../schemas/reports.schema";
 import { inventoryServices, reportServices } from "@/services";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";

@@ -1,5 +1,5 @@
 import { ProductWithCombinations } from "./product.schema";
-import { Inventory } from "./inventory.schema";
+import { Inventory } from "./reports.schema";
 import z from "zod";
 
 export const statusHistorySchema = z.object({

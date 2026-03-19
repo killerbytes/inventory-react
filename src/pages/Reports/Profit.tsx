@@ -11,13 +11,13 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { Profit } from "@/features/inventory/schema/inventory.schema";
 import { useProfit } from "@/features/inventory/hooks/useInventory";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
+import { Profit } from "@/schemas/reports.schema";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";

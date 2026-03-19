@@ -12,34 +12,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { GoodReceipt, PaginatedResponse, filterProps } from "@/schemas";
+import { useGoodReceiptsPaginated } from "@/features/good-receipts/hooks/useGoodReceipts";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
 import { Link, useNavigate } from "react-router-dom";
+import { GoodReceipt, filterProps } from "@/schemas";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
 import { DateRange } from "react-day-picker";
 import Select from "@/components/Select";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 import React from "react";
 
 export default function GoodReceipts() {
   const navigate = useNavigate();
-  const [data, setData] =
-    React.useState<PaginatedResponse<GoodReceipt>>(PAGINATION_RESPONSE);
 
-  const [loading, setLoading] = React.useState(true);
   const [range, setRange] = React.useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
@@ -53,29 +52,24 @@ export default function GoodReceipts() {
     q: "",
   });
 
-  const getData = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const payload = {
-        ...filter,
-        ...(range?.from && range?.to && { startDate: range.from }),
-        ...(range?.from && range?.to && { endDate: range.to }),
+  const payload = {
+    ...filter,
+    ...(range?.from && range?.to && { startDate: range.from }),
+    ...(range?.from && range?.to && { endDate: range.to }),
 
-        status: filter.status === "ALL" ? undefined : filter.status,
-      };
-      const data: PaginatedResponse<GoodReceipt> =
-        await goodReceiptServices.getAll(payload);
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter, range.from, range.to]);
+    status: filter.status === "ALL" ? undefined : filter.status,
+  };
 
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  const {
+    data = PAGINATION_RESPONSE,
+    isLoading,
+    isError,
+    error,
+  } = useGoodReceiptsPaginated(payload);
+
+  if (isError) {
+    toast.error(error?.message);
+  }
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -254,8 +248,8 @@ export default function GoodReceipts() {
               }}
             />
           </div>
-          {loading ? (
-            <p>Loading...</p>
+          {isLoading ? (
+            <Loader />
           ) : (
             <>
               <DataTable

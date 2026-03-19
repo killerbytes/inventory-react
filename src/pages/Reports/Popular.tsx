@@ -12,10 +12,10 @@ import {
   UNIT_COLOR,
 } from "@/utils/definitions";
 import { usePopularProducts } from "@/features/inventory/hooks/useInventory";
-import { Popular } from "@/features/inventory/schema/inventory.schema";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { endOfMonth, startOfMonth } from "date-fns";
+import { Popular } from "@/schemas/reports.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
