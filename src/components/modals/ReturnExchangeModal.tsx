@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { useCreateSupplierReturns } from "@/features/good-receipts/hooks/useGoodReceipts";
+import { useCreateReturnExchange } from "@/features/sales-orders/hooks/useSalesOrders";
 import { Loader2Icon, Plus, Trash2, Undo2 } from "lucide-react";
 import ProductLookupInput from "../forms/ProductLookupInput";
 import LineColumn from "../forms/OrderItemForm/LineColumn";
@@ -34,7 +35,6 @@ import { formatCurrency } from "@/utils/formatters";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCell, TableRow } from "../ui/table";
 import { UNIT_COLOR } from "@/utils/definitions";
-import { salesOrderServices } from "@/services";
 import { cx } from "class-variance-authority";
 import { DialogFooter } from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
@@ -57,8 +57,11 @@ export default function ReturnExchangeModal({
   referenceId: number;
   salesOrder?: boolean;
 }) {
-  const { mutate: createSupplierReturns, isPending } =
+  const { mutate: createSupplierReturns, isPending: isSupplierReturnsPending } =
     useCreateSupplierReturns();
+
+  const { mutate: createReturnExchange, isPending: isReturnExchangePending } =
+    useCreateReturnExchange();
   const form = useForm<ReturnForm>({
     resolver: zodResolver(returnFormSchema),
     defaultValues: {
@@ -81,41 +84,48 @@ export default function ReturnExchangeModal({
   const fieldExchanges = useWatch({ control: form.control, name: "exchanges" });
 
   const handleReturn = async (values: ReturnForm) => {
-    try {
-      const returns = values.returns.map((i) => ({
-        combinationId: i.combinationId,
-        quantity: i.returnQuantity,
-      })) as ReturnItem[];
+    const returns = values.returns.map((i) => ({
+      combinationId: i.combinationId,
+      quantity: i.returnQuantity,
+    })) as ReturnItem[];
 
-      if (salesOrder) {
-        await salesOrderServices.returnExchange(referenceId, {
-          ...values,
-          returns,
-        });
-      } else {
-        createSupplierReturns(
-          {
-            id: referenceId,
-            data: {
-              ...values,
-              returns,
-            },
-          },
-          {
-            onSuccess: () => {
-              toast.success("Supplier Returns submitted successfully");
-              onClose();
-            },
-            onError: (error: unknown) => {
-              const apiError = error as ApiErrorResponse;
-              toast.error("Submission failed - " + apiError.message);
-            },
-          },
-        );
-      }
-    } catch (error) {
+    const onSuccess = (text: "Sales Order" | "Supplier") => {
+      toast.success(`${text} Returns submitted successfully`);
+      onClose();
+    };
+    const onError = (error: unknown) => {
       const apiError = error as ApiErrorResponse;
       toast.error("Submission failed - " + apiError.message);
+    };
+
+    if (salesOrder) {
+      createReturnExchange(
+        {
+          id: referenceId,
+          data: {
+            ...values,
+            returns,
+          },
+        },
+        {
+          onSuccess: () => onSuccess("Sales Order"),
+          onError,
+        },
+      );
+    } else {
+      createSupplierReturns(
+        {
+          id: referenceId,
+          data: {
+            ...values,
+            returns,
+          },
+        },
+        {
+          onSuccess: () => onSuccess("Supplier"),
+          onError,
+        },
+      );
     }
   };
 
@@ -535,8 +545,14 @@ export default function ReturnExchangeModal({
           </div>
 
           <DialogFooter className="flex justify-between">
-            <Button disabled={isPending}>
-              {isPending ? <Loader2Icon /> : <Undo2 />}
+            <Button
+              disabled={isSupplierReturnsPending || isReturnExchangePending}
+            >
+              {isSupplierReturnsPending || isReturnExchangePending ? (
+                <Loader2Icon />
+              ) : (
+                <Undo2 />
+              )}
               Return
             </Button>
           </DialogFooter>

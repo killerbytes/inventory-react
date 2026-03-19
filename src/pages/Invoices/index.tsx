@@ -11,7 +11,8 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import { filterProps, Invoice, PaginatedResponse } from "@/schemas";
+import { useInvoicesPaginated } from "@/features/invoices/hooks/useInvoices";
+import InvoiceModal from "../../features/invoices/components/InvoiceModal";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -20,11 +21,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { Link, useNavigate } from "react-router";
+import { filterProps, Invoice } from "@/schemas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { invoiceServices } from "@/services";
 import useToggle from "@/hooks/useToggle";
-import InvoiceModal from "./InvoiceModal";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import { Plus } from "lucide-react";
 import React from "react";
@@ -34,10 +35,7 @@ export default function Invoices() {
   const [toggle, handleToggle] = useToggle({
     addInvoiceModal: false,
   });
-  const [data, setData] =
-    React.useState<PaginatedResponse<Invoice>>(PAGINATION_RESPONSE);
 
-  const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -45,22 +43,8 @@ export default function Invoices() {
     order: "DESC",
     q: "",
   });
-
-  const getData = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await invoiceServices.getAll(filter);
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
-
-  React.useEffect(() => {
-    getData();
-  }, [filter, getData]);
+  const { data = PAGINATION_RESPONSE, isLoading } =
+    useInvoicesPaginated(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -211,8 +195,8 @@ export default function Invoices() {
             }}
           />
         </div>
-        {loading ? (
-          <p>Loading...</p>
+        {isLoading ? (
+          <Loader />
         ) : (
           <>
             <DataTable
@@ -254,11 +238,8 @@ export default function Invoices() {
       {toggle.addInvoiceModal && (
         <InvoiceModal
           isOpen={true}
-          onClose={(reload) => {
+          onClose={() => {
             handleToggle({ addInvoiceModal: false });
-            if (reload) {
-              getData();
-            }
           }}
         />
       )}

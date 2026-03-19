@@ -43,7 +43,6 @@ export default function Products() {
   const { productCombinationState } = useStore();
   const [query, setQuery] = React.useState("");
   const [data, setData] = React.useState<CategorizedProductList[]>([]);
-  const [loading, setLoading] = React.useState(false);
   const [filter, setFilter] = React.useState<filterProps>({
     categoryId: "ALL",
   });
@@ -168,7 +167,7 @@ export default function Products() {
               />
             </div>
           </div>
-          {loading ? (
+          {categoriesLoading ? (
             <Loader />
           ) : (
             data.length > 0 && (

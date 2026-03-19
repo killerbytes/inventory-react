@@ -5,6 +5,7 @@ import {
   PaginatedResponse,
   ReturnForm,
 } from "@/schemas";
+import { productCombinationKeys } from "@/features/products/hooks/useProductCombination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { goodReceiptServices } from "@/services";
 import { AxiosError } from "axios";
@@ -54,6 +55,7 @@ export const useUpdateGoodReceipt = () => {
       goodReceiptServices.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goodReceiptKeys.all });
+      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
     },
   });
 };
@@ -77,6 +79,7 @@ export const useCreateSupplierReturns = () => {
       goodReceiptServices.supplierReturns(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goodReceiptKeys.all });
+      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
     },
   });
 };

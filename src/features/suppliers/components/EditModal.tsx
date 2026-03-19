@@ -210,7 +210,7 @@ export default function EditModal({
               >
                 <Trash2 />
               </Button>
-              <Button className="shadow-sm" type="submit">
+              <Button className="shadow-sm" type="submit" disabled={isUpdating}>
                 Save changes
               </Button>
             </DialogFooter>
@@ -228,7 +228,7 @@ export default function EditModal({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>

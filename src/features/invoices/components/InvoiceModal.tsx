@@ -1,11 +1,4 @@
 import {
-  ApiErrorResponse,
-  InvoiceForm,
-  invoiceFormSchema,
-  InvoiceGoodReceipt,
-  Supplier,
-} from "@/schemas";
-import {
   Form,
   FormControl,
   FormField,
@@ -13,19 +6,26 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  ApiErrorResponse,
+  InvoiceForm,
+  invoiceFormSchema,
+  InvoiceGoodReceipt,
+} from "@/schemas";
 import { ERROR, INVOICE_STATUS, STATUS_COLOR } from "@/utils/definitions";
 import { useController, useFieldArray, useForm } from "react-hook-form";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { invoiceServices, supplierServices } from "@/services";
 import GoodReceiptPickerModal from "./GoodReceiptPickerModal";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCreateInvoice } from "../hooks/useInvoices";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import Autocomplete from "@/components/Autcomplete";
 import { DataTable } from "@/components/DataTable";
+import { useSuppliers } from "@/hooks/useSupplier";
 import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
@@ -36,7 +36,6 @@ import useToggle from "@/hooks/useToggle";
 import Modal from "@/components/Modal";
 import { Plus } from "lucide-react";
 import { addWeeks } from "date-fns";
-import { useStore } from "@/stores";
 import { toast } from "sonner";
 import React from "react";
 
@@ -45,11 +44,10 @@ export default function InvoiceModal({
   onClose,
 }: {
   isOpen: boolean;
-  onClose: (boolean: boolean) => void;
+  onClose: () => void;
 }) {
-  const {
-    supplierState: { suppliers, setSuppliers },
-  } = useStore();
+  const { data: suppliers = [] } = useSuppliers();
+  const { mutate: createInvoice } = useCreateInvoice();
   const { toggle, handleToggle } = useToggle({
     goodReceiptPickerModal: false,
   });
@@ -82,57 +80,46 @@ export default function InvoiceModal({
     ...watchGr?.[index],
   }));
 
-  React.useEffect(() => {
-    const getData = async () => {
-      const data: Supplier[] = await supplierServices.list();
-      setSuppliers(data);
-    };
-    if (suppliers.length === 0) {
-      getData();
-    }
-  }, [setSuppliers, suppliers.length]);
-
   const onPickerSubmit = (selected: InvoiceGoodReceipt[]) => {
     handleToggle({ goodReceiptPickerModal: false });
     form.setValue("gr", selected);
   };
 
   const onSubmit = async (values: InvoiceForm) => {
-    try {
-      const { gr, ...rest } = values;
-      const invoiceLines = gr.map((item) => ({
-        goodReceiptId: Number(item.id),
-        amount: Number(item.totalAmount) - Number(item.totalReturnAmount),
-      }));
+    const { gr, ...rest } = values;
+    const invoiceLines = gr.map((item) => ({
+      goodReceiptId: Number(item.id),
+      amount: Number(item.totalAmount) - Number(item.totalReturnAmount),
+    }));
 
-      const payload = {
-        ...rest,
-        status: INVOICE_STATUS.POSTED,
-        invoiceLines,
-        applications: [],
-      };
+    const payload = {
+      ...rest,
+      status: INVOICE_STATUS.POSTED,
+      invoiceLines,
+      applications: [],
+    };
 
-      await invoiceServices.create(payload);
-
-      toast.success(`Good Receipt created successfully`);
-      onClose(true);
-    } catch (error) {
-      console.log(error);
-
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof InvoiceForm, {
-              type: "server",
-              message: err.message,
-            });
-          }
-        });
-      } else {
-        toast.error("Submission failed: " + apiError.message);
-      }
-    }
+    createInvoice(payload, {
+      onSuccess: () => {
+        toast.success(`Good Receipt created successfully`);
+        onClose();
+      },
+      onError: (error: unknown) => {
+        const apiError = error as ApiErrorResponse;
+        if (apiError.code === ERROR.VALIDATION_ERROR) {
+          apiError.errors?.forEach((err) => {
+            if (err.field) {
+              form.setError(err.field as keyof InvoiceForm, {
+                type: "server",
+                message: err.message,
+              });
+            }
+          });
+        } else {
+          toast.error("Submission failed: " + apiError.message);
+        }
+      },
+    });
   };
   const columns: ColumnDef<InvoiceGoodReceipt>[] = React.useMemo(
     () => [
@@ -179,12 +166,7 @@ export default function InvoiceModal({
     [],
   );
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={() => onClose(false)}
-      title="Add Invoice"
-      size="lg"
-    >
+    <Modal isOpen={isOpen} onOpenChange={onClose} title="Add Invoice" size="lg">
       <Form {...form}>
         <form className="flex flex-col gap-4">
           <div className="flex gap-2">

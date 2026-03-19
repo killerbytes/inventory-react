@@ -44,11 +44,7 @@ export default function PopularPage() {
     ...(range?.from && range?.to && { endDate: range.to }),
   };
 
-  const {
-    data = PAGINATION_RESPONSE,
-    isLoading,
-    error,
-  } = usePopularProducts(payload);
+  const { data = PAGINATION_RESPONSE, isLoading } = usePopularProducts(payload);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     const { sort } = data;

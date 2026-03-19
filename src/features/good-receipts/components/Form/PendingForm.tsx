@@ -30,7 +30,6 @@ import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
-import { useStore } from "@/stores";
 import React from "react";
 
 export default function PendingForm({
@@ -39,7 +38,6 @@ export default function PendingForm({
   form: UseFormReturn<GoodReceiptForm>;
 }) {
   const { data: suppliers } = useSuppliers();
-  const { productCombinationState } = useStore();
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "goodReceiptLines",

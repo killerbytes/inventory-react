@@ -100,7 +100,7 @@ export default function Create() {
     if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
       localStorage.setItem(
         `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
-        JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v)),
+        JSON.stringify(newDraft, (_, v) => (v === undefined ? null : v)),
       );
     }
   }, [form]);

@@ -16,7 +16,7 @@ import useToggle from "@/hooks/useToggle";
 import { useStore } from "@/stores";
 import React from "react";
 
-export default function Combinations<T extends { id: number; name?: string }>({
+export default function Combinations({
   combinations: _combinations,
   variants,
   selectedCombination,

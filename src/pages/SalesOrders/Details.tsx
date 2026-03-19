@@ -13,6 +13,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  useCancelSalesOrder,
+  useSalesOrder,
+} from "@/features/sales-orders/hooks/useSalesOrders";
+import {
   Card,
   CardAction,
   CardContent,
@@ -26,24 +30,23 @@ import {
   EllipsisVertical,
   Undo,
 } from "lucide-react";
-import { ERROR, ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
-import { ApiErrorResponse, CancelOrder, Customer, SalesOrder } from "@/schemas";
+import StaticDataTable from "../../features/sales-orders/components/StaticDataTable";
 import DeliveryDetailsModal from "@/components/modals/DeliveryDetailsModal";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
-import { customerServices, salesOrderServices } from "@/services";
+import { ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
+import Static from "../../features/sales-orders/components/Static";
 import { CancelModal } from "@/components/modals/CancelModal";
+import { ApiErrorResponse, CancelOrder } from "@/schemas";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useNavigate, useParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import StaticDataTable from "./StaticDataTable";
-import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
+import Loader from "@/components/Loader";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
-import Static from "./Static";
 
 export default function SalesOrderDetails() {
   const [toggle, handleToggle] = useToggle({
@@ -54,49 +57,33 @@ export default function SalesOrderDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const {
-    customerState: { customers, setCustomers },
     salesOrderState: { returnEnabled, setReturnEnabled },
   } = useStore();
-  const [data, setData] = React.useState<SalesOrder>();
+  const { data, isError, error, isLoading } = useSalesOrder(Number(id));
+  const { mutate: cancelSalesOrder } = useCancelSalesOrder();
 
-  const getData = useCallback(async () => {
-    try {
-      const data = await salesOrderServices.get(Number(id));
-      setData(data);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.NOT_FOUND) {
-        navigate(ROUTES.SALES_ORDERS);
-      }
-      toast.error("Submission failed - " + apiError.message);
-    }
-  }, [id, navigate]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
-
-  React.useEffect(() => {
-    const getData = async () => {
-      const data: Customer[] = await customerServices.list();
-      setCustomers(data);
-    };
-    if (customers.length === 0) {
-      getData();
-    }
-  }, [customers.length, setCustomers]);
+  if (isError) {
+    toast.error("Submission failed - " + error?.message);
+    navigate(ROUTES.SALES_ORDERS);
+  }
 
   async function onCancelOrder(form: CancelOrder) {
-    try {
-      await salesOrderServices.cancelOrder(Number(id), {
-        ...form,
-      });
-      toast.success(`Purchase Order cancelled successfully`);
-      navigate(ROUTES.SALES_ORDERS);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error(`Submission failed, ${apiError.message}`);
-    }
+    cancelSalesOrder(
+      {
+        id: Number(id),
+        data: form,
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Purchase Order cancelled successfully`);
+          navigate(ROUTES.SALES_ORDERS);
+        },
+        onError: (error: unknown) => {
+          const apiError = error as ApiErrorResponse;
+          toast.error(`Submission failed, ${apiError.message}`);
+        },
+      },
+    );
   }
 
   const totalReturnAmount =
@@ -123,57 +110,64 @@ export default function SalesOrderDetails() {
             <ColorBadge colorMap={STATUS_COLOR}>
               {String(data?.status)}
             </ColorBadge>
-            <DropdownMenu
-              open={toggle.dropdownMenu}
-              onOpenChange={(open) => {
-                handleToggle({ dropdownMenu: open });
-              }}
-            >
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="size-8">
-                  <EllipsisVertical />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    handleToggle({
-                      deliveryDetailsModal: true,
-                      dropdownMenu: false,
-                    });
-                  }}
-                >
-                  <Car />
-                  Delivery Details
-                </DropdownMenuItem>
-
-                {(data?.status === ORDER_STATUS.RECEIVED ||
-                  data?.status === ORDER_STATUS.COMPLETED) && (
+            {data?.status !== ORDER_STATUS.VOID && (
+              <DropdownMenu
+                open={toggle.dropdownMenu}
+                onOpenChange={(open) => {
+                  handleToggle({ dropdownMenu: open });
+                }}
+              >
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="size-8">
+                    <EllipsisVertical />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
                   <DropdownMenuItem
                     onSelect={(e) => {
                       e.preventDefault();
-                      handleToggle({ cancelModal: true, dropdownMenu: false });
+                      handleToggle({
+                        deliveryDetailsModal: true,
+                        dropdownMenu: false,
+                      });
                     }}
                   >
-                    <Ban color="red" />
-                    Cancel Order
+                    <Car />
+                    Delivery Details
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    setReturnEnabled(!returnEnabled);
-                    handleToggle({
-                      dropdownMenu: false,
-                    });
-                  }}
-                >
-                  <Undo />
-                  Return/Exchange
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+                  {(data?.status === ORDER_STATUS.RECEIVED ||
+                    data?.status === ORDER_STATUS.COMPLETED) && (
+                    <>
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          handleToggle({
+                            cancelModal: true,
+                            dropdownMenu: false,
+                          });
+                        }}
+                      >
+                        <Ban color="red" />
+                        Cancel Order
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          setReturnEnabled(!returnEnabled);
+                          handleToggle({
+                            dropdownMenu: false,
+                          });
+                        }}
+                      >
+                        <Undo />
+                        Return/Exchange
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </CardAction>
         </CardHeader>
 
@@ -194,6 +188,7 @@ export default function SalesOrderDetails() {
           <CardTitle>Order Items</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          {isLoading && <Loader />}
           {data && <StaticDataTable data={data} />}
 
           {data &&

@@ -18,6 +18,7 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
+import Loader from "@/components/Loader";
 import { filterProps } from "@/schemas";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
@@ -31,7 +32,7 @@ export default function NoSalesPage() {
     sort: "quantity",
   });
 
-  const { data = PAGINATION_RESPONSE, isLoading, error } = useNoSales(filter);
+  const { data = PAGINATION_RESPONSE, isLoading } = useNoSales(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     const { sort } = data;
@@ -103,6 +104,7 @@ export default function NoSalesPage() {
         <CardAction></CardAction>
       </CardHeader>
       <CardContent>
+        {isLoading && <Loader />}
         <DataTable
           data={data.data || []}
           columns={columns}

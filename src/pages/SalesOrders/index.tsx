@@ -14,11 +14,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { filterProps, PaginatedResponse, SalesOrder } from "@/schemas";
+import { useSalesOrdersPaginated } from "@/features/sales-orders/hooks/useSalesOrders";
+import SalesOrderModal from "../../features/sales-orders/components/SalesOrderModal";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
+import { filterProps, SalesOrder } from "@/schemas";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -26,8 +28,6 @@ import { mappedStatusHistory } from "@/lib/utils";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import SalesOrderModal from "./SalesOrderModal";
-import { salesOrderServices } from "@/services";
 import { useNavigate } from "react-router-dom";
 import { cx } from "class-variance-authority";
 import { DateRange } from "react-day-picker";
@@ -40,10 +40,7 @@ import React from "react";
 
 export default function SalesOrders() {
   const navigate = useNavigate();
-  const [data, setData] =
-    React.useState<PaginatedResponse<SalesOrder>>(PAGINATION_RESPONSE);
   const [selected, setSelected] = React.useState<SalesOrder>();
-  const [loading, setLoading] = React.useState(true);
   const [range, setRange] = React.useState<DateRange>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
@@ -55,35 +52,20 @@ export default function SalesOrders() {
     sort: "salesOrderNumber",
     status: "ALL",
   });
+  const payload = {
+    ...filter,
+    ...(range?.from && range?.to && { startDate: range.from }),
+    ...(range?.from && range?.to && { endDate: range.to }),
+
+    status: filter.status === "ALL" ? undefined : filter.status,
+  };
+
+  const { data = PAGINATION_RESPONSE, isLoading } =
+    useSalesOrdersPaginated(payload);
+
   const [toggle, handleToggle] = useToggle({
     salesOrderModal: false,
   });
-
-  const getData = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const payload = {
-        ...filter,
-        ...(range?.from && range?.to && { startDate: range.from }),
-        ...(range?.from && range?.to && { endDate: range.to }),
-
-        status: filter.status === "ALL" ? undefined : filter.status,
-      };
-
-      const data: PaginatedResponse<SalesOrder> =
-        await salesOrderServices.getAll(payload);
-
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter, range.from, range.to]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -258,7 +240,7 @@ export default function SalesOrders() {
               />
             </div>
           </div>
-          {loading ? (
+          {isLoading ? (
             <Loader />
           ) : (
             <>
@@ -292,10 +274,7 @@ export default function SalesOrders() {
         <SalesOrderModal
           data={selected as SalesOrder}
           isOpen={toggle.salesOrderModal}
-          onClose={(reload = false) => {
-            if (reload) {
-              getData();
-            }
+          onClose={() => {
             handleToggle({
               salesOrderModal: false,
             });

@@ -3,6 +3,7 @@ export * from "./breakpack.schema";
 export * from "./category.schema";
 export * from "./customer.schema";
 export * from "./goodReceipt.schema";
+export * from "./inventory.schema";
 export * from "./inventoryMovement.schema";
 export * from "./invoice.schema";
 export * from "./others";
