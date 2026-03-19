@@ -1,36 +1,50 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
+    /* 1. IDENTITY & ENVIRONMENT */
+    "target": "ESNext" /* Performance: Use modern JS features */,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "jsx": "react-jsx",
     "module": "ESNext",
-    "moduleResolution": "Node",
-    "allowJs": false,
+    "moduleResolution": "Bundler" /* Modern: Optimized for Vite/Next.js/Next-gen bundlers */,
+
+    /* 2. SECURITY & BOUNDARIES */
+    "allowJs": true /* Flexible but controlled for migration */,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
     "forceConsistentCasingInFileNames": true,
-    // React app settings
-    "noEmit": true, // don't output .js or .d.ts
-    "isolatedModules": true, // needed for React Fast Refresh / Vite
-    // Path aliases
+
+    /* 3. CODING STANDARDS (STRICT ENFORCEMENT) */
+    "strict": true /* Mandatory per Section 3 */,
+    "noImplicitAny": true /* Prevent type escapes */,
+    "strictNullChecks": true /* Prevent null-pointer edge cases (Section 6) */,
+    "noUnusedLocals": true /* DRY/KISS: Clean up dead code */,
+    "noUnusedParameters": true /* DRY/KISS: Clean up dead interfaces */,
+    "noImplicitReturns": true /* Robustness: Ensure all code paths return */,
+    "noFallthroughCasesInSwitch": true /* Security: Prevent logic bugs */,
+
+    /* 4. PERFORMANCE & BUILD */
+    "noEmit": true,
+    "isolatedModules": true,
+    "incremental": true /* Speed: Only recompile changed files */,
+    "resolveJsonModule": true,
+
+    /* 5. ARCHITECTURE (DRY) */
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"] /* Standardized internal mapping */
     }
   },
   "include": [
-    "src"
+    "src",
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts" /* If using Next.js per Section 3 */
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "**/*.test.ts" /* Separate concerns for production build */,
+    "**/*.spec.ts"
   ]
 }

@@ -96,6 +96,7 @@ export default class Http {
           case "invalid signature":
           case "Invalid refresh token":
           case "jwt must be provided":
+          case "Token validation failed":
             localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
             window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
             break;
