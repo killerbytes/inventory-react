@@ -17,6 +17,7 @@ import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { Input } from "@/components/ui/input";
 import Pager from "@/components/Pager";
+import { Loader } from "lucide-react";
 import { Link } from "react-router";
 import React from "react";
 
@@ -27,11 +28,7 @@ export default function StockAdjustments() {
     type: "ALL",
     q: "",
   });
-  const {
-    data = PAGINATION_RESPONSE,
-    isLoading,
-    error,
-  } = useStockAdjustments(filter);
+  const { data = PAGINATION_RESPONSE, isLoading } = useStockAdjustments(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -183,6 +180,7 @@ export default function StockAdjustments() {
               }));
             }}
           />
+          {isLoading && <Loader />}
           <DataTable data={data.data} columns={columns} />
           {data.meta.totalPages > 1 && (
             <Pager meta={data.meta} filter={filter} setFilter={setFilter} />

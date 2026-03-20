@@ -22,6 +22,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  useCreateSalesOrder,
+  useDeleteSalesOrder,
+  useUpdateSalesOrder,
+} from "../hooks/useSalesOrders";
+import {
   Card,
   CardAction,
   CardContent,
@@ -84,9 +89,13 @@ export default function SalesOrderModal({
   isOpen: boolean;
   onClose: (reload: boolean) => void;
 }) {
-  const [loading, setLoading] = React.useState(false);
-  // const { customerState } = useStore();
-  const { data: customers, isLoading: customersLoading } = useCustomers();
+  const { data: customers } = useCustomers();
+  const { mutate: createSalesOrder, isPending: createSalesOrderLoading } =
+    useCreateSalesOrder();
+  const { mutate: updateSalesOrder, isPending: updateSalesOrderLoading } =
+    useUpdateSalesOrder();
+  const { mutate: deleteSalesOrder, isPending: deleteSalesOrderLoading } =
+    useDeleteSalesOrder();
 
   const defaultValues = localStorage.getItem(
     `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
@@ -142,54 +151,58 @@ export default function SalesOrderModal({
   }, [data, form]);
 
   async function onSubmit(values: SalesOrderForm) {
-    try {
-      setLoading(true);
-      await salesOrderServices.create(values);
-      localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
-      toast.success(`Sales Order submitted successfully`);
-      onClose(true);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors.forEach((err) => {
-          if (err.field) {
-            form.setError(err.field as keyof SalesOrderForm, {
-              type: "server",
-              message: err.message,
-            });
-          }
-        });
-      } else {
-        toast.error("Submission failed: " + apiError.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+    createSalesOrder(values, {
+      onSuccess: () => {
+        localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
+        toast.success(`Sales Order submitted successfully`);
+        onClose(true);
+      },
+      onError: (error: unknown) => {
+        const apiError = error as ApiErrorResponse;
+        if (apiError.code === ERROR.VALIDATION_ERROR) {
+          apiError.errors.forEach((err) => {
+            if (err.field) {
+              form.setError(err.field as keyof SalesOrderForm, {
+                type: "server",
+                message: err.message,
+              });
+            }
+          });
+        } else {
+          toast.error("Submission failed: " + apiError.message);
+        }
+      },
+    });
   }
+
   async function onSave(values: SalesOrderForm) {
-    try {
-      setLoading(true);
-      await salesOrderServices.update(Number(data.id), values as SalesOrder);
-      localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`);
-      toast.success(`Sales Order saved successfully`);
-      onClose(true);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err: ApiError) => {
-          if (err.field) {
-            form.setError(err.field as keyof SalesOrderForm, {
-              type: "server",
-              message: err.message,
+    updateSalesOrder(
+      { id: Number(data.id), data: values as SalesOrder },
+      {
+        onSuccess: () => {
+          localStorage.removeItem(
+            `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+          );
+          toast.success(`Sales Order saved successfully`);
+          onClose(true);
+        },
+        onError: (error: unknown) => {
+          const apiError = error as ApiErrorResponse;
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors?.forEach((err: ApiError) => {
+              if (err.field) {
+                form.setError(err.field as keyof SalesOrderForm, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
             });
+          } else {
+            toast.error("Submission failed - " + apiError.message);
           }
-        });
-      } else {
-        toast.error("Submission failed - " + apiError.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+        },
+      },
+    );
   }
 
   const saveDraft = React.useCallback(() => {
@@ -204,7 +217,7 @@ export default function SalesOrderModal({
     if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
       localStorage.setItem(
         `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
-        JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v)),
+        JSON.stringify(newDraft, (_, v) => (v === undefined ? null : v)),
       );
     }
   }, [form]);
@@ -219,14 +232,16 @@ export default function SalesOrderModal({
   }, [data, debouncedFormData, saveDraft]);
 
   async function onDeleteOrder() {
-    try {
-      await salesOrderServices.delete(Number(data.id));
-      toast.success(`Sales Order deleted successfully`);
-      onClose(true);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Submission failed - " + apiError.message);
-    }
+    deleteSalesOrder(Number(data.id), {
+      onSuccess: () => {
+        toast.success(`Sales Order deleted successfully`);
+        onClose(true);
+      },
+      onError: (error: unknown) => {
+        const apiError = error as ApiErrorResponse;
+        toast.error("Submission failed - " + apiError.message);
+      },
+    });
   }
 
   const columns = React.useMemo<ColumnDef<SalesOrderItem>[]>(
@@ -742,6 +757,7 @@ export default function SalesOrderModal({
                 variant="outline"
                 className="text-red-500 shadow-sm"
                 tabIndex={-1}
+                disabled={deleteSalesOrderLoading}
               >
                 <Trash2 />
               </Button>
@@ -753,7 +769,7 @@ export default function SalesOrderModal({
           className="shadow-sm"
           variant="secondary"
           type="button"
-          disabled={loading}
+          disabled={createSalesOrderLoading || updateSalesOrderLoading}
           onClick={(e) => {
             console.log(form.getValues(), form.formState.errors);
             form.handleSubmit((props) =>
@@ -763,13 +779,17 @@ export default function SalesOrderModal({
             )(e);
           }}
         >
-          {loading ? <Spinner data-icon="inline-start" /> : <Save />}
+          {createSalesOrderLoading ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <Save />
+          )}
           Save as Draft
         </Button>
         <ConfirmDialog
           title="Create Invoice"
           description="Are you sure you want to create this invoice? This action cannot be undone."
-          isLoading={loading}
+          isLoading={createSalesOrderLoading || updateSalesOrderLoading}
           shouldConfirm={() =>
             formData.salesOrderItems?.some(({ combinations }) =>
               Object.values(WHOLESALE_UNITS).includes(combinations?.unit ?? ""),

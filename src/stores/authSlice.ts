@@ -1,4 +1,5 @@
 import { StoreState } from "./store.types";
+import { authServices } from "@/services";
 import { StateCreator } from "zustand";
 import { User } from "@/schemas";
 
@@ -22,7 +23,8 @@ export const createAuthSlice: StateCreator<
       set((state) => {
         state.authState.user = user;
       }),
-    logout: () => {
+    logout: async () => {
+      await authServices.logout();
       localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
       window.location.href = "/login";
       set((state) => {

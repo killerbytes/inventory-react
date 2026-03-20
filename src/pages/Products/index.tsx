@@ -13,8 +13,6 @@ import {
 } from "@/components/ui/accordion";
 import CreateProductModal from "../../features/products/components/CreateProductModal";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
-import { CategorizedProductList, ProductWithCombinations } from "@/schemas";
-import ProductItem from "../../features/products/components/ProductItem";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,8 +27,7 @@ import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
-import React, { Fragment } from "react";
-import { useStore } from "@/stores";
+import React from "react";
 
 interface filterProps {
   q?: string;
@@ -40,10 +37,8 @@ interface filterProps {
 export default function Products() {
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const navigate = useNavigate();
-  const { productCombinationState } = useStore();
   const [query, setQuery] = React.useState("");
-  const [data, setData] = React.useState<CategorizedProductList[]>([]);
-  const [loading, setLoading] = React.useState(false);
+  // const [data, setData] = React.useState<CategorizedProductList[]>([]);
   const [filter, setFilter] = React.useState<filterProps>({
     categoryId: "ALL",
   });
@@ -61,40 +56,40 @@ export default function Products() {
     }));
   }, [debouncedQuery]);
 
-  React.useEffect(() => {
-    if (
-      categories &&
-      categories?.length > 0 &&
-      productCombinationState.ProductCombination.length > 0
-    ) {
-      const productMap = new Map<number, ProductWithCombinations>();
-      productCombinationState.ProductCombination.forEach((item) => {
-        const productId = item.product.id;
-        if (!productMap.has(productId)) {
-          productMap.set(productId, {
-            ...item.product,
-            id: productId,
-            combinations: [],
-          });
-        }
-        const product = productMap.get(productId);
-        product!.combinations?.push(item);
-      });
+  // React.useEffect(() => {
+  //   if (
+  //     categories &&
+  //     categories?.length > 0 &&
+  //     productCombinationState.ProductCombination.length > 0
+  //   ) {
+  //     const productMap = new Map<number, ProductWithCombinations>();
+  //     productCombinationState.ProductCombination.forEach((item) => {
+  //       const productId = item.product.id;
+  //       if (!productMap.has(productId)) {
+  //         productMap.set(productId, {
+  //           ...item.product,
+  //           id: productId,
+  //           combinations: [],
+  //         });
+  //       }
+  //       const product = productMap.get(productId);
+  //       product!.combinations?.push(item);
+  //     });
 
-      const categorizedProductList = categories?.map((category) => {
-        return {
-          categoryId: category.id ?? 0,
-          categoryName: category.name,
-          categoryOrder: category.order ?? 0,
-          products: Array.from(productMap.values()).filter(
-            (product) => product.categoryId === category.id,
-          ),
-        };
-      });
+  //     const categorizedProductList = categories?.map((category) => {
+  //       return {
+  //         categoryId: category.id ?? 0,
+  //         categoryName: category.name,
+  //         categoryOrder: category.order ?? 0,
+  //         products: Array.from(productMap.values()).filter(
+  //           (product) => product.categoryId === category.id,
+  //         ),
+  //       };
+  //     });
 
-      setData(categorizedProductList);
-    }
-  }, [categories, productCombinationState.ProductCombination]);
+  //     setData(categorizedProductList);
+  //   }
+  // }, [categories, productCombinationState.ProductCombination]);
 
   const onSearch = React.useCallback(async (search: string) => {
     return await getMappedSearchProductCombinations({ search });
@@ -168,37 +163,33 @@ export default function Products() {
               />
             </div>
           </div>
-          {loading ? (
+          {categoriesLoading ? (
             <Loader />
           ) : (
-            data.length > 0 && (
-              <Accordion type="multiple" className="w-full">
-                {data?.map((item) => (
-                  <AccordionItem
-                    value={String(item.categoryId)}
-                    key={item.categoryId}
-                  >
+            <Accordion type="multiple" className="w-full">
+              {categories &&
+                categories.map((item) => (
+                  <AccordionItem value={String(item.id)} key={item.id}>
                     <AccordionTrigger
                       className={cx(
                         "uppercase text-right",
                         GLOBAL_COLOR.CATEGORY,
                       )}
                     >
-                      {item.categoryName}
+                      {item.name}
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col">
-                      <>
+                      {/* <>
                         {item.products.map((product) => (
                           <Fragment key={product.id}>
                             <ProductItem item={product} />
                           </Fragment>
                         ))}
-                      </>
+                      </> */}
                     </AccordionContent>
                   </AccordionItem>
                 ))}
-              </Accordion>
-            )
+            </Accordion>
           )}
         </CardContent>
       </Card>

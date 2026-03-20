@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import BreakPackModal from "./BreakPackModal";
 import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
-import { useStore } from "@/stores";
 import React from "react";
 
 interface ProductCombinationWithSubItem extends ProductCombination {
@@ -55,7 +54,6 @@ export default function Combinations({
   const [combinations, setCombinations] = React.useState(
     groupSubItems(_combinations),
   );
-  const { productCombinationState } = useStore();
   const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
   );
@@ -253,7 +251,6 @@ export default function Combinations({
           }}
           combination={selected as ProductCombination}
           onSubmit={async () => {
-            productCombinationState.invalidate();
             handleToggle({ breakPackModal: false });
           }}
         />

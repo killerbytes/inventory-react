@@ -8,13 +8,7 @@ import useToggle from "@/hooks/useToggle";
 import { Plus } from "lucide-react";
 import React from "react";
 
-export default function PaymentTab({
-  data,
-  cb,
-}: {
-  data: Invoice;
-  cb: (id: number) => Promise<void>;
-}) {
+export default function PaymentTab({ data }: { data: Invoice }) {
   const { toggle, handleToggle } = useToggle({
     addPaymentModal: false,
   });
@@ -76,7 +70,6 @@ export default function PaymentTab({
           isOpen={true}
           onClose={() => {
             handleToggle({ addPaymentModal: false });
-            cb(Number(data.id));
           }}
         />
       )}

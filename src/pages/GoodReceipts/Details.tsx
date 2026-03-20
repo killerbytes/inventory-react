@@ -1,16 +1,14 @@
 import {
+  useDeleteGoodReceipt,
+  useGoodReceipt,
+  useUpdateGoodReceipt,
+} from "@/features/good-receipts/hooks/useGoodReceipts";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  ApiErrorResponse,
-  CancelOrder,
-  GoodReceipt,
-  goodReceiptBaseSchema,
-  GoodReceiptInput,
-} from "@/schemas";
 import {
   Table,
   TableBody,
@@ -39,31 +37,36 @@ import {
   Trash2,
   Undo,
 } from "lucide-react";
+import {
+  ApiErrorResponse,
+  goodReceiptBaseSchema,
+  GoodReceiptInput,
+} from "@/schemas";
+import PendingOrderForm from "../../features/good-receipts/components/Form/PendingForm";
+import PartialForm from "../../features/good-receipts/components/Form/PartialForm";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
-import { CancelModal } from "@/components/modals/CancelModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
-import PendingOrderForm from "./Form/PendingForm";
 import ColorBadge from "@/components/ColorBadge";
-import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { getErrorMessage } from "@/lib/utils";
-import PartialForm from "./Form/PartialForm";
-import React, { useCallback } from "react";
 import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
+import React from "react";
 
 export default function Details() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [data, setData] = React.useState<GoodReceipt>();
+  const { data, isError, error } = useGoodReceipt(Number(id));
+  const { mutate: deleteGoodReceipt } = useDeleteGoodReceipt();
+  const { mutate: updateGoodReceipt } = useUpdateGoodReceipt();
   const { toggle, handleToggle } = useToggle({
     cancelModal: false,
     dropdownMenu: false,
@@ -76,74 +79,77 @@ export default function Details() {
     resolver: zodResolver(goodReceiptBaseSchema),
   });
 
-  async function onSaveOrder(values: GoodReceiptInput) {
-    try {
-      await goodReceiptServices.update(Number(id), {
-        ...values,
-        status: data?.status ?? ORDER_STATUS.DRAFT,
-      });
-      toast.success(`Purchase Order saved successfully`);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Submission failed - " + apiError.message);
+  React.useEffect(() => {
+    if (data) {
+      form.reset(data);
     }
+  }, [data, form]);
+
+  React.useEffect(() => {
+    if (isError) {
+      const { message } = getErrorMessage(error as unknown as ApiErrorResponse);
+      toast.error(message);
+      navigate(ROUTES.GOOD_RECEIPT);
+    }
+  }, [isError, error, navigate]);
+
+  async function onSaveOrder(values: GoodReceiptInput) {
+    updateGoodReceipt(
+      {
+        id: Number(id),
+        data: {
+          ...values,
+          status: data?.status ?? ORDER_STATUS.DRAFT,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Purchase Order saved successfully`);
+          handleToggle({ dropdownMenu: false });
+        },
+        onError: (error: unknown) => {
+          const apiError = error as ApiErrorResponse;
+          toast.error("Submission failed - " + apiError.message);
+        },
+      },
+    );
     handleToggle({ dropdownMenu: false });
   }
 
   async function onReceiveOrder(form: GoodReceiptInput) {
-    try {
-      await goodReceiptServices.update(Number(id), {
-        ...form,
-        status: ORDER_STATUS.RECEIVED,
-      });
-
-      toast.success(`Purchase Order received`);
-      navigate(ROUTES.GOOD_RECEIPT);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Submission failed - " + apiError.message);
-    }
+    updateGoodReceipt(
+      {
+        id: Number(id),
+        data: {
+          ...form,
+          status: ORDER_STATUS.RECEIVED,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Purchase Order received`);
+          navigate(ROUTES.GOOD_RECEIPT);
+        },
+        onError: (error: unknown) => {
+          const apiError = error as ApiErrorResponse;
+          toast.error("Submission failed - " + apiError.message);
+        },
+      },
+    );
   }
 
   async function onDeleteOrder() {
-    try {
-      await goodReceiptServices.delete(Number(id));
-      toast.success(`Purchase Order deleted successfully`);
-      navigate(ROUTES.GOOD_RECEIPT);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Submission failed - " + apiError.message);
-    }
+    deleteGoodReceipt(Number(id), {
+      onSuccess: () => {
+        toast.success(`Purchase Order deleted successfully`);
+        navigate(ROUTES.GOOD_RECEIPT);
+      },
+      onError: (error: unknown) => {
+        const apiError = error as ApiErrorResponse;
+        toast.error("Submission failed - " + apiError.message);
+      },
+    });
   }
-
-  async function onCancelOrder(form: CancelOrder) {
-    try {
-      await goodReceiptServices.cancelOrder(Number(id), {
-        ...form,
-      });
-      toast.success(`Purchase Order cancelled successfully`);
-      navigate(ROUTES.GOOD_RECEIPT);
-    } catch (error) {
-      const { message } = getErrorMessage(error as ApiErrorResponse);
-      toast.error(`Submission failed, ${message}`);
-    }
-  }
-
-  const getData = useCallback(async () => {
-    try {
-      const data = await goodReceiptServices.get(Number(id));
-      setData(data);
-      form.reset(data);
-    } catch (error) {
-      const { message } = getErrorMessage(error as ApiErrorResponse);
-      toast.error(message);
-      navigate(ROUTES.GOOD_RECEIPT);
-    }
-  }, [form, id, navigate]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData, returnEnabled]);
 
   const totalReturnAmount =
     data?.returnTransactions?.reduce(
@@ -263,19 +269,7 @@ export default function Details() {
               </div>
             </>
           ) : (
-            <>
-              <PartialForm form={form} />
-              {toggle.cancelModal && (
-                <CancelModal
-                  isOpen={true}
-                  onClose={() => handleToggle({ cancelModal: false })}
-                  onSubmit={(data) => {
-                    handleToggle({ cancelModal: false });
-                    onCancelOrder(data);
-                  }}
-                />
-              )}
-            </>
+            <PartialForm form={form} />
           )}
           {data &&
             data?.returnTransactions &&

@@ -8,7 +8,7 @@ export default class GoodReceiptService extends BaseService<
   constructor(props: { http: Http }) {
     super({ ...props, url: "/good-receipt" });
   }
-  cancelOrder = async (id: number, payload: CancelOrder) => {
+  cancel = async (id: number, payload: CancelOrder) => {
     const response = await this.http.patch(`${this.url}/${id}/cancel`, payload);
     return response;
   };

@@ -23,7 +23,6 @@ import { categoryServices } from "@/services";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
-import { useStore } from "@/stores";
 import { toast } from "sonner";
 
 export default function EditModal({
@@ -37,9 +36,6 @@ export default function EditModal({
   cb: () => void;
   data: Category;
 }) {
-  const {
-    categoryState: { invalidate },
-  } = useStore();
   const form = useForm<CategoryInput>({
     resolver: zodResolver(categoryBaseSchema),
     defaultValues: { ...data },
@@ -51,7 +47,6 @@ export default function EditModal({
       await categoryServices.update(Number(data.id), { name, description });
       toast.success(`Submitted: ${values.name}`);
       form.reset();
-      invalidate();
       onClose();
     } catch (error) {
       const { errors } = getErrorMessage(error as ApiErrorResponse);

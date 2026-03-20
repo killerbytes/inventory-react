@@ -26,12 +26,12 @@ import {
   useProduct,
   useUpdateProduct,
 } from "@/features/products/hooks/useProducts";
-import { ApiErrorResponse, productBaseSchema, ProductInput } from "@/schemas";
 import SupplierHistoryTab from "@/features/products/components/SupplierHistoryTab";
 import CreateProductModal from "@/features/products/components/CreateProductModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CombinationModal from "@/features/products/components/CombinationModal";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
+import { ApiErrorResponse, productBaseSchema, ProductInput } from "@/schemas";
 import ProductHistory from "@/features/products/components/ProductHistory";
 import { Loader2Icon, Pencil, PlusIcon, Save, Search } from "lucide-react";
 import VariantsModal from "@/features/products/components/VariantsModal";
@@ -322,7 +322,6 @@ export default function ProductEdit() {
                   </CardHeader>
                   <CardContent className="grid gap-6">
                     <ProductHistory
-                      productName={form.getValues().name}
                       selectedCombination={selectedCombination}
                       combinations={data?.combinations || []}
                     />

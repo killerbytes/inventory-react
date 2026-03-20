@@ -14,6 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import PaymentTab from "@/features/invoices/components/PaymentTab";
+import { useInvoice } from "@/features/invoices/hooks/useInvoices";
 import { ERROR, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -24,18 +26,24 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Label } from "@/components/ui/label";
-import { invoiceServices } from "@/services";
 import { useForm } from "react-hook-form";
 import Loader from "@/components/Loader";
-import PaymentTab from "./PaymentTab";
 import { toast } from "sonner";
 import React from "react";
 
 export default function Details() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [loading, setLoading] = React.useState(false);
-  const [data, setData] = React.useState<Invoice>();
+  const { data, isLoading, isError, error } = useInvoice(Number(id));
+
+  if (isError) {
+    const apiError = error as unknown as ApiErrorResponse;
+    if (apiError.code === ERROR.NOT_FOUND) {
+      navigate(ROUTES.INVOICES);
+    }
+    toast.error("Server Error - " + apiError.message);
+  }
+
   const form = useForm({
     resolver: zodResolver(invoiceFormSchema),
   });
@@ -43,29 +51,6 @@ export default function Details() {
   React.useEffect(() => {
     form.reset(data);
   }, [data, form]);
-
-  const getData = React.useCallback(
-    async (id: number) => {
-      setLoading(true);
-      try {
-        const data = await invoiceServices.get(id);
-        setData(data);
-      } catch (error) {
-        const apiError = error as ApiErrorResponse;
-        if (apiError.code === ERROR.NOT_FOUND) {
-          navigate(ROUTES.INVOICES);
-        }
-        toast.error("Server Error - " + apiError.message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [navigate],
-  );
-
-  React.useEffect(() => {
-    getData(Number(id));
-  }, [getData, id]);
 
   const remainingBalance = data?.applications.reduce(
     (acc: number, val: PaymentApplication) => {
@@ -117,7 +102,7 @@ export default function Details() {
     [],
   );
 
-  if (!data) return <Loader isLoading={loading} />;
+  if (isLoading) return <Loader />;
   return (
     <div className="flex flex-col gap-4 relative">
       <Card>
@@ -198,12 +183,12 @@ export default function Details() {
               />
             </TabsContent>
             <TabsContent value="payments">
-              <PaymentTab data={data} cb={getData} />
+              <PaymentTab data={data as Invoice} />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
-      <Loader isLoading={loading} />
+      <Loader isLoading={isLoading} />
     </div>
   );
 }

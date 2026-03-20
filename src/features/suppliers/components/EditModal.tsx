@@ -27,7 +27,6 @@ import { ERROR } from "@/utils/definitions";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
-import { useStore } from "@/stores";
 import { toast } from "sonner";
 import React from "react";
 
@@ -43,7 +42,6 @@ export default function EditModal({
   const { mutate: updateSupplier, isPending: isUpdating } = useUpdateSupplier();
   const { mutate: deleteSupplier, isPending: isDeleting } = useDeleteSupplier();
   const [confirm, setConfirm] = React.useState(false);
-  const { supplierState } = useStore();
   const form = useForm<Supplier>({
     resolver: zodResolver(supplierSchema),
     defaultValues: { ...data },
@@ -81,7 +79,6 @@ export default function EditModal({
       onSuccess: () => {
         toast.success(`Deleted: ${data.name}`);
         onClose();
-        supplierState.invalidate();
       },
       onError: (error: unknown) => {
         const apiError = error as ApiErrorResponse;
@@ -210,7 +207,7 @@ export default function EditModal({
               >
                 <Trash2 />
               </Button>
-              <Button className="shadow-sm" type="submit">
+              <Button className="shadow-sm" type="submit" disabled={isUpdating}>
                 Save changes
               </Button>
             </DialogFooter>
@@ -228,7 +225,7 @@ export default function EditModal({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>

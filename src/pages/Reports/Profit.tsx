@@ -11,19 +11,20 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { Profit } from "@/features/inventory/schema/inventory.schema";
 import { useProfit } from "@/features/inventory/hooks/useInventory";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
+import { Profit } from "@/schemas/reports.schema";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { DateRange } from "react-day-picker";
 import { filterProps } from "@/schemas";
 import Pager from "@/components/Pager";
+import { Loader } from "lucide-react";
 import { Link } from "react-router";
 import { last } from "lodash";
 import React from "react";
@@ -46,7 +47,7 @@ export default function ProfitPage() {
     ...(range?.from && range?.to && { endDate: range.to }),
   };
 
-  const { data = PAGINATION_RESPONSE, isLoading, error } = useProfit(payload);
+  const { data = PAGINATION_RESPONSE, isLoading } = useProfit(payload);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     const { sort } = data;
@@ -141,7 +142,7 @@ export default function ProfitPage() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <DateRangePicker value={range} onChange={setRange} />
-
+        {isLoading && <Loader />}
         <DataTable
           data={data.data || []}
           columns={columns}

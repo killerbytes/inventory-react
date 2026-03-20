@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
-import { goodReceiptServices } from "@/services";
 
 import {
   ApiError,
@@ -16,9 +15,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import PendingOrderForm from "../../features/good-receipts/components/Form/PendingForm";
+import { useCreateGoodReceipt } from "@/features/good-receipts/hooks/useGoodReceipts";
 import { ERROR, goodReceiptItemDefault, ROUTES } from "@/utils/definitions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import PendingOrderForm from "./Form/PendingForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
@@ -35,6 +35,7 @@ const goodReceiptDefault = {
 };
 
 export default function Create() {
+  const { mutate: createGoodReceipt } = useCreateGoodReceipt();
   const navigate = useNavigate();
   const [json, setJson] = React.useState<string | null>(null);
 
@@ -60,29 +61,31 @@ export default function Create() {
   }, [form]);
 
   async function onSubmit(values: GoodReceiptInput) {
-    try {
-      await goodReceiptServices.create(values);
-      toast.success(`Purchase Order created successfully`);
-      localStorage.removeItem(
-        `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
-      );
-      navigate(ROUTES.GOOD_RECEIPT);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      if (apiError.code === ERROR.VALIDATION_ERROR) {
-        apiError.errors?.forEach((err: ApiError) => {
-          if (err.field) {
-            console.log(err.field);
-            form.setError(err.field as keyof GoodReceiptInput, {
-              type: "server",
-              message: err.message,
-            });
-          }
-        });
-      } else {
-        toast.error("Submission failed: " + apiError.message);
-      }
-    }
+    createGoodReceipt(values, {
+      onSuccess: () => {
+        toast.success(`Purchase Order created successfully`);
+        localStorage.removeItem(
+          `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
+        );
+        navigate(ROUTES.GOOD_RECEIPT);
+      },
+      onError: (error: unknown) => {
+        const apiError = error as ApiErrorResponse;
+        if (apiError.code === ERROR.VALIDATION_ERROR) {
+          apiError.errors?.forEach((err: ApiError) => {
+            if (err.field) {
+              console.log(err.field);
+              form.setError(err.field as keyof GoodReceiptInput, {
+                type: "server",
+                message: err.message,
+              });
+            }
+          });
+        } else {
+          toast.error("Submission failed: " + apiError.message);
+        }
+      },
+    });
   }
 
   const saveDraft = React.useCallback(() => {
@@ -97,7 +100,7 @@ export default function Create() {
     if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
       localStorage.setItem(
         `${import.meta.env.VITE_APP_NAME}_PURCHASE_DRAFT`,
-        JSON.stringify(newDraft, (k, v) => (v === undefined ? null : v)),
+        JSON.stringify(newDraft, (_, v) => (v === undefined ? null : v)),
       );
     }
   }, [form]);

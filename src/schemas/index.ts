@@ -12,6 +12,7 @@ export * from "./paymentApplication.schema";
 export * from "./priceHistory.schema";
 export * from "./product.schema";
 export * from "./productCombination.schema";
+export * from "./reports.schema";
 export * from "./returnItem.schema";
 export * from "./salesOrder.schema";
 export * from "./stockAdjustment.schema";

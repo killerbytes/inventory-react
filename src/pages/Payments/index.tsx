@@ -1,30 +1,21 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
-import { filterProps, PaginatedResponse } from "@/schemas/others";
+import { usePaymentsPaginated } from "@/hooks/usePayment";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
 import { Invoice } from "@/schemas/invoice.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
+import { filterProps } from "@/schemas/others";
 import { PaymentApplication } from "@/schemas";
 import { Input } from "@/components/ui/input";
-import { paymentServices } from "@/services";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
 
 export default function Payments() {
-  const [data, setData] =
-    React.useState<PaginatedResponse<PaymentApplication>>(PAGINATION_RESPONSE);
-
-  const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
@@ -32,22 +23,8 @@ export default function Payments() {
     order: "DESC",
     q: "",
   });
-
-  const getData = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await paymentServices.getAll(filter);
-      setData(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
-
-  React.useEffect(() => {
-    getData();
-  }, [filter, getData]);
+  const { data = PAGINATION_RESPONSE, isLoading } =
+    usePaymentsPaginated(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -172,17 +149,6 @@ export default function Payments() {
           <div className="bg-border h-5 w-[1px]"></div>
           Payments
         </CardTitle>
-        <CardAction>
-          {/* <Button
-            className="shadow-sm"
-            onClick={() => {
-              setSelected(undefined);
-              handleToggle({ addInvoiceModal: true });
-            }}
-          >
-            <Plus /> Create Invoice
-          </Button> */}
-        </CardAction>
       </CardHeader>
       <CardContent>
         <div>
@@ -199,8 +165,8 @@ export default function Payments() {
             }}
           />
         </div>
-        {loading ? (
-          <p>Loading...</p>
+        {isLoading ? (
+          <Loader />
         ) : (
           <>
             <DataTable data={data.data || []} columns={columns} />

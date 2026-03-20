@@ -96,7 +96,7 @@ export default function GroupedCommandList<T extends BaseProps>({
     }
 
     // Optional: sort items within each group by score descending
-    for (const [key, groupItems] of map) {
+    for (const [_, groupItems] of map) {
       groupItems.sort(
         (a, b) => getScore(b.name, search) - getScore(a.name, search),
       );

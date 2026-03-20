@@ -12,8 +12,8 @@ import {
   UNIT_COLOR,
 } from "@/utils/definitions";
 import { useReorderLevels } from "@/features/inventory/hooks/useInventory";
-import { Reorder } from "@/features/inventory/schema/inventory.schema";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Reorder } from "@/schemas/reports.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
