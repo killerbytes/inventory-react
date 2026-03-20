@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import BreakPackModal from "./BreakPackModal";
 import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
-import { useStore } from "@/stores";
 import React from "react";
 
 export default function Combinations({
@@ -26,7 +25,6 @@ export default function Combinations({
   selectedCombination: ComboboxItem | undefined;
 }) {
   const [combinations, setCombinations] = React.useState(_combinations);
-  const { productCombinationState } = useStore();
   const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
   );
@@ -220,7 +218,6 @@ export default function Combinations({
           }}
           combination={selected as ProductCombination}
           onSubmit={async () => {
-            productCombinationState.invalidate();
             handleToggle({ breakPackModal: false });
           }}
         />

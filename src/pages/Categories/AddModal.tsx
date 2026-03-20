@@ -21,7 +21,6 @@ import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
 import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { useStore } from "@/stores";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -36,9 +35,6 @@ export default function AddModal({
   cb: () => void;
   selected?: Category;
 }) {
-  const {
-    categoryState: { invalidate },
-  } = useStore();
   const form = useForm<z.infer<typeof categoryBaseSchema>>({
     resolver: zodResolver(categoryBaseSchema),
     defaultValues: {
@@ -53,7 +49,6 @@ export default function AddModal({
       await categoryServices.create({ ...values, parentId: selected?.id });
       toast.success(`Submitted: ${values.name} (${values.description})`);
       form.reset();
-      invalidate();
       onClose();
     } catch (error) {
       const { errors } = getErrorMessage(error as ApiErrorResponse);

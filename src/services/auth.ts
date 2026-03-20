@@ -12,6 +12,15 @@ export default class UserService extends BaseService<User> {
     return response;
   };
 
+  logout = async () => {
+    const response = await this.http.post(
+      `${this.url}/logout`,
+      {},
+      { withCredentials: true },
+    );
+    return response;
+  };
+
   me = async () => {
     const response = await this.http.get(`${this.url}/me`);
     return response;
