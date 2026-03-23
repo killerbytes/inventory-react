@@ -45,7 +45,6 @@ export default class Http {
                 if (originalRequest.url?.includes("/auth/refresh-token")) {
                   return Promise.reject(error);
                 }
-
                 originalRequest._retry = true;
                 try {
                   const token = await this.refreshToken();
@@ -54,6 +53,13 @@ export default class Http {
                 } catch (retryError) {
                   return Promise.reject(retryError);
                 }
+              } else {
+                localStorage.removeItem(
+                  `${import.meta.env.VITE_APP_NAME}_TOKEN`,
+                );
+                const currentUrl =
+                  window.location.pathname + window.location.search;
+                window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
               }
               return Promise.reject(error);
             }
