@@ -23,8 +23,11 @@ export default class BaseService<T extends object> {
     return response;
   };
 
-  update = async (id: number, data: T) => {
-    const response = await this.http.patch(`${this.url}/${id}`, data);
+  update = async (id: number | null, data: T) => {
+    const response = await this.http.patch(
+      `${this.url}${id ? `/${id}` : ""}`,
+      data,
+    );
     return response;
   };
 

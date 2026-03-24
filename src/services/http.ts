@@ -37,21 +37,30 @@ export default class Http {
           }
 
           const { status } = error.response || {};
+
           switch (status) {
             case 401:
             case 403: {
               const originalRequest = error.config;
               if (!originalRequest._retry) {
                 if (originalRequest.url?.includes("/auth/refresh-token")) {
-                  return Promise.reject(error);
+                  throw error;
                 }
                 originalRequest._retry = true;
+
                 try {
                   const token = await this.refreshToken();
                   originalRequest.headers["x-access-token"] = token;
                   return this.axiosInstance(originalRequest);
                 } catch (retryError) {
-                  return Promise.reject(retryError);
+                  localStorage.removeItem(
+                    `${import.meta.env.VITE_APP_NAME}_TOKEN`,
+                  );
+                  const currentUrl =
+                    window.location.pathname + window.location.search;
+                  window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+
+                  throw retryError;
                 }
               } else {
                 localStorage.removeItem(
@@ -61,14 +70,22 @@ export default class Http {
                   window.location.pathname + window.location.search;
                 window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
               }
-              return Promise.reject(error);
+              throw error;
             }
             default:
-              return Promise.reject(error);
+              throw error;
           }
         } catch (error) {
-          const apiError = error as ApiErrorResponse;
-          toast.error(apiError.message);
+          const axiosError = error as AxiosError<ApiErrorResponse>;
+          const apiError = axiosError.response?.data;
+          const errorMessage = apiError?.message || axiosError.message;
+
+          if (errorMessage) {
+            // toast.error(errorMessage);
+          } else {
+            toast.error("An unexpected error occurred");
+          }
+
           return Promise.reject(error);
         }
       },
