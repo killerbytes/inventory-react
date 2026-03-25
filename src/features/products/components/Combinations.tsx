@@ -1,18 +1,17 @@
-import { ProductCombination, VariantTypes } from "@/schemas";
+import { ProductCombination, ProductWithCombinations } from "@/schemas";
 import StockAdjustmentModal from "./StockAdjustmentModal";
 import { ComboboxItem } from "@/pages/Products/Details";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
-import { PackageOpen, Pencil } from "lucide-react";
 import ColorBadge from "@/components/ColorBadge";
 import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
 import BreakPackModal from "./BreakPackModal";
-import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
+import Combination from "./Combination";
+import { CogIcon } from "lucide-react";
 import React from "react";
 
 interface ProductCombinationWithSubItem extends ProductCombination {
@@ -43,16 +42,14 @@ const groupSubItems = (
 };
 
 export default function Combinations({
-  combinations: _combinations,
-  variants,
+  product,
   selectedCombination,
 }: {
-  combinations: ProductCombination[];
-  variants: VariantTypes[];
+  product: ProductWithCombinations;
   selectedCombination: ComboboxItem | undefined;
 }) {
   const [combinations, setCombinations] = React.useState(
-    groupSubItems(_combinations),
+    groupSubItems(product.combinations),
   );
   const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
@@ -61,6 +58,7 @@ export default function Combinations({
   const [toggle, handleToggle] = useToggle({
     breakPackModal: false,
     stockAdjustmentModal: false,
+    combinationModal: false,
   });
 
   const columns = React.useMemo<ColumnDef<ProductCombination>[]>(
@@ -81,28 +79,28 @@ export default function Combinations({
           </div>
         ),
       },
-      ...variants.map((variant, idx) => ({
-        accessorKey: "values.values." + variant.name,
-        header: () => {
-          return variant.isBreakpackFilter ? (
-            <Badge variant="secondary">{variant.name}</Badge>
-          ) : (
-            variant.name
-          );
-        },
-        meta: {
-          headerClassName: cx({
-            "italic underline font-bold": variant.isBreakpackFilter,
-          }),
-        },
-        cell: ({ row }: { row: Row<ProductCombination> }) => {
-          const x = row.original.values.findIndex(
-            (i) => i.variantTypeId === variants[idx].id,
-          );
+      // ...(product.variants || []).map((variant) => ({
+      //   accessorKey: "values.values." + variant.name,
+      //   header: () => {
+      //     return variant.isBreakpackFilter ? (
+      //       <Badge variant="secondary">{variant.name}</Badge>
+      //     ) : (
+      //       variant.name
+      //     );
+      //   },
+      //   meta: {
+      //     headerClassName: cx({
+      //       "italic underline font-bold": variant.isBreakpackFilter,
+      //     }),
+      //   },
+      //   cell: ({ row }: { row: Row<ProductCombination> }) => {
+      //     const x = row.original.values.findIndex(
+      //       (i) => i.variantTypeId === variant.id,
+      //     );
 
-          return row.original.values[x]?.value;
-        },
-      })),
+      //     return row.original.values[x]?.value;
+      //   },
+      // })),
       {
         accessorKey: "price",
         header: "Price",
@@ -169,7 +167,7 @@ export default function Combinations({
         },
         cell: ({ row }: { row: Row<ProductCombination> }) => (
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               size="sm"
@@ -180,8 +178,8 @@ export default function Combinations({
               }}
             >
               <Pencil />
-            </Button>
-            {Number(row.original?.inventory?.quantity) === 0 ||
+            </Button> */}
+            {/* {Number(row.original?.inventory?.quantity) === 0 ||
             row.original?.inventory?.quantity === undefined ? (
               <Tooltip content="Quantity must be more than 1">
                 <Button
@@ -211,26 +209,39 @@ export default function Combinations({
               >
                 <PackageOpen />
               </Button>
-            )}
+            )} */}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shadow-sm"
+              onClick={() => {
+                setSelected(row.original);
+                handleToggle({ combinationModal: true });
+              }}
+            >
+              <CogIcon />
+            </Button>
           </div>
         ),
       },
     ],
-    [handleToggle, variants],
+    [handleToggle, product.variants],
   );
 
   React.useEffect(() => {
     if (!selectedCombination) {
-      setCombinations(groupSubItems(_combinations));
+      setCombinations(groupSubItems(product.combinations));
       return;
     }
 
-    let combinations = _combinations.filter(
+    let combinations = product.combinations.filter(
       (v) => v.id === selectedCombination.id,
     );
 
     setCombinations(groupSubItems(combinations));
-  }, [_combinations, selectedCombination]);
+  }, [product.combinations, selectedCombination]);
 
   return (
     <>
@@ -263,6 +274,19 @@ export default function Combinations({
           }}
           combinationId={Number(selected?.id)}
           onSubmit={async () => {}}
+        />
+      )}
+      {toggle.combinationModal && selected && (
+        <Combination
+          product={product}
+          selected={selected}
+          isOpen={true}
+          onClose={() => {
+            handleToggle({ combinationModal: false });
+          }}
+          onSubmit={async () => {
+            handleToggle({ combinationModal: false });
+          }}
         />
       )}
     </>

@@ -9,7 +9,7 @@ import {
 } from "@/schemas";
 import {
   useProductCombinationByProductId,
-  useUpdateProductCombination,
+  useUpdateProductCombinations,
 } from "@/features/products/hooks/useProductCombination";
 import {
   Form,
@@ -52,7 +52,7 @@ export default function CombinationModal({
 }) {
   const { data, isFetching } = useProductCombinationByProductId(product.id);
   const { mutate: updateProductCombination, isPending } =
-    useUpdateProductCombination();
+    useUpdateProductCombinations();
 
   const [variants, setVariants] = React.useState<VariantTypes[]>([]);
 

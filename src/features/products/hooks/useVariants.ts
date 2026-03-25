@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { productCombinationKeys } from "./useProductCombination";
 import { filterProps, VariantTypes } from "@/schemas";
 import { variantTypesServices } from "@/services";
+import { productKeys } from "./useProducts";
 import { AxiosError } from "axios";
 
 export const variantKeys = {
@@ -33,7 +33,7 @@ export const useCreateVariantType = () => {
       variantTypesServices.create(newVariantType),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: variantKeys.all });
-      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };
@@ -46,7 +46,7 @@ export const useUpdateVariantType = () => {
       variantTypesServices.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: variantKeys.all });
-      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };
@@ -57,7 +57,7 @@ export const useDeleteVariantType = () => {
     mutationFn: (id: number) => variantTypesServices.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: variantKeys.all });
-      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };

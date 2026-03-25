@@ -29,6 +29,42 @@ export const useProductCombination = (id: number) => {
   });
 };
 
+export const useCreateProductCombination = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ values }: { values: ProductCombinationInput }) =>
+      productCombinationServices.create(values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    },
+  });
+};
+
+export const useUpdateProductCombination = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ values }: { values: ProductCombinationInput }) =>
+      productCombinationServices.update(null, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    },
+  });
+};
+
+export const useDeleteProductCombination = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id }: { id: number }) =>
+      productCombinationServices.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
+    },
+  });
+};
+
 export const useProductCombinationByProductId = (id: number) => {
   return useQuery<
     {
@@ -44,7 +80,7 @@ export const useProductCombinationByProductId = (id: number) => {
   });
 };
 
-export const useUpdateProductCombination = () => {
+export const useUpdateProductCombinations = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -57,7 +93,6 @@ export const useUpdateProductCombination = () => {
     }) => productCombinationServices.updateByProductId(productId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
-      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
     },
   });
 };
@@ -69,7 +104,7 @@ export const useCreateBreakPack = () => {
     mutationFn: ({ values }: { values: BreakPackInput }) =>
       productCombinationServices.breakPack(values),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };
@@ -82,7 +117,7 @@ export const useCreateStockAdjustment = () => {
       return productCombinationServices.stockAdjustment(values);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };
