@@ -26,6 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SelectItem } from "@/components/ui/select";
+import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
@@ -318,6 +319,18 @@ export default function CombinationModal({
                 </FormItem>
               )}
             />
+          );
+        },
+      },
+      {
+        accessorKey: "inventory.averagePrice",
+        header: "Average Price",
+        meta: {
+          className: "text-left w-[50px]",
+        },
+        cell: ({ row }) => {
+          return formatCurrency(
+            Number(row.original.inventory?.averagePrice ?? 0),
           );
         },
       },
