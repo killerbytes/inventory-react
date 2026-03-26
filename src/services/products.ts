@@ -1,9 +1,9 @@
-import { Product, ProductInput } from "@/schemas";
+import { ProductCombination, ProductInput } from "@/schemas";
 import BaseService from "./base";
 import type Http from "./http";
 
 export default class ProductService extends BaseService<
-  Product | ProductInput
+  ProductCombination | ProductInput
 > {
   constructor(props: { http: Http }) {
     super({ ...props, url: "/products" });
