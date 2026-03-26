@@ -30,8 +30,8 @@ export default function CombinationForm({
   product: Product;
   form: ReturnType<typeof useForm<ProductCombinationInput>>;
   handleSubmit: (values: ProductCombinationInput) => Promise<void>;
-  handleRemove?: () => void;
-  handleAdd?: () => void;
+  handleRemove?: (() => void) | null;
+  handleAdd?: (() => void) | null;
 }) {
   return (
     <>
@@ -226,23 +226,25 @@ export default function CombinationForm({
             </div>
           </>
           <DialogFooter className="flex items-center text-left flex-row">
-            {handleRemove && (
-              <Button
-                onClick={handleRemove}
-                type="button"
-                variant="destructive"
-                className="mr-auto"
-              >
-                <Trash2 />
-              </Button>
-            )}
+            <Button
+              onClick={handleRemove || (() => {})}
+              type="button"
+              variant="destructive"
+              disabled={!handleRemove}
+              className="mr-auto"
+            >
+              <Trash2 />
+            </Button>
 
-            {handleAdd && (
-              <Button variant="outline" onClick={handleAdd} type="button">
-                <PackageOpen />
-                New Breakpack
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              onClick={handleAdd || (() => {})}
+              type="button"
+              disabled={!handleAdd}
+            >
+              <PackageOpen />
+              New Breakpack
+            </Button>
 
             <Button className="shadow-sm" type="submit">
               <Save />

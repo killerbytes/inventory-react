@@ -5,22 +5,8 @@ import {
   PageHeaderDescription,
   PageHeaderTitle,
 } from "@/components/PageHeader";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
 import {
   ApiErrorResponse,
   productBaseSchema,
@@ -34,21 +20,19 @@ import {
 import SupplierHistoryTab from "@/features/products/components/SupplierHistoryTab";
 import CreateProductModal from "@/features/products/components/CreateProductModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import CombinationModal from "@/features/products/components/CombinationModal";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import ProductHistory from "@/features/products/components/ProductHistory";
-import { Loader2Icon, Pencil, PlusIcon, Save, Search } from "lucide-react";
 import VariantsModal from "@/features/products/components/VariantsModal";
 import PriceHistory from "@/features/products/components/PriceHistory";
 import Combinations from "@/features/products/components/Combinations";
 import ProductForm from "@/features/products/components/ProductForm";
+import { Loader2Icon, PlusIcon, Save, Search } from "lucide-react";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
-import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import Variants from "@/features/products/components/Variants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCategories } from "@/hooks/useCategories";
 import { useNavigate, useParams } from "react-router";
-import ColorBadge from "@/components/ColorBadge";
+import { ERROR, ROUTES } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import useToggle from "@/hooks/useToggle";
@@ -89,7 +73,6 @@ export default function ProductEdit() {
   });
   const [toggle, handleToggle] = useToggle({
     variantModal: false,
-    combinationModal: false,
     createProductModal: false,
   });
   async function onSubmit(values: ProductInput) {
@@ -175,44 +158,45 @@ export default function ProductEdit() {
       {isLoading ? (
         <Loader />
       ) : (
-        <Form {...form}>
+        <div className="flex flex-col gap-4">
           <Card>
             <CardContent>
-              <form
-                className="h-full flex flex-col gap-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  console.log(form.formState.errors);
-                  form
-                    .handleSubmit(onSubmit)(e)
-                    .catch((error) => {
-                      console.error("Form submission error:", error);
-                    });
-                }}
-              >
-                <ProductForm
-                  form={form}
-                  onSubmit={onSubmit}
-                  categories={categories || []}
-                />
-                <div className="flex justify-end">
-                  <Button
-                    className="shadow-sm"
-                    type="submit"
-                    disabled={isPending || isFetching}
-                  >
-                    {isPending || isFetching ? (
-                      <Loader2Icon className="animate-spin" />
-                    ) : (
-                      <Save />
-                    )}
-                    Save changes
-                  </Button>
-                </div>
-              </form>
+              <Form {...form}>
+                <form
+                  className="h-full flex flex-col gap-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    console.log(form.formState.errors);
+                    form
+                      .handleSubmit(onSubmit)(e)
+                      .catch((error) => {
+                        console.error("Form submission error:", error);
+                      });
+                  }}
+                >
+                  <ProductForm
+                    form={form}
+                    onSubmit={onSubmit}
+                    categories={categories || []}
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      className="shadow-sm"
+                      type="submit"
+                      disabled={isPending || isFetching}
+                    >
+                      {isPending || isFetching ? (
+                        <Loader2Icon className="animate-spin" />
+                      ) : (
+                        <Save />
+                      )}
+                      Save changes
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </CardContent>
           </Card>
-
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full xsm:w-fit flex items-center justify-start flex-nowrap overflow-x-auto md:overflow-x-visible">
               <TabsTrigger value="product_combination">
@@ -225,7 +209,7 @@ export default function ProductEdit() {
               </TabsTrigger>
               <TabsTrigger value="product_history">Product History</TabsTrigger>
             </TabsList>
-            {uniqueCombinations.length > 1 && (
+            {/* {uniqueCombinations.length > 1 && (
               <Combobox<ComboboxItem>
                 items={[...uniqueCombinations]}
                 itemToStringLabel={(item) => item?.name || ""}
@@ -249,31 +233,10 @@ export default function ProductEdit() {
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>
-            )}
+            )} */}
 
             <TabsContent value="product_combination">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Product Combinations</CardTitle>
-                  <CardAction>
-                    <Button
-                      onClick={() => handleToggle({ combinationModal: true })}
-                      type="button"
-                      variant="outline"
-                      className="shadow-sm"
-                    >
-                      <Pencil />
-                      Edit Combinations
-                    </Button>
-                  </CardAction>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <Combinations
-                    product={product as ProductWithCombinations}
-                    selectedCombination={selectedCombination}
-                  />
-                </CardContent>
-              </Card>
+              <Combinations product={product as ProductWithCombinations} />
             </TabsContent>
             <TabsContent value="variants">
               <Card>
@@ -328,20 +291,9 @@ export default function ProductEdit() {
               </Card>
             </TabsContent>
           </Tabs>
-        </Form>
+        </div>
       )}
       {/* {JSON.stringify(x)} */}
-      {toggle.combinationModal && product && (
-        <CombinationModal
-          product={product}
-          isOpen={true}
-          onSubmit={onSubmit}
-          onClose={() => {
-            handleToggle({ combinationModal: false });
-            setActiveTab("product_combination");
-          }}
-        />
-      )}
 
       {toggle.variantModal && (
         <VariantsModal

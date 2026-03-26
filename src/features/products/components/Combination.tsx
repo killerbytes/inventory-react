@@ -1,15 +1,16 @@
 import {
-  useCreateProductCombination,
-  useDeleteProductCombination,
-  useUpdateProductCombination,
-} from "../hooks/useProductCombination";
-import {
   ApiErrorResponse,
   Product,
   ProductCombination,
   ProductCombinationInput,
   productCombinationInputSchema,
+  ProductWithCombinations,
 } from "@/schemas";
+import {
+  useCreateProductCombination,
+  useDeleteProductCombination,
+  useUpdateProductCombination,
+} from "../hooks/useProductCombination";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FieldPath, useForm } from "react-hook-form";
 import CombinationForm from "./CombinationForm";
@@ -25,20 +26,31 @@ export default function Combination({
   isOpen,
   selected,
 }: {
-  product: Product;
+  product: ProductWithCombinations;
   onSubmit: (e: Product) => Promise<void>;
   onClose: () => void;
   isOpen: boolean;
-  selected: ProductCombination;
+  selected?: ProductCombination;
 }) {
   const { mutate: createProductCombination } = useCreateProductCombination();
   const { mutate: updateProductCombination } = useUpdateProductCombination();
   const { mutate: deleteProductCombination } = useDeleteProductCombination();
 
+  const isCreate = React.useMemo(() => {
+    return selected ? false : true;
+  }, [selected]);
+
+  const hasBreakpack = React.useMemo(() => {
+    if (isCreate) return false;
+    return product.combinations.find((i) => i.isBreakPackOfId === selected?.id)
+      ? true
+      : false;
+  }, [product]);
+
   const values = React.useMemo(() => {
     if (!product.variants) return;
     return product.variants.map((i) => {
-      const v = selected.values.find((j) => j.variantTypeId === i.id);
+      const v = selected?.values.find((j) => j.variantTypeId === i.id);
 
       return v ? v : { id: null, variantTypeId: i.id, value: "" };
     });
@@ -47,23 +59,30 @@ export default function Combination({
   const isBreakpackFilter = product.variants?.find((i) => i.isBreakpackFilter);
 
   const setPrimaryValues = React.useMemo(() => {
-    if (!isBreakpackFilter) return;
     return values?.map((i) => {
-      if (i.variantTypeId === isBreakpackFilter.id) {
+      if (!isCreate && i.variantTypeId === isBreakpackFilter?.id) {
         return { ...i, disabled: true };
       }
       return i;
     });
   }, [values]);
 
+  const defaultValues = {
+    productId: Number(product.id),
+    reorderLevel: 10,
+    unit: product.baseUnit,
+    price: 0,
+    conversionFactor: 1,
+    isActive: true,
+    isBreakPack: false,
+    isBreakPackOfId: null,
+    ...selected,
+    values: setPrimaryValues ?? [],
+  };
+
   const form = useForm<ProductCombinationInput>({
     resolver: zodResolver(productCombinationInputSchema),
-    values: {
-      ...selected,
-      values: selected.isBreakPackOfId
-        ? (setPrimaryValues ?? [])
-        : (values ?? []),
-    },
+    defaultValues,
   });
 
   const { toggle, handleToggle } = useToggle({
@@ -80,11 +99,37 @@ export default function Combination({
       conversionFactor: 1,
       isActive: true,
       isBreakPack: true,
-      isBreakPackOfId: selected.id,
+      isBreakPackOfId: selected?.id,
       values: setPrimaryValues,
     },
   });
 
+  const handleAdd = async (values: ProductCombinationInput) => {
+    createProductCombination(
+      { values },
+      {
+        onSuccess: () => {
+          toast.success("Combination added successfully");
+        },
+        onError: (error: unknown) => {
+          const apiError = error as ApiErrorResponse;
+
+          if (apiError.code === ERROR.VALIDATION_ERROR) {
+            apiError.errors.forEach((err) => {
+              if (err.field) {
+                form.setError(err.field as FieldPath<ProductCombinationInput>, {
+                  type: "server",
+                  message: err.message,
+                });
+              }
+            });
+          } else {
+            toast.error("Failed to add combination: " + apiError.message);
+          }
+        },
+      },
+    );
+  };
   const handleAddBreakpack = async (values: ProductCombinationInput) => {
     createProductCombination(
       { values },
@@ -146,7 +191,7 @@ export default function Combination({
 
   const handleRemove = () => {
     deleteProductCombination(
-      { id: selected.id },
+      { id: selected?.id ?? 0 },
       {
         onSuccess: () => {
           toast.success("Combination deleted successfully");
@@ -164,16 +209,22 @@ export default function Combination({
       <Modal
         isOpen={isOpen}
         onOpenChange={onClose}
-        title={`Product: ${selected.name}`}
+        title={`Product: ${isCreate ? "New" : selected?.name}`}
         description="Manage product combination"
         className="!max-w-[90%]"
       >
         <CombinationForm
           product={product}
           form={form}
-          handleSubmit={handleUpdate}
-          handleRemove={handleRemove}
-          handleAdd={() => handleToggle({ addBreakpackForm: true })}
+          handleSubmit={isCreate ? handleAdd : handleUpdate}
+          handleRemove={
+            isCreate || (selected && selected.inventory?.quantity > 0)
+              ? null
+              : handleRemove
+          }
+          handleAdd={
+            hasBreakpack ? null : () => handleToggle({ addBreakpackForm: true })
+          }
         />
       </Modal>
 

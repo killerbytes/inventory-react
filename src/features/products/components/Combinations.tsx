@@ -1,9 +1,18 @@
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ProductCombination, ProductWithCombinations } from "@/schemas";
+import { TableCell, TableRow } from "@/components/ui/table";
 import StockAdjustmentModal from "./StockAdjustmentModal";
-import { ComboboxItem } from "@/pages/Products/Details";
 import { ColumnDef, Row } from "@tanstack/react-table";
+import { CogIcon, Pencil, Plus } from "lucide-react";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
+import CombinationModal from "./CombinationModal";
 import ColorBadge from "@/components/ColorBadge";
 import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
@@ -11,7 +20,6 @@ import { cx } from "class-variance-authority";
 import BreakPackModal from "./BreakPackModal";
 import useToggle from "@/hooks/useToggle";
 import Combination from "./Combination";
-import { CogIcon } from "lucide-react";
 import React from "react";
 
 interface ProductCombinationWithSubItem extends ProductCombination {
@@ -43,14 +51,12 @@ const groupSubItems = (
 
 export default function Combinations({
   product,
-  selectedCombination,
 }: {
   product: ProductWithCombinations;
-  selectedCombination: ComboboxItem | undefined;
 }) {
-  const [combinations, setCombinations] = React.useState(
-    groupSubItems(product.combinations),
-  );
+  // const [combinations, setCombinations] = React.useState(
+  //   groupSubItems(product.combinations),
+  // );
   const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
   );
@@ -59,7 +65,13 @@ export default function Combinations({
     breakPackModal: false,
     stockAdjustmentModal: false,
     combinationModal: false,
+    createCombinationModal: false,
+    editCombinationModal: false,
   });
+
+  const combinations = React.useMemo(() => {
+    return groupSubItems(product.combinations);
+  }, [product.combinations]);
 
   const columns = React.useMemo<ColumnDef<ProductCombination>[]>(
     () => [
@@ -161,7 +173,7 @@ export default function Combinations({
       },
       {
         accessorKey: "stockAdjustment",
-        header: "Stock Adjustment",
+        header: "",
         meta: {
           className: "w-0",
         },
@@ -230,29 +242,55 @@ export default function Combinations({
     [handleToggle, product.variants],
   );
 
-  React.useEffect(() => {
-    if (!selectedCombination) {
-      setCombinations(groupSubItems(product.combinations));
-      return;
-    }
-
-    let combinations = product.combinations.filter(
-      (v) => v.id === selectedCombination.id,
-    );
-
-    setCombinations(groupSubItems(combinations));
-  }, [product.combinations, selectedCombination]);
-
   return (
     <>
-      <DataTable
-        data={combinations}
-        columns={columns}
-        meta={{
-          disabledRow: { isActive: false },
-          subRows: "subItem",
-        }}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Combinations</CardTitle>
+          <CardAction>
+            <Button
+              onClick={() => handleToggle({ editCombinationModal: true })}
+              type="button"
+              variant="outline"
+              className="shadow-sm"
+            >
+              <Pencil />
+              Edit Combinations
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <DataTable
+            data={combinations}
+            columns={columns}
+            meta={{
+              disabledRow: { isActive: false },
+              subRows: "subItem",
+            }}
+            renderFooter={(data) => {
+              return (
+                <>
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <Button
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        className="shadow-sm append-btn"
+                        onClick={() =>
+                          handleToggle({ createCombinationModal: true })
+                        }
+                      >
+                        <Plus />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </>
+              );
+            }}
+          />
+        </CardContent>
+      </Card>
 
       {toggle.breakPackModal && (
         <BreakPackModal
@@ -276,6 +314,19 @@ export default function Combinations({
           onSubmit={async () => {}}
         />
       )}
+      {toggle.createCombinationModal && (
+        <Combination
+          product={product}
+          isOpen={true}
+          onClose={() => {
+            handleToggle({ createCombinationModal: false });
+          }}
+          onSubmit={async () => {
+            handleToggle({ createCombinationModal: false });
+          }}
+        />
+      )}
+
       {toggle.combinationModal && selected && (
         <Combination
           product={product}
@@ -286,6 +337,17 @@ export default function Combinations({
           }}
           onSubmit={async () => {
             handleToggle({ combinationModal: false });
+          }}
+        />
+      )}
+
+      {toggle.editCombinationModal && product && (
+        <CombinationModal
+          product={product}
+          isOpen={true}
+          // onSubmit={onSubmit}
+          onClose={() => {
+            handleToggle({ editCombinationModal: false });
           }}
         />
       )}
