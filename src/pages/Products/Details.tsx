@@ -50,8 +50,6 @@ export type ComboboxItem = {
 export default function ProductEdit() {
   const { id } = useParams();
 
-  // const { data } = useProductCombinationByProductId(Number(id));
-
   const { mutate: updateProduct, isPending } = useUpdateProduct();
   const {
     data: product,
@@ -174,11 +172,7 @@ export default function ProductEdit() {
                       });
                   }}
                 >
-                  <ProductForm
-                    form={form}
-                    onSubmit={onSubmit}
-                    categories={categories || []}
-                  />
+                  <ProductForm form={form} categories={categories || []} />
                   <div className="flex justify-end">
                     <Button
                       className="shadow-sm"

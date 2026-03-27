@@ -247,15 +247,25 @@ export default function CombinationModal({
             .getRowModel()
             .rows.map((row) => row.original);
 
+          const selectedParentIds = allOriginalData
+            .filter((_, index) => index !== row.index)
+            .map((r) => r.isBreakPackOfId)
+            .filter(Boolean);
+
           if (type) {
             const f = row.original.values.find(
               (v) => v.variantTypeId === type.id,
             );
-            options = allOriginalData.filter((i) =>
-              i.values.find((v) => v.id === f?.id),
+            options = allOriginalData.filter(
+              (i) =>
+                i.values.find((v) => v.id === f?.id) &&
+                !selectedParentIds.includes(i.id),
             );
           } else {
-            options = allOriginalData.filter((i) => i.id !== row.original.id);
+            options = allOriginalData.filter(
+              (i) =>
+                i.id !== row.original.id && !selectedParentIds.includes(i.id),
+            );
           }
 
           return (

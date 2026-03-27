@@ -6,9 +6,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ProductCombination, ProductWithCombinations } from "@/schemas";
+import { ClipboardList, Cog, PackageOpen, Plus } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import StockAdjustmentModal from "./StockAdjustmentModal";
-import { PackageOpen, Pencil, Plus } from "lucide-react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -28,9 +28,6 @@ export default function Combinations({
 }: {
   product: ProductWithCombinations;
 }) {
-  // const [combinations, setCombinations] = React.useState(
-  //   groupSubItems(product.combinations),
-  // );
   const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
   );
@@ -65,28 +62,6 @@ export default function Combinations({
           </div>
         ),
       },
-      // ...(product.variants || []).map((variant) => ({
-      //   accessorKey: "values.values." + variant.name,
-      //   header: () => {
-      //     return variant.isBreakpackFilter ? (
-      //       <Badge variant="secondary">{variant.name}</Badge>
-      //     ) : (
-      //       variant.name
-      //     );
-      //   },
-      //   meta: {
-      //     headerClassName: cx({
-      //       "italic underline font-bold": variant.isBreakpackFilter,
-      //     }),
-      //   },
-      //   cell: ({ row }: { row: Row<ProductCombination> }) => {
-      //     const x = row.original.values.findIndex(
-      //       (i) => i.variantTypeId === variant.id,
-      //     );
-
-      //     return row.original.values[x]?.value;
-      //   },
-      // })),
       {
         accessorKey: "price",
         header: "Price",
@@ -153,7 +128,7 @@ export default function Combinations({
         },
         cell: ({ row }: { row: Row<ProductCombination> }) => (
           <div className="flex gap-2">
-            {/* {/* <Button
+            <Button
               type="button"
               variant="outline"
               size="sm"
@@ -163,8 +138,8 @@ export default function Combinations({
                 handleToggle({ stockAdjustmentModal: true });
               }}
             >
-              <Pencil />
-            </Button> */}
+              <ClipboardList />
+            </Button>
             {Number(row.original?.inventory?.quantity) === 0 ||
             row.original?.inventory?.quantity === undefined ? (
               <Tooltip content="Quantity must be more than 1">
@@ -196,19 +171,6 @@ export default function Combinations({
                 <PackageOpen />
               </Button>
             )}
-
-            {/* <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="shadow-sm"
-              onClick={() => {
-                setSelected(row.original);
-                handleToggle({ combinationModal: true });
-              }}
-            >
-              <CogIcon />
-            </Button> */}
           </div>
         ),
       },
@@ -228,7 +190,7 @@ export default function Combinations({
               variant="outline"
               className="shadow-sm"
             >
-              <Pencil />
+              <Cog />
               Edit Combinations
             </Button>
           </CardAction>
@@ -288,32 +250,6 @@ export default function Combinations({
           onSubmit={async () => {}}
         />
       )}
-      {/* {toggle.createCombinationModal && (
-        <Combination
-          product={product}
-          isOpen={true}
-          onClose={() => {
-            handleToggle({ createCombinationModal: false });
-          }}
-          onSubmit={async () => {
-            handleToggle({ createCombinationModal: false });
-          }}
-        />
-      )} */}
-
-      {/* {toggle.combinationModal && selected && (
-        <Combination
-          product={product}
-          selected={selected}
-          isOpen={true}
-          onClose={() => {
-            handleToggle({ combinationModal: false });
-          }}
-          onSubmit={async () => {
-            handleToggle({ combinationModal: false });
-          }}
-        />
-      )} */}
 
       {toggle.editCombinationModal && product && (
         <CombinationModal

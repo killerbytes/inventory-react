@@ -20,7 +20,6 @@ export default function ProductForm({
   categories,
 }: {
   form: UseFormReturn<ProductInput>;
-  onSubmit: (e: ProductInput) => Promise<void>;
   categories: Category[];
 }) {
   React.useEffect(() => {
