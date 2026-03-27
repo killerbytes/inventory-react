@@ -185,11 +185,7 @@ export default function ProductEdit() {
           >
             <Card>
               <CardContent>
-                <ProductForm
-                  form={form}
-                  onSubmit={onSubmit}
-                  categories={categories || []}
-                />
+                <ProductForm form={form} categories={categories || []} />
                 <div className="flex justify-end">
                   <Button
                     className="shadow-sm"
