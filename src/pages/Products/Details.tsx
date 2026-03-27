@@ -23,16 +23,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import ProductHistory from "@/features/products/components/ProductHistory";
 import VariantsModal from "@/features/products/components/VariantsModal";
+import { Edit, Loader2Icon, PlusIcon, Save, Search } from "lucide-react";
 import PriceHistory from "@/features/products/components/PriceHistory";
 import Combinations from "@/features/products/components/Combinations";
 import ProductForm from "@/features/products/components/ProductForm";
-import { Loader2Icon, PlusIcon, Save, Search } from "lucide-react";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
+import { ERROR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import Variants from "@/features/products/components/Variants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCategories } from "@/hooks/useCategories";
 import { useNavigate, useParams } from "react-router";
-import { ERROR, ROUTES } from "@/utils/definitions";
+import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import useToggle from "@/hooks/useToggle";
@@ -60,6 +61,7 @@ export default function ProductEdit() {
   } = useProduct(Number(id));
 
   const [activeTab, setActiveTab] = React.useState("product_combination");
+  const [isEditing, setIsEditing] = React.useState(false);
   const { data: categories } = useCategories();
   const [selectedCombination, setSelectedCombination] = React.useState<
     ComboboxItem | undefined
@@ -82,6 +84,7 @@ export default function ProductEdit() {
       {
         onSuccess: () => {
           toast.success("Product updated successfully");
+          setIsEditing(false);
         },
         onError: (error) => {
           const apiError = error as unknown as ApiErrorResponse;
@@ -159,36 +162,99 @@ export default function ProductEdit() {
         <div className="flex flex-col gap-4">
           <Card>
             <CardContent>
-              <Form {...form}>
-                <form
-                  className="h-full flex flex-col gap-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    console.log(form.formState.errors);
-                    form
-                      .handleSubmit(onSubmit)(e)
-                      .catch((error) => {
-                        console.error("Form submission error:", error);
-                      });
-                  }}
-                >
-                  <ProductForm form={form} categories={categories || []} />
-                  <div className="flex justify-end">
+              {isEditing ? (
+                <Form {...form}>
+                  <form
+                    className="h-full flex flex-col gap-4"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      console.log(form.formState.errors);
+                      form
+                        .handleSubmit(onSubmit)(e)
+                        .catch((error) => {
+                          console.error("Form submission error:", error);
+                        });
+                    }}
+                  >
+                    <ProductForm form={form} categories={categories || []} />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        className="shadow-sm"
+                        type="button"
+                        variant="secondary"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        className="shadow-sm"
+                        type="submit"
+                        disabled={isPending || isFetching}
+                      >
+                        {isPending || isFetching ? (
+                          <Loader2Icon className="animate-spin" />
+                        ) : (
+                          <Save />
+                        )}
+                        Save changes
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              ) : (
+                <>
+                  <div className="flex justify-between">
+                    <div className="flex flex-col gap-4">
+                      <div className="flex flex-col ">
+                        <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground/80">
+                          Product Name
+                        </span>
+                        <span className="font-medium text-foreground ">
+                          {product?.name || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col ">
+                        <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground/80">
+                          Category
+                        </span>
+                        <span className="font-medium text-foreground ">
+                          {categories?.find((c) => c.id === product?.categoryId)
+                            ?.name || "Uncategorized"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col ">
+                        <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground/80">
+                          Base Unit
+                        </span>
+                        <span className="font-medium text-foreground ">
+                          <ColorBadge colorMap={UNIT_COLOR}>
+                            {product?.baseUnit}
+                          </ColorBadge>
+                        </span>
+                      </div>
+                      <div className="flex flex-col ">
+                        <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground/80">
+                          Description
+                        </span>
+                        <span
+                          className="font-medium text-foreground truncate"
+                          title={product?.description || ""}
+                        >
+                          {product?.description || "No description"}
+                        </span>
+                      </div>
+                    </div>
                     <Button
                       className="shadow-sm"
-                      type="submit"
-                      disabled={isPending || isFetching}
+                      type="button"
+                      onClick={() => setIsEditing(true)}
                     >
-                      {isPending || isFetching ? (
-                        <Loader2Icon className="animate-spin" />
-                      ) : (
-                        <Save />
-                      )}
-                      Save changes
+                      <Edit />
+                      Edit
                     </Button>
                   </div>
-                </form>
-              </Form>
+                </>
+              )}
             </CardContent>
           </Card>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
