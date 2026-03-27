@@ -8,8 +8,8 @@ import {
 import { ProductCombination, ProductWithCombinations } from "@/schemas";
 import { TableCell, TableRow } from "@/components/ui/table";
 import StockAdjustmentModal from "./StockAdjustmentModal";
+import { PackageOpen, Pencil, Plus } from "lucide-react";
 import { ColumnDef, Row } from "@tanstack/react-table";
-import { CogIcon, Pencil, Plus } from "lucide-react";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
 import CombinationModal from "./CombinationModal";
@@ -18,36 +18,10 @@ import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import BreakPackModal from "./BreakPackModal";
+import { groupSubItems } from "@/lib/utils";
+import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
-import Combination from "./Combination";
 import React from "react";
-
-interface ProductCombinationWithSubItem extends ProductCombination {
-  subItem?: ProductCombinationWithSubItem[];
-}
-
-const groupSubItems = (
-  items: ProductCombination[],
-): ProductCombinationWithSubItem[] => {
-  const itemRecord: Record<number, ProductCombinationWithSubItem> = {};
-  items.forEach((item) => {
-    itemRecord[item.id] = {
-      ...item,
-      subItem: undefined,
-    };
-  });
-  const rootItems: ProductCombinationWithSubItem[] = [];
-  Object.values(itemRecord).forEach((item) => {
-    const parentId = item.isBreakPackOfId;
-    if (parentId && itemRecord[parentId]) {
-      itemRecord[parentId].subItem = [item];
-    } else {
-      rootItems.push(item);
-    }
-  });
-
-  return rootItems;
-};
 
 export default function Combinations({
   product,
@@ -179,7 +153,7 @@ export default function Combinations({
         },
         cell: ({ row }: { row: Row<ProductCombination> }) => (
           <div className="flex gap-2">
-            {/* <Button
+            {/* {/* <Button
               type="button"
               variant="outline"
               size="sm"
@@ -191,7 +165,7 @@ export default function Combinations({
             >
               <Pencil />
             </Button> */}
-            {/* {Number(row.original?.inventory?.quantity) === 0 ||
+            {Number(row.original?.inventory?.quantity) === 0 ||
             row.original?.inventory?.quantity === undefined ? (
               <Tooltip content="Quantity must be more than 1">
                 <Button
@@ -221,9 +195,9 @@ export default function Combinations({
               >
                 <PackageOpen />
               </Button>
-            )} */}
+            )}
 
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               size="sm"
@@ -234,7 +208,7 @@ export default function Combinations({
               }}
             >
               <CogIcon />
-            </Button>
+            </Button> */}
           </div>
         ),
       },
@@ -314,7 +288,7 @@ export default function Combinations({
           onSubmit={async () => {}}
         />
       )}
-      {toggle.createCombinationModal && (
+      {/* {toggle.createCombinationModal && (
         <Combination
           product={product}
           isOpen={true}
@@ -325,9 +299,9 @@ export default function Combinations({
             handleToggle({ createCombinationModal: false });
           }}
         />
-      )}
+      )} */}
 
-      {toggle.combinationModal && selected && (
+      {/* {toggle.combinationModal && selected && (
         <Combination
           product={product}
           selected={selected}
@@ -339,13 +313,15 @@ export default function Combinations({
             handleToggle({ combinationModal: false });
           }}
         />
-      )}
+      )} */}
 
       {toggle.editCombinationModal && product && (
         <CombinationModal
           product={product}
           isOpen={true}
-          // onSubmit={onSubmit}
+          onSubmit={() => {
+            handleToggle({ editCombinationModal: false });
+          }}
           onClose={() => {
             handleToggle({ editCombinationModal: false });
           }}
