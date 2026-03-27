@@ -23,6 +23,7 @@ export const productCombinationInputSchema =
     isBreakPack: z.boolean().nullish(),
     isActive: z.boolean().nullish(),
     inventory: inventorySchema.nullish(),
+    sku: z.string().optional(),
     product: z.lazy(() => productSchema).nullish(),
   });
 

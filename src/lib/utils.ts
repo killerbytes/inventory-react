@@ -119,3 +119,30 @@ export const getMappedSearchProductCombinations = async (params: {
 
   return result;
 };
+
+interface ProductCombinationWithSubItem extends ProductCombination {
+  subItem?: ProductCombinationWithSubItem[];
+}
+
+export const groupSubItems = (
+  items: ProductCombination[],
+): ProductCombinationWithSubItem[] => {
+  const itemRecord: Record<number, ProductCombinationWithSubItem> = {};
+  items.forEach((item) => {
+    itemRecord[item.id] = {
+      ...item,
+      subItem: undefined,
+    };
+  });
+  const rootItems: ProductCombinationWithSubItem[] = [];
+  Object.values(itemRecord).forEach((item) => {
+    const parentId = item.isBreakPackOfId;
+    if (parentId && itemRecord[parentId]) {
+      itemRecord[parentId].subItem = [item];
+    } else {
+      rootItems.push(item);
+    }
+  });
+
+  return rootItems;
+};

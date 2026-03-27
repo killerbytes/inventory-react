@@ -1,30 +1,33 @@
-import { ProductCombination, VariantTypes } from "@/schemas";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ProductCombination, ProductWithCombinations } from "@/schemas";
+import { ClipboardList, Cog, PackageOpen, Plus } from "lucide-react";
+import { TableCell, TableRow } from "@/components/ui/table";
 import StockAdjustmentModal from "./StockAdjustmentModal";
-import { ComboboxItem } from "@/pages/Products/Details";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
-import { PackageOpen, Pencil } from "lucide-react";
+import CombinationModal from "./CombinationModal";
 import ColorBadge from "@/components/ColorBadge";
 import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
-import { Badge } from "@/components/ui/badge";
 import BreakPackModal from "./BreakPackModal";
+import { groupSubItems } from "@/lib/utils";
 import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
 import React from "react";
 
 export default function Combinations({
-  combinations: _combinations,
-  variants,
-  selectedCombination,
+  product,
 }: {
-  combinations: ProductCombination[];
-  variants: VariantTypes[];
-  selectedCombination: ComboboxItem | undefined;
+  product: ProductWithCombinations;
 }) {
-  const [combinations, setCombinations] = React.useState(_combinations);
   const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
   );
@@ -32,44 +35,32 @@ export default function Combinations({
   const [toggle, handleToggle] = useToggle({
     breakPackModal: false,
     stockAdjustmentModal: false,
+    combinationModal: false,
+    createCombinationModal: false,
+    editCombinationModal: false,
   });
+
+  const combinations = React.useMemo(() => {
+    return groupSubItems(product.combinations);
+  }, [product.combinations]);
 
   const columns = React.useMemo<ColumnDef<ProductCombination>[]>(
     () => [
       {
         accessorKey: "name",
         header: "Name",
-      },
-      ...variants.map((variant, idx) => ({
-        accessorKey: "values.values." + variant.name,
-        header: () => {
-          return variant.isBreakpackFilter ? (
-            <Badge variant="secondary">{variant.name}</Badge>
-          ) : (
-            variant.name
-          );
-        },
-        meta: {
-          headerClassName: cx({
-            "italic underline font-bold": variant.isBreakpackFilter,
-          }),
-        },
-        cell: ({ row }: { row: Row<ProductCombination> }) => {
-          const x = row.original.values.findIndex(
-            (i) => i.variantTypeId === variants[idx].id,
-          );
-
-          return row.original.values[x]?.value;
-        },
-      })),
-      {
-        accessorKey: "unit",
-        header: "Unit",
-        cell: ({ row }: { row: Row<ProductCombination> }) => {
-          return (
-            <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
-          );
-        },
+        cell: ({ row }: { row: Row<ProductCombination> }) => (
+          <div
+            style={{
+              paddingLeft: `${row.depth}rem`,
+            }}
+          >
+            <div className="flex items-center gap-1">
+              <ColorBadge colorMap={UNIT_COLOR}>{row.original.unit}</ColorBadge>
+              {row.original.name}
+            </div>
+          </div>
+        ),
       },
       {
         accessorKey: "price",
@@ -131,7 +122,7 @@ export default function Combinations({
       },
       {
         accessorKey: "stockAdjustment",
-        header: "Stock Adjustment",
+        header: "",
         meta: {
           className: "w-0",
         },
@@ -147,7 +138,7 @@ export default function Combinations({
                 handleToggle({ stockAdjustmentModal: true });
               }}
             >
-              <Pencil />
+              <ClipboardList />
             </Button>
             {Number(row.original?.inventory?.quantity) === 0 ||
             row.original?.inventory?.quantity === undefined ? (
@@ -184,31 +175,58 @@ export default function Combinations({
         ),
       },
     ],
-    [handleToggle, variants],
+    [handleToggle, product.variants],
   );
-
-  React.useEffect(() => {
-    if (!selectedCombination) {
-      setCombinations(_combinations);
-      return;
-    }
-
-    let combinations = _combinations.filter(
-      (v) => v.id === selectedCombination.id,
-    );
-
-    setCombinations(combinations);
-  }, [_combinations, selectedCombination]);
 
   return (
     <>
-      <DataTable
-        data={combinations}
-        columns={columns}
-        meta={{
-          disabledRow: { isActive: false },
-        }}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Combinations</CardTitle>
+          <CardAction>
+            <Button
+              onClick={() => handleToggle({ editCombinationModal: true })}
+              type="button"
+              variant="outline"
+              className="shadow-sm"
+            >
+              <Cog />
+              Edit Combinations
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <DataTable
+            data={combinations}
+            columns={columns}
+            meta={{
+              disabledRow: { isActive: false },
+              subRows: "subItem",
+            }}
+            renderFooter={(data) => {
+              return (
+                <>
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <Button
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        className="shadow-sm append-btn"
+                        onClick={() =>
+                          handleToggle({ createCombinationModal: true })
+                        }
+                      >
+                        <Plus />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </>
+              );
+            }}
+          />
+        </CardContent>
+      </Card>
 
       {toggle.breakPackModal && (
         <BreakPackModal
@@ -230,6 +248,19 @@ export default function Combinations({
           }}
           combinationId={Number(selected?.id)}
           onSubmit={async () => {}}
+        />
+      )}
+
+      {toggle.editCombinationModal && product && (
+        <CombinationModal
+          product={product}
+          isOpen={true}
+          onSubmit={() => {
+            handleToggle({ editCombinationModal: false });
+          }}
+          onClose={() => {
+            handleToggle({ editCombinationModal: false });
+          }}
         />
       )}
     </>

@@ -1,16 +1,12 @@
 import {
   ApiErrorResponse,
-  Product,
+  ProductCombination,
   ProductCombinationInput,
   productCombinationInputSchema,
   ProductWithCombinations,
   VariantTypes,
   VariantValues,
 } from "@/schemas";
-import {
-  useProductCombinationByProductId,
-  useUpdateProductCombination,
-} from "@/features/products/hooks/useProductCombination";
 import {
   Form,
   FormControl,
@@ -19,6 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useUpdateProductCombinations } from "@/features/products/hooks/useProductCombination";
 import { ERROR, UNIT_COLOR, UNIT_OPTIONS } from "@/utils/definitions";
 import { FieldPath, useFieldArray, useForm } from "react-hook-form";
 import { Loader2Icon, Plus, Save, Trash2 } from "lucide-react";
@@ -33,6 +30,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
+import { groupSubItems } from "@/lib/utils";
 import Select from "@/components/Select";
 import VariantCell from "./VariantCell";
 import Modal from "@/components/Modal";
@@ -42,45 +40,33 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 export default function CombinationModal({
-  product,
+  product: data,
+  onSubmit,
   onClose,
   isOpen,
 }: {
   product: ProductWithCombinations;
-  onSubmit: (e: Product) => Promise<void>;
+  onSubmit: () => void;
   onClose: () => void;
   isOpen: boolean;
 }) {
-  const { data, isFetching } = useProductCombinationByProductId(product.id);
   const { mutate: updateProductCombination, isPending } =
-    useUpdateProductCombination();
+    useUpdateProductCombinations();
 
-  const [variants, setVariants] = React.useState<VariantTypes[]>([]);
-
-  const values = React.useMemo(() => {
-    if (!data) return;
-    const { combinations, variants } = data;
-    setVariants(variants);
-    const map = combinations.map((i) => i.values);
-    const x = combinations.map((i) => {
-      return {
-        ...i,
-        values: Array(variants.length).fill({ id: "" }),
-      };
-    });
-
-    const xx = x.map((i, index) => {
-      map[index].forEach((j) => {
-        const idx = variants.findIndex((v) => v.id === j.variantTypeId);
-        i.values[idx] = j;
+  const combinations = React.useMemo(() => {
+    const combinations: ProductCombination[] = [];
+    const getSubItem = (i: any) => {
+      combinations.push(i);
+      i?.subItem?.forEach((j: any) => {
+        getSubItem(j);
       });
-      return { ...i };
+    };
+    groupSubItems(data.combinations).forEach((i: any) => {
+      getSubItem(i);
     });
 
-    return {
-      combinations: xx,
-    };
-  }, [data]);
+    return combinations;
+  }, [data.combinations]);
 
   const form = useForm<{
     combinations: ProductCombinationInput[];
@@ -90,7 +76,9 @@ export default function CombinationModal({
         combinations: z.array(productCombinationInputSchema),
       }),
     ),
-    values,
+    values: {
+      combinations,
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -100,32 +88,34 @@ export default function CombinationModal({
   });
 
   const productCombinationDefaultValue: ProductCombinationInput = {
-    productId: Number(product.id),
+    productId: Number(data.id),
     reorderLevel: 10,
-    unit: product.baseUnit,
+    unit: data.baseUnit,
     price: 0,
     conversionFactor: 1,
     isActive: true,
-    values: variants.map(() => ({
-      value: "",
-      variantTypeId: null,
-      id: null,
-    })),
+    values:
+      data.variants?.map(() => ({
+        value: "",
+        variantTypeId: null,
+        id: null,
+      })) ?? [],
   };
 
-  const handleSubmit = async (data: {
+  const handleSubmit = async (values: {
     combinations: ProductCombinationInput[];
   }) => {
-    const { combinations } = data;
+    const { combinations } = values;
 
     updateProductCombination(
       {
-        productId: product.id,
+        productId: Number(data.id),
         data: combinations,
       },
       {
         onSuccess: () => {
           toast.success("Variants saved successfully");
+          onSubmit();
         },
         onError: (error) => {
           const apiError = error as unknown as ApiErrorResponse;
@@ -171,7 +161,7 @@ export default function CombinationModal({
           </Button>
         ),
       },
-      ...variants.map((variant, idx) => ({
+      ...(data.variants ?? []).map((variant, idx) => ({
         accessorKey: "values.values." + variant.name,
         header: variant.name,
         meta: {
@@ -249,7 +239,7 @@ export default function CombinationModal({
 
         cell: (props) => {
           const { row, table } = props;
-          const type = variants.find(
+          const type = data.variants?.find(
             (item: VariantTypes) => item.isBreakpackFilter,
           );
           let options: ProductCombinationInput[] = [];
@@ -257,15 +247,25 @@ export default function CombinationModal({
             .getRowModel()
             .rows.map((row) => row.original);
 
+          const selectedParentIds = allOriginalData
+            .filter((_, index) => index !== row.index)
+            .map((r) => r.isBreakPackOfId)
+            .filter(Boolean);
+
           if (type) {
             const f = row.original.values.find(
               (v) => v.variantTypeId === type.id,
             );
-            options = allOriginalData.filter((i) =>
-              i.values.find((v) => v.id === f?.id),
+            options = allOriginalData.filter(
+              (i) =>
+                i.values.find((v) => v.id === f?.id) &&
+                !selectedParentIds.includes(i.id),
             );
           } else {
-            options = allOriginalData.filter((i) => i.id !== row.original.id);
+            options = allOriginalData.filter(
+              (i) =>
+                i.id !== row.original.id && !selectedParentIds.includes(i.id),
+            );
           }
 
           return (
@@ -456,14 +456,14 @@ export default function CombinationModal({
         },
       },
     ],
-    [form, remove, variants, fields],
+    [form, remove, data.variants, fields],
   );
 
   return (
     <Modal
       isOpen={isOpen}
       onOpenChange={onClose}
-      title={`Product: ${product.name}`}
+      title={`Product: ${data.name}`}
       description="Manage product variants"
       className="!max-w-[90%]"
     >
@@ -520,16 +520,8 @@ export default function CombinationModal({
             >
               <Plus />
             </Button>
-            <Button
-              className="shadow-sm"
-              type="submit"
-              disabled={isPending || isFetching}
-            >
-              {isPending || isFetching ? (
-                <Loader2Icon className="animate-spin" />
-              ) : (
-                <Save />
-              )}
+            <Button className="shadow-sm" type="submit" disabled={isPending}>
+              {isPending ? <Loader2Icon className="animate-spin" /> : <Save />}
               Save changes
             </Button>
           </DialogFooter>

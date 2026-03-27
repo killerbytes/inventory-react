@@ -20,6 +20,7 @@ export const productSchema = productBaseSchema.extend({
 
 export const productSchemaWithCombinations = productSchema.extend({
   combinations: z.array(z.lazy(() => productCombinationSchema)),
+  variants: z.array(variantTypesSchema).nullish(),
 });
 
 export type Product = z.infer<typeof productSchema>;
