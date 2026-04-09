@@ -6,8 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ProductCombination, ProductWithCombinations } from "@/schemas";
-import { ClipboardList, Cog, PackageOpen, Plus } from "lucide-react";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { ClipboardList, Cog, PackageOpen } from "lucide-react";
 import StockAdjustmentModal from "./StockAdjustmentModal";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatCurrency } from "@/utils/formatters";
@@ -21,8 +20,8 @@ import BreakPackModal from "./BreakPackModal";
 import { groupSubItems } from "@/lib/utils";
 import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
-import React from "react";
 
+import React from "react";
 export default function Combinations({
   product,
 }: {
@@ -62,6 +61,25 @@ export default function Combinations({
           </div>
         ),
       },
+      // {
+      //   accessorKey: "sku",
+      //   header: "SKU",
+      //   cell: ({ row }: { row: Row<ProductCombination> }) => {
+      //     return <span>{row.original.sku}</span>;
+      //   },
+      // },
+      // {
+      //   accessorKey: "barcode",
+      //   header: "Barcode",
+      //   cell: ({ row }: { row: Row<ProductCombination> }) => {
+      //     return (
+      //       <BarcodeComponent
+      //         className="items-start"
+      //         value={String(row.original.barcode)}
+      //       />
+      //     );
+      //   },
+      // },
       {
         accessorKey: "price",
         header: "Price",
@@ -202,27 +220,6 @@ export default function Combinations({
             meta={{
               disabledRow: { isActive: false },
               subRows: "subItem",
-            }}
-            renderFooter={(data) => {
-              return (
-                <>
-                  <TableRow>
-                    <TableCell colSpan={8}>
-                      <Button
-                        size="icon-sm"
-                        type="button"
-                        variant="outline"
-                        className="shadow-sm append-btn"
-                        onClick={() =>
-                          handleToggle({ createCombinationModal: true })
-                        }
-                      >
-                        <Plus />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </>
-              );
             }}
           />
         </CardContent>

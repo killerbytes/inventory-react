@@ -24,6 +24,14 @@ export const useProducts = () => {
   });
 };
 
+export const useProductsByCategory = (categoryId: number) => {
+  return useQuery<Product[], AxiosError>({
+    queryKey: [...productKeys.all, "category", categoryId],
+    queryFn: () => productServices.getByCategory(categoryId),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
 export const useProduct = (id: number) => {
   return useQuery<ProductWithCombinations, AxiosError>({
     queryKey: productKeys.detail(id),

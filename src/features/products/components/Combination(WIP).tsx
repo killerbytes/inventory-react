@@ -1,23 +1,15 @@
 import {
-  ApiErrorResponse,
   Product,
   ProductCombination,
   ProductCombinationInput,
   productCombinationInputSchema,
   ProductWithCombinations,
 } from "@/schemas";
-import {
-  useCreateProductCombination,
-  useDeleteProductCombination,
-  useUpdateProductCombination,
-} from "../hooks/useProductCombination";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FieldPath, useForm } from "react-hook-form";
-import CombinationForm from "./CombinationForm";
-import { ERROR } from "@/utils/definitions";
+import CombinationForm from "./CombinationForm(WIP)";
 import useToggle from "@/hooks/useToggle";
+import { useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
-import { toast } from "sonner";
 import React from "react";
 
 export default function Combination({
@@ -32,9 +24,9 @@ export default function Combination({
   isOpen: boolean;
   selected?: ProductCombination;
 }) {
-  const { mutate: createProductCombination } = useCreateProductCombination();
-  const { mutate: updateProductCombination } = useUpdateProductCombination();
-  const { mutate: deleteProductCombination } = useDeleteProductCombination();
+  // const { mutate: createProductCombination } = useCreateProductCombination();
+  // const { mutate: updateProductCombination } = useUpdateProductCombination();
+  // const { mutate: deleteProductCombination } = useDeleteProductCombination();
 
   const isCreate = React.useMemo(() => {
     return selected ? false : true;
@@ -104,104 +96,101 @@ export default function Combination({
     },
   });
 
-  const handleAdd = async (values: ProductCombinationInput) => {
-    createProductCombination(
-      { values },
-      {
-        onSuccess: () => {
-          toast.success("Combination added successfully");
-        },
-        onError: (error: unknown) => {
-          const apiError = error as ApiErrorResponse;
-
-          if (apiError.code === ERROR.VALIDATION_ERROR) {
-            apiError.errors.forEach((err) => {
-              if (err.field) {
-                form.setError(err.field as FieldPath<ProductCombinationInput>, {
-                  type: "server",
-                  message: err.message,
-                });
-              }
-            });
-          } else {
-            toast.error("Failed to add combination: " + apiError.message);
-          }
-        },
-      },
-    );
-  };
-  const handleAddBreakpack = async (values: ProductCombinationInput) => {
-    createProductCombination(
-      { values },
-      {
-        onSuccess: () => {
-          toast.success("Breakpack added successfully");
-          handleToggle({ addBreakpackForm: false });
-        },
-        onError: (error: unknown) => {
-          const apiError = error as ApiErrorResponse;
-
-          if (apiError.code === ERROR.VALIDATION_ERROR) {
-            apiError.errors.forEach((err) => {
-              if (err.field) {
-                form.setError(err.field as FieldPath<ProductCombinationInput>, {
-                  type: "server",
-                  message: err.message,
-                });
-              }
-            });
-          } else {
-            toast.error("Failed to add breakpack: " + apiError.message);
-          }
-        },
-      },
-    );
+  const handleAdd = async (_values: ProductCombinationInput) => {
+    //   createProductCombination(
+    //     { values },
+    //     {
+    //       onSuccess: () => {
+    //         toast.success("Combination added successfully");
+    //       },
+    //       onError: (error: unknown) => {
+    //         const apiError = error as ApiErrorResponse;
+    //         if (apiError.code === ERROR.VALIDATION_ERROR) {
+    //           apiError.errors.forEach((err) => {
+    //             if (err.field) {
+    //               form.setError(err.field as FieldPath<ProductCombinationInput>, {
+    //                 type: "server",
+    //                 message: err.message,
+    //               });
+    //             }
+    //           });
+    //         } else {
+    //           toast.error("Failed to add combination: " + apiError.message);
+    //         }
+    //       },
+    //     },
+    //   );
   };
 
-  const handleUpdate = async (values: ProductCombinationInput) => {
-    updateProductCombination(
-      {
-        values,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Combination saved successfully");
-        },
-        onError: (error: unknown) => {
-          const apiError = error as ApiErrorResponse;
+  const handleAddBreakpack = async (_values: ProductCombinationInput) => {
+    //   createProductCombination(
+    //     { values },
+    //     {
+    //       onSuccess: () => {
+    //         toast.success("Breakpack added successfully");
+    //         handleToggle({ addBreakpackForm: false });
+    //       },
+    //       onError: (error: unknown) => {
+    //         const apiError = error as ApiErrorResponse;
+    //         if (apiError.code === ERROR.VALIDATION_ERROR) {
+    //           apiError.errors.forEach((err) => {
+    //             if (err.field) {
+    //               form.setError(err.field as FieldPath<ProductCombinationInput>, {
+    //                 type: "server",
+    //                 message: err.message,
+    //               });
+    //             }
+    //           });
+    //         } else {
+    //           toast.error("Failed to add breakpack: " + apiError.message);
+    //         }
+    //       },
+    //     },
+    //   );
+  };
 
-          if (apiError.code === ERROR.VALIDATION_ERROR) {
-            apiError.errors.forEach((err) => {
-              if (err.field) {
-                console.log(err);
-
-                form.setError(err.field as FieldPath<ProductCombinationInput>, {
-                  type: "server",
-                  message: err.message,
-                });
-              }
-            });
-          } else {
-            toast.error("Failed to update combination: " + apiError.message);
-          }
-        },
-      },
-    );
+  const handleUpdate = async (_values: ProductCombinationInput) => {
+    //   updateProductCombination(
+    //     {
+    //       values,
+    //     },
+    //     {
+    //       onSuccess: () => {
+    //         toast.success("Combination saved successfully");
+    //       },
+    //       onError: (error: unknown) => {
+    //         const apiError = error as ApiErrorResponse;
+    //         if (apiError.code === ERROR.VALIDATION_ERROR) {
+    //           apiError.errors.forEach((err) => {
+    //             if (err.field) {
+    //               console.log(err);
+    //               form.setError(err.field as FieldPath<ProductCombinationInput>, {
+    //                 type: "server",
+    //                 message: err.message,
+    //               });
+    //             }
+    //           });
+    //         } else {
+    //           toast.error("Failed to update combination: " + apiError.message);
+    //         }
+    //       },
+    //     },
+    //   );
   };
 
   const handleRemove = () => {
-    deleteProductCombination(
-      { id: selected?.id ?? 0 },
-      {
-        onSuccess: () => {
-          toast.success("Combination deleted successfully");
-          onClose();
-        },
-        onError: (error) => {
-          toast.error("Failed to delete combination: " + error.message);
-        },
-      },
-    );
+    //   deleteProductCombination(
+    //     { id: selected?.id ?? 0 },
+    //     {
+    //       onSuccess: () => {
+    //         toast.success("Combination deleted successfully");
+    //         onClose();
+    //       },
+    //       onError: (error) => {
+    //         toast.error("Failed to delete combination: " + error.message);
+    //       },
+    //     },
+    //   );
   };
 
   return (

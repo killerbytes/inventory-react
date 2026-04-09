@@ -31,6 +31,7 @@ const Reorders = lazy(() => import("@/pages/Reports/ReorderLevels"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const ProductSearch = lazy(() => import("@/pages/ProductSearch"));
 const SupplierDetails = lazy(() => import("@/pages/Suppliers/Details"));
+const BarcodeScanner = lazy(() => import("@/pages/BarcodeScanner"));
 
 export const AppRoutes = () => {
   const routes = [
@@ -236,6 +237,7 @@ export const AppRoutes = () => {
       ),
     },
     { path: ROUTES.SEARCH, element: <ProductSearch /> },
+    { path: ROUTES.SCANNER, element: <BarcodeScanner /> },
     { path: "*", element: <NotFound /> },
   ];
 

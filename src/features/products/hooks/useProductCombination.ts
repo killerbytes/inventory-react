@@ -18,6 +18,16 @@ export const productCombinationKeys = {
     "by-product",
     id,
   ],
+  byCategoryId: (id: number) => [
+    ...productCombinationKeys.all,
+    "by-category",
+    id,
+  ],
+  byBarcode: (barcode: string) => [
+    ...productCombinationKeys.all,
+    "by-barcode",
+    barcode,
+  ],
 };
 
 export const useProductCombination = (id: number) => {
@@ -29,41 +39,59 @@ export const useProductCombination = (id: number) => {
   });
 };
 
-export const useCreateProductCombination = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ values }: { values: ProductCombinationInput }) =>
-      productCombinationServices.create(values),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
-    },
+export const useProductCombinationsByCategoryId = (id: number) => {
+  return useQuery<ProductCombination[], AxiosError>({
+    queryKey: productCombinationKeys.byCategoryId(id),
+    queryFn: () => productCombinationServices.getByCategoryId(id),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!id,
   });
 };
 
-export const useUpdateProductCombination = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ values }: { values: ProductCombinationInput }) =>
-      productCombinationServices.update(null, values),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
-    },
+export const useProductCombinationsByBarcode = (barcode: string) => {
+  return useQuery<ProductCombination, AxiosError>({
+    queryKey: productCombinationKeys.byBarcode(barcode),
+    queryFn: () => productCombinationServices.getByBarcode(barcode),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!barcode,
   });
 };
 
-export const useDeleteProductCombination = () => {
-  const queryClient = useQueryClient();
+// export const useCreateProductCombination = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id }: { id: number }) =>
-      productCombinationServices.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.all });
-    },
-  });
-};
+//   return useMutation({
+//     mutationFn: ({ values }: { values: ProductCombinationInput }) =>
+//       productCombinationServices.create(values),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: productKeys.all });
+//     },
+//   });
+// };
+
+// export const useUpdateProductCombination = () => {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: ({ values }: { values: ProductCombinationInput }) =>
+//       productCombinationServices.update(null, values),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: productKeys.all });
+//     },
+//   });
+// };
+
+// export const useDeleteProductCombination = () => {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: ({ id }: { id: number }) =>
+//       productCombinationServices.delete(id),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: productKeys.all });
+//     },
+//   });
+// };
 
 export const useProductCombinationByProductId = (id: number) => {
   return useQuery<
@@ -93,6 +121,7 @@ export const useUpdateProductCombinations = () => {
     }) => productCombinationServices.updateByProductId(productId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
+      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
     },
   });
 };

@@ -11,6 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { LazyProductsByCategory } from "@/features/products/components/LazyProductsByCategory";
 import CreateProductModal from "../../features/products/components/CreateProductModal";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
@@ -55,41 +56,6 @@ export default function Products() {
       q: debouncedQuery,
     }));
   }, [debouncedQuery]);
-
-  // React.useEffect(() => {
-  //   if (
-  //     categories &&
-  //     categories?.length > 0 &&
-  //     productCombinationState.ProductCombination.length > 0
-  //   ) {
-  //     const productMap = new Map<number, ProductWithCombinations>();
-  //     productCombinationState.ProductCombination.forEach((item) => {
-  //       const productId = item.product.id;
-  //       if (!productMap.has(productId)) {
-  //         productMap.set(productId, {
-  //           ...item.product,
-  //           id: productId,
-  //           combinations: [],
-  //         });
-  //       }
-  //       const product = productMap.get(productId);
-  //       product!.combinations?.push(item);
-  //     });
-
-  //     const categorizedProductList = categories?.map((category) => {
-  //       return {
-  //         categoryId: category.id ?? 0,
-  //         categoryName: category.name,
-  //         categoryOrder: category.order ?? 0,
-  //         products: Array.from(productMap.values()).filter(
-  //           (product) => product.categoryId === category.id,
-  //         ),
-  //       };
-  //     });
-
-  //     setData(categorizedProductList);
-  //   }
-  // }, [categories, productCombinationState.ProductCombination]);
 
   const onSearch = React.useCallback(async (search: string) => {
     return await getMappedSearchProductCombinations({ search });
@@ -179,13 +145,7 @@ export default function Products() {
                       {item.name}
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col">
-                      {/* <>
-                        {item.products.map((product) => (
-                          <Fragment key={product.id}>
-                            <ProductItem item={product} />
-                          </Fragment>
-                        ))}
-                      </> */}
+                      <LazyProductsByCategory itemId={String(item.id)} />
                     </AccordionContent>
                   </AccordionItem>
                 ))}

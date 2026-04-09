@@ -8,6 +8,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import {
   ApiErrorResponse,
   productBaseSchema,
   ProductInput,
@@ -22,6 +30,7 @@ import CreateProductModal from "@/features/products/components/CreateProductModa
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
 import ProductHistory from "@/features/products/components/ProductHistory";
+import BarcodePrinter from "@/features/products/components/BarcodePrinter";
 import VariantsModal from "@/features/products/components/VariantsModal";
 import { Edit, Loader2Icon, PlusIcon, Save, Search } from "lucide-react";
 import PriceHistory from "@/features/products/components/PriceHistory";
@@ -74,6 +83,7 @@ export default function ProductEdit() {
   const [toggle, handleToggle] = useToggle({
     variantModal: false,
     createProductModal: false,
+    barcodePrinter: false,
   });
   async function onSubmit(values: ProductInput) {
     updateProduct(
@@ -244,14 +254,23 @@ export default function ProductEdit() {
                         </span>
                       </div>
                     </div>
-                    <Button
-                      className="shadow-sm"
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Edit />
-                      Edit
-                    </Button>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={() => {
+                          handleToggle({ barcodePrinter: true });
+                        }}
+                      >
+                        Print Barcode
+                      </Button>
+                      <Button
+                        className="shadow-sm"
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                      >
+                        <Edit />
+                        Edit
+                      </Button>
+                    </div>
                   </div>
                 </>
               )}
@@ -269,7 +288,7 @@ export default function ProductEdit() {
               </TabsTrigger>
               <TabsTrigger value="product_history">Product History</TabsTrigger>
             </TabsList>
-            {/* {uniqueCombinations.length > 1 && (
+            {uniqueCombinations.length > 1 && (
               <Combobox<ComboboxItem>
                 items={[...uniqueCombinations]}
                 itemToStringLabel={(item) => item?.name || ""}
@@ -293,7 +312,7 @@ export default function ProductEdit() {
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>
-            )} */}
+            )}
 
             <TabsContent value="product_combination">
               <Combinations product={product as ProductWithCombinations} />
@@ -376,6 +395,12 @@ export default function ProductEdit() {
           }}
         />
       )}
+
+      <BarcodePrinter
+        isOpen={toggle.barcodePrinter || false}
+        onClose={() => handleToggle({ barcodePrinter: false })}
+        items={product?.combinations || []}
+      />
     </Fragment>
   );
 }

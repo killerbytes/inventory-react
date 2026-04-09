@@ -95,11 +95,7 @@ export default function CreateProductModal({
               });
           }}
         >
-          <ProductForm
-            form={form}
-            onSubmit={onSubmit}
-            categories={categories || []}
-          />
+          <ProductForm form={form} categories={categories || []} />
           <div className="flex justify-end gap-2">
             <Button>Create Product</Button>
           </div>
