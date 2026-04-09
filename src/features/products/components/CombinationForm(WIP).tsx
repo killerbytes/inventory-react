@@ -71,7 +71,6 @@ export default function CombinationForm({
                         <Select
                           {...field}
                           className={cx("w-full")}
-                          disabled={field.value?.disabled}
                           value={String(
                             variant.values.find((i) => i.id === field.value?.id)
                               ?.id ?? "",

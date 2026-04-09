@@ -40,6 +40,7 @@ export const productCombinationSearchSchema = z.object({
 export const productCombinationSchema = productCombinationInputSchema.extend({
   id: z.number(),
   sku: z.string(),
+  barcode: z.string(),
   name: z.string(),
   inventory: inventorySchema,
   product: z.lazy(() => productSchema),

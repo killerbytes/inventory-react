@@ -6,6 +6,10 @@
 
 @custom-variant dark (&: is(.dark *));
 
+:root {
+  --text-xs: 11px;
+}
+
 @theme inline {
   --font-sans: Plus Jakarta Sans, sans-serif;
   --font-mono: IBM Plex Mono, monospace;

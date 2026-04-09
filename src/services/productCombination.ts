@@ -16,6 +16,16 @@ export default class ProductCombinationService extends BaseService<ProductCombin
     return response;
   };
 
+  getByCategoryId = async (id: number) => {
+    const response = await this.http.get(`${this.url}/category/${id}`);
+    return response;
+  };
+
+  getByBarcode = async (barcode: string) => {
+    const response = await this.http.get(`${this.url}/barcode/${barcode}`);
+    return response;
+  };
+
   updateByProductId = async (
     id: number,
     combinations: ProductCombinationInput[],

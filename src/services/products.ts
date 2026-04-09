@@ -8,6 +8,10 @@ export default class ProductService extends BaseService<
   constructor(props: { http: Http }) {
     super({ ...props, url: "/products" });
   }
+  getByCategory = async (categoryId: number) => {
+    const response = await this.http.get(`${this.url}/category/${categoryId}`);
+    return response;
+  };
 
   getBySku = async (sku: string) => {
     const response = await this.http.get(`${this.url}/sku/${sku}`);

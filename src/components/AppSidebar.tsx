@@ -4,6 +4,7 @@ import {
   Banknote,
   BanknoteArrowDown,
   BanknoteArrowUp,
+  Barcode,
   BookUser,
   Boxes,
   ChartCandlestick,
@@ -14,9 +15,9 @@ import {
   Diff,
   Gauge,
   Home,
+  Search,
   ShoppingCart,
   TrendingUp,
-  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -72,6 +73,16 @@ const items = [
     url: ROUTES.INVOICES,
     icon: CreditCard,
   },
+  {
+    title: "Search",
+    url: ROUTES.SEARCH,
+    icon: Search,
+  },
+  {
+    title: "Barcode Scanner",
+    url: ROUTES.SCANNER,
+    icon: Barcode,
+  },
 ];
 
 const reports = [
@@ -123,11 +134,11 @@ const menu = [
     url: ROUTES.PRODUCTS,
     icon: ShoppingCart,
   },
-  {
-    title: "Users",
-    url: ROUTES.USERS,
-    icon: Users,
-  },
+  // {
+  //   title: "Users",
+  //   url: ROUTES.USERS,
+  //   icon: Users,
+  // },
   {
     title: "Categories",
     url: ROUTES.CATEGORIES,

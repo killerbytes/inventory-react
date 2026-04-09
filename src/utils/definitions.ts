@@ -36,6 +36,7 @@ export const ROUTES = {
   REPORTS_POPULAR: "/reports/popular",
   REPORTS_PROFIT: "/reports/profit",
   REPORTS_NO_SALES: "/reports/no-sale",
+  SCANNER: "/scanner",
 };
 
 export const ORDER_TYPE = {

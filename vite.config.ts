@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import path from "path";
+import fs from "fs";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -40,8 +41,13 @@ export default defineConfig({
     },
   },
   server: {
-    strictPort: true,
-    host: true,
     port: 8081,
+    host: true,
+    ...(fs.existsSync(".env.local") && {
+      https: {
+        key: fs.readFileSync("./localhost+2-key.pem"),
+        cert: fs.readFileSync("./localhost+2.pem"),
+      },
+    }),
   },
 });
