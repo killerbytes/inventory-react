@@ -1,11 +1,11 @@
 import { useProductCombinationsByBarcode } from "@/features/products/hooks/useProductCombination";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { useCategories } from "@/hooks/useCategories";
 import { formatCurrency } from "@/utils/formatters";
 import ColorBadge from "@/components/ColorBadge";
 import { UNIT_COLOR } from "@/utils/definitions";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
-import { Html5Qrcode } from "html5-qrcode";
 import Loader from "@/components/Loader";
 import { Link } from "react-router";
 import { toast } from "sonner";
@@ -40,6 +40,8 @@ const playBeep = () => {
     console.warn("AudioContext not supported or failed to play beep", e);
   }
 };
+
+const formatsToSupport = [Html5QrcodeSupportedFormats.CODE_128];
 
 const BarcodeScanner = () => {
   const [scannedResult, setScannedResult] = React.useState("");
@@ -78,7 +80,10 @@ const BarcodeScanner = () => {
       container.innerHTML = "";
     }
     if (!scannerRef.current) {
-      scannerRef.current = new Html5Qrcode(containerId);
+      scannerRef.current = new Html5Qrcode(containerId, {
+        formatsToSupport: formatsToSupport,
+        verbose: false,
+      });
     }
 
     const startScanner = async () => {

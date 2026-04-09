@@ -11,15 +11,16 @@ export default function BarcodeComponent({
   className?: string;
 }) {
   return (
-    <div className={cx("flex flex-col items-center text-xs", className)}>
-      {label && <span className="text-xs">{label}</span>}
+    <div className={cx("flex flex-col items-center", className)}>
+      {label && <span className="text-[10px] font-mono">{label}</span>}
       <Barcode
         value={String(value)}
-        width={1}
-        height={30}
-        fontSize={11}
+        width={1.5}
+        height={20}
+        fontSize={10}
         margin={0}
         textMargin={0}
+        className="tracking-widest"
       />
     </div>
   );
