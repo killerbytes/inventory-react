@@ -7,6 +7,7 @@ import {
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { productCombinationServices } from "@/services";
 import { ColumnDef, Row } from "@tanstack/react-table";
+import { useCategories } from "@/hooks/useCategories";
 import { Link, useSearchParams } from "react-router";
 import { formatCurrency } from "@/utils/formatters";
 import { DataTable } from "@/components/DataTable";
@@ -15,6 +16,7 @@ import ColorBadge from "@/components/ColorBadge";
 import { ProductCombination } from "@/schemas";
 import { cx } from "class-variance-authority";
 import useDebounce from "@/hooks/useDebounce";
+import Loader from "@/components/Loader";
 import { Search, X } from "lucide-react";
 import React from "react";
 
@@ -25,6 +27,13 @@ export default function ProductSearch() {
   const [search, setSearch] = React.useState(initialSearch);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [loading, setLoading] = React.useState(false);
+
+  const { data: category, isLoading } = useCategories();
+
+  const mappedCategory = React.useMemo(
+    () => new Map(isLoading ? [] : category?.map((item) => [item.id, item])),
+    [category, isLoading],
+  );
 
   const getData = React.useCallback(async (search: string) => {
     if (!search || search.length < 2) {
@@ -46,14 +55,21 @@ export default function ProductSearch() {
         .filter((i) => i.length > 0);
 
       for (const item of res) {
-        const ProductCombination = item.combinations.filter(
+        const productCombination = item.combinations.filter(
           (i: ProductCombination) => {
             const name = i.name.toLowerCase();
             return words.every((word) => name.includes(word.toLowerCase()));
           },
         );
 
-        result.push(...ProductCombination);
+        result.push(
+          ...productCombination.map((i: ProductCombination) => ({
+            ...i,
+            product: {
+              categoryId: item.categoryId,
+            },
+          })),
+        );
       }
 
       setData(result);
@@ -96,13 +112,20 @@ export default function ProductSearch() {
       {
         accessorKey: "Product",
         cell: ({ row }: { row: Row<ProductCombination> }) => {
+          console.log(mappedCategory);
+
           return (
-            <Link
-              className={GLOBAL_COLOR.PRODUCT}
-              to={`${ROUTES.PRODUCTS}/${row.original.productId}`}
-            >
-              {row.original.name}
-            </Link>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase text-muted-foreground">
+                {mappedCategory.get(row.original.product.categoryId)?.name}
+              </span>
+              <Link
+                className={GLOBAL_COLOR.PRODUCT}
+                to={`${ROUTES.PRODUCTS}/${row.original.productId}`}
+              >
+                {row.original.name}
+              </Link>
+            </div>
           );
         },
       },
@@ -152,8 +175,12 @@ export default function ProductSearch() {
         },
       },
     ],
-    [],
+    [mappedCategory],
   );
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className="ml-auto p-4 flex flex-col gap-4">

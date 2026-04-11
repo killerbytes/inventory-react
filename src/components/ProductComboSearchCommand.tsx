@@ -91,14 +91,14 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
       >
         {children}
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen} className="md:!w-[70%]">
+      <CommandDialog open={open} onOpenChange={setOpen} className="md:!w-[80%]">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search"
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList ref={listRef} className="max-h-96 overflow-y-auto">
+          <CommandList ref={listRef} className="md:max-h-160 overflow-y-auto">
             {loading && (
               <CommandEmpty>
                 <Loader />

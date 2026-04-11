@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { formatCurrency, getScore } from "@/utils/formatters";
 import { CommandGroup, CommandItem } from "./ui/command";
+import { useCategories } from "@/hooks/useCategories";
 import { UNIT_COLOR } from "@/utils/definitions";
 import HighlightMatch from "./HighlightMatch";
 import ColorBadge from "./ColorBadge";
@@ -13,6 +14,7 @@ export type BaseProps = {
   unit: string;
   inventory: { quantity: number };
   id: number;
+  product: { categoryId: number };
 };
 
 const MemoizedCommandItem = memo(
@@ -31,20 +33,27 @@ const MemoizedCommandItem = memo(
   }) => {
     const ref = useRef<HTMLDivElement>(null);
     const name = item.name.replace(/\*\*\*[\s\S]*?\*\*\*/g, "").trim();
+    const { data: category } = useCategories();
+
+    const mappedCategory = new Map(category?.map((item) => [item.id, item]));
 
     return (
       <CommandItem
         key={item.id}
         value={name + item.unit}
         onSelect={onSelect}
-        className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm cursor-default select-none"
         ref={selected ? ref : undefined}
         disabled={disableNoQuantity && Number(item.inventory.quantity) === 0}
       >
         <ColorBadge colorMap={UNIT_COLOR}>{item.unit}</ColorBadge>
 
-        <div>
-          <HighlightMatch text={name} query={search} />
+        <div className="flex flex-col w-full">
+          <span className="text-[9px] uppercase text-muted-foreground leading-none">
+            {mappedCategory.get(item.product.categoryId)?.name}
+          </span>
+          <div>
+            <HighlightMatch text={name} query={search} />
+          </div>
         </div>
 
         <Badge
@@ -139,7 +148,7 @@ export default function GroupedCommandList<T extends BaseProps>({
   if (!open) return null;
 
   return (
-    <div ref={containerRef} className="max-h-80 overflow-auto">
+    <div ref={containerRef} className="max-h-[80%] overflow-auto">
       <CommandGroup>
         {grouped.map(([groupName, groupItems]) => (
           <React.Fragment key={groupName}>
