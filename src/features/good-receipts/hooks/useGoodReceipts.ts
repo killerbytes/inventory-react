@@ -7,6 +7,7 @@ import {
 } from "@/schemas";
 import { productCombinationKeys } from "@/features/products/hooks/useProductCombination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { productKeys } from "@/features/products/hooks/useProducts";
 import { goodReceiptServices } from "@/services";
 import { AxiosError } from "axios";
 
@@ -56,6 +57,7 @@ export const useUpdateGoodReceipt = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: goodReceiptKeys.all });
       queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };

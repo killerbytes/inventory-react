@@ -8,6 +8,7 @@ import {
 } from "@/schemas";
 import { productCombinationKeys } from "@/features/products/hooks/useProductCombination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { productKeys } from "@/features/products/hooks/useProducts";
 import { salesOrderServices } from "@/services";
 import { AxiosError } from "axios";
 
@@ -45,6 +46,7 @@ export const useCreateSalesOrder = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: salesOrderKeys.all });
       queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
+      queryClient.invalidateQueries({ queryKey: productKeys.all });
     },
   });
 };
