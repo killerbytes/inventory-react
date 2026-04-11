@@ -11,6 +11,19 @@ export default class ProductCombinationService extends BaseService<ProductCombin
     super({ ...props, url: "/product-combinations" });
   }
 
+  getByIds = async (ids: number[]) => {
+    const response = await this.http.post(`${this.url}/get-by-ids`, ids);
+    return response;
+  };
+
+  updatePrices = async (combinations: ProductCombinationInput[]) => {
+    const response = await this.http.patch(
+      `${this.url}/update-prices`,
+      combinations,
+    );
+    return response;
+  };
+
   getByProductId = async (id: number) => {
     const response = await this.http.get(`${this.url}/product/${id}`);
     return response;

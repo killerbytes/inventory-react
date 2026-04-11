@@ -11,15 +11,15 @@ export const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-export const formatDate = (value: string) => {
-  return value && format(value, DATE_FORMAT);
+export const formatDate = (value?: string | null) => {
+  return value ? format(value, DATE_FORMAT) : "";
 };
 
 export const formatDateTime = (
-  value: string,
+  value?: string | null,
   formatStr: string = DATETIME_FORMAT,
 ) => {
-  return value && format(value, formatStr);
+  return value ? format(value, formatStr) : "";
 };
 
 export const getScore = (value: string, search: string) => {

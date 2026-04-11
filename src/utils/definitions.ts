@@ -37,6 +37,7 @@ export const ROUTES = {
   REPORTS_PROFIT: "/reports/profit",
   REPORTS_NO_SALES: "/reports/no-sale",
   SCANNER: "/scanner",
+  PRICE_MANAGER: "/price-manager",
 };
 
 export const ORDER_TYPE = {

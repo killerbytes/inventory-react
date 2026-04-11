@@ -1,3 +1,4 @@
+import PriceManager from "@/pages/PriceManager";
 import Popular from "@/pages/Reports/Popular";
 import NoSales from "@/pages/Reports/NoSales";
 import { ROUTES } from "@/utils/definitions";
@@ -238,6 +239,14 @@ export const AppRoutes = () => {
     },
     { path: ROUTES.SEARCH, element: <ProductSearch /> },
     { path: ROUTES.SCANNER, element: <BarcodeScanner /> },
+    {
+      path: ROUTES.PRICE_MANAGER,
+      element: (
+        <Layout>
+          <PriceManager />
+        </Layout>
+      ),
+    },
     { path: "*", element: <NotFound /> },
   ];
 

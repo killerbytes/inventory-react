@@ -1,6 +1,7 @@
 import {
   Annoyed,
   BadgeDollarSign,
+  BadgePercent,
   Banknote,
   BanknoteArrowDown,
   BanknoteArrowUp,
@@ -139,6 +140,12 @@ const menu = [
   //   url: ROUTES.USERS,
   //   icon: Users,
   // },
+  {
+    title: "Price Upload",
+    url: ROUTES.PRICE_MANAGER,
+    icon: BadgePercent,
+  },
+
   {
     title: "Categories",
     url: ROUTES.CATEGORIES,
