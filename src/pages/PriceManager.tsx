@@ -38,7 +38,9 @@ const PriceManager = () => {
           const matchingRow = filtered.find(
             (f: any) => Number(f.ID) === item.id,
           );
-          const newPrice = matchingRow ? Number(matchingRow["NEW PRICE"]) : 0;
+          let newPrice = parseFloat(
+            matchingRow["NEW PRICE"].replace(/[^0-9.-]+/g, ""),
+          );
 
           return {
             ...item,
@@ -143,7 +145,6 @@ const PriceManager = () => {
     ],
     [],
   );
-  console.log(data);
 
   return (
     <div className="flex flex-col gap-4">
