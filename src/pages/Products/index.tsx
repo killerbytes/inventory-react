@@ -18,44 +18,20 @@ import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCategories } from "@/hooks/useCategories";
-import { SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, Search } from "lucide-react";
 import { cx } from "class-variance-authority";
-import { Input } from "@/components/ui/input";
-import useDebounce from "@/hooks/useDebounce";
 import { useNavigate } from "react-router";
 import useToggle from "@/hooks/useToggle";
-import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import React from "react";
-
-interface filterProps {
-  q?: string;
-  categoryId?: string;
-}
 
 export default function Products() {
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const navigate = useNavigate();
-  const [query, setQuery] = React.useState("");
-  // const [data, setData] = React.useState<CategorizedProductList[]>([]);
-  const [filter, setFilter] = React.useState<filterProps>({
-    categoryId: "ALL",
-  });
   const [toggle, handleToggle] = useToggle({
     createProductModal: false,
-    editModal: false,
-    newPackageModal: false,
   });
-
-  const debouncedQuery = useDebounce(query, 500);
-  React.useEffect(() => {
-    setFilter((prev) => ({
-      ...prev,
-      q: debouncedQuery,
-    }));
-  }, [debouncedQuery]);
 
   const onSearch = React.useCallback(async (search: string) => {
     return await getMappedSearchProductCombinations({ search });
@@ -95,40 +71,6 @@ export default function Products() {
 
       <Card>
         <CardContent>
-          <div className="flex gap-2">
-            <div className="w-full">
-              <div className="text-sm font-semibold mb-1">Search</div>
-
-              <Input
-                placeholder="Search products"
-                className="w-full mb-4"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                }}
-              />
-            </div>
-            <div className="w-full">
-              <div className="text-sm font-semibold mb-1">Category</div>
-              <Select
-                value={filter.categoryId}
-                options={[{ id: "ALL", name: "ALL" }, ...(categories ?? [])]}
-                className="w-full mb-4"
-                onChange={(value) => {
-                  const categoryId = value;
-                  setFilter({
-                    ...filter,
-                    categoryId,
-                  });
-                }}
-                renderOption={(option) => (
-                  <SelectItem key={option.id} value={String(option.id)}>
-                    {option.name}
-                  </SelectItem>
-                )}
-              />
-            </div>
-          </div>
           {categoriesLoading ? (
             <Loader />
           ) : (
@@ -155,7 +97,6 @@ export default function Products() {
       </Card>
       {toggle.createProductModal && (
         <CreateProductModal
-          // categoryId={category}
           isOpen={true}
           onClose={() => {
             handleToggle({ createProductModal: false });
