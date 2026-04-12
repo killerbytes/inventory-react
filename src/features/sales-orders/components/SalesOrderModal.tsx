@@ -1,11 +1,18 @@
 import {
   ApiError,
   ApiErrorResponse,
+  ProductCombination,
   SalesOrder,
   SalesOrderForm,
   salesOrderFormSchema,
   SalesOrderItem,
 } from "@/schemas";
+import {
+  useCreateSalesOrder,
+  useDeleteSalesOrder,
+  useSalesOrder,
+  useUpdateSalesOrder,
+} from "../hooks/useSalesOrders";
 import {
   ERROR,
   MODE_OF_PAYMENT_OPTIONS,
@@ -22,11 +29,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  useCreateSalesOrder,
-  useDeleteSalesOrder,
-  useUpdateSalesOrder,
-} from "../hooks/useSalesOrders";
-import {
   Card,
   CardAction,
   CardContent,
@@ -40,6 +42,7 @@ import LineColumn from "@/components/forms/OrderItemForm/LineColumn";
 import { BanknoteArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
+import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -55,12 +58,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import DatePicker from "@/components/DatePicker";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
-import { salesOrderServices } from "@/services";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
-import useDebounce from "@/hooks/useDebounce";
 import Select from "@/components/Select";
+import Loader from "@/components/Loader";
 import Modal from "@/components/Modal";
+import { debounce } from "lodash";
 import { toast } from "sonner";
 import React from "react";
 
@@ -89,6 +92,9 @@ export default function SalesOrderModal({
   isOpen: boolean;
   onClose: (reload: boolean) => void;
 }) {
+  const [loading, setLoading] = React.useState(false);
+  const { data: salesOrder, isLoading } = useSalesOrder(Number(data?.id));
+
   const { data: customers } = useCustomers();
   const { mutate: createSalesOrder, isPending: createSalesOrderLoading } =
     useCreateSalesOrder();
@@ -97,19 +103,64 @@ export default function SalesOrderModal({
   const { mutate: deleteSalesOrder, isPending: deleteSalesOrderLoading } =
     useDeleteSalesOrder();
 
-  const defaultValues = localStorage.getItem(
-    `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
-  )
-    ? JSON.parse(
-        localStorage.getItem(
-          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
-        ) as string,
-      )
-    : salesOrderDefault;
+  const getLatestPrice = async (str: string) => {
+    try {
+      const draft = JSON.parse(str);
+
+      const ids =
+        draft.salesOrderItems
+          ?.filter((item: SalesOrderItem) => item.combinationId !== -1)
+          .map((item: SalesOrderItem) => item.combinationId) || [];
+      setLoading(true);
+      const combinations = await productCombinationServices.getByIds(ids);
+      draft.salesOrderItems = draft.salesOrderItems.map(
+        (item: SalesOrderItem) => ({
+          ...item,
+          purchasePrice: Number(
+            combinations.find(
+              (c: ProductCombination) => c.id === item.combinationId,
+            )?.price ?? 0,
+          ),
+        }),
+      );
+      setLoading(false);
+      return draft;
+    } catch (e) {
+      console.error("Failed to parse sales draft", e);
+      return salesOrderDefault;
+    }
+  };
+
+  const defaultValuesFunc = async () => {
+    if (data?.id) {
+      if (!salesOrder) return salesOrderDefault;
+      const mapped = {
+        ...salesOrder,
+        salesOrderItems: salesOrder?.salesOrderItems.map(
+          (item: SalesOrderItem) => ({
+            ...item,
+            combinations: {
+              ...item.combinations,
+              price: Number(item.combinations?.price),
+            },
+          }),
+        ),
+      };
+
+      return mapped;
+    }
+    const str = localStorage.getItem(
+      `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+    );
+
+    if (!str) return salesOrderDefault;
+
+    return getLatestPrice(str);
+  };
 
   const form = useForm<SalesOrderForm>({
     resolver: zodResolver(salesOrderFormSchema),
-    defaultValues,
+    defaultValues: async () => await defaultValuesFunc(),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -129,26 +180,23 @@ export default function SalesOrderModal({
   const modeOfPayment = form.watch("modeOfPayment");
 
   React.useEffect(() => {
-    const getData = async () => {
-      const res = await salesOrderServices.get(Number(data.id));
-
+    if (salesOrder) {
       const mapped = {
-        ...res,
-        salesOrderItems: res.salesOrderItems.map((item: SalesOrderItem) => ({
-          ...item,
-          combinations: {
-            ...item.combinations,
-            price: Number(item.combinations?.price),
-          },
-        })),
+        ...salesOrder,
+        salesOrderItems: salesOrder.salesOrderItems.map(
+          (item: SalesOrderItem) => ({
+            ...item,
+            combinations: {
+              ...item.combinations,
+              price: Number(item.combinations?.price),
+            },
+          }),
+        ),
       };
 
       form.reset(mapped);
-    };
-    if (data) {
-      getData();
     }
-  }, [data, form]);
+  }, [salesOrder, form]);
 
   async function onSubmit(values: SalesOrderForm) {
     createSalesOrder(values, {
@@ -205,31 +253,37 @@ export default function SalesOrderModal({
     );
   }
 
-  const saveDraft = React.useCallback(() => {
-    const draft =
-      JSON.parse(
-        localStorage.getItem(
-          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
-        ) as string,
-      ) || {};
-    const newDraft = { ...form.getValues() };
+  const saveDraft = React.useCallback(
+    debounce((newDraft: SalesOrderForm) => {
+      if (newDraft.salesOrderItems.every((item) => item.combinationId === -1)) {
+        return;
+      }
+      console.log(newDraft);
 
-    if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
-      localStorage.setItem(
-        `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
-        JSON.stringify(newDraft, (_, v) => (v === undefined ? null : v)),
-      );
-    }
-  }, [form]);
+      const draft =
+        JSON.parse(
+          localStorage.getItem(
+            `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+          ) as string,
+        ) || {};
+
+      if (JSON.stringify(draft) !== JSON.stringify(newDraft)) {
+        localStorage.setItem(
+          `${import.meta.env.VITE_APP_NAME}_SALES_DRAFT`,
+          JSON.stringify(newDraft, (_, v) => (v === undefined ? null : v)),
+        );
+      }
+    }, 1000),
+    [],
+  );
+
   const formData = useWatch({ control: form.control });
 
-  const debouncedFormData = useDebounce(formData, 1000);
-
   React.useEffect(() => {
-    if (!data) {
-      saveDraft();
+    if (!data && formData) {
+      saveDraft(formData as SalesOrderForm);
     }
-  }, [data, debouncedFormData, saveDraft]);
+  }, [data, saveDraft, formData]);
 
   async function onDeleteOrder() {
     deleteSalesOrder(Number(data.id), {
@@ -478,6 +532,7 @@ export default function SalesOrderModal({
       size="xl"
     >
       <div className="no-scrollbar -mx-4 max-h-[60vh] overflow-y-auto px-4 md:max-h-full">
+        {isLoading || (loading && <Loader />)}
         <Form {...form}>
           <form className="flex flex-col gap-4 ">
             <FormField
