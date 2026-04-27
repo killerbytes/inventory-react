@@ -123,11 +123,12 @@ export default function DnDTable<T extends Props>({
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
-      setData((data) => {
-        const oldIndex = dataIds.indexOf(active.id);
-        const newIndex = dataIds.indexOf(over.id);
-        return arrayMove(data, oldIndex, newIndex);
-      });
+      const oldIndex = dataIds.indexOf(active.id);
+      const newIndex = dataIds.indexOf(over.id);
+      const newData = arrayMove(data, oldIndex, newIndex);
+      
+      setData(newData);
+      onSubmit(newData);
     }
   }
 
@@ -136,10 +137,6 @@ export default function DnDTable<T extends Props>({
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {}),
   );
-
-  React.useEffect(() => {
-    onSubmit(data);
-  }, [data, onSubmit]);
 
   return (
     <DndContext

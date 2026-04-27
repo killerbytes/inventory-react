@@ -10,6 +10,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { ApiErrorResponse, User, userSchema } from "@/schemas";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -31,18 +38,18 @@ export default function EditModal({
   data: User;
 }) {
   const form = useForm<User>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(userSchema) as any,
     defaultValues: { ...data, isActive: !!data.isActive },
   });
 
   async function onSubmit(values: User) {
     try {
-      const { name, email, isActive, isAdmin } = values;
+      const { name, email, isActive, role } = values;
       await userServices.update(data.id ?? 0, {
         name,
         email,
         isActive,
-        isAdmin,
+        role,
       });
       toast.success(`Submitted: ${values.name} (${values.email})`);
       form.reset();
@@ -87,7 +94,7 @@ export default function EditModal({
             className="space-y-8"
           >
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="name"
               render={({ field }) => (
                 <FormItem>
@@ -101,7 +108,7 @@ export default function EditModal({
             />
 
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="email"
               render={({ field }) => (
                 <FormItem>
@@ -114,7 +121,7 @@ export default function EditModal({
               )}
             />
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="isActive"
               render={({ field }) => (
                 <FormItem>
@@ -132,19 +139,27 @@ export default function EditModal({
               )}
             />
             <FormField
-              control={form.control}
-              name="isAdmin"
+              control={form.control as any}
+              name="role"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center space-x-2">
+                  <FormLabel>Role</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormLabel>Is Admin</FormLabel>
-                  </div>
+                    <SelectContent>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                      <SelectItem value="Manager">Manager</SelectItem>
+                      <SelectItem value="Cashier">Cashier</SelectItem>
+                      <SelectItem value="User">User</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

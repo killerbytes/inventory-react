@@ -59,6 +59,7 @@ export default function Categories() {
     const sorted = data.map(({ id }) => {
       return String(id);
     });
+
     await categoryServices.updateSort(sorted);
   };
 

@@ -34,7 +34,7 @@ export const createAuthSlice: StateCreator<
           email: "",
           username: "",
           isActive: false,
-          isAdmin: false,
+          role: "User",
         };
       });
     },

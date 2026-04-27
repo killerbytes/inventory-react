@@ -3,7 +3,6 @@ import {
   BadgeDollarSign,
   BadgePercent,
   Banknote,
-  BanknoteArrowDown,
   BanknoteArrowUp,
   Barcode,
   BookUser,
@@ -19,6 +18,8 @@ import {
   Search,
   ShoppingCart,
   TrendingUp,
+  Truck,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import ChangePasswordModal from "./modals/ChangePassword";
+import { ROUTE_PERMISSIONS } from "@/utils/permissions";
 import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
@@ -62,7 +64,7 @@ const items = [
   {
     title: "Good Receipt",
     url: ROUTES.GOOD_RECEIPT,
-    icon: BanknoteArrowDown,
+    icon: Truck,
   },
   {
     title: "Sales Orders",
@@ -91,41 +93,49 @@ const reports = [
     title: "Payments",
     url: ROUTES.PAYMENTS,
     icon: Banknote,
+    roles: ROUTE_PERMISSIONS[ROUTES.PAYMENTS],
   },
   {
     title: "Inventory Movements",
     url: ROUTES.INVENTORY_MOVEMENTS,
     icon: ClipboardList,
+    roles: ROUTE_PERMISSIONS[ROUTES.INVENTORY_MOVEMENTS],
   },
   {
     title: "Stock Adjustments",
     url: ROUTES.STOCK_ADJUSTMENTS,
     icon: Diff,
+    roles: ROUTE_PERMISSIONS[ROUTES.STOCK_ADJUSTMENTS],
   },
   {
     title: "Price History",
     url: ROUTES.PRICE_HISTORY,
     icon: ChartCandlestick,
+    roles: ROUTE_PERMISSIONS[ROUTES.PRICE_HISTORY],
   },
   {
     title: "Reorder Levels",
     url: ROUTES.REORDERS,
     icon: Gauge,
+    roles: ROUTE_PERMISSIONS[ROUTES.REORDERS],
   },
   {
     title: "Popular",
     url: ROUTES.REPORTS_POPULAR,
     icon: TrendingUp,
+    roles: ROUTE_PERMISSIONS[ROUTES.REPORTS_POPULAR],
   },
   {
     title: "Profit",
     url: ROUTES.REPORTS_PROFIT,
     icon: BadgeDollarSign,
+    roles: ROUTE_PERMISSIONS[ROUTES.REPORTS_PROFIT],
   },
   {
     title: "No Sales",
     url: ROUTES.REPORTS_NO_SALES,
     icon: Annoyed,
+    roles: ROUTE_PERMISSIONS[ROUTES.REPORTS_NO_SALES],
   },
 ];
 
@@ -134,32 +144,38 @@ const menu = [
     title: "Products",
     url: ROUTES.PRODUCTS,
     icon: ShoppingCart,
+    roles: ROUTE_PERMISSIONS[ROUTES.PRODUCTS],
   },
-  // {
-  //   title: "Users",
-  //   url: ROUTES.USERS,
-  //   icon: Users,
-  // },
+  {
+    title: "Users",
+    url: ROUTES.USERS,
+    icon: Users,
+    roles: ROUTE_PERMISSIONS[ROUTES.USERS],
+  },
   {
     title: "Price Upload",
     url: ROUTES.PRICE_MANAGER,
     icon: BadgePercent,
+    roles: ROUTE_PERMISSIONS[ROUTES.PRICE_MANAGER],
   },
 
   {
     title: "Categories",
     url: ROUTES.CATEGORIES,
     icon: Boxes,
+    roles: ROUTE_PERMISSIONS[ROUTES.CATEGORIES],
   },
   {
     title: "Customers",
     url: ROUTES.CUSTOMERS,
     icon: BookUser,
+    roles: ROUTE_PERMISSIONS[ROUTES.CUSTOMERS],
   },
   {
     title: "Suppliers",
     url: ROUTES.SUPPLIERS,
     icon: Container,
+    roles: ROUTE_PERMISSIONS[ROUTES.SUPPLIERS],
   },
 ];
 
@@ -207,7 +223,9 @@ export default function AppSidebar() {
       <SidebarContent>
         <Header />
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel className="uppercase tracking-widest">
+            Application
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -227,43 +245,57 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Reports</SidebarGroupLabel>
+          <SidebarGroupLabel className="uppercase tracking-widest">
+            Reports
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {reports.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.url === location.pathname}
-                  >
-                    <Link to={item.url}>
-                      {item.icon && <item.icon />}
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {reports
+                .filter(
+                  (item: any) =>
+                    !item.roles || item.roles.includes(authState.user.role),
+                )
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={item.url === location.pathname}
+                    >
+                      <Link to={item.url}>
+                        {item.icon && <item.icon />}
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Manage</SidebarGroupLabel>
+          <SidebarGroupLabel className="uppercase tracking-widest">
+            Manage
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menu.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.url === location.pathname}
-                  >
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menu
+                .filter(
+                  (item: any) =>
+                    !item.roles || item.roles.includes(authState.user.role),
+                )
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={item.url === location.pathname}
+                    >
+                      <Link to={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               <Button size="sm" variant="outline" onClick={onUpdateGSheet}>
                 Update GSheet
               </Button>

@@ -1,13 +1,19 @@
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { ROUTE_PERMISSIONS } from "@/utils/permissions";
+import { ProtectedRoute } from "./ProtectedRoute";
 import PriceManager from "@/pages/PriceManager";
 import Popular from "@/pages/Reports/Popular";
 import NoSales from "@/pages/Reports/NoSales";
 import { ROUTES } from "@/utils/definitions";
 import Profit from "@/pages/Reports/Profit";
+import Forbidden from "@/pages/Forbidden";
 import Dashboard from "@/pages/Dashboard";
+import Loader from "@/components/Loader";
 import Layout from "@/components/Layout";
 import { useRoutes } from "react-router";
 import NotFound from "@/pages/NotFound";
-import { lazy } from "react";
+import { useStore } from "@/stores";
+import React, { lazy } from "react";
 
 const Login = lazy(() => import("@/pages/LoginForm"));
 const Suppliers = lazy(() => import("@/pages/Suppliers"));
@@ -35,206 +41,276 @@ const SupplierDetails = lazy(() => import("@/pages/Suppliers/Details"));
 const BarcodeScanner = lazy(() => import("@/pages/BarcodeScanner"));
 
 export const AppRoutes = () => {
+  const { data: user, isLoading } = useCurrentUser();
+  const { authState } = useStore();
+
+  const token = localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
+
+  React.useEffect(() => {
+    if (user) {
+      console.log(user);
+      authState.setUser(user);
+    }
+  }, [user, authState]);
+
   const routes = [
     { path: ROUTES.LOGIN, element: <Login /> },
     {
       path: ROUTES.DASHBOARD,
       element: (
-        <Layout>
-          <Dashboard />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.DASHBOARD]}>
+          <Layout>
+            <Dashboard />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.SUPPLIERS_DETAILS,
       element: (
-        <Layout>
-          <SupplierDetails />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.SUPPLIERS]}>
+          <Layout>
+            <SupplierDetails />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.SUPPLIERS,
       element: (
-        <Layout>
-          <Suppliers />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.SUPPLIERS]}>
+          <Layout>
+            <Suppliers />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.CUSTOMERS,
       element: (
-        <Layout>
-          <Customers />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.CUSTOMERS]}>
+          <Layout>
+            <Customers />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.CATEGORIES,
       element: (
-        <Layout>
-          <Categories />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.CATEGORIES]}>
+          <Layout>
+            <Categories />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: `${ROUTES.PRODUCTS}/:id`,
       element: (
-        <Layout>
-          <ProductDetails />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.PRODUCTS]}>
+          <Layout>
+            <ProductDetails />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.PRODUCTS,
       element: (
-        <Layout>
-          <Products />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.PRODUCTS]}>
+          <Layout>
+            <Products />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.USERS,
       element: (
-        <Layout>
-          <Users />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.USERS]}>
+          <Layout>
+            <Users />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.GOOD_RECEIPT_CREATE,
       element: (
-        <Layout>
-          <GoodReceiptCreate />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.GOOD_RECEIPT]}>
+          <Layout>
+            <GoodReceiptCreate />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: `${ROUTES.GOOD_RECEIPT}/:id`,
       element: (
-        <Layout>
-          <GoodReceiptDetails />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.GOOD_RECEIPT]}>
+          <Layout>
+            <GoodReceiptDetails />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.GOOD_RECEIPT,
       element: (
-        <Layout>
-          <GoodReceipts />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.GOOD_RECEIPT]}>
+          <Layout>
+            <GoodReceipts />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.BREAK_PACKS,
       element: (
-        <Layout>
-          <BreakPacks />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.BREAK_PACKS]}>
+          <Layout>
+            <BreakPacks />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.STOCK_ADJUSTMENTS,
       element: (
-        <Layout>
-          <StockAdjustments />
-        </Layout>
+        <ProtectedRoute
+          allowedRoles={ROUTE_PERMISSIONS[ROUTES.STOCK_ADJUSTMENTS]}
+        >
+          <Layout>
+            <StockAdjustments />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.INVENTORY_MOVEMENTS,
       element: (
-        <Layout>
-          <Movements />
-        </Layout>
+        <ProtectedRoute
+          allowedRoles={ROUTE_PERMISSIONS[ROUTES.INVENTORY_MOVEMENTS]}
+        >
+          <Layout>
+            <Movements />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: `${ROUTES.SALES_ORDERS}/:id`,
       element: (
-        <Layout>
-          <SalesDetails />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.SALES_ORDERS]}>
+          <Layout>
+            <SalesDetails />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.SALES_ORDERS,
       element: (
-        <Layout>
-          <SalesOrders />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.SALES_ORDERS]}>
+          <Layout>
+            <SalesOrders />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: `${ROUTES.INVOICE_DETAILS}`,
       element: (
-        <Layout>
-          <InvoiceDetails />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.INVOICES]}>
+          <Layout>
+            <InvoiceDetails />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.INVOICES,
       element: (
-        <Layout>
-          <Invoices />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.INVOICES]}>
+          <Layout>
+            <Invoices />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.PAYMENTS,
       element: (
-        <Layout>
-          <Payments />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.PAYMENTS]}>
+          <Layout>
+            <Payments />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.PRICE_HISTORY,
       element: (
-        <Layout>
-          <PriceHistory />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.PRICE_HISTORY]}>
+          <Layout>
+            <PriceHistory />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.REORDERS,
       element: (
-        <Layout>
-          <Reorders />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.REORDERS]}>
+          <Layout>
+            <Reorders />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.REPORTS_POPULAR,
       element: (
-        <Layout>
-          <Popular />
-        </Layout>
+        <ProtectedRoute
+          allowedRoles={ROUTE_PERMISSIONS[ROUTES.REPORTS_POPULAR]}
+        >
+          <Layout>
+            <Popular />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.REPORTS_PROFIT,
       element: (
-        <Layout>
-          <Profit />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.REPORTS_PROFIT]}>
+          <Layout>
+            <Profit />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: ROUTES.REPORTS_NO_SALES,
       element: (
-        <Layout>
-          <NoSales />
-        </Layout>
+        <ProtectedRoute
+          allowedRoles={ROUTE_PERMISSIONS[ROUTES.REPORTS_NO_SALES]}
+        >
+          <Layout>
+            <NoSales />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     {
       path: "settings",
       element: (
-        <Layout>
-          <Settings />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS["settings"]}>
+          <Layout>
+            <Settings />
+          </Layout>
+        </ProtectedRoute>
       ),
     },
     { path: ROUTES.SEARCH, element: <ProductSearch /> },
@@ -242,15 +318,29 @@ export const AppRoutes = () => {
     {
       path: ROUTES.PRICE_MANAGER,
       element: (
-        <Layout>
-          <PriceManager />
-        </Layout>
+        <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS[ROUTES.PRICE_MANAGER]}>
+          <Layout>
+            <PriceManager />
+          </Layout>
+        </ProtectedRoute>
       ),
+    },
+    {
+      path: ROUTES.FORBIDDEN,
+      element: <Forbidden />,
     },
     { path: "*", element: <NotFound /> },
   ];
 
   const element = useRoutes([...routes]);
+
+  if (isLoading && token) {
+    return <Loader />;
+  }
+
+  if (user && !authState.user.id) {
+    return <Loader />;
+  }
 
   return <>{element}</>;
 };

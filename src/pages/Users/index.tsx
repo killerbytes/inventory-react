@@ -157,7 +157,7 @@ export default function Users() {
         },
       },
       {
-        accessorKey: "isAdmin",
+        accessorKey: "role",
         header: ({ column }) => {
           return (
             <ColumnSort
@@ -173,9 +173,10 @@ export default function Users() {
           className: "w-50",
         },
         cell: ({ row }) => {
+          const role = row.original.role;
           return (
-            <Badge variant={row.original.isAdmin ? "default" : "secondary"}>
-              {row.original.isAdmin ? "Admin" : ""}
+            <Badge variant={role === "Admin" ? "default" : "secondary"}>
+              {role}
             </Badge>
           );
         },

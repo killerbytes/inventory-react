@@ -39,8 +39,10 @@ export default class Http {
           const { status } = error.response || {};
 
           switch (status) {
-            case 401:
-            case 403: {
+            case 403:
+              window.location.href = ROUTES.FORBIDDEN;
+              break;
+            case 401: {
               const originalRequest = error.config;
               if (!originalRequest._retry) {
                 if (originalRequest.url?.includes("/auth/refresh-token")) {

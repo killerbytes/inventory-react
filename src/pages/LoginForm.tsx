@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { authServices } from "@/services";
+import { ROUTES } from "@/routes/routes";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -41,15 +42,14 @@ export default function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
-      const data = await authServices.login(values);
-      const { accessToken } = data;
+      const { accessToken } = await authServices.login(values);
       localStorage.setItem(
         `${import.meta.env.VITE_APP_NAME}_TOKEN`,
         accessToken,
       );
       toast.success(`Logging in... ${values.username}`);
       form.reset();
-      navigate(decodeURIComponent(redirect), { replace: true });
+      navigate(decodeURIComponent(redirect) || ROUTES.DASHBOARD);
     } catch (error) {
       const apiError = error as ApiErrorResponse;
 

@@ -22,7 +22,12 @@ export default function UserIcon() {
               {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
-          {user?.name}
+          <div>
+            <div>{user?.name}</div>
+            <div className="text-xs text-muted-foreground uppercase">
+              {user?.role}
+            </div>
+          </div>
         </>
       )}
     </>
