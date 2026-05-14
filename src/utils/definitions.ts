@@ -54,11 +54,17 @@ export const INVENTORY_MOVEMENT_TYPE = {
   ALL: "ALL",
   IN: "IN",
   OUT: "OUT",
-  ADJUSTMENT: "ADJUSTMENT",
-  RETURN: "RETURN",
+  ADJUSTMENT_IN: "ADJUSTMENT_IN",
+  ADJUSTMENT_OUT: "ADJUSTMENT_OUT",
+  RETURN_IN: "RETURN_IN",
   CANCEL_PURCHASE: "CANCEL_PURCHASE",
-  BREAK_PACK: "BREAK_PACK",
-  RE_PACK: "RE_PACK",
+  BREAK_PACK_IN: "BREAK_PACK_IN",
+  BREAK_PACK_OUT: "BREAK_PACK_OUT",
+  RE_PACK_IN: "RE_PACK_IN",
+  RE_PACK_OUT: "RE_PACK_OUT",
+  EXCHANGE_IN: "EXCHANGE_IN",
+  EXCHANGE_OUT: "EXCHANGE_OUT",
+  SUPPLIER_RETURN_OUT: "SUPPLIER_RETURN_OUT",
 };
 
 export const INVENTORY_MOVEMENT_TYPE_OPTIONS = Object.values(
@@ -71,13 +77,17 @@ export const INVENTORY_MOVEMENT_TYPE_OPTIONS = Object.values(
 export const INVENTORY_MOVEMENT_TYPE_COLOR = {
   IN: "bg-orange-500 text-white",
   OUT: "bg-green-500 text-white",
-  ADJUSTMENT: "ADJUST",
-  RETURN: "text-red-600 border-red-600 bg-red-200",
-  SUPPLIER_RETURN: "text-red-600 border-red-600 bg-red-200",
-  EXCHANGE: "bg-green-500 border-black text-black",
+  ADJUSTMENT_IN: "bg-green-500 text-white",
+  ADJUSTMENT_OUT: "bg-red-500 text-white",
+  RETURN_IN: "text-red-600 border-red-600 bg-red-200",
+  SUPPLIER_RETURN_OUT: "text-black border-red-600 bg-green-500",
+  EXCHANGE_IN: "bg-red-500 border-black text-black",
+  EXCHANGE_OUT: "bg-green-500 border-black text-black",
   CANCELLATION: "text-red-500 border-red-500 bg-red-100",
-  BREAK_PACK: "text-gray-500 border-gray-500 bg-gray-100",
-  RE_PACK: "text-gray-100 border-gray-100 bg-gray-500",
+  BREAK_PACK_IN: "text-gray-500 border-gray-500 bg-gray-100",
+  BREAK_PACK_OUT: "text-gray-100 border-gray-100 bg-gray-500",
+  RE_PACK_IN: "text-gray-900 border-gray-500 bg-gray-100",
+  RE_PACK_OUT: "text-gray-100 border-gray-100 bg-gray-900",
 };
 
 export const INVENTORY_MOVEMENT_REFERENCE_TYPE = {
