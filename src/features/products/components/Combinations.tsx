@@ -84,10 +84,13 @@ export default function Combinations({
         accessorKey: "price",
         header: "Price",
         cell: ({ row }: { row: Row<ProductCombination> }) => {
+          const price = row.original.price ?? 0;
+          const avgPrice = Number(row.original.inventory?.averagePrice ?? 0);
+          const error = (price > 0 && avgPrice >= price) || price == 0;
           return (
             <div
               className={cx("font-bold", {
-                "text-red-500": row.original.price == 0,
+                "text-red-500": error,
               })}
             >
               {formatCurrency(row.original.price ?? 0)}

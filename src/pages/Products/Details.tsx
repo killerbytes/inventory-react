@@ -114,6 +114,10 @@ export default function ProductEdit() {
     );
   }
 
+  React.useEffect(() => {
+    setSelectedCombination(undefined);
+  }, [id]);
+
   if (isError) {
     if (error.code === ERROR.NOT_FOUND) {
       navigate(`${ROUTES.PRODUCTS}`);
