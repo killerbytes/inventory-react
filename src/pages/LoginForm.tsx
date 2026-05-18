@@ -26,12 +26,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { authServices } from "@/services";
+import { useStore } from "@/stores";
 import { cn } from "@/lib/utils";
 import React from "react";
 
 export default function LoginForm() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const { authState } = useStore();
   const [showPassword, setShowPassword] = React.useState(false);
 
   const form = useForm<Login>({
@@ -43,10 +45,7 @@ export default function LoginForm() {
     try {
       const data = await authServices.login(values);
       const { accessToken } = data;
-      localStorage.setItem(
-        `${import.meta.env.VITE_APP_NAME}_TOKEN`,
-        accessToken,
-      );
+      authState.setToken(accessToken);
       toast.success(`Logging in... ${values.username}`);
       form.reset();
       navigate(decodeURIComponent(redirect), { replace: true });
