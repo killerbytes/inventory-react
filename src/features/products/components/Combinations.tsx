@@ -26,9 +26,9 @@ export default function CombinationTab({
 
   const uniqueCombinations = React.useMemo(() => {
     return (
-      product?.combinations.filter(
+      product?.combinations?.filter(
         (item, index) =>
-          product?.combinations.findIndex((i) => i.name === item.name) ===
+          product.combinations?.findIndex((i) => i.name === item.name) ===
           index,
       ) || []
     );

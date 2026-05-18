@@ -46,7 +46,6 @@ export default function ProductEdit() {
     isFetching,
   } = useProduct(Number(id));
 
-  const [activeTab, setActiveTab] = React.useState("product_combination");
   const [isEditing, setIsEditing] = React.useState(false);
   const { data: categories } = useCategories();
 
@@ -141,15 +140,7 @@ export default function ProductEdit() {
                 <Form {...form}>
                   <form
                     className="h-full flex flex-col gap-4"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      console.log(form.formState.errors);
-                      form
-                        .handleSubmit(onSubmit)(e)
-                        .catch((error) => {
-                          console.error("Form submission error:", error);
-                        });
-                    }}
+                    onSubmit={form.handleSubmit(onSubmit)}
                   >
                     <ProductForm form={form} categories={categories || []} />
                     <div className="flex justify-end gap-2">
@@ -249,7 +240,6 @@ export default function ProductEdit() {
           <Combinations id={id} product={product} />
         </div>
       )}
-      {/* {JSON.stringify(x)} */}
 
       {toggle.variantModal && (
         <VariantsModal
