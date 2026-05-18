@@ -1,3 +1,4 @@
+import CombinationFilter, { SelectedCombination } from "./CombinationFilter";
 import { useMovements } from "@/features/inventory/hooks/useInventory";
 import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
 import { filterProps, ProductCombination } from "@/schemas";
@@ -6,12 +7,16 @@ import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import React from "react";
 
-export default function ProductHistory<T extends { id: number | string }>({
+export default function ProductHistoryTab({
   selectedCombination,
   combinations: _combinations,
+  setSelectedCombination,
+  uniqueCombinations,
 }: {
-  selectedCombination: T | undefined;
+  selectedCombination: SelectedCombination | undefined;
   combinations: ProductCombination[];
+  setSelectedCombination: (value: SelectedCombination) => void;
+  uniqueCombinations: SelectedCombination[];
 }) {
   const combinations = React.useMemo(() => {
     if (!selectedCombination) return _combinations;
@@ -33,6 +38,11 @@ export default function ProductHistory<T extends { id: number | string }>({
 
   return (
     <>
+      <CombinationFilter
+        uniqueCombinations={uniqueCombinations}
+        selectedCombination={selectedCombination}
+        setSelectedCombination={setSelectedCombination}
+      />
       {isLoading && <Loader />}
       <Movements data={data.data || []} />
       {data.meta.totalPages > 1 && (

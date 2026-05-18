@@ -17,6 +17,7 @@ import { VariantTypes } from "@/schemas";
 import { Pencil } from "lucide-react";
 
 import { ToggleUpdater } from "@/hooks/useToggle";
+import ShowMore from "@/components/ShowMore";
 
 export default function Variants({
   variants,
@@ -28,7 +29,7 @@ export default function Variants({
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="items-center justify-between flex">
           <CardTitle>Variant Types</CardTitle>
           <CardAction>
             <Button
@@ -54,22 +55,28 @@ export default function Variants({
             defaultValue={variants
               .find((i) => i.isBreakpackFilter)
               ?.id?.toString()}
-            className="flex"
+            className="grid grid-cols-4 gap-4"
           >
             {variants.map((variant) => (
               <FieldLabel key={variant.id} htmlFor={variant.id?.toString()}>
                 <Field orientation="horizontal">
                   <FieldContent>
-                    <FieldTitle>{variant.name}</FieldTitle>
-                    <ul className="text-sm flex gap-1 flex-col text-muted-foreground">
-                      {variant.values.map((i) => (
-                        <li key={i.id}>{i.value}</li>
-                      ))}
-                    </ul>
+                    <FieldTitle className="uppercase text-muted-foreground">
+                      {variant.name}
+                    </FieldTitle>
+                    <ShowMore>
+                      <ul className="text-sm flex gap-1 flex-col">
+                        {variant.values
+                          .sort((a, b) => a.value.localeCompare(b.value))
+                          .map((i) => (
+                            <li key={i.id}>{i.value}</li>
+                          ))}
+                      </ul>
+                    </ShowMore>
                   </FieldContent>
                   <RadioGroupItem
+                    className="hidden"
                     value={variant.id?.toString() || ""}
-                    // id={variant.id?.toString()}
                   />
                 </Field>
               </FieldLabel>
