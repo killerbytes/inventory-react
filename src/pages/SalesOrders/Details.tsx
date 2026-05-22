@@ -47,6 +47,7 @@ import useToggle from "@/hooks/useToggle";
 import Loader from "@/components/Loader";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
+import { hasRole, ROLES } from "@/utils/permissions";
 
 export default function SalesOrderDetails() {
   const [toggle, handleToggle] = useToggle({
@@ -54,6 +55,7 @@ export default function SalesOrderDetails() {
     deliveryDetailsModal: false,
     returnEnabled: false,
   });
+  const { authState } = useStore();
   const navigate = useNavigate();
   const { id } = useParams();
   const {
@@ -138,33 +140,37 @@ export default function SalesOrderDetails() {
 
                   {(data?.status === ORDER_STATUS.RECEIVED ||
                     data?.status === ORDER_STATUS.COMPLETED) && (
-                    <>
-                      <DropdownMenuItem
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          handleToggle({
-                            cancelModal: true,
-                            dropdownMenu: false,
-                          });
-                        }}
-                      >
-                        <Ban color="red" />
-                        Cancel Order
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          setReturnEnabled(!returnEnabled);
-                          handleToggle({
-                            dropdownMenu: false,
-                          });
-                        }}
-                      >
-                        <Undo />
-                        Return/Exchange
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                      <>
+                        {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+                          <DropdownMenuItem
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              handleToggle({
+                                cancelModal: true,
+                                dropdownMenu: false,
+                              });
+                            }}
+                          >
+                            <Ban color="red" />
+                            Cancel Order
+                          </DropdownMenuItem>
+                        )}
+                        {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+                          <DropdownMenuItem
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              setReturnEnabled(!returnEnabled);
+                              handleToggle({
+                                dropdownMenu: false,
+                              });
+                            }}
+                          >
+                            <Undo />
+                            Return/Exchange
+                          </DropdownMenuItem>
+                        )}
+                      </>
+                    )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -232,8 +238,8 @@ export default function SalesOrderDetails() {
                   <TableCell className="text-right font-bold">
                     {formatCurrency(
                       Number(data?.totalAmount) -
-                        totalReturnAmount +
-                        totalExchangeAmount,
+                      totalReturnAmount +
+                      totalExchangeAmount,
                     )}
                   </TableCell>
                 </TableRow>

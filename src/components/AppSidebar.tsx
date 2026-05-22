@@ -40,7 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import ChangePasswordModal from "./modals/ChangePassword";
-import { ROUTE_PERMISSIONS } from "@/utils/permissions";
+import { ROLES, ROUTE_PERMISSIONS } from "@/utils/permissions";
 import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
@@ -60,21 +60,25 @@ const items = [
     title: "Dashboard",
     url: ROUTES.DASHBOARD,
     icon: Home,
+    roles: ROUTE_PERMISSIONS[ROUTES.DASHBOARD],
   },
   {
     title: "Good Receipt",
     url: ROUTES.GOOD_RECEIPT,
     icon: Truck,
+    roles: ROUTE_PERMISSIONS[ROUTES.GOOD_RECEIPT],
   },
   {
     title: "Sales Orders",
     url: ROUTES.SALES_ORDERS,
     icon: BanknoteArrowUp,
+    roles: ROUTE_PERMISSIONS[ROUTES.SALES_ORDERS],
   },
   {
     title: "Invoices",
     url: ROUTES.INVOICES,
     icon: CreditCard,
+    roles: ROUTE_PERMISSIONS[ROUTES.INVOICES],
   },
   {
     title: "Search",
@@ -228,7 +232,10 @@ export default function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {items.filter(
+                (item: any) =>
+                  !item.roles || item.roles.includes(authState.user.role),
+              ).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
@@ -296,9 +303,11 @@ export default function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
-              <Button size="sm" variant="outline" onClick={onUpdateGSheet}>
-                Update GSheet
-              </Button>
+              {([ROLES.ADMIN, ROLES.MANAGER] as string[]).includes(authState.user.role) && (
+                <Button size="sm" variant="outline" onClick={onUpdateGSheet}>
+                  Update GSheet
+                </Button>
+              )}
               {/* <SidebarMenuItem key="Variant Templates">
                 <SidebarMenuButton
                   asChild

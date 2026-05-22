@@ -46,7 +46,7 @@ export default function Movements({ data }: { data: InventoryMovement[] }) {
               className="text-primary"
             >
               <ColorBadge colorMap={INVENTORY_MOVEMENT_TYPE_COLOR}>
-                {String(row.original.type)}
+                {row.original.type}
               </ColorBadge>
             </Link>
           );

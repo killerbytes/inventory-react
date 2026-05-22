@@ -1,3 +1,4 @@
+import { ROLES } from "@/utils/permissions";
 import z from "zod";
 
 export const userSchema = z.object({
@@ -15,7 +16,9 @@ export const userSchema = z.object({
     message: "Please enter a valid email address.",
   }),
   isActive: z.boolean(),
-  role: z.enum(["Admin", "Manager", "Cashier", "User"]).default("User"),
+  role: z.enum(
+    Object.values(ROLES) as [string, ...string[]],
+  ).default(ROLES.USER),
   // .min(8, {
   //   message: "Password must be at least 8 characters.",
   // })

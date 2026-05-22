@@ -5,35 +5,18 @@ import {
   PageHeaderDescription,
   PageHeaderTitle,
 } from "@/components/PageHeader";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
-import {
-  ApiErrorResponse,
-  productBaseSchema,
-  ProductInput,
-  ProductWithCombinations,
-} from "@/schemas";
 import {
   useProduct,
   useUpdateProduct,
 } from "@/features/products/hooks/useProducts";
-import SupplierHistoryTab from "@/features/products/components/SupplierHistoryTab";
 import CreateProductModal from "@/features/products/components/CreateProductModal";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductComboSearchCommand from "@/components/ProductComboSearchCommand";
-import ProductHistory from "@/features/products/components/ProductHistory";
+import { ApiErrorResponse, productBaseSchema, ProductInput } from "@/schemas";
 import BarcodePrinter from "@/features/products/components/BarcodePrinter";
 import VariantsModal from "@/features/products/components/VariantsModal";
 import { Edit, Loader2Icon, PlusIcon, Save, Search } from "lucide-react";
-import PriceHistory from "@/features/products/components/PriceHistory";
 import Combinations from "@/features/products/components/Combinations";
 import ProductForm from "@/features/products/components/ProductForm";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
@@ -50,14 +33,11 @@ import { useForm } from "react-hook-form";
 import Loader from "@/components/Loader";
 import React, { Fragment } from "react";
 import { toast } from "sonner";
+import { hasRole, ROLES } from "@/utils/permissions";
+import { useStore } from "@/stores";
 
-export type ComboboxItem = {
-  id: number;
-  name?: string;
-  value?: string;
-};
-
-export default function ProductEdit() {
+export default function ProductDetails() {
+  const { authState } = useStore();
   const { id } = useParams();
 
   const { mutate: updateProduct, isPending } = useUpdateProduct();
@@ -69,12 +49,10 @@ export default function ProductEdit() {
     isFetching,
   } = useProduct(Number(id));
 
-  const [activeTab, setActiveTab] = React.useState("product_combination");
+
   const [isEditing, setIsEditing] = React.useState(false);
   const { data: categories } = useCategories();
-  const [selectedCombination, setSelectedCombination] = React.useState<
-    ComboboxItem | undefined
-  >();
+
   const navigate = useNavigate();
   const form = useForm<ProductInput>({
     resolver: zodResolver(productBaseSchema),
@@ -125,16 +103,6 @@ export default function ProductEdit() {
     return await getMappedSearchProductCombinations({ search });
   }, []);
 
-  const uniqueCombinations = React.useMemo(() => {
-    return (
-      product?.combinations.filter(
-        (item, index) =>
-          product?.combinations.findIndex((i) => i.name === item.name) ===
-          index,
-      ) || []
-    );
-  }, [product]);
-
   return (
     <Fragment key={id}>
       <PageHeader>
@@ -155,15 +123,17 @@ export default function ProductEdit() {
               <Search />
             </Button>
           </ProductComboSearchCommand>
-          <Button
-            size="icon"
-            className="size-8 shadow-sm"
-            onClick={() => {
-              handleToggle({ createProductModal: true });
-            }}
-          >
-            <PlusIcon />
-          </Button>
+          {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+            <Button
+              size="icon"
+              className="size-8 shadow-sm"
+              onClick={() => {
+                handleToggle({ createProductModal: true });
+              }}
+            >
+              <PlusIcon />
+            </Button>
+          )}
         </PageHeaderActions>
       </PageHeader>
       {isLoading ? (
@@ -176,15 +146,7 @@ export default function ProductEdit() {
                 <Form {...form}>
                   <form
                     className="h-full flex flex-col gap-4"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      console.log(form.formState.errors);
-                      form
-                        .handleSubmit(onSubmit)(e)
-                        .catch((error) => {
-                          console.error("Form submission error:", error);
-                        });
-                    }}
+                    onSubmit={form.handleSubmit(onSubmit)}
                   >
                     <ProductForm form={form} categories={categories || []} />
                     <div className="flex justify-end gap-2">
@@ -262,117 +224,30 @@ export default function ProductEdit() {
                       >
                         Print Barcode
                       </Button>
-                      <Button
-                        className="shadow-sm"
-                        type="button"
-                        onClick={() => setIsEditing(true)}
-                      >
-                        <Edit />
-                        Edit
-                      </Button>
+                      {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+                        <Button
+                          className="shadow-sm"
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                        >
+                          <Edit />
+                          Edit
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </>
               )}
             </CardContent>
           </Card>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full xsm:w-fit flex items-center justify-start flex-nowrap overflow-x-auto md:overflow-x-visible">
-              <TabsTrigger value="product_combination">
-                Product Combinations
-              </TabsTrigger>
-              <TabsTrigger value="variants">Variants</TabsTrigger>
-              <TabsTrigger value="price_history">Price History</TabsTrigger>
-              <TabsTrigger value="supplier_history">
-                Supplier History
-              </TabsTrigger>
-              <TabsTrigger value="product_history">Product History</TabsTrigger>
-            </TabsList>
-            {uniqueCombinations.length > 1 && (
-              <Combobox<ComboboxItem>
-                items={[...uniqueCombinations]}
-                itemToStringLabel={(item) => item?.name || ""}
-                value={selectedCombination}
-                onValueChange={(value) => {
-                  setSelectedCombination(value || undefined);
-                }}
-              >
-                <ComboboxInput placeholder="Filter by combination" showClear />
-                <ComboboxContent>
-                  <ComboboxEmpty>No items found.</ComboboxEmpty>
-                  <ComboboxList>
-                    {(item) => (
-                      <ComboboxItem key={item.id} value={item}>
-                        <ColorBadge colorMap={UNIT_COLOR}>
-                          {item.unit}
-                        </ColorBadge>
-                        {item.name}
-                      </ComboboxItem>
-                    )}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            )}
+          <Variants
+            variants={product?.variants || []}
+            handleToggle={handleToggle}
+          />
 
-            <TabsContent value="product_combination">
-              <Combinations product={product as ProductWithCombinations} />
-            </TabsContent>
-            <TabsContent value="variants">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Variants</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <Variants
-                    variants={product?.variants || []}
-                    handleToggle={handleToggle}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="price_history">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Price History</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <PriceHistory
-                    productId={id ?? ""}
-                    selectedCombination={selectedCombination}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="supplier_history">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Supplier History</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <SupplierHistoryTab
-                    productId={id ?? ""}
-                    selectedCombination={selectedCombination}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="product_history">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Product History</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-6">
-                  <ProductHistory
-                    selectedCombination={selectedCombination}
-                    combinations={product?.combinations || []}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <Combinations id={id} product={product} />
         </div>
       )}
-      {/* {JSON.stringify(x)} */}
 
       {toggle.variantModal && (
         <VariantsModal

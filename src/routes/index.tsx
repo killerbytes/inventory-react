@@ -12,6 +12,7 @@ import Loader from "@/components/Loader";
 import Layout from "@/components/Layout";
 import { useRoutes } from "react-router";
 import NotFound from "@/pages/NotFound";
+import { authServices } from "@/services";
 import { useStore } from "@/stores";
 import React, { lazy } from "react";
 
@@ -43,12 +44,28 @@ const BarcodeScanner = lazy(() => import("@/pages/BarcodeScanner"));
 export const AppRoutes = () => {
   const { data: user, isLoading } = useCurrentUser();
   const { authState } = useStore();
+  const [isInitializing, setIsInitializing] = React.useState(true);
 
-  const token = localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
+  React.useEffect(() => {
+    const initAuth = async () => {
+      if (window.location.pathname === ROUTES.LOGIN) {
+        setIsInitializing(false);
+        return;
+      }
+
+      try {
+        await authServices.refreshToken();
+      } catch (error) {
+        // Suppress initial failed refresh on boot (e.g. no session cookie)
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+    initAuth();
+  }, []);
 
   React.useEffect(() => {
     if (user) {
-      console.log(user);
       authState.setUser(user);
     }
   }, [user, authState]);
@@ -334,6 +351,11 @@ export const AppRoutes = () => {
 
   const element = useRoutes([...routes]);
 
+  if (isInitializing) {
+    return <Loader />;
+  }
+
+  const token = authState.token;
   if (isLoading && token) {
     return <Loader />;
   }

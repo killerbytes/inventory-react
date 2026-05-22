@@ -1,3 +1,4 @@
+import CombinationFilter, { SelectedCombination } from "./CombinationFilter";
 import { useSupplierHistory } from "@/hooks/useSupplierHistory";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { ROUTES, UNIT_COLOR } from "@/utils/definitions";
@@ -8,12 +9,16 @@ import { SupplierHistory } from "@/schemas";
 import { Link } from "react-router";
 import React from "react";
 
-export default function SupplierHistoryTab<T extends { id: number | string }>({
+export default function SupplierHistoryTab({
   productId,
   selectedCombination,
+  setSelectedCombination,
+  uniqueCombinations,
 }: {
   productId: string;
-  selectedCombination: T | undefined;
+  selectedCombination: SelectedCombination | undefined;
+  setSelectedCombination: (value: SelectedCombination) => void;
+  uniqueCombinations: SelectedCombination[];
 }) {
   const { data = [] } = useSupplierHistory(Number(productId));
 
@@ -107,14 +112,21 @@ export default function SupplierHistoryTab<T extends { id: number | string }>({
   }, [data, selectedCombination]);
 
   return (
-    <DataTable
-      data={filteredData}
-      columns={columns}
-      meta={{
-        disabledRow: {
-          "combinations.deletedAt": true,
-        },
-      }}
-    />
+    <>
+      <CombinationFilter
+        uniqueCombinations={uniqueCombinations}
+        selectedCombination={selectedCombination}
+        setSelectedCombination={setSelectedCombination}
+      />
+      <DataTable
+        data={filteredData}
+        columns={columns}
+        meta={{
+          disabledRow: {
+            "combinations.deletedAt": true,
+          },
+        }}
+      />
+    </>
   );
 }

@@ -2,6 +2,7 @@ import { ROUTES } from "@/utils/definitions";
 import { ApiErrorResponse } from "@/schemas";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
+import { useStore } from "@/stores";
 
 const baseURL = import.meta.env.VITE_API_URL;
 
@@ -16,15 +17,10 @@ export default class Http {
   private axiosInstance: ReturnType<typeof axios.create>;
 
   constructor() {
-    const token = localStorage.getItem(
-      `${import.meta.env.VITE_APP_NAME}_TOKEN`,
-    );
-
     this.axiosInstance = axios.create({
       baseURL,
       headers: {
         "Content-Type": "application/json",
-        "x-access-token": token,
       },
     });
     this.axiosInstance.defaults.withCredentials = true;
@@ -41,10 +37,12 @@ export default class Http {
           switch (status) {
             case 403:
               window.location.href = ROUTES.FORBIDDEN;
-              break;
+              throw error;
             case 401: {
+              console.log('===> http.ts:43 ~ error', error);
               const originalRequest = error.config;
-              if (!originalRequest._retry) {
+              console.log('===> http.ts:44 ~ originalRequest', originalRequest);
+              if (originalRequest && !originalRequest._retry) {
                 if (originalRequest.url?.includes("/auth/refresh-token")) {
                   throw error;
                 }
@@ -55,22 +53,22 @@ export default class Http {
                   originalRequest.headers["x-access-token"] = token;
                   return this.axiosInstance(originalRequest);
                 } catch (retryError) {
-                  localStorage.removeItem(
-                    `${import.meta.env.VITE_APP_NAME}_TOKEN`,
-                  );
-                  const currentUrl =
-                    window.location.pathname + window.location.search;
-                  window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                  useStore.getState().authState.setToken(null);
+                  if (window.location.pathname !== ROUTES.LOGIN) {
+                    const currentUrl =
+                      window.location.pathname + window.location.search;
+                    window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                  }
 
                   throw retryError;
                 }
               } else {
-                localStorage.removeItem(
-                  `${import.meta.env.VITE_APP_NAME}_TOKEN`,
-                );
-                const currentUrl =
-                  window.location.pathname + window.location.search;
-                window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                useStore.getState().authState.setToken(null);
+                if (window.location.pathname !== ROUTES.LOGIN) {
+                  const currentUrl =
+                    window.location.pathname + window.location.search;
+                  window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                }
               }
               throw error;
             }
@@ -82,10 +80,18 @@ export default class Http {
           const apiError = axiosError.response?.data;
           const errorMessage = apiError?.message || axiosError.message;
 
-          if (errorMessage) {
-            // toast.error(errorMessage);
-          } else {
-            toast.error("An unexpected error occurred");
+          const isSilentAuth =
+            axiosError.config?.url?.includes("/auth/refresh-token") ||
+            (axiosError.response?.status === 401 &&
+              (axiosError.config?.url?.includes("/auth/me") ||
+                window.location.pathname === ROUTES.LOGIN));
+
+          if (!isSilentAuth) {
+            if (errorMessage) {
+              toast.error(errorMessage);
+            } else {
+              toast.error("An unexpected error occurred");
+            }
           }
 
           return Promise.reject(error);
@@ -107,10 +113,7 @@ export default class Http {
           { withCredentials: true },
         );
 
-        localStorage.setItem(
-          `${import.meta.env.VITE_APP_NAME}_TOKEN`,
-          accessToken,
-        );
+        useStore.getState().authState.setToken(accessToken);
         return accessToken;
       } catch (error) {
         const apiError = error as ApiErrorResponse;
@@ -122,8 +125,10 @@ export default class Http {
           case "Invalid refresh token":
           case "jwt must be provided":
           case "Token validation failed":
-            localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
-            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+            useStore.getState().authState.setToken(null);
+            if (window.location.pathname !== ROUTES.LOGIN) {
+              window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+            }
             break;
         }
         throw error;
@@ -135,7 +140,7 @@ export default class Http {
     return this.refreshPromise;
   };
   getToken = () => {
-    return localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
+    return useStore.getState().authState.token;
   };
   getHeaders = () => {
     return { "x-access-token": this.getToken() };

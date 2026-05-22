@@ -4,6 +4,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
+import CombinationFilter, { SelectedCombination } from "./CombinationFilter";
 import { usePriceHistory } from "@/features/inventory/hooks/useInventory";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import { filterProps, PriceHistory } from "@/schemas";
@@ -19,12 +20,16 @@ interface filterPropTypes extends filterProps {
   productId: string;
 }
 
-export default function PriceHistoryTab<T extends { id: number | string }>({
+export default function PriceHistoryTab({
   productId,
   selectedCombination,
+  setSelectedCombination,
+  uniqueCombinations,
 }: {
   productId: string;
-  selectedCombination: T | undefined;
+  selectedCombination: SelectedCombination | undefined;
+  setSelectedCombination: (value: SelectedCombination) => void;
+  uniqueCombinations: SelectedCombination[];
 }) {
   const [filter, setFilter] = React.useState<filterPropTypes>({
     limit: PAGINATION.PAGE_SIZE,
@@ -143,14 +148,22 @@ export default function PriceHistoryTab<T extends { id: number | string }>({
   }, [data, selectedCombination]);
 
   return (
-    <DataTable
-      data={filterData}
-      columns={columns}
-      meta={{
-        disabledRow: {
-          "combinations.deletedAt": true,
-        },
-      }}
-    />
+    <>
+      <CombinationFilter
+        uniqueCombinations={uniqueCombinations}
+        selectedCombination={selectedCombination}
+        setSelectedCombination={setSelectedCombination}
+      />
+
+      <DataTable
+        data={filterData}
+        columns={columns}
+        meta={{
+          disabledRow: {
+            "combinations.deletedAt": true,
+          },
+        }}
+      />
+    </>
   );
 }

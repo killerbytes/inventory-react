@@ -13,12 +13,10 @@ export const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { authState } = useStore();
   const location = useLocation();
-  console.log(1);
 
   if (!authState.user || !authState.user.id) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
-  console.log(2, allowedRoles, authState.user.role);
 
   if (
     allowedRoles &&
@@ -27,7 +25,6 @@ export const ProtectedRoute = ({
   ) {
     return <Navigate to="/" replace />;
   }
-  console.log(3);
 
   return children;
 };

@@ -294,10 +294,10 @@ export default function PendingForm({
             name="referenceNo"
             render={({ field }) => (
               <FormItem className="w-full md:w-1/4">
-                <FormLabel>Reference No</FormLabel>
+                <FormLabel>DDR / Reference No</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Enter some notes..."
+                    placeholder="DDR / Reference No"
                     className="resize-none"
                     {...field}
                     value={field.value ?? ""}

@@ -6,7 +6,9 @@ import { User } from "@/schemas";
 export type AuthState = {
   authState: {
     user: User;
+    token: string | null;
     setUser: (user: User) => void;
+    setToken: (token: string | null) => void;
     logout: () => void;
   };
 };
@@ -19,13 +21,17 @@ export const createAuthSlice: StateCreator<
 > = (set) => ({
   authState: {
     user: {} as User,
+    token: null,
     setUser: (user: User) =>
       set((state) => {
         state.authState.user = user;
       }),
+    setToken: (token: string | null) =>
+      set((state) => {
+        state.authState.token = token;
+      }),
     logout: async () => {
       await authServices.logout();
-      localStorage.removeItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
       window.location.href = "/login";
       set((state) => {
         state.authState.user = {
@@ -36,6 +42,7 @@ export const createAuthSlice: StateCreator<
           isActive: false,
           role: "User",
         };
+        state.authState.token = null;
       });
     },
   },

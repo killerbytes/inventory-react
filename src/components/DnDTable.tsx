@@ -38,7 +38,6 @@ import { useSortable } from "@dnd-kit/sortable";
 import { GripHorizontal } from "lucide-react";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "./ui/button";
-
 type Props = {
   id: number;
 };
@@ -86,23 +85,25 @@ export default function DnDTable<T extends Props>({
   columns: _columns,
   data: _data,
   onSubmit,
+  disabled
 }: {
   className?: string;
   tableClassname?: string;
   columns: ColumnDef<T>[];
   data: T[];
   onSubmit: (data: T[]) => void;
+  disabled?: boolean;
 }) {
   const columns = React.useMemo<ColumnDef<T>[]>(
     () => [
-      {
+      ...(!disabled ? [{
         id: "drag-handle",
         header: "Move",
-        cell: ({ row }) => <RowDragHandleCell rowId={row.id} />,
+        cell: ({ row }: { row: Row<T> }) => <RowDragHandleCell rowId={row.id} />,
         meta: {
           className: "w-10",
         },
-      },
+      }] : []),
       ..._columns,
     ],
     [_columns],
@@ -126,7 +127,7 @@ export default function DnDTable<T extends Props>({
       const oldIndex = dataIds.indexOf(active.id);
       const newIndex = dataIds.indexOf(over.id);
       const newData = arrayMove(data, oldIndex, newIndex);
-      
+
       setData(newData);
       onSubmit(newData);
     }
@@ -162,9 +163,9 @@ export default function DnDTable<T extends Props>({
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                       </TableHead>
                     );
                   })}

@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { authServices } from "@/services";
+import { useStore } from "@/stores";
 
 export const useCurrentUser = () => {
-  const token = localStorage.getItem(`${import.meta.env.VITE_APP_NAME}_TOKEN`);
+  const token = useStore(s => s.authState.token);
+
   return useQuery({
     queryKey: ["current-user"],
     queryFn: authServices.me,
