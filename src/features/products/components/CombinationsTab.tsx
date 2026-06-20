@@ -22,11 +22,15 @@ import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
 
 import React from "react";
+import { hasRole, ROLES } from "@/utils/permissions";
+import { useStore } from "@/stores";
 export default function CombinationsTab({
   product,
 }: {
   product: ProductWithCombinations;
 }) {
+  const { authState } = useStore();
+
   const [selected, setSelected] = React.useState<ProductCombination | null>(
     null,
   );
@@ -61,25 +65,7 @@ export default function CombinationsTab({
           </div>
         ),
       },
-      // {
-      //   accessorKey: "sku",
-      //   header: "SKU",
-      //   cell: ({ row }: { row: Row<ProductCombination> }) => {
-      //     return <span>{row.original.sku}</span>;
-      //   },
-      // },
-      // {
-      //   accessorKey: "barcode",
-      //   header: "Barcode",
-      //   cell: ({ row }: { row: Row<ProductCombination> }) => {
-      //     return (
-      //       <BarcodeComponent
-      //         className="items-start"
-      //         value={String(row.original.barcode)}
-      //       />
-      //     );
-      //   },
-      // },
+
       {
         accessorKey: "price",
         header: "Price",
@@ -142,56 +128,63 @@ export default function CombinationsTab({
         },
       },
       {
-        accessorKey: "stockAdjustment",
+        accessorKey: "actions",
         header: "",
         meta: {
           className: "w-0",
         },
         cell: ({ row }: { row: Row<ProductCombination> }) => (
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="shadow-sm"
-              onClick={() => {
-                setSelected(row.original);
-                handleToggle({ stockAdjustmentModal: true });
-              }}
-            >
-              <ClipboardList />
-            </Button>
-            {Number(row.original?.inventory?.quantity) === 0 ||
-            row.original?.inventory?.quantity === undefined ? (
-              <Tooltip content="Quantity must be more than 1">
+            {
+              hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   className="shadow-sm"
-                  disabled
                   onClick={() => {
                     setSelected(row.original);
-                    handleToggle({ breakPackModal: true });
+                    handleToggle({ stockAdjustmentModal: true });
                   }}
                 >
-                  <PackageOpen />
+                  <ClipboardList />
                 </Button>
-              </Tooltip>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="shadow-sm"
-                onClick={() => {
-                  setSelected(row.original);
-                  handleToggle({ breakPackModal: true });
-                }}
-              >
-                <PackageOpen />
-              </Button>
-            )}
+              )}
+            {
+              hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+
+                Number(row.original?.inventory?.quantity) === 0 ||
+                  row.original?.inventory?.quantity === undefined ? (
+                  <Tooltip content="Quantity must be more than 1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shadow-sm"
+                      disabled
+                      onClick={() => {
+                        setSelected(row.original);
+                        handleToggle({ breakPackModal: true });
+                      }}
+                    >
+                      <PackageOpen />
+                    </Button>
+                  </Tooltip>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shadow-sm"
+                    onClick={() => {
+                      setSelected(row.original);
+                      handleToggle({ breakPackModal: true });
+                    }}
+                  >
+                    <PackageOpen />
+                  </Button>
+                )
+              )}
           </div>
         ),
       },
@@ -205,15 +198,17 @@ export default function CombinationsTab({
         <CardHeader className="items-center justify-between flex">
           <CardTitle>Product Combinations</CardTitle>
           <CardAction>
-            <Button
-              onClick={() => handleToggle({ editCombinationModal: true })}
-              type="button"
-              variant="outline"
-              className="shadow-sm"
-            >
-              <Cog />
-              Edit Combinations
-            </Button>
+            {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+              <Button
+                onClick={() => handleToggle({ editCombinationModal: true })}
+                type="button"
+                variant="outline"
+                className="shadow-sm"
+              >
+                <Cog />
+                Edit Combinations
+              </Button>
+            )}
           </CardAction>
         </CardHeader>
         <CardContent className="grid gap-6">
@@ -247,7 +242,7 @@ export default function CombinationsTab({
             handleToggle({ stockAdjustmentModal: false });
           }}
           combinationId={Number(selected?.id)}
-          onSubmit={async () => {}}
+          onSubmit={async () => { }}
         />
       )}
 

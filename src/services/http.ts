@@ -35,10 +35,14 @@ export default class Http {
           const { status } = error.response || {};
 
           switch (status) {
-            case 401:
-            case 403: {
+            case 403:
+              window.location.href = ROUTES.FORBIDDEN;
+              throw error;
+            case 401: {
+              console.log('===> http.ts:43 ~ error', error);
               const originalRequest = error.config;
-              if (!originalRequest._retry) {
+              console.log('===> http.ts:44 ~ originalRequest', originalRequest);
+              if (originalRequest && !originalRequest._retry) {
                 if (originalRequest.url?.includes("/auth/refresh-token")) {
                   throw error;
                 }
@@ -50,17 +54,21 @@ export default class Http {
                   return this.axiosInstance(originalRequest);
                 } catch (retryError) {
                   useStore.getState().authState.setToken(null);
-                  const currentUrl =
-                    window.location.pathname + window.location.search;
-                  window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                  if (window.location.pathname !== ROUTES.LOGIN) {
+                    const currentUrl =
+                      window.location.pathname + window.location.search;
+                    window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                  }
 
                   throw retryError;
                 }
               } else {
                 useStore.getState().authState.setToken(null);
-                const currentUrl =
-                  window.location.pathname + window.location.search;
-                window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                if (window.location.pathname !== ROUTES.LOGIN) {
+                  const currentUrl =
+                    window.location.pathname + window.location.search;
+                  window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                }
               }
               throw error;
             }
@@ -72,10 +80,18 @@ export default class Http {
           const apiError = axiosError.response?.data;
           const errorMessage = apiError?.message || axiosError.message;
 
-          if (errorMessage) {
-            // toast.error(errorMessage);
-          } else {
-            toast.error("An unexpected error occurred");
+          const isSilentAuth =
+            axiosError.config?.url?.includes("/auth/refresh-token") ||
+            (axiosError.response?.status === 401 &&
+              (axiosError.config?.url?.includes("/auth/me") ||
+                window.location.pathname === ROUTES.LOGIN));
+
+          if (!isSilentAuth) {
+            if (errorMessage) {
+              toast.error(errorMessage);
+            } else {
+              toast.error("An unexpected error occurred");
+            }
           }
 
           return Promise.reject(error);
@@ -110,7 +126,9 @@ export default class Http {
           case "jwt must be provided":
           case "Token validation failed":
             useStore.getState().authState.setToken(null);
-            window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+            if (window.location.pathname !== ROUTES.LOGIN) {
+              window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+            }
             break;
         }
         throw error;

@@ -29,7 +29,7 @@ export default function AddModal({
   cb: () => void;
 }) {
   const form = useForm<Signup>({
-    resolver: zodResolver(signupSchema),
+    resolver: zodResolver(signupSchema) as any,
     defaultValues: {
       isActive: false,
     },
@@ -79,7 +79,7 @@ export default function AddModal({
           className="space-y-8"
         >
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="name"
             render={({ field }) => (
               <FormItem>
@@ -92,7 +92,7 @@ export default function AddModal({
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="username"
             render={({ field }) => (
               <FormItem>
@@ -106,7 +106,7 @@ export default function AddModal({
           />
 
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="email"
             render={({ field }) => (
               <FormItem>
@@ -119,7 +119,7 @@ export default function AddModal({
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="password"
             render={({ field }) => (
               <FormItem>
@@ -132,7 +132,7 @@ export default function AddModal({
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
@@ -145,7 +145,7 @@ export default function AddModal({
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="isActive"
             render={({ field }) => (
               <FormItem>

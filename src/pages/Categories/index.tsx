@@ -9,8 +9,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ApiErrorResponse, Category } from "@/schemas";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
 import DnDTable from "@/components/DnDTable";
@@ -20,13 +18,15 @@ import EditModal from "./EditModal";
 import AddModal from "./AddModal";
 import { toast } from "sonner";
 import React from "react";
+import { useStore } from "@/stores";
+import { hasRole, ROLES } from "@/utils/permissions";
 
 export default function Categories() {
   const [data, setData] = React.useState<Category[]>([]);
-
+  const { authState } = useStore();
   const [selected, setSelected] = React.useState<Category>();
   const [loading, setLoading] = React.useState(true);
-  const [filter, setFilter] = React.useState({
+  const [filter] = React.useState({
     limit: 10,
     page: 1,
     sort: "order",
@@ -59,6 +59,7 @@ export default function Categories() {
     const sorted = data.map(({ id }) => {
       return String(id);
     });
+
     await categoryServices.updateSort(sorted);
   };
 
@@ -74,59 +75,62 @@ export default function Categories() {
       size: 10,
       meta: { className: "!text-wrap" },
     },
-    {
-      accessorKey: "subCategories",
-      header: "Sub Categories",
-      cell: ({ row }) => {
-        return (
-          <div className="flex gap-2 justify-start items-center">
-            {row.original.subCategories?.map((i) => (
-              <Badge
-                onClick={() => {
-                  setSelected(i);
-                  handleToggle({ editModal: true });
-                }}
-              >
-                {i.name}
-              </Badge>
-            ))}
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8"
-              onClick={() => {
-                setSelected(row.original);
-                handleToggle({ addModal: true });
-              }}
-              disabled={row.original.subCategories?.length === 0}
-            >
-              <Plus />
-            </Button>
-          </div>
-        );
-      },
-    },
+    // {
+    //   accessorKey: "subCategories",
+    //   header: "Sub Categories",
+    //   cell: ({ row }) => {
+    //     return (
+    //       <div className="flex gap-2 justify-start items-center">
+    //         {row.original.subCategories?.map((i) => (
+    //           <Badge
+    //             onClick={() => {
+    //               setSelected(i);
+    //               handleToggle({ editModal: true });
+    //             }}
+    //           >
+    //             {i.name}
+    //           </Badge>
+    //         ))}
+    //         <Button
+    //           variant="outline"
+    //           size="icon"
+    //           className="size-8"
+    //           onClick={() => {
+    //             setSelected(row.original);
+    //             handleToggle({ addModal: true });
+    //           }}
+    //           disabled={row.original.subCategories?.length === 0}
+    //         >
+    //           <Plus />
+    //         </Button>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       accessorKey: "actions",
-      header: () => <div className="text-center">Actions</div>,
+      header: "",
       meta: {
         className: "w-10",
       },
       cell: ({ row }) => {
         return (
           <div className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-8"
-              onClick={() => {
-                setSelected(row.original);
-                handleToggle({ editModal: true });
-              }}
-            >
-              <Pencil />
-            </Button>
-            <Button
+            {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                onClick={() => {
+                  setSelected(row.original);
+                  handleToggle({ editModal: true });
+                }}
+              >
+                <Pencil />
+              </Button>
+            )}
+            {/* <Button
               variant="outline"
               size="icon"
               className="size-8"
@@ -136,7 +140,7 @@ export default function Categories() {
               }}
             >
               <Plus />
-            </Button>
+            </Button> */}
           </div>
         );
       },
@@ -152,30 +156,19 @@ export default function Categories() {
             Categories
           </CardTitle>
           <CardAction>
-            <Button
-              onClick={() => {
-                handleToggle({ addModal: true });
-              }}
-            >
-              <Plus /> Add Category
-            </Button>
+            {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+              <Button
+                onClick={() => {
+                  handleToggle({ addModal: true });
+                }}
+              >
+                <Plus /> Add Category
+              </Button>
+            )}
           </CardAction>
         </CardHeader>
         <CardContent>
-          <div>
-            <Input
-              placeholder="Search products"
-              className="w-full mb-4"
-              value={filter.q}
-              onChange={(e) => {
-                setFilter((prev) => ({
-                  ...prev,
-                  q: e.target.value,
-                  page: 1,
-                }));
-              }}
-            />
-          </div>
+
           {loading ? (
             <p>Loading...</p>
           ) : (
@@ -184,6 +177,7 @@ export default function Categories() {
                 columns={columns}
                 data={data || []}
                 onSubmit={onSubmit}
+                disabled={!hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER])}
               />
             </>
           )}

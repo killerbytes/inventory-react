@@ -95,6 +95,22 @@ export default function Reorders() {
         },
       },
       {
+        accessorKey: "transactionCount",
+        header: ({ column }) => (
+          <ColumnSort
+            filter={filter}
+            handleFilterChange={handleFilterChange}
+            column={column}
+            align="right"
+          >
+            Transactions
+          </ColumnSort>
+        ),
+        meta: {
+          className: "text-right",
+        },
+      },
+      {
         accessorKey: "combinations.inventory.quantity",
         header: ({ column }) => {
           return (

@@ -134,6 +134,7 @@ export const useCreateBreakPack = () => {
       productCombinationServices.breakPack(values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
+      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
     },
   });
 };
@@ -147,6 +148,7 @@ export const useCreateStockAdjustment = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.all });
+      queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
     },
   });
 };

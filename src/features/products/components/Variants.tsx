@@ -18,6 +18,8 @@ import { Pencil } from "lucide-react";
 
 import { ToggleUpdater } from "@/hooks/useToggle";
 import ShowMore from "@/components/ShowMore";
+import { hasRole, ROLES } from "@/utils/permissions";
+import { useStore } from "@/stores";
 
 export default function Variants({
   variants,
@@ -26,28 +28,32 @@ export default function Variants({
   variants: VariantTypes[];
   handleToggle: (updater: ToggleUpdater) => void;
 }) {
+  const { authState } = useStore();
+
   return (
     <>
       <Card>
         <CardHeader className="items-center justify-between flex">
           <CardTitle>Variant Types</CardTitle>
           <CardAction>
-            <Button
-              onClick={() =>
-                handleToggle((prevState) => {
-                  return {
-                    ...prevState,
-                    variantModal: true,
-                  };
-                })
-              }
-              type="button"
-              variant="outline"
-              className="shadow-sm"
-            >
-              <Pencil />
-              Edit Variants
-            </Button>
+            {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+              <Button
+                onClick={() =>
+                  handleToggle((prevState) => {
+                    return {
+                      ...prevState,
+                      variantModal: true,
+                    };
+                  })
+                }
+                type="button"
+                variant="outline"
+                className="shadow-sm"
+              >
+                <Pencil />
+                Edit Variants
+              </Button>
+            )}
           </CardAction>
         </CardHeader>
         <CardContent>

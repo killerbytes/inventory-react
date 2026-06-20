@@ -33,8 +33,11 @@ import { useForm } from "react-hook-form";
 import Loader from "@/components/Loader";
 import React, { Fragment } from "react";
 import { toast } from "sonner";
+import { hasRole, ROLES } from "@/utils/permissions";
+import { useStore } from "@/stores";
 
-export default function ProductEdit() {
+export default function ProductDetails() {
+  const { authState } = useStore();
   const { id } = useParams();
 
   const { mutate: updateProduct, isPending } = useUpdateProduct();
@@ -45,6 +48,7 @@ export default function ProductEdit() {
     isLoading,
     isFetching,
   } = useProduct(Number(id));
+
 
   const [isEditing, setIsEditing] = React.useState(false);
   const { data: categories } = useCategories();
@@ -119,15 +123,17 @@ export default function ProductEdit() {
               <Search />
             </Button>
           </ProductComboSearchCommand>
-          <Button
-            size="icon"
-            className="size-8 shadow-sm"
-            onClick={() => {
-              handleToggle({ createProductModal: true });
-            }}
-          >
-            <PlusIcon />
-          </Button>
+          {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+            <Button
+              size="icon"
+              className="size-8 shadow-sm"
+              onClick={() => {
+                handleToggle({ createProductModal: true });
+              }}
+            >
+              <PlusIcon />
+            </Button>
+          )}
         </PageHeaderActions>
       </PageHeader>
       {isLoading ? (
@@ -218,14 +224,16 @@ export default function ProductEdit() {
                       >
                         Print Barcode
                       </Button>
-                      <Button
-                        className="shadow-sm"
-                        type="button"
-                        onClick={() => setIsEditing(true)}
-                      >
-                        <Edit />
-                        Edit
-                      </Button>
+                      {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+                        <Button
+                          className="shadow-sm"
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                        >
+                          <Edit />
+                          Edit
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </>
