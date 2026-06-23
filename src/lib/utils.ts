@@ -101,7 +101,9 @@ export const getMappedSearchProductCombinations = async (params: {
     .filter((i) => i.length > 0);
 
   for (const item of searchResults) {
-    const isMatch = words.some((word) => item.description?.includes(word));
+    const isMatch = words.some((word) =>
+      item.description?.toLowerCase().includes(word),
+    );
 
     const combinations = isMatch
       ? item.combinations.map((i: ProductCombination) => ({
