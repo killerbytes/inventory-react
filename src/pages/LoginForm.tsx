@@ -31,7 +31,6 @@ import { useStore } from "@/stores";
 import { cn } from "@/lib/utils";
 import React from "react";
 
-
 export default function LoginForm() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -44,8 +43,12 @@ export default function LoginForm() {
   const redirect = params.get("callbackUrl") || "/";
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
+    const { username, password } = values;
     try {
-      const data = await authServices.login(values);
+      const data = await authServices.login({
+        username: username.trim().toLowerCase(),
+        password: password.trim(),
+      });
       const { accessToken } = data;
       authState.setToken(accessToken);
 

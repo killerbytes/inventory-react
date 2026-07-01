@@ -31,7 +31,7 @@ export const productCombinationSearchSchema = z.object({
   id: z.number(),
   productId: z.number(),
   name: z.string(),
-  price: z.number().optional(),
+  price: z.coerce.number().optional(),
   unit: z.string(),
   isBreakPack: z.boolean().optional(),
   inventory: inventorySchema.nullish(),

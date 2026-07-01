@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import React, { memo, useEffect, useMemo, useRef } from "react";
 import { formatCurrency, getScore } from "@/utils/formatters";
 import { CommandGroup, CommandItem } from "./ui/command";
 import { useCategories } from "@/hooks/useCategories";
@@ -17,25 +17,34 @@ export type BaseProps = {
   product: { categoryId: number };
 };
 
-const MemoizedCommandItem = memo(
+export const MemoizedCommandItem = memo(
   <T extends BaseProps>({
     item,
     selected,
     onSelect,
     search,
     disableNoQuantity,
+    categoryId = item?.product?.categoryId,
   }: {
     item: T;
-    selected: boolean;
+    selected?: boolean;
     onSelect: () => void;
     search: string;
-    disableNoQuantity: boolean;
+    disableNoQuantity?: boolean;
+    categoryId?: number;
   }) => {
     const ref = useRef<HTMLDivElement>(null);
     const name = item.name.replace(/\*\*\*[\s\S]*?\*\*\*/g, "").trim();
     const { data: category } = useCategories();
 
     const mappedCategory = new Map(category?.map((item) => [item.id, item]));
+
+    useEffect(() => {
+      if (!selected || !ref.current) return;
+      setTimeout(() => {
+        ref.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }, 0);
+    }, [selected]);
 
     return (
       <CommandItem
@@ -49,10 +58,10 @@ const MemoizedCommandItem = memo(
 
         <div className="flex flex-col w-full">
           <span className="text-[9px] uppercase text-muted-foreground leading-none">
-            {mappedCategory.get(item.product.categoryId)?.name}
+            {categoryId && mappedCategory.get(categoryId)?.name}
           </span>
           <div>
-            <HighlightMatch text={name} query={search} />
+            <HighlightMatch text={name} query={search || ""} />
           </div>
         </div>
 
@@ -63,7 +72,7 @@ const MemoizedCommandItem = memo(
           {Number(item.inventory.quantity)}
         </Badge>
         <span className="w-1/4 text-right font-bold">
-          {formatCurrency(item.price)}
+          {formatCurrency(item.price || 0)}
         </span>
       </CommandItem>
     );
@@ -77,6 +86,7 @@ export default function GroupedCommandList<T extends BaseProps>({
   open,
   setOpen,
   selectedId,
+  heading,
   disableNoQuantity = false,
 }: {
   items: T[];
@@ -85,11 +95,9 @@ export default function GroupedCommandList<T extends BaseProps>({
   open: boolean;
   setOpen: (open: boolean) => void;
   selectedId?: string | number;
+  heading?: string;
   disableNoQuantity?: boolean;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const selectedRef = useRef<HTMLDivElement>(null);
-
   // Filter, score, and group memoized
   const grouped = useMemo(() => {
     if (!items || items.length === 0) return [];
@@ -114,57 +122,28 @@ export default function GroupedCommandList<T extends BaseProps>({
     return Array.from(map.entries());
   }, [items, search]);
 
-  // Smooth scroll to selected item
-  const scrollToSelected = useCallback(() => {
-    if (!selectedRef.current || !containerRef.current) return;
-    const container = containerRef.current;
-    const selected = selectedRef.current;
-    const offsetTop = selected.offsetTop;
-    const scrollTop = container.scrollTop;
-    const containerHeight = container.clientHeight;
-    const selectedHeight = selected.offsetHeight;
-
-    if (
-      offsetTop < scrollTop ||
-      offsetTop + selectedHeight > scrollTop + containerHeight
-    ) {
-      container.scrollTo({
-        top: offsetTop - containerHeight / 2 + selectedHeight / 2,
-        behavior: "smooth",
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (open) scrollToSelected();
-  }, [selectedId, open, scrollToSelected]);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = 0; // jump to top
-    }
-  }, [search]);
-
   if (!open) return null;
 
   return (
-    <div ref={containerRef} className="max-h-[80%] overflow-auto">
-      <CommandGroup>
+    <div className="max-h-[80%] overflow-auto">
+      <CommandGroup heading={heading}>
         {grouped.map(([groupName, groupItems]) => (
           <React.Fragment key={groupName}>
-            {groupItems.map((item) => (
-              <MemoizedCommandItem
-                key={item.id}
-                item={item}
-                search={search}
-                selected={selectedId === item.id}
-                onSelect={() => {
-                  setOpen(false);
-                  onSelect?.(item);
-                }}
-                disableNoQuantity={disableNoQuantity}
-              />
-            ))}
+            {groupItems.map((item) => {
+              return (
+                <MemoizedCommandItem
+                  key={item.id}
+                  item={item}
+                  search={search}
+                  selected={String(selectedId) === String(item.id)}
+                  onSelect={() => {
+                    setOpen(false);
+                    onSelect?.(item);
+                  }}
+                  disableNoQuantity={disableNoQuantity}
+                />
+              );
+            })}
           </React.Fragment>
         ))}
       </CommandGroup>

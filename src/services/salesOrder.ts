@@ -19,4 +19,10 @@ export default class SalesOrderService extends BaseService<
     );
     return response;
   };
+
+  ocr = async (payload: FormData) => {
+    const response = await this.http.upload(`/ocr/parse-receipt`, payload);
+
+    return response;
+  };
 }
