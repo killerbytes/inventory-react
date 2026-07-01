@@ -46,7 +46,7 @@ export default function LoginForm() {
     const { username, password } = values;
     try {
       const data = await authServices.login({
-        username: username.trim().toLowerCase(),
+        username: username.trim(),
         password: password.trim(),
       });
       const { accessToken } = data;
