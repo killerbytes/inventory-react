@@ -45,12 +45,13 @@ export default function ProductSearch() {
       setLoading(true);
       const res = await productCombinationServices.search({
         search,
-        limit: 20,
+        limit: 100,
       });
 
       const result = [];
       const words = search
         .toLowerCase()
+        .replace(/['"#]/g, "") // Remove all quotes to prevent tsquery syntax errors
         .split(" ")
         .filter((i) => i.length > 0);
 

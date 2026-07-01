@@ -1,8 +1,8 @@
 import { ROUTES } from "@/utils/definitions";
 import { ApiErrorResponse } from "@/schemas";
 import axios, { AxiosError } from "axios";
-import { toast } from "sonner";
 import { useStore } from "@/stores";
+import { toast } from "sonner";
 
 const baseURL = import.meta.env.VITE_API_URL;
 
@@ -188,6 +188,19 @@ export default class Http {
     };
     try {
       const res = await this.axiosInstance.delete(url, config);
+      return res.data;
+    } catch (error) {
+      const apiError = error as AxiosError;
+      errorParser(apiError);
+    }
+  };
+  upload = async (url: string, payload: object, options: object = {}) => {
+    const config = {
+      headers: { ...this.getHeaders(), "Content-Type": undefined },
+      ...options,
+    };
+    try {
+      const res = await this.axiosInstance.post(url, payload, config);
       return res.data;
     } catch (error) {
       const apiError = error as AxiosError;

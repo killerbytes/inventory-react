@@ -513,7 +513,8 @@ export default function SalesOrderModal({
             {(value) => {
               const q = Number(value.quantity);
               const p =
-                Number(value.purchasePrice) - Number(value.discount) / q;
+                Number(value.purchasePrice) - (Number(value.discount) || 0) / q;
+
               return formatCurrency(q * p);
             }}
           </LineColumn>
@@ -560,49 +561,16 @@ export default function SalesOrderModal({
               )}
             />
 
-            <div className="w-full flex flex-col gap-4 items-start md:flex-row">
+            <div className="grid  sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
               <FormField
                 control={form.control}
-                name="orderDate"
-                render={({ field }) => (
-                  <FormItem className="w-full md:w-1/4">
-                    <FormLabel>Order Date</FormLabel>
-                    <DatePicker {...field} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="modeOfPayment"
-                render={({ field }) => (
-                  <FormItem className="w-full md:w-1/4">
-                    <FormLabel>Mode of Payment</FormLabel>
-                    <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="checkNumber"
+                name="salesOrderNumber"
                 render={({ field }) => {
                   return (
-                    <FormItem
-                      className={cx(
-                        "w-full md:w-1/4",
-                        modeOfPayment !== "CHECK" && "opacity-50",
-                      )}
-                    >
-                      <FormLabel>Check Number</FormLabel>
+                    <FormItem>
+                      <FormLabel>Receipt No</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          disabled={modeOfPayment !== "CHECK"}
-                          value={field.value ?? ""}
-                        />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -611,23 +579,69 @@ export default function SalesOrderModal({
               />
               <FormField
                 control={form.control}
-                name="dueDate"
+                name="orderDate"
                 render={({ field }) => (
-                  <FormItem
-                    className={cx(
-                      "w-full md:w-1/4",
-                      modeOfPayment !== "CHECK" && "opacity-50",
-                    )}
-                  >
-                    <FormLabel>Due Date</FormLabel>
-                    <DatePicker
-                      {...field}
-                      disabled={modeOfPayment !== "CHECK"}
-                    />
+                  <FormItem>
+                    <FormLabel>Order Date</FormLabel>
+                    <DatePicker {...field} />
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <div className="flex flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="modeOfPayment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mode of Payment</FormLabel>
+                      <Select {...field} options={MODE_OF_PAYMENT_OPTIONS} />
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div
+                  className={cx(
+                    modeOfPayment !== "CHECK" && "hidden",
+                    "flex gap-4",
+                  )}
+                >
+                  <FormField
+                    control={form.control}
+                    name="checkNumber"
+                    render={({ field }) => {
+                      return (
+                        <FormItem className={cx("w-full")}>
+                          <FormLabel>Check Number</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled={modeOfPayment !== "CHECK"}
+                              value={field.value ?? ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dueDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Due Date</FormLabel>
+                        <DatePicker
+                          {...field}
+                          disabled={modeOfPayment !== "CHECK"}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             </div>
             <Tabs defaultValue="notes">
               <TabsList>

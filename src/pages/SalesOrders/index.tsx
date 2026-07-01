@@ -17,6 +17,7 @@ import {
 import { useSalesOrdersPaginated } from "@/features/sales-orders/hooks/useSalesOrders";
 import SalesOrderModal from "../../features/sales-orders/components/SalesOrderModal";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
+import OCRModal from "@/features/sales-orders/components/OCRModal";
 import DateRangePicker from "@/components/DateRangePicker";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
@@ -31,11 +32,11 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { cx } from "class-variance-authority";
 import { DateRange } from "react-day-picker";
+import { Camera, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import Select from "@/components/Select";
 import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
-import { Plus } from "lucide-react";
 import React from "react";
 
 export default function SalesOrders() {
@@ -49,7 +50,7 @@ export default function SalesOrders() {
     limit: PAGINATION.PAGE_SIZE,
     page: PAGINATION.PAGE,
     order: "DESC",
-    sort: "salesOrderNumber",
+    sort: "orderDate",
     status: "ALL",
   });
   const payload = {
@@ -65,6 +66,7 @@ export default function SalesOrders() {
 
   const [toggle, handleToggle] = useToggle({
     salesOrderModal: false,
+    ocrModal: false,
   });
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
@@ -208,7 +210,16 @@ export default function SalesOrders() {
             <div className="bg-border h-5 w-[1px]"></div>
             Sales Orders
           </CardTitle>
-          <CardAction>
+          <CardAction className="gap-2 flex">
+            <Button
+              className="shadow-md bg-red-500"
+              onClick={() => {
+                setSelected(undefined);
+                handleToggle({ ocrModal: true });
+              }}
+            >
+              <Camera />
+            </Button>
             <Button
               className="shadow-md bg-green-500"
               onClick={() => {
@@ -277,6 +288,22 @@ export default function SalesOrders() {
           onClose={() => {
             handleToggle({
               salesOrderModal: false,
+            });
+          }}
+        />
+      )}
+      {toggle.ocrModal && (
+        <OCRModal
+          isOpen={toggle.ocrModal}
+          onClose={() => {
+            handleToggle({
+              ocrModal: false,
+            });
+          }}
+          onSubmit={() => {
+            handleToggle({
+              ocrModal: false,
+              salesOrderModal: true,
             });
           }}
         />

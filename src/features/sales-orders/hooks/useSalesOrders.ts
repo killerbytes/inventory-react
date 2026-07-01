@@ -1,6 +1,7 @@
 import {
   CancelOrder,
   filterProps,
+  OCRForm,
   PaginatedResponse,
   ReturnForm,
   SalesOrder,
@@ -20,6 +21,7 @@ export const salesOrderKeys = {
     "paginated",
     filter,
   ],
+  ocr: () => [...salesOrderKeys.all, "ocr"],
 };
 
 export const useSalesOrder = (id: number) => {
@@ -99,5 +101,11 @@ export const useCreateReturnExchange = () => {
       queryClient.invalidateQueries({ queryKey: salesOrderKeys.all });
       queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
     },
+  });
+};
+
+export const useOCR = () => {
+  return useMutation<OCRForm, AxiosError, FormData>({
+    mutationFn: (data: FormData) => salesOrderServices.ocr(data),
   });
 };

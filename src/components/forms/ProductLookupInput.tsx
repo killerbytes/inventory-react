@@ -41,6 +41,8 @@ export default function ProductLookupInput<T extends FieldValues>({
   );
 
   const options = useExcludeExistToList(items, form?.control, name);
+  const selectedId = form.getValues(name)[index].combinationId;
+
   return (
     <ProductComboSearchCommand
       onSearch={onSearch}
@@ -57,6 +59,7 @@ export default function ProductLookupInput<T extends FieldValues>({
           onSelect={onSelect}
           search={search}
           disableNoQuantity={disableNoQuantity}
+          selectedId={selectedId}
         />
       )}
     >

@@ -30,6 +30,7 @@ export const salesOrderItemSchema = salesOrderItemBaseSchema.extend({
 });
 
 export const salesOrderBaseSchema = z.object({
+  salesOrderNumber: z.string().min(2, "Receipt number is required"),
   customerId: z.coerce.number().min(1, {
     message: "Customer is required.",
   }),
@@ -108,8 +109,30 @@ export const salesOrderSchema = salesOrderBaseSchema
     }
   });
 
+export const articlesSchema = z.object({
+  article: z.string(),
+  value: z.object({
+    id: z.number(),
+    name: z.string(),
+    price: z.number(),
+    unit: z.string(),
+  }),
+  quantity: z.number().min(1, "Quantity is required"),
+  unit: z.string().min(1, "Unit is required"),
+  price: z.number(),
+  amount: z.number().nullish(),
+  suggestedProducts: z.array(z.any()),
+});
+
+export const ocrFormSchema = z.object({
+  receiptNo: z.string().min(1, "Receipt number is required"),
+  articles: z.array(articlesSchema),
+});
+
 export type SalesOrderInput = z.infer<typeof salesOrderBaseSchema>;
 export type SalesOrder = z.infer<typeof salesOrderSchema>;
 export type SalesOrderForm = z.infer<typeof salesOrderFormSchema>;
 export type SalesOrderItemBase = z.infer<typeof salesOrderItemBaseSchema>;
 export type SalesOrderItem = z.infer<typeof salesOrderItemSchema>;
+export type OCRForm = z.infer<typeof ocrFormSchema>;
+export type Articles = z.infer<typeof articlesSchema>;
