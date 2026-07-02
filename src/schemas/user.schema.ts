@@ -1,24 +1,20 @@
 import { ROLES } from "@/utils/permissions";
 import z from "zod";
 
-export const userSchema = z.object({
-  id: z.coerce.number().optional(),
+export const userBaseSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  username: z
-    .string()
-    .min(2, {
-      message: "Username must be at least 2 characters.",
-    })
-    .optional(),
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
   isActive: z.boolean(),
-  role: z.enum(
-    Object.values(ROLES) as [string, ...string[]],
-  ).default(ROLES.USER),
+  role: z
+    .enum(Object.values(ROLES) as [string, ...string[]])
+    .default(ROLES.USER),
   // .min(8, {
   //   message: "Password must be at least 8 characters.",
   // })
@@ -36,22 +32,31 @@ export const userSchema = z.object({
   // }),
 });
 
-export const signupSchema = userSchema
-  .extend({
-    password: z.string(),
-    confirmPassword: z.string(),
-  })
-  .omit({
-    id: true,
-  })
-  .refine((data) => data.password === data.confirmPassword, {
+export const userSchema = userBaseSchema.extend({
+  id: z.coerce.number(),
+});
+
+export const signupObjectSchema = userBaseSchema.extend({
+  password: z.string(),
+  confirmPassword: z.string(),
+});
+
+export const signupSchema = signupObjectSchema.refine(
+  (data) => data.password === data.confirmPassword,
+  {
     path: ["confirmPassword"],
     message: "Passwords must match.",
-  });
+  },
+);
 
-export const loginSchema = z.object({
-  username: z.string(),
-  password: z.string(),
+export const loginSchema = signupObjectSchema.pick({
+  username: true,
+  password: true,
+});
+
+export const userFormSchema = userBaseSchema.pick({
+  isActive: true,
+  role: true,
 });
 
 export const formChangePasswordSchema = z
@@ -63,22 +68,10 @@ export const formChangePasswordSchema = z
     path: ["confirmPassword"],
     message: "Passwords must match.",
   });
-//  export const loginSchema = z
-//   .object({
-//     password: z.string().min(1, "Password is required"),
-//     confirmPassword: z.string().nullish(),
-//   })
-//   .superRefine((data, ctx) => {
-//     if (data.password && !data.confirmPassword) {
-//       ctx.addIssue({
-//         path: ["confirmPassword"],
-//         code: z.ZodIssueCode.custom,
-//         message: "Check number is required when payment is by check",
-//       });
-//     }
-//   });
 
+export type UserBase = z.infer<typeof userBaseSchema>;
 export type User = z.infer<typeof userSchema>;
+export type UserForm = z.infer<typeof userFormSchema>;
 export type Signup = z.infer<typeof signupSchema>;
-export type Login = z.infer<typeof loginSchema>;
+export type Login = Pick<z.infer<typeof signupSchema>, "username" | "password">;
 export type ChangePassword = z.infer<typeof formChangePasswordSchema>;

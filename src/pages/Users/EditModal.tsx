@@ -6,10 +6,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -17,11 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-import { ApiErrorResponse, User, userSchema } from "@/schemas";
+import { ApiErrorResponse, User, userFormSchema, UserForm } from "@/schemas";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ERROR } from "@/utils/definitions";
 import { userServices } from "@/services";
 import Modal from "@/components/Modal";
@@ -37,21 +36,19 @@ export default function EditModal({
   cb: () => void;
   data: User;
 }) {
-  const form = useForm<User>({
-    resolver: zodResolver(userSchema) as any,
+  const form = useForm<UserForm>({
+    resolver: zodResolver(userFormSchema) as any,
     defaultValues: { ...data, isActive: !!data.isActive },
   });
 
-  async function onSubmit(values: User) {
+  async function onSubmit(values: UserForm) {
     try {
-      const { name, email, isActive, role } = values;
-      await userServices.update(data.id ?? 0, {
-        name,
-        email,
+      const { isActive, role } = values;
+      const result = await userServices.update(data.id ?? 0, {
         isActive,
         role,
       });
-      toast.success(`Submitted: ${values.name} (${values.email})`);
+      toast.success(`Successfully updated ${result.name}`);
       form.reset();
       onClose();
     } catch (error) {
@@ -59,7 +56,7 @@ export default function EditModal({
       if (apiError.code === ERROR.VALIDATION_ERROR) {
         apiError.errors.forEach((err) => {
           if (err.field) {
-            form.setError(err.field as keyof User, {
+            form.setError(err.field as keyof UserForm, {
               type: "server",
               message: err.message,
             });
@@ -99,9 +96,7 @@ export default function EditModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Name" {...field} />
-                  </FormControl>
+                  {field.value}
                   <FormMessage />
                 </FormItem>
               )}
@@ -113,9 +108,7 @@ export default function EditModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="email@example.com" {...field} />
-                  </FormControl>
+                  {field.value}
                   <FormMessage />
                 </FormItem>
               )}
@@ -132,7 +125,7 @@ export default function EditModal({
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel>Is Active</FormLabel>
+                    <FormLabel>Active</FormLabel>
                   </div>
                   <FormMessage />
                 </FormItem>
@@ -166,7 +159,7 @@ export default function EditModal({
             />
 
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit">Update User</Button>
             </DialogFooter>
           </form>
         </Form>

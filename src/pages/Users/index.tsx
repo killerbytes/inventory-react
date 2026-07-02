@@ -14,8 +14,8 @@ import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColumnSort from "@/components/ColumnSort";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { User } from "@/schemas/user.schema";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
@@ -174,11 +174,17 @@ export default function Users() {
         },
         cell: ({ row }) => {
           const role = row.original.role;
-          return (
-            <Badge variant={role === "Admin" ? "default" : "secondary"}>
-              {role}
-            </Badge>
-          );
+
+          const variant: Record<
+            string,
+            "default" | "secondary" | "destructive" | "outline"
+          > = {
+            Admin: "destructive",
+            Manager: "default",
+            Cashier: "secondary",
+            User: "outline",
+          };
+          return <Badge variant={variant[role]}>{role}</Badge>;
         },
       },
     ],

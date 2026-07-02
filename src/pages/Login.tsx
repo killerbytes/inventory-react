@@ -13,22 +13,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Toaster } from "@/components/ui/sonner";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
-
 import { ApiErrorResponse, Login, loginSchema } from "@/schemas";
 import { useNavigate, useSearchParams } from "react-router";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { authServices } from "@/services";
 import { ROUTES } from "@/routes/routes";
 import { useStore } from "@/stores";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import React from "react";
 
 export default function LoginForm() {
@@ -42,7 +40,7 @@ export default function LoginForm() {
   });
   const redirect = params.get("callbackUrl") || "/";
 
-  async function onSubmit(values: z.infer<typeof loginSchema>) {
+  async function onSubmit(values: Login) {
     const { username, password } = values;
     try {
       const data = await authServices.login({

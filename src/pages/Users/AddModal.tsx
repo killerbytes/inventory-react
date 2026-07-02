@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { ApiErrorResponse, Signup, signupSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ERROR } from "@/utils/definitions";
@@ -30,9 +29,6 @@ export default function AddModal({
 }) {
   const form = useForm<Signup>({
     resolver: zodResolver(signupSchema) as any,
-    defaultValues: {
-      isActive: false,
-    },
   });
 
   async function onSubmit(values: Signup) {
@@ -67,6 +63,7 @@ export default function AddModal({
     >
       <Form {...form}>
         <form
+          autoComplete="off"
           onSubmit={(e) => {
             console.log(form.getValues(), form.formState.errors);
             e.preventDefault();
@@ -125,7 +122,12 @@ export default function AddModal({
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="********" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="********"
+                    {...field}
+                    autoComplete="new-password"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -144,26 +146,8 @@ export default function AddModal({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control as any}
-            name="isActive"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center space-x-2">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel>Is Active</FormLabel>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <DialogFooter>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit">Create User</Button>
           </DialogFooter>
         </form>
       </Form>

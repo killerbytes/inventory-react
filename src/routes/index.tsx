@@ -8,15 +8,15 @@ import { ROUTES } from "@/utils/definitions";
 import Profit from "@/pages/Reports/Profit";
 import Forbidden from "@/pages/Forbidden";
 import Dashboard from "@/pages/Dashboard";
+import { authServices } from "@/services";
 import Loader from "@/components/Loader";
 import Layout from "@/components/Layout";
 import { useRoutes } from "react-router";
 import NotFound from "@/pages/NotFound";
-import { authServices } from "@/services";
 import { useStore } from "@/stores";
 import React, { lazy } from "react";
 
-const Login = lazy(() => import("@/pages/LoginForm"));
+const Login = lazy(() => import("@/pages/Login"));
 const Suppliers = lazy(() => import("@/pages/Suppliers"));
 const Customers = lazy(() => import("@/pages/Customers"));
 const Categories = lazy(() => import("@/pages/Categories"));
