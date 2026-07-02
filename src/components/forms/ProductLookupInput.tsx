@@ -1,67 +1,84 @@
+import GroupedCommandList, { BaseProps } from "../GroupedCommandList";
 import ProductComboSearchCommand from "../ProductComboSearchCommand";
-import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { getMappedSearchProductCombinations } from "@/lib/utils";
 import useExcludeExistToList from "@/hooks/useExcludeExists";
-import GroupedCommandList from "../GroupedCommandList";
-import { ProductCombinationSearch } from "@/schemas";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import React from "react";
 
-export default function ProductLookupInput<T extends FieldValues>({
-  form,
+export type { BaseProps };
+
+export default function ProductLookupInput<T extends BaseProps>({
   onChange,
-  index,
-  name,
   ariaInvalid,
+  exclude,
   disableNoQuantity,
   noBreakPacks = false,
-  valueKey = "combinations",
+  valueKey = "id",
+  labelKey = "name",
+  selected,
+  renderOptions = ({ props, options, selectedId }) => (
+    <GroupedCommandList
+      {...props}
+      items={options}
+      disableNoQuantity={disableNoQuantity}
+      selectedId={selectedId ? Number(selectedId) : -1}
+    />
+  ),
 }: {
-  form: UseFormReturn<T>;
-  onChange: (value: ProductCombinationSearch) => void;
-  index: number;
-  name: Path<T>;
+  onChange: (value: T) => void;
   ariaInvalid?: boolean;
+  exclude?: number[];
   disableNoQuantity?: boolean;
   noBreakPacks?: boolean;
   valueKey?: string;
+  labelKey?: string;
+  selected?: any;
+  renderOptions?: ({
+    props,
+    options,
+    selectedId,
+  }: {
+    props: Parameters<typeof GroupedCommandList>[0];
+    options: T[];
+    selectedId: number;
+  }) => React.ReactNode;
 }) {
-  const [items, setItems] = React.useState<ProductCombinationSearch[]>([]);
-  const onSearch = React.useCallback(
+  const defaultOnSearch = React.useCallback(
     async (search: string) => {
       const combinations = await getMappedSearchProductCombinations({
         search,
         ...(noBreakPacks && { noBreakPacks }),
       });
-      setItems(combinations);
-      return combinations;
+      return combinations as unknown as T[];
     },
     [noBreakPacks],
   );
 
-  const options = useExcludeExistToList(items, form?.control, name);
-  const selectedId = form.getValues(name)[index].combinationId;
+  const [items, setItems] = React.useState<T[]>([]);
+  const onSearch = React.useCallback(
+    async (search: string) => {
+      const results = await defaultOnSearch(search);
+      setItems(results);
+      return results;
+    },
+    [defaultOnSearch],
+  );
+
+  const options = useExcludeExistToList(items, exclude);
+  const selectedId = selected?.[valueKey];
 
   return (
-    <ProductComboSearchCommand
+    <ProductComboSearchCommand<T>
       onSearch={onSearch}
-      onSelect={(value) => {
-        // form.setValue(`${name}[${index}].combinations` as Path<T>, value);
-
-        onChange(value);
-      }}
-      renderOptions={({ open, setOpen, onSelect, search }) => (
-        <GroupedCommandList
-          items={options}
-          open={open}
-          setOpen={setOpen}
-          onSelect={onSelect}
-          search={search}
-          disableNoQuantity={disableNoQuantity}
-          selectedId={selectedId}
-        />
-      )}
+      onSelect={onChange}
+      renderOptions={(props) =>
+        renderOptions({
+          props: props as unknown as Parameters<typeof GroupedCommandList>[0],
+          options,
+          selectedId,
+        })
+      }
     >
       <Button
         variant="outline"
@@ -69,7 +86,7 @@ export default function ProductLookupInput<T extends FieldValues>({
         type="button"
         aria-invalid={ariaInvalid}
       >
-        {form.getValues()[name][index]?.[valueKey]?.name}
+        {selected?.[labelKey] ? String(selected?.[labelKey]) : null}
         <ChevronsUpDown className="ml-auto" />
       </Button>
     </ProductComboSearchCommand>

@@ -28,6 +28,7 @@ import { useCreateSupplierReturns } from "@/features/good-receipts/hooks/useGood
 import { useCreateReturnExchange } from "@/features/sales-orders/hooks/useSalesOrders";
 import { Loader2Icon, Plus, Trash2, Undo2 } from "lucide-react";
 import ProductLookupInput from "../forms/ProductLookupInput";
+import { ProductCombinationSearch } from "@/schemas";
 import LineColumn from "../forms/OrderItemForm/LineColumn";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -304,17 +305,13 @@ export default function ReturnExchangeModal({
                   <>
                     <FormItem>
                       <FormControl>
-                        <ProductLookupInput
+                        <ProductLookupInput<ProductCombinationSearch>
                           valueKey="combination"
                           ariaInvalid={Boolean(
                             form.formState.errors?.exchanges?.[row.index]
                               ?.combinationId,
                           )}
-                          index={row.index}
                           disableNoQuantity
-                          form={form}
-                          {...field}
-                          name="exchanges"
                           onChange={(value) => {
                             field.onChange(value.id);
                             form.setValue(

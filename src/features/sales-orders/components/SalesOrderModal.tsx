@@ -46,6 +46,7 @@ import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
+import { ProductCombinationSearch } from "@/schemas";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
@@ -258,7 +259,6 @@ export default function SalesOrderModal({
       if (newDraft.salesOrderItems.every((item) => item.combinationId === -1)) {
         return;
       }
-      console.log(newDraft);
 
       const draft =
         JSON.parse(
@@ -374,7 +374,9 @@ export default function SalesOrderModal({
         meta: {
           className: "w-[35%]",
         },
-        cell: ({ row }) => {
+        cell: (props) => {
+          const { row } = props;
+
           return (
             <Controller
               name={`salesOrderItems.${row.index}.combinationId`}
@@ -384,18 +386,19 @@ export default function SalesOrderModal({
                   <>
                     <FormItem>
                       <FormControl>
-                        <ProductLookupInput
+                        <ProductLookupInput<ProductCombinationSearch>
+                          selected={row.original.combinations}
                           ariaInvalid={Boolean(
                             form.formState.errors?.salesOrderItems?.[row.index]
                               ?.combinationId,
                           )}
-                          index={row.index}
+                          exclude={form
+                            .getValues("salesOrderItems")
+                            .map((item) => item.combinations?.id ?? 0)}
                           disableNoQuantity
-                          form={form}
-                          {...field}
-                          name="salesOrderItems"
                           onChange={(value) => {
                             field.onChange(value.id);
+
                             form.setValue(
                               `salesOrderItems.${row.index}.purchasePrice`,
                               value.price ?? 0,

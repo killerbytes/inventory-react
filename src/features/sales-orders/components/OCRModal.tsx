@@ -6,9 +6,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandSeparator,
+} from "@/components/ui/command";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { Camera, Loader2, Trash2, Upload } from "lucide-react";
+import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import { Articles, OCRForm, ocrFormSchema } from "@/schemas";
+import GroupedCommandList from "@/components/GroupedCommandList";
+import { Camera, Loader2, Trash2, Upload } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -16,7 +24,6 @@ import { formatCurrency } from "@/utils/formatters";
 import NumberInput from "@/components/NumberInput";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import SuggestionLookup from "./SuggestionLookup";
 import ColorBadge from "@/components/ColorBadge";
 import { useOCR } from "../hooks/useSalesOrders";
 import { UNIT_COLOR } from "@/utils/definitions";
@@ -150,10 +157,7 @@ export default function OCRModal({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <NumberInput
-                    {...field}
-                    // value={Number(field.value)}
-                  />
+                  <NumberInput {...field} />
                 </FormControl>
               </FormItem>
             )}
@@ -178,29 +182,60 @@ export default function OCRModal({
         },
       },
       {
-        accessorKey: "combinationId",
+        accessorKey: "value.id",
         header: "Product",
         meta: {
           className: "w-[35%]",
         },
         cell: ({ row }) => {
+          const data = row.original;
+          const combinations = data.suggestedProducts.flatMap(
+            (item) => item.combinations,
+          );
+
           return (
             <Controller
-              name={`articles.${row.index}`}
+              name={`articles.${row.index}.value`}
               control={form.control}
               render={({ field }) => {
                 return (
                   <>
                     <FormItem>
                       <FormControl>
-                        <SuggestionLookup
+                        <ProductLookupInput
+                          selected={row.original.value}
                           ariaInvalid={Boolean(
                             form.formState.errors?.articles?.[row.index]?.value,
                           )}
-                          form={form}
-                          name="articles"
-                          index={row.index}
-                          data={field.value}
+                          onChange={(value) => {
+                            field.onChange(value);
+                          }}
+                          renderOptions={({ props, options }) => (
+                            <>
+                              <CommandEmpty>No results found.</CommandEmpty>
+                              <CommandGroup heading="Actual">
+                                <CommandItem>{data.article}</CommandItem>
+                              </CommandGroup>
+                              {data.suggestedProducts?.length > 0 && (
+                                <>
+                                  <GroupedCommandList
+                                    heading="Suggestions"
+                                    {...props}
+                                    items={combinations}
+                                  />
+
+                                  <CommandSeparator />
+                                </>
+                              )}
+                              {options.length > 0 && (
+                                <GroupedCommandList
+                                  heading="Search"
+                                  {...props}
+                                  items={options}
+                                />
+                              )}
+                            </>
+                          )}
                         />
                       </FormControl>
                     </FormItem>

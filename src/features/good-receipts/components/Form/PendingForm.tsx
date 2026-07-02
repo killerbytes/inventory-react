@@ -15,7 +15,7 @@ import {
 import { goodReceiptItemDefault, UNIT_COLOR } from "@/utils/definitions";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import LineColumn from "@/components/forms/OrderItemForm/LineColumn";
-import { GoodReceiptForm, GoodReceiptItem } from "@/schemas";
+import { GoodReceiptForm, GoodReceiptItem, ProductCombinationSearch } from "@/schemas";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -129,19 +129,15 @@ export default function PendingForm({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <ProductLookupInput
-                      index={row.index}
+                    <ProductLookupInput<ProductCombinationSearch>
+                      selected={row.original.combinations}
                       ariaInvalid={Boolean(
                         form.formState.errors?.goodReceiptLines?.[row.index]
                           ?.combinationId,
                       )}
-                      form={form}
-                      {...field}
-                      name="goodReceiptLines"
                       noBreakPacks
                       onChange={(value) => {
                         field.onChange(value.id);
-                        console.log(value);
 
                         form.setValue(
                           `goodReceiptLines.${row.index}.combinations`,

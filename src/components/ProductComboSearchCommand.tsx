@@ -16,15 +16,7 @@ function ProductComboSearchCommandComponent<T extends BaseProps>({
   onSearch,
   children,
   className,
-  renderOptions = ({ items, open, setOpen, onSelect, search }) => (
-    <GroupedCommandList
-      items={items}
-      open={open}
-      setOpen={setOpen}
-      onSelect={onSelect}
-      search={search}
-    />
-  ),
+  renderOptions = (props) => <GroupedCommandList {...props} />,
 }: {
   onSelect?: (item: T) => void;
   children: React.ReactNode;

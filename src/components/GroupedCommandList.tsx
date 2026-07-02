@@ -2,29 +2,28 @@ import React, { memo, useEffect, useMemo, useRef } from "react";
 import { formatCurrency, getScore } from "@/utils/formatters";
 import { CommandGroup, CommandItem } from "./ui/command";
 import { useCategories } from "@/hooks/useCategories";
+import { ProductCombinationSearch } from "@/schemas";
 import { UNIT_COLOR } from "@/utils/definitions";
 import HighlightMatch from "./HighlightMatch";
 import ColorBadge from "./ColorBadge";
 import { Badge } from "./ui/badge";
 
-export type BaseProps = {
-  group?: string | null;
-  name: string;
-  price: number;
-  unit: string;
-  inventory: { quantity: number };
-  id: number;
-  product: { categoryId: number };
+export type BaseProps = Pick<
+  ProductCombinationSearch,
+  "id" | "name" | "unit" | "price"
+> & {
+  productId?: number;
+  inventory?: { quantity?: number; product?: any } | null;
 };
 
-export const MemoizedCommandItem = memo(
+const MemoizedCommandItem = memo(
   <T extends BaseProps>({
     item,
     selected,
     onSelect,
     search,
     disableNoQuantity,
-    categoryId = item?.product?.categoryId,
+    categoryId = item?.inventory?.product?.categoryId,
   }: {
     item: T;
     selected?: boolean;
@@ -52,7 +51,7 @@ export const MemoizedCommandItem = memo(
         value={name + item.unit}
         onSelect={onSelect}
         ref={selected ? ref : undefined}
-        disabled={disableNoQuantity && Number(item.inventory.quantity) === 0}
+        disabled={disableNoQuantity && Number(item.inventory?.quantity) === 0}
       >
         <ColorBadge colorMap={UNIT_COLOR}>{item.unit}</ColorBadge>
 
@@ -67,9 +66,9 @@ export const MemoizedCommandItem = memo(
 
         <Badge
           className="ml-auto"
-          variant={item.inventory.quantity === 0 ? "destructive" : "default"}
+          variant={item.inventory?.quantity === 0 ? "destructive" : "default"}
         >
-          {Number(item.inventory.quantity)}
+          {Number(item.inventory?.quantity)}
         </Badge>
         <span className="w-1/4 text-right font-bold">
           {formatCurrency(item.price || 0)}
