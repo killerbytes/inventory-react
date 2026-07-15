@@ -144,7 +144,7 @@ export default function LoginForm() {
               />
 
               <DialogFooter>
-                <Button className="w-full " type="submit">
+                <Button className="w-full shadow-sm" type="submit">
                   Login
                 </Button>
               </DialogFooter>

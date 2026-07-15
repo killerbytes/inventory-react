@@ -1,11 +1,4 @@
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   PAGINATION,
   PAGINATION_RESPONSE,
   ROUTES,
@@ -13,12 +6,12 @@ import {
 } from "@/utils/definitions";
 import { useProfit } from "@/features/inventory/hooks/useInventory";
 import DateRangePicker from "@/components/DateRangePicker";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { Profit } from "@/schemas/reports.schema";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { DateRange } from "react-day-picker";
@@ -131,16 +124,9 @@ export default function ProfitPage() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Profit Products
-        </CardTitle>
-        <CardAction></CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+    <>
+      <PageHeader title="Profit Products" />
+      <>
         <DateRangePicker value={range} onChange={setRange} />
         {isLoading && <Loader />}
         <DataTable
@@ -155,7 +141,7 @@ export default function ProfitPage() {
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}
-      </CardContent>
-    </Card>
+      </>
+    </>
   );
 }

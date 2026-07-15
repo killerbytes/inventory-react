@@ -7,11 +7,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex-grow mx-auto flex flex-col h-screen bg-background md:m-2 rounded size-full relative">
-        <div className="flex flex-col h-full md:m-2">
+      <main className="flex-grow mx-auto flex flex-col min-h-screen bg-main md:m-2 md:rounded size-full relative">
+        <div className="flex flex-col gap-2 md:gap-4 p-2 md:p-4">
           {children}
-          <Toaster position="bottom-left" richColors />
         </div>
+        <Toaster position="bottom-left" richColors />
       </main>
     </SidebarProvider>
   );

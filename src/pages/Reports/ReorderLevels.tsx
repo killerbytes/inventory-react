@@ -1,21 +1,14 @@
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   PAGINATION,
   PAGINATION_RESPONSE,
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
 import { useReorderLevels } from "@/features/inventory/hooks/useInventory";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Reorder } from "@/schemas/reports.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { formatDate } from "@/utils/formatters";
@@ -164,16 +157,9 @@ export default function Reorders() {
     [filter, handleFilterChange],
   );
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Reorder Levels
-        </CardTitle>
-        <CardAction></CardAction>
-      </CardHeader>
-      <CardContent>
+    <>
+      <PageHeader title="Reorder Levels" />
+      <>
         <DataTable
           data={data.data || []}
           columns={columns}
@@ -182,7 +168,7 @@ export default function Reorders() {
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}
-      </CardContent>
-    </Card>
+      </>
+    </>
   );
 }

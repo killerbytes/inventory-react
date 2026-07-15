@@ -8,16 +8,9 @@ import {
 } from "@/components/ui/table";
 import React from "react";
 
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useCustomersPaginated } from "@/hooks/useCustomers";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Customer, filterProps } from "@/schemas";
+import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
@@ -81,30 +74,22 @@ export default function Customers() {
   ];
 
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SidebarTrigger />
-            <div className="bg-border h-5 w-[1px]"></div>
-            Customers
-          </CardTitle>
-          <CardAction>
-            <Button
-              className="shadow-sm"
-              onClick={() => {
-                handleToggle({ addModal: true });
-              }}
-            >
-              <Plus /> Add Customer
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
+    <>
+      <>
+        <PageHeader title="Customers">
+          <Button
+            className="shadow-sm"
+            onClick={() => {
+              handleToggle({ addModal: true });
+            }}
+          >
+            <Plus /> Add Customer
+          </Button>
+        </PageHeader>
+        <>
           <div>
             <Input
-              placeholder="Search customer"
-              className="w-full mb-4"
+              className="w-full"
               value={filter.q}
               onChange={(e) => {
                 setFilter((prev) => ({
@@ -119,65 +104,67 @@ export default function Customers() {
             <Loader />
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {columns.map((column) => (
-                      <TableHead
-                        key={column.key}
-                        onClick={() => requestSort(column.key)}
-                        style={{ cursor: "pointer" }}
-                        title={column.title}
-                        className={column.className}
-                      >
-                        {column.title}
-                        {filter.sort === column.key && (
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            {filter.order === "ASC" ? "↑" : "↓"}
-                          </span>
-                        )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data?.data?.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">
-                        {item.name}
-                        <p className="text-xs text-muted-foreground">
-                          {item.address}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        {item.contact}
-                        <p className="text-xs text-muted-foreground">
-                          {item.phone}
-                        </p>
-                      </TableCell>
-                      <TableHead className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelected(item);
-                            handleToggle({ editModal: true });
-                          }}
+              <div className="w-full overflow-auto border shadow rounded-md">
+                <Table className="bg-background">
+                  <TableHeader>
+                    <TableRow>
+                      {columns.map((column) => (
+                        <TableHead
+                          key={column.key}
+                          onClick={() => requestSort(column.key)}
+                          style={{ cursor: "pointer" }}
+                          title={column.title}
+                          className={column.className}
                         >
-                          <Pencil size={16} />
-                        </Button>
-                      </TableHead>
+                          {column.title}
+                          {filter.sort === column.key && (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              {filter.order === "ASC" ? "↑" : "↓"}
+                            </span>
+                          )}
+                        </TableHead>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {data?.data?.map((item) => (
+                      <TableRow key={item.id} className="odd:bg-gray-100">
+                        <TableCell className="font-medium">
+                          {item.name}
+                          <p className="text-xs text-muted-foreground">
+                            {item.address}
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          {item.contact}
+                          <p className="text-xs text-muted-foreground">
+                            {item.phone}
+                          </p>
+                        </TableCell>
+                        <TableHead className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelected(item);
+                              handleToggle({ editModal: true });
+                            }}
+                          >
+                            <Pencil size={16} />
+                          </Button>
+                        </TableHead>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
               {data && data.meta.totalPages > 1 && (
                 <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </>
+      </>
 
       {toggle.addModal && (
         <AddModal
@@ -199,6 +186,6 @@ export default function Customers() {
           data={selected as Customer}
         />
       )}
-    </div>
+    </>
   );
 }

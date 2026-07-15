@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/pagination";
 import { filterProps, pagerProps } from "@/schemas";
 import { PAGINATION } from "@/utils/definitions";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Select from "./Select";
 
 export default function Pager<T extends filterProps>({
@@ -22,9 +23,10 @@ export default function Pager<T extends filterProps>({
     label: i,
     value: i,
   }));
+
   const getVisiblePages = () => {
     const visiblePages = [];
-    const maxVisible = 5; // Maximum visible page numbers
+    const maxVisible = useIsMobile() ? 3 : 5; // Maximum visible page numbers
 
     if (pageCount <= maxVisible) {
       return Array.from({ length: pageCount }, (_, i) => i + 1);
@@ -58,8 +60,8 @@ export default function Pager<T extends filterProps>({
     return visiblePages;
   };
   return (
-    <Pagination className="pt-4 relative">
-      <div className="absolute left-0">
+    <Pagination className="relative flex-col md:flex-row gap-2">
+      <div className="md:absolute left-0">
         <Select
           onChange={(e) => {
             setFilter((prev) => ({
@@ -72,7 +74,7 @@ export default function Pager<T extends filterProps>({
           options={paginationLimits}
         />
       </div>
-      <PaginationContent>
+      <PaginationContent className="justify-center">
         <PaginationItem>
           <PaginationPrevious
             href="#"

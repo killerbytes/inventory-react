@@ -3,6 +3,7 @@ import { PriceHistory, ProductCombination } from "@/schemas";
 import { productCombinationServices } from "@/services";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { DataTable } from "@/components/DataTable";
+import PageHeader from "@/components/PageHeader";
 import ColorBadge from "@/components/ColorBadge";
 import { UNIT_COLOR } from "@/utils/definitions";
 import { Button } from "@/components/ui/button";
@@ -147,7 +148,8 @@ const PriceManager = () => {
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
+      <PageHeader title="Price Manager" />{" "}
       <div
         {...getRootProps()}
         className="border-dashed border-2 border-gray-300 rounded-md p-10 text-center cursor-pointer bg-gray-50"
@@ -159,7 +161,6 @@ const PriceManager = () => {
           <p>Drag & drop a CSV, or click to select</p>
         )}
       </div>
-
       <DataTable
         data={data}
         columns={columns}
@@ -172,7 +173,7 @@ const PriceManager = () => {
           Update Prices
         </Button>
       </div>
-    </div>
+    </>
   );
 };
 

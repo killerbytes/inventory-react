@@ -18,13 +18,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   BUTTON_COLOR,
   ORDER_STATUS,
   ROUTES,
@@ -46,11 +39,12 @@ import PendingOrderForm from "../../features/good-receipts/components/Form/Pendi
 import PartialForm from "../../features/good-receipts/components/Form/PartialForm";
 import ReturnTransactionsTable from "@/components/ReturnTransactionsTable";
 import OrderHistoryModal from "@/components/modals/OrderHistoryModal";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router";
+import { hasRole, ROLES } from "@/utils/permissions";
 import { formatCurrency } from "@/utils/formatters";
+import PageHeader from "@/components/PageHeader";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
@@ -60,7 +54,6 @@ import { useForm } from "react-hook-form";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
 import React from "react";
-import { hasRole, ROLES } from "@/utils/permissions";
 
 export default function Details() {
   const navigate = useNavigate();
@@ -160,171 +153,158 @@ export default function Details() {
     ) ?? 0;
 
   return (
-    <div className="flex flex-col gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SidebarTrigger />
-            <div className="bg-border h-5 w-[1px]"></div>
-            {data?.referenceNo}
-          </CardTitle>
-          <CardAction className="flex gap-2">
-            <ColorBadge colorMap={STATUS_COLOR}>
-              {String(data?.status)}
-            </ColorBadge>
-            <DropdownMenu
-              open={toggle.dropdownMenu}
-              onOpenChange={(open) => {
-                handleToggle({ dropdownMenu: open });
+    <>
+      <PageHeader title={data?.referenceNo || ""}>
+        <ColorBadge colorMap={STATUS_COLOR}>{String(data?.status)}</ColorBadge>
+        <DropdownMenu
+          open={toggle.dropdownMenu}
+          onOpenChange={(open) => {
+            handleToggle({ dropdownMenu: open });
+          }}
+        >
+          <DropdownMenuTrigger
+            asChild
+            onClick={() => handleToggle({ dropdownMenu: true })}
+          >
+            <Button variant="outline" size="icon" className="size-8">
+              <EllipsisVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onSelect={() => {
+                handleToggle({
+                  orderHistoryModal: true,
+                  dropdownMenu: false,
+                });
               }}
             >
-              <DropdownMenuTrigger
-                asChild
-                onClick={() => handleToggle({ dropdownMenu: true })}
-              >
-                <Button variant="outline" size="icon" className="size-8">
-                  <EllipsisVertical />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onSelect={() => {
-                    handleToggle({
-                      orderHistoryModal: true,
-                      dropdownMenu: false,
-                    });
-                  }}
-                >
-                  <ClipboardList />
-                  Order History
-                </DropdownMenuItem>
+              <ClipboardList />
+              Order History
+            </DropdownMenuItem>
 
-                {data?.status === ORDER_STATUS.DRAFT && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        // e.preventDefault();
-                        console.log(form.getValues(), form.formState.errors);
-                        form
-                          .handleSubmit(onSaveOrder)(e)
-                          .catch((error) => {
-                            console.error("Form submission error:", error);
-                          });
-                      }}
-                    >
-                      <Save color="green" />
-                      Save
-                    </DropdownMenuItem>
-                    {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-                      <ConfirmDialog
-                        title={`Void order`}
-                        onConfirm={onDeleteOrder}
-                      >
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <Trash2 color="red" />
-                          Void
-                        </DropdownMenuItem>
-                      </ConfirmDialog>
-                    )}
-                  </>
-                )}
-                {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-                  data?.status === ORDER_STATUS.RECEIVED ||
-                    data?.status === ORDER_STATUS.COMPLETED ? (
-                    <DropdownMenuItem
-                      onSelect={() => {
-                        setReturnEnabled(!returnEnabled);
-                        handleToggle({
-                          dropdownMenu: false,
-                        });
-                      }}
-                    >
-                      <Undo />
-                      Returns
-                    </DropdownMenuItem>
-                  ) : null)}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {data?.status === ORDER_STATUS.DRAFT ? (
-            <>
-              <PendingOrderForm form={form} />
-              <div className="flex justify-end mt-auto mb-10">
-                <ConfirmDialog
-                  title={`Receive Order`}
-                  onConfirm={(e) => {
-                    e.preventDefault();
+            {data?.status === ORDER_STATUS.DRAFT && (
+              <>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    // e.preventDefault();
                     console.log(form.getValues(), form.formState.errors);
                     form
-                      .handleSubmit(onReceiveOrder)(e)
+                      .handleSubmit(onSaveOrder)(e)
                       .catch((error) => {
                         console.error("Form submission error:", error);
                       });
                   }}
                 >
-                  <Button
-                    variant="outline"
-                    className={cx("shadow", BUTTON_COLOR["RECEIVED"])}
-                  >
-                    Receive Order
-                  </Button>
-                </ConfirmDialog>
-              </div>
-            </>
-          ) : (
-            <PartialForm form={form} />
-          )}
-          {data &&
-            data?.returnTransactions &&
-            data?.returnTransactions.length > 0 && (
-              <ReturnTransactionsTable data={data.returnTransactions} />
+                  <Save color="green" />
+                  Save
+                </DropdownMenuItem>
+                {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+                  <ConfirmDialog title={`Void order`} onConfirm={onDeleteOrder}>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <Trash2 color="red" />
+                      Void
+                    </DropdownMenuItem>
+                  </ConfirmDialog>
+                )}
+              </>
             )}
-          {(data?.status === ORDER_STATUS.RECEIVED ||
-            data?.status === ORDER_STATUS.COMPLETED) && (
-              <div className="md:w-1/3 flex ml-auto">
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-bold">Order Amount</TableCell>
-                      <TableHead className="text-right">
-                        {formatCurrency(Number(data?.totalAmount))}
-                      </TableHead>
-                    </TableRow>
+            {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) &&
+              (data?.status === ORDER_STATUS.RECEIVED ||
+              data?.status === ORDER_STATUS.COMPLETED ? (
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setReturnEnabled(!returnEnabled);
+                    handleToggle({
+                      dropdownMenu: false,
+                    });
+                  }}
+                >
+                  <Undo />
+                  Returns
+                </DropdownMenuItem>
+              ) : null)}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </PageHeader>
 
-                    {totalReturnAmount > 0 && (
-                      <TableRow>
-                        <TableCell>Returns</TableCell>
-                        <TableHead className="text-right text-red-500">
-                          -{formatCurrency(totalReturnAmount)}
-                        </TableHead>
-                      </TableRow>
+      <div className="flex flex-col gap-4">
+        {data?.status === ORDER_STATUS.DRAFT ? (
+          <>
+            <PendingOrderForm form={form} />
+            <div className="flex justify-end mt-auto mb-10">
+              <ConfirmDialog
+                title={`Receive Order`}
+                onConfirm={(e) => {
+                  e.preventDefault();
+                  console.log(form.getValues(), form.formState.errors);
+                  form
+                    .handleSubmit(onReceiveOrder)(e)
+                    .catch((error) => {
+                      console.error("Form submission error:", error);
+                    });
+                }}
+              >
+                <Button
+                  variant="outline"
+                  className={cx("shadow", BUTTON_COLOR["RECEIVED"])}
+                >
+                  Receive Order
+                </Button>
+              </ConfirmDialog>
+            </div>
+          </>
+        ) : (
+          <PartialForm form={form} />
+        )}
+        {data &&
+          data?.returnTransactions &&
+          data?.returnTransactions.length > 0 && (
+            <ReturnTransactionsTable data={data.returnTransactions} />
+          )}
+        {(data?.status === ORDER_STATUS.RECEIVED ||
+          data?.status === ORDER_STATUS.COMPLETED) && (
+          <div className="md:w-1/3 flex ml-auto">
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-bold">Order Amount</TableCell>
+                  <TableHead className="text-right">
+                    {formatCurrency(Number(data?.totalAmount))}
+                  </TableHead>
+                </TableRow>
+
+                {totalReturnAmount > 0 && (
+                  <TableRow>
+                    <TableCell>Returns</TableCell>
+                    <TableHead className="text-right text-red-500">
+                      -{formatCurrency(totalReturnAmount)}
+                    </TableHead>
+                  </TableRow>
+                )}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={1} className="font-bold">
+                    Grand Total
+                  </TableCell>
+                  <TableCell className="text-right font-bold">
+                    {formatCurrency(
+                      Number(data?.totalAmount) - totalReturnAmount,
                     )}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TableCell colSpan={1} className="font-bold">
-                        Grand Total
-                      </TableCell>
-                      <TableCell className="text-right font-bold">
-                        {formatCurrency(
-                          Number(data?.totalAmount) - totalReturnAmount,
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  </TableFooter>
-                </Table>
-              </div>
-            )}
-        </CardContent>
-      </Card>
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
+        )}
+      </div>
       {toggle.orderHistoryModal && data?.goodReceiptStatusHistory && (
         <OrderHistoryModal
           data={data.goodReceiptStatusHistory}
           onClose={() => handleToggle({ orderHistoryModal: false })}
         />
       )}
-    </div>
+    </>
   );
 }

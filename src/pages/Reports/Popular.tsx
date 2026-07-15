@@ -1,11 +1,4 @@
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   PAGINATION,
   PAGINATION_RESPONSE,
   ROUTES,
@@ -13,11 +6,11 @@ import {
 } from "@/utils/definitions";
 import { usePopularProducts } from "@/features/inventory/hooks/useInventory";
 import DateRangePicker from "@/components/DateRangePicker";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { Popular } from "@/schemas/reports.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { DateRange } from "react-day-picker";
@@ -109,16 +102,9 @@ export default function PopularPage() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Popular Products
-        </CardTitle>
-        <CardAction></CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+    <>
+      <PageHeader title="Popular Products" />
+      <>
         <DateRangePicker value={range} onChange={setRange} />
         {isLoading ? (
           <Loader />
@@ -132,7 +118,7 @@ export default function PopularPage() {
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}
-      </CardContent>
-    </Card>
+      </>
+    </>
   );
 }

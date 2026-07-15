@@ -1,13 +1,7 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ApiErrorResponse, Category } from "@/schemas";
+import { hasRole, ROLES } from "@/utils/permissions";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/utils";
 import { categoryServices } from "@/services";
@@ -15,11 +9,10 @@ import DnDTable from "@/components/DnDTable";
 import { Pencil, Plus } from "lucide-react";
 import useToggle from "@/hooks/useToggle";
 import EditModal from "./EditModal";
+import { useStore } from "@/stores";
 import AddModal from "./AddModal";
 import { toast } from "sonner";
 import React from "react";
-import { useStore } from "@/stores";
-import { hasRole, ROLES } from "@/utils/permissions";
 
 export default function Categories() {
   const [data, setData] = React.useState<Category[]>([]);
@@ -117,7 +110,6 @@ export default function Categories() {
         return (
           <div className="flex gap-2 justify-end">
             {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-
               <Button
                 variant="outline"
                 size="icon"
@@ -147,42 +139,37 @@ export default function Categories() {
     },
   ];
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SidebarTrigger />
-            <div className="bg-border h-5 w-[1px]"></div>
-            Categories
-          </CardTitle>
-          <CardAction>
-            {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-              <Button
-                onClick={() => {
-                  handleToggle({ addModal: true });
-                }}
-              >
-                <Plus /> Add Category
-              </Button>
-            )}
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-
+    <>
+      <>
+        <PageHeader title="Categories">
+          {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+            <Button
+              onClick={() => {
+                handleToggle({ addModal: true });
+              }}
+            >
+              <Plus /> Add Category
+            </Button>
+          )}
+        </PageHeader>
+        <>
           {loading ? (
             <p>Loading...</p>
           ) : (
-            <>
+            <div className="w-full overflow-auto border shadow rounded-md">
               <DnDTable
+                className="bg-background"
                 columns={columns}
                 data={data || []}
                 onSubmit={onSubmit}
-                disabled={!hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER])}
+                disabled={
+                  !hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER])
+                }
               />
-            </>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </>
+      </>
 
       {toggle.addModal && (
         <AddModal
@@ -205,6 +192,6 @@ export default function Categories() {
           data={selected as Category}
         />
       )}
-    </div>
+    </>
   );
 }

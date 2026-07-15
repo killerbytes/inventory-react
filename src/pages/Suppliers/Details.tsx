@@ -1,12 +1,4 @@
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   PAGINATION,
   PAGINATION_RESPONSE,
   ROUTES,
@@ -23,10 +15,10 @@ import { formatCurrency, formatDate } from "@/utils/formatters";
 import SectionCards from "@/components/SectionCards";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { goodReceiptServices } from "@/services";
-import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
@@ -166,41 +158,39 @@ export default function SupplierDetails() {
     [filter, handleFilterChange],
   );
   return (
-    <div>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>{supplier?.name}</CardTitle>
-          <CardDescription>
-            {supplier?.address}
-            <br />
+    <>
+      <PageHeader
+        title={supplier?.name}
+        description={
+          <>
+            <div>{supplier?.address}</div>
             <p className="whitespace-pre">{supplier?.phone}</p>
-          </CardDescription>
-          <CardAction>
-            <Button disabled>Create Invoice</Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="gap-4 flex flex-col">
-          <SectionCards data={data.summary} />
+          </>
+        }
+      >
+        {/* <Button disabled>Create Invoice</Button> */}
+      </PageHeader>
+      <>
+        <SectionCards data={data.summary} />
 
-          <Input
-            placeholder="Search Reference"
-            className="w-full"
-            value={filter.q}
-            onChange={(e) => {
-              setFilter((prev) => ({
-                ...prev,
-                q: e.target.value,
-                page: 1,
-              }));
-            }}
-          />
+        <Input
+          placeholder="Search Reference"
+          className="w-full"
+          value={filter.q}
+          onChange={(e) => {
+            setFilter((prev) => ({
+              ...prev,
+              q: e.target.value,
+              page: 1,
+            }));
+          }}
+        />
 
-          <DataTable data={data.data || []} columns={columns} />
-          {data.meta.totalPages > 1 && (
-            <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
-          )}
-        </CardContent>
-      </Card>
-    </div>
+        <DataTable data={data.data || []} columns={columns} />
+        {data.meta.totalPages > 1 && (
+          <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+        )}
+      </>
+    </>
   );
 }
