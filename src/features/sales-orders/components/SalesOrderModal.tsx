@@ -750,6 +750,7 @@ export default function SalesOrderModal({
                       onCheckedChange={(value) => {
                         field.onChange(value);
                       }}
+                      className="bg-background"
                       value={String(field.value)}
                     />
                   </FormControl>
@@ -881,7 +882,7 @@ export default function SalesOrderModal({
               });
           }}
         >
-          <Button className="shadow-sm bg-green-500 hidden md:inline-flex">
+          <Button className="shadow-sm hidden md:inline-flex">
             <BanknoteArrowUp /> Create Order
           </Button>
         </ConfirmDialog>

@@ -1,11 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
 import { usePaymentsPaginated } from "@/hooks/usePayment";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { formatCurrency } from "@/utils/formatters";
 import { Invoice } from "@/schemas/invoice.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import { filterProps } from "@/schemas/others";
 import { PaymentApplication } from "@/schemas";
@@ -142,19 +141,13 @@ export default function Payments() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Payments
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      <PageHeader title="Payments" />
+      <>
         <div>
           <Input
             placeholder="Search invoice"
-            className="w-full mb-4"
+            className="w-full"
             value={filter.q}
             onChange={(e) => {
               setFilter((prev) => ({
@@ -175,7 +168,7 @@ export default function Payments() {
             )}
           </>
         )}
-      </CardContent>
-    </Card>
+      </>
+    </>
   );
 }

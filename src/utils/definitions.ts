@@ -102,7 +102,7 @@ export const PAGINATION = {
 };
 
 export const DATE_FORMAT = "MMM-dd-yy";
-export const DATETIME_FORMAT = "MMM-dd-yy h:mm:ss a";
+export const DATETIME_FORMAT = "MMM-dd-yy h:mm a";
 
 export const STATUS = ["DRAFT", "RECEIVED", "COMPLETED", "CANCELLED"];
 

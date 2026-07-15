@@ -39,8 +39,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import ChangePasswordModal from "./modals/ChangePassword";
 import { ROLES, ROUTE_PERMISSIONS } from "@/utils/permissions";
+import ChangePasswordModal from "./modals/ChangePassword";
 import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
@@ -222,6 +222,27 @@ export default function AppSidebar() {
     }
   };
 
+  const Menus = ({
+    items,
+  }: {
+    items: {
+      title: string;
+      url: string;
+      icon: React.ComponentType<{ className?: string }>;
+    }[];
+  }) => {
+    return items.map((item) => (
+      <SidebarMenuItem key={item.title}>
+        <SidebarMenuButton asChild isActive={item.url === location.pathname}>
+          <Link to={item.url}>
+            <item.icon className="text-gray-400" />
+            <span>{item.title}</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    ));
+  };
+
   return (
     <Sidebar variant="inset">
       <SidebarContent>
@@ -232,22 +253,12 @@ export default function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.filter(
-                (item: any) =>
-                  !item.roles || item.roles.includes(authState.user.role),
-              ).map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.url === location.pathname}
-                  >
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <Menus
+                items={items.filter(
+                  (item: any) =>
+                    !item.roles || item.roles.includes(authState.user.role),
+                )}
+              />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -257,24 +268,12 @@ export default function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {reports
-                .filter(
+              <Menus
+                items={reports.filter(
                   (item: any) =>
                     !item.roles || item.roles.includes(authState.user.role),
-                )
-                .map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={item.url === location.pathname}
-                    >
-                      <Link to={item.url}>
-                        {item.icon && <item.icon />}
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                )}
+              />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -285,40 +284,19 @@ export default function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menu
-                .filter(
+              <Menus
+                items={menu.filter(
                   (item: any) =>
                     !item.roles || item.roles.includes(authState.user.role),
-                )
-                .map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={item.url === location.pathname}
-                    >
-                      <Link to={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              {([ROLES.ADMIN, ROLES.MANAGER] as string[]).includes(authState.user.role) && (
-                <Button size="sm" variant="outline" onClick={onUpdateGSheet}>
+                )}
+              />
+              {([ROLES.ADMIN, ROLES.MANAGER] as string[]).includes(
+                authState.user.role,
+              ) && (
+                <Button size="sm" variant="secondary" onClick={onUpdateGSheet}>
                   Update GSheet
                 </Button>
               )}
-              {/* <SidebarMenuItem key="Variant Templates">
-                <SidebarMenuButton
-                  asChild
-                  // isActive={item.url === location.pathname}
-                >
-                  <Link to="" onClick={() => setVariantTemplateModal(true)}>
-                    <BookType />
-                    <span>Variant Templates</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem> */}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

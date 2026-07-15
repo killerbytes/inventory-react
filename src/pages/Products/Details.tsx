@@ -1,10 +1,3 @@
-import {
-  PageHeader,
-  PageHeaderActions,
-  PageHeaderContent,
-  PageHeaderDescription,
-  PageHeaderTitle,
-} from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 
 import {
@@ -25,6 +18,8 @@ import Variants from "@/features/products/components/Variants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCategories } from "@/hooks/useCategories";
 import { useNavigate, useParams } from "react-router";
+import { hasRole, ROLES } from "@/utils/permissions";
+import PageHeader from "@/components/PageHeader";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -32,9 +27,8 @@ import useToggle from "@/hooks/useToggle";
 import { useForm } from "react-hook-form";
 import Loader from "@/components/Loader";
 import React, { Fragment } from "react";
-import { toast } from "sonner";
-import { hasRole, ROLES } from "@/utils/permissions";
 import { useStore } from "@/stores";
+import { toast } from "sonner";
 
 export default function ProductDetails() {
   const { authState } = useStore();
@@ -48,7 +42,6 @@ export default function ProductDetails() {
     isLoading,
     isFetching,
   } = useProduct(Number(id));
-
 
   const [isEditing, setIsEditing] = React.useState(false);
   const { data: categories } = useCategories();
@@ -105,41 +98,34 @@ export default function ProductDetails() {
 
   return (
     <Fragment key={id}>
-      <PageHeader>
-        <PageHeaderContent>
-          <PageHeaderTitle>Products</PageHeaderTitle>
-          <PageHeaderDescription>
-            Manage your products and variants
-          </PageHeaderDescription>
-        </PageHeaderContent>
-        <PageHeaderActions>
-          <ProductComboSearchCommand
-            onSearch={onSearch}
-            onSelect={(item) =>
-              navigate(`${ROUTES.PRODUCTS}/${item.productId}`)
-            }
+      <PageHeader
+        title="Products"
+        description="Manage your products and variants"
+      >
+        <ProductComboSearchCommand
+          onSearch={onSearch}
+          onSelect={(item) => navigate(`${ROUTES.PRODUCTS}/${item.productId}`)}
+        >
+          <Button variant="outline" size="sm">
+            <Search />
+          </Button>
+        </ProductComboSearchCommand>
+        {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+          <Button
+            size="icon"
+            className="size-8 shadow-sm"
+            onClick={() => {
+              handleToggle({ createProductModal: true });
+            }}
           >
-            <Button variant="outline" size="sm">
-              <Search />
-            </Button>
-          </ProductComboSearchCommand>
-          {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-            <Button
-              size="icon"
-              className="size-8 shadow-sm"
-              onClick={() => {
-                handleToggle({ createProductModal: true });
-              }}
-            >
-              <PlusIcon />
-            </Button>
-          )}
-        </PageHeaderActions>
+            <PlusIcon />
+          </Button>
+        )}
       </PageHeader>
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="flex flex-col gap-4">
+        <>
           <Card>
             <CardContent>
               {isEditing ? (
@@ -178,34 +164,32 @@ export default function ProductDetails() {
                   <div className="flex justify-between">
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-col ">
-                        <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground/80">
+                        <span className="text-xs uppercase tracking-wider text-muted-foreground">
                           Product Name
                         </span>
-                        <span className="font-medium text-foreground ">
-                          {product?.name || "N/A"}
-                        </span>
+                        <span>{product?.name || "N/A"}</span>
                       </div>
                       <div className="flex flex-col ">
-                        <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground/80">
+                        <span className="text-xs uppercase tracking-wider text-muted-foreground">
                           Category
                         </span>
-                        <span className="font-medium text-foreground ">
+                        <span>
                           {categories?.find((c) => c.id === product?.categoryId)
                             ?.name || "Uncategorized"}
                         </span>
                       </div>
                       <div className="flex flex-col ">
-                        <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground/80">
+                        <span className="text-xs uppercase tracking-wider text-muted-foreground">
                           Base Unit
                         </span>
-                        <span className="font-medium text-foreground ">
+                        <span>
                           <ColorBadge colorMap={UNIT_COLOR}>
                             {product?.baseUnit}
                           </ColorBadge>
                         </span>
                       </div>
                       <div className="flex flex-col ">
-                        <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground/80">
+                        <span className="text-xs uppercase tracking-wider  text-muted-foreground">
                           Description
                         </span>
                         <span
@@ -218,16 +202,22 @@ export default function ProductDetails() {
                     </div>
                     <div className="flex flex-col gap-2">
                       <Button
+                        className="shadow-sm"
+                        variant="secondary"
                         onClick={() => {
                           handleToggle({ barcodePrinter: true });
                         }}
                       >
                         Print Barcode
                       </Button>
-                      {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+                      {hasRole(authState.user.role, [
+                        ROLES.ADMIN,
+                        ROLES.MANAGER,
+                      ]) && (
                         <Button
                           className="shadow-sm"
                           type="button"
+                          variant="secondary"
                           onClick={() => setIsEditing(true)}
                         >
                           <Edit />
@@ -246,7 +236,7 @@ export default function ProductDetails() {
           />
 
           <Combinations id={id} product={product} />
-        </div>
+        </>
       )}
 
       {toggle.variantModal && (

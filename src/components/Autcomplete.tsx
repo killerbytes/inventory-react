@@ -5,13 +5,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -92,6 +93,14 @@ export default function Autocomplete({
           <CommandList>
             <CommandEmpty>No products found.</CommandEmpty>
             {renderOptionsDefault({ options, setOpen, onChange, value })}
+
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem>
+                <Plus />
+                <span>Add New {placeholder}</span>
+              </CommandItem>
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>

@@ -5,17 +5,9 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useGoodReceiptsPaginated } from "@/features/good-receipts/hooks/useGoodReceipts";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
 import { Link, useNavigate } from "react-router-dom";
 import { GoodReceipt, filterProps } from "@/schemas";
@@ -23,6 +15,7 @@ import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
@@ -200,72 +193,63 @@ export default function GoodReceipts() {
     [filter, handleFilterChange],
   );
   return (
-    <div>
-      <Card>
-        <CardHeader className="px-2 md:px-4">
-          <CardTitle className="flex items-center gap-2">
-            <SidebarTrigger />
-            <div className="bg-border h-5 w-[1px]"></div>
-            Good Receipts
-          </CardTitle>
-          <CardAction>
-            <Link to={ROUTES.GOOD_RECEIPT_CREATE}>
-              <Button className="shadow-md bg-orange-500">
-                <Plus /> Create Order
-              </Button>
-            </Link>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 px-2 md:px-4">
-          <SectionCards data={data.summary || []} />
+    <>
+      <PageHeader title="Good Receipts">
+        <Link to={ROUTES.GOOD_RECEIPT_CREATE}>
+          <Button className="shadow-md bg-orange-500">
+            <Plus /> Create Order
+          </Button>
+        </Link>
+      </PageHeader>
+      <div className="flex flex-col gap-4 px-2 md:px-4">
+        <SectionCards data={data.summary || []} />
 
-          <div className="flex flex-col md:flex-row gap-2  ">
-            <div>
-              <DateRangePicker value={range} onChange={setRange} />
-            </div>
-
-            <Input
-              placeholder="Search Reference"
-              className="w-full"
-              value={filter.q}
-              onChange={(e) => {
-                setFilter((prev) => ({
-                  ...prev,
-                  q: e.target.value,
-                }));
-                setFilter((prev) => ({ ...prev, page: 1 }));
-              }}
-            />
-            <Select
-              options={ORDER_STATUS_OPTIONS}
-              value={filter.status}
-              onChange={(selected) => {
-                if (selected === "ALL") {
-                  setFilter(({ ...prev }) => ({ ...prev, status: "ALL" }));
-                } else {
-                  setFilter((prev) => ({ ...prev, status: selected }));
-                }
-              }}
-            />
+        <div className="flex flex-col md:flex-row gap-2  ">
+          <div>
+            <DateRangePicker value={range} onChange={setRange} />
           </div>
-          {isLoading ? (
-            <Loader />
-          ) : (
-            <>
-              <DataTable
-                data={data.data || []}
-                columns={columns}
-                onRowClick={(item: GoodReceipt) =>
-                  navigate(`${ROUTES.GOOD_RECEIPT}/${item.id}`)
-                }
-              />
-              {data.meta.totalPages > 1 && (
-                <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+
+          <Input
+            placeholder="Search Reference"
+            className="w-full"
+            value={filter.q}
+            onChange={(e) => {
+              setFilter((prev) => ({
+                ...prev,
+                q: e.target.value,
+              }));
+              setFilter((prev) => ({ ...prev, page: 1 }));
+            }}
+          />
+          <Select
+            options={ORDER_STATUS_OPTIONS}
+            value={filter.status}
+            onChange={(selected) => {
+              if (selected === "ALL") {
+                setFilter(({ ...prev }) => ({ ...prev, status: "ALL" }));
+              } else {
+                setFilter((prev) => ({ ...prev, status: selected }));
+              }
+            }}
+          />
+        </div>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <>
+            <DataTable
+              data={data.data || []}
+              columns={columns}
+              onRowClick={(item: GoodReceipt) =>
+                navigate(`${ROUTES.GOOD_RECEIPT}/${item.id}`)
+              }
+            />
+            {data.meta.totalPages > 1 && (
+              <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+            )}
+          </>
+        )}
+      </div>
+    </>
   );
 }

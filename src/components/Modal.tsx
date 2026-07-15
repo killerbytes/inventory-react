@@ -40,7 +40,11 @@ export default function Modal({
       }}
     >
       <DialogContent
-        className={cx("w-full px-2 md:px-6", `${Modal.sizes[size]}`, className)}
+        className={cx(
+          "w-full bg-main px-2 md:px-6",
+          `${Modal.sizes[size]}`,
+          className,
+        )}
         tabIndex={undefined}
       >
         <DialogHeader className="text-left">

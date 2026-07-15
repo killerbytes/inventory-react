@@ -17,13 +17,6 @@ import {
   useSalesOrder,
 } from "@/features/sales-orders/hooks/useSalesOrders";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   AlertCircleIcon,
   Ban,
   Car,
@@ -38,16 +31,16 @@ import { ORDER_STATUS, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import Static from "../../features/sales-orders/components/Static";
 import { CancelModal } from "@/components/modals/CancelModal";
 import { ApiErrorResponse, CancelOrder } from "@/schemas";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useNavigate, useParams } from "react-router";
+import { hasRole, ROLES } from "@/utils/permissions";
 import { formatCurrency } from "@/utils/formatters";
+import PageHeader from "@/components/PageHeader";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import useToggle from "@/hooks/useToggle";
 import Loader from "@/components/Loader";
 import { useStore } from "@/stores";
 import { toast } from "sonner";
-import { hasRole, ROLES } from "@/utils/permissions";
 
 export default function SalesOrderDetails() {
   const [toggle, handleToggle] = useToggle({
@@ -100,84 +93,83 @@ export default function SalesOrderDetails() {
     ) || 0;
 
   return (
-    <div className="flex flex-col gap-4">
-      <Card>
-        <CardHeader className="px-2 md:px-4">
-          <CardTitle className="flex items-center gap-2">
-            <SidebarTrigger />
-            <div className="bg-border h-5 w-[1px]"></div>
-            Sales Order
-          </CardTitle>
-          <CardAction className="flex gap-2">
-            <ColorBadge colorMap={STATUS_COLOR}>
-              {String(data?.status)}
-            </ColorBadge>
-            {data?.status !== ORDER_STATUS.VOID && (
-              <DropdownMenu
-                open={toggle.dropdownMenu}
-                onOpenChange={(open) => {
-                  handleToggle({ dropdownMenu: open });
-                }}
-              >
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="size-8">
-                    <EllipsisVertical />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      handleToggle({
-                        deliveryDetailsModal: true,
-                        dropdownMenu: false,
-                      });
-                    }}
-                  >
-                    <Car />
-                    Delivery Details
-                  </DropdownMenuItem>
+    <>
+      <>
+        <PageHeader title={`Sales Order #${data?.salesOrderNumber}`}>
+          <ColorBadge colorMap={STATUS_COLOR}>
+            {String(data?.status)}
+          </ColorBadge>
+          {data?.status !== ORDER_STATUS.VOID && (
+            <DropdownMenu
+              open={toggle.dropdownMenu}
+              onOpenChange={(open) => {
+                handleToggle({ dropdownMenu: open });
+              }}
+            >
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="size-8">
+                  <EllipsisVertical />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    handleToggle({
+                      deliveryDetailsModal: true,
+                      dropdownMenu: false,
+                    });
+                  }}
+                >
+                  <Car />
+                  Delivery Details
+                </DropdownMenuItem>
 
-                  {(data?.status === ORDER_STATUS.RECEIVED ||
-                    data?.status === ORDER_STATUS.COMPLETED) && (
-                      <>
-                        {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-                          <DropdownMenuItem
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              handleToggle({
-                                cancelModal: true,
-                                dropdownMenu: false,
-                              });
-                            }}
-                          >
-                            <Ban color="red" />
-                            Cancel Order
-                          </DropdownMenuItem>
-                        )}
-                        {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-                          <DropdownMenuItem
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              setReturnEnabled(!returnEnabled);
-                              handleToggle({
-                                dropdownMenu: false,
-                              });
-                            }}
-                          >
-                            <Undo />
-                            Return/Exchange
-                          </DropdownMenuItem>
-                        )}
-                      </>
+                {(data?.status === ORDER_STATUS.RECEIVED ||
+                  data?.status === ORDER_STATUS.COMPLETED) && (
+                  <>
+                    {hasRole(authState.user.role, [
+                      ROLES.ADMIN,
+                      ROLES.MANAGER,
+                    ]) && (
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          handleToggle({
+                            cancelModal: true,
+                            dropdownMenu: false,
+                          });
+                        }}
+                      >
+                        <Ban color="red" />
+                        Cancel Order
+                      </DropdownMenuItem>
                     )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </CardAction>
-        </CardHeader>
+                    {hasRole(authState.user.role, [
+                      ROLES.ADMIN,
+                      ROLES.MANAGER,
+                    ]) && (
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          setReturnEnabled(!returnEnabled);
+                          handleToggle({
+                            dropdownMenu: false,
+                          });
+                        }}
+                      >
+                        <Undo />
+                        Return/Exchange
+                      </DropdownMenuItem>
+                    )}
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </PageHeader>
 
-        <CardContent className="flex flex-col gap-4 px-2 md:px-4">
+        <>
           {data && <Static data={data} />}
           {data?.status === ORDER_STATUS.CANCELLED && (
             <Alert variant="destructive">
@@ -186,14 +178,6 @@ export default function SalesOrderDetails() {
               <AlertDescription>{data?.cancellationReason}</AlertDescription>
             </Alert>
           )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Order Items</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
           {isLoading && <Loader />}
           {data && <StaticDataTable data={data} />}
 
@@ -207,7 +191,9 @@ export default function SalesOrderDetails() {
             <Table>
               <TableBody>
                 <TableRow>
-                  <TableCell className="font-semibold">Sale Amount</TableCell>
+                  <TableCell className="font-semibold text-muted-foreground">
+                    Sale Amount
+                  </TableCell>
                   <TableHead className="text-right">
                     {formatCurrency(Number(data?.totalAmount))}
                   </TableHead>
@@ -215,7 +201,9 @@ export default function SalesOrderDetails() {
 
                 {totalReturnAmount > 0 && (
                   <TableRow>
-                    <TableCell>Total Returns</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      Total Returns
+                    </TableCell>
                     <TableHead className="text-right text-red-500">
                       -{formatCurrency(totalReturnAmount)}
                     </TableHead>
@@ -223,8 +211,10 @@ export default function SalesOrderDetails() {
                 )}
                 {totalExchangeAmount > 0 && (
                   <TableRow>
-                    <TableCell>Total Exchanges</TableCell>
-                    <TableHead className="text-right ">
+                    <TableCell className="text-muted-foreground">
+                      Total Exchanges
+                    </TableCell>
+                    <TableHead className="text-right">
                       {formatCurrency(totalExchangeAmount)}
                     </TableHead>
                   </TableRow>
@@ -232,22 +222,25 @@ export default function SalesOrderDetails() {
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={1} className="font-bold">
+                  <TableCell
+                    colSpan={1}
+                    className="font-bold text-muted-foreground"
+                  >
                     Grand Total
                   </TableCell>
                   <TableCell className="text-right font-bold">
                     {formatCurrency(
                       Number(data?.totalAmount) -
-                      totalReturnAmount +
-                      totalExchangeAmount,
+                        totalReturnAmount +
+                        totalExchangeAmount,
                     )}
                   </TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
           </div>
-        </CardContent>
-      </Card>
+        </>
+      </>
 
       {toggle.cancelModal && (
         <CancelModal
@@ -265,6 +258,6 @@ export default function SalesOrderDetails() {
           onClose={() => handleToggle({ deliveryDetailsModal: false })}
         />
       )}
-    </div>
+    </>
   );
 }

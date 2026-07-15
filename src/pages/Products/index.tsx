@@ -1,11 +1,4 @@
 import {
-  PageHeader,
-  PageHeaderActions,
-  PageHeaderContent,
-  PageHeaderDescription,
-  PageHeaderTitle,
-} from "@/components/PageHeader";
-import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -18,6 +11,7 @@ import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { GLOBAL_COLOR, ROUTES } from "@/utils/definitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCategories } from "@/hooks/useCategories";
+import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, Search } from "lucide-react";
 import { cx } from "class-variance-authority";
@@ -39,34 +33,29 @@ export default function Products() {
 
   return (
     <>
-      <PageHeader>
-        <PageHeaderContent>
-          <PageHeaderTitle>Products</PageHeaderTitle>
-          <PageHeaderDescription>
-            Manage your products and variants
-          </PageHeaderDescription>
-        </PageHeaderContent>
-        <PageHeaderActions>
-          <ProductComboSearchCommand
-            onSearch={onSearch}
-            onSelect={(item) => {
-              navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
-            }}
-          >
-            <Button variant="outline" size="sm">
-              <Search />
-            </Button>
-          </ProductComboSearchCommand>
-          <Button
-            size="icon"
-            className="size-8 shadow-sm"
-            onClick={() => {
-              handleToggle({ createProductModal: true });
-            }}
-          >
-            <PlusIcon />
+      <PageHeader
+        title="Products"
+        description="Manage your products and variants"
+      >
+        <ProductComboSearchCommand
+          onSearch={onSearch}
+          onSelect={(item) => {
+            navigate(`${ROUTES.PRODUCTS}/${item.productId}`);
+          }}
+        >
+          <Button variant="outline" size="sm">
+            <Search />
           </Button>
-        </PageHeaderActions>
+        </ProductComboSearchCommand>
+        <Button
+          size="icon"
+          className="size-8 shadow-sm"
+          onClick={() => {
+            handleToggle({ createProductModal: true });
+          }}
+        >
+          <PlusIcon />
+        </Button>
       </PageHeader>
 
       <Card>

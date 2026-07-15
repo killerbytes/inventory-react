@@ -24,9 +24,7 @@ export default function UserIcon() {
           </Avatar>
           <div>
             <div>{user?.name}</div>
-            <div className="text-xs text-muted-foreground uppercase">
-              {user?.role}
-            </div>
+            <div className="text-xs text-muted uppercase">{user?.role}</div>
           </div>
         </>
       )}

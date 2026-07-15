@@ -21,9 +21,9 @@ import { groupSubItems } from "@/lib/utils";
 import Tooltip from "@/components/Tooltip";
 import useToggle from "@/hooks/useToggle";
 
-import React from "react";
 import { hasRole, ROLES } from "@/utils/permissions";
 import { useStore } from "@/stores";
+import React from "react";
 export default function CombinationsTab({
   product,
 }: {
@@ -135,47 +135,30 @@ export default function CombinationsTab({
         },
         cell: ({ row }: { row: Row<ProductCombination> }) => (
           <div className="flex gap-2">
-            {
-              hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="shadow-sm"
-                  onClick={() => {
-                    setSelected(row.original);
-                    handleToggle({ stockAdjustmentModal: true });
-                  }}
-                >
-                  <ClipboardList />
-                </Button>
-              )}
-            {
-              hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
-
-                Number(row.original?.inventory?.quantity) === 0 ||
-                  row.original?.inventory?.quantity === undefined ? (
-                  <Tooltip content="Quantity must be more than 1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shadow-sm"
-                      disabled
-                      onClick={() => {
-                        setSelected(row.original);
-                        handleToggle({ breakPackModal: true });
-                      }}
-                    >
-                      <PackageOpen />
-                    </Button>
-                  </Tooltip>
-                ) : (
+            {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shadow-sm"
+                onClick={() => {
+                  setSelected(row.original);
+                  handleToggle({ stockAdjustmentModal: true });
+                }}
+              >
+                <ClipboardList />
+              </Button>
+            )}
+            {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) &&
+              (Number(row.original?.inventory?.quantity) === 0 ||
+              row.original?.inventory?.quantity === undefined ? (
+                <Tooltip content="Quantity must be more than 1">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     className="shadow-sm"
+                    disabled
                     onClick={() => {
                       setSelected(row.original);
                       handleToggle({ breakPackModal: true });
@@ -183,8 +166,21 @@ export default function CombinationsTab({
                   >
                     <PackageOpen />
                   </Button>
-                )
-              )}
+                </Tooltip>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shadow-sm"
+                  onClick={() => {
+                    setSelected(row.original);
+                    handleToggle({ breakPackModal: true });
+                  }}
+                >
+                  <PackageOpen />
+                </Button>
+              ))}
           </div>
         ),
       },
@@ -202,7 +198,7 @@ export default function CombinationsTab({
               <Button
                 onClick={() => handleToggle({ editCombinationModal: true })}
                 type="button"
-                variant="outline"
+                variant="secondary"
                 className="shadow-sm"
               >
                 <Cog />
@@ -211,7 +207,7 @@ export default function CombinationsTab({
             )}
           </CardAction>
         </CardHeader>
-        <CardContent className="grid gap-6">
+        <CardContent className="">
           <DataTable
             data={combinations}
             columns={columns}
@@ -242,7 +238,7 @@ export default function CombinationsTab({
             handleToggle({ stockAdjustmentModal: false });
           }}
           combinationId={Number(selected?.id)}
-          onSubmit={async () => { }}
+          onSubmit={async () => {}}
         />
       )}
 

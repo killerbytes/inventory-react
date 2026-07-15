@@ -1,11 +1,4 @@
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   PAGINATION,
   PAGINATION_RESPONSE,
   ROUTES,
@@ -13,10 +6,10 @@ import {
 } from "@/utils/definitions";
 import { usePriceHistory } from "@/features/inventory/hooks/useInventory";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { filterProps, PriceHistory } from "@/schemas";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { cx } from "class-variance-authority";
@@ -146,20 +139,13 @@ export default function PriceHistoryPage() {
     [filter, handleFilterChange],
   );
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Price History
-        </CardTitle>
-        <CardAction></CardAction>
-      </CardHeader>
-      <CardContent>
+    <>
+      <PageHeader title="Price History" />
+      <>
         <div>
           <Input
             placeholder="Search Product"
-            className="w-full mb-4"
+            className="w-full"
             value={filter.q}
             onChange={(e) => {
               setFilter((prev) => ({
@@ -186,7 +172,7 @@ export default function PriceHistoryPage() {
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}
-      </CardContent>
-    </Card>
+      </>
+    </>
   );
 }

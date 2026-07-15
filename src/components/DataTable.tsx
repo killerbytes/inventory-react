@@ -95,89 +95,85 @@ const DataTable = <T,>(props: Props<T>) => {
     : [null, null];
 
   return (
-    <div className={cx("w-full overflow-auto ")}>
-      <div className={cx("rounded-md border overflow-hidden")}>
-        <Table className="overflow ">
-          {
-            <TableHeader className="text-xs ">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      key={header.id}
-                      className={
-                        header.column.columnDef?.meta?.headerClassName ?? ""
-                      }
+    <div className={cx("w-full overflow-auto border shadow rounded-md")}>
+      <Table className="overflow bg-white">
+        {
+          <TableHeader className="text-xs ">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className={
+                      header.column.columnDef?.meta?.headerClassName ?? ""
+                    }
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+        }
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => {
+              const isDisabled = disabledKey
+                ? disabledKey
+                    .split(".")
+                    .reduce(
+                      (acc: unknown, key) =>
+                        (acc as Record<string, unknown>)?.[key],
+                      row.original,
+                    ) === disabledValue
+                : null;
+
+              return (
+                <TableRow
+                  className={cx(
+                    "odd:bg-gray-100",
+                    { "cursor-pointer": onRowClick && !isDisabled },
+                    isDisabled
+                      ? "pointer-events-none bg-muted text-muted-foreground opacity-50"
+                      : "hover:bg-gray-300",
+                  )}
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  onClick={() => {
+                    if (onRowClick) {
+                      onRowClick?.(row.original);
+                    }
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cell.column.columnDef.meta?.className}
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
                   ))}
                 </TableRow>
-              ))}
-            </TableHeader>
-          }
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => {
-                const isDisabled = disabledKey
-                  ? disabledKey
-                      .split(".")
-                      .reduce(
-                        (acc: unknown, key) =>
-                          (acc as Record<string, unknown>)?.[key],
-                        row.original,
-                      ) === disabledValue
-                  : null;
-
-                return (
-                  <TableRow
-                    className={cx(
-                      { "cursor-pointer": onRowClick && !isDisabled },
-                      isDisabled
-                        ? "pointer-events-none bg-muted text-muted-foreground opacity-50"
-                        : "hover:bg-muted/50",
-                    )}
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    onClick={() => {
-                      if (onRowClick) {
-                        onRowClick?.(row.original);
-                      }
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={cell.column.columnDef.meta?.className}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-12 text-center"
-                >
-                  {meta?.emptyText || "No results found"}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-          {renderFooter && <TableFooter>{renderFooter(data)}</TableFooter>}
-        </Table>
-      </div>
+              );
+            })
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-12 text-center">
+                {meta?.emptyText || "No results found"}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+        {renderFooter && <TableFooter>{renderFooter(data)}</TableFooter>}
+      </Table>
     </div>
   );
 };

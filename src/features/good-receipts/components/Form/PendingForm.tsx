@@ -12,10 +12,14 @@ import {
   UseFormReturn,
   useWatch,
 } from "react-hook-form";
+import {
+  GoodReceiptForm,
+  GoodReceiptItem,
+  ProductCombinationSearch,
+} from "@/schemas";
 import { goodReceiptItemDefault, UNIT_COLOR } from "@/utils/definitions";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
 import LineColumn from "@/components/forms/OrderItemForm/LineColumn";
-import { GoodReceiptForm, GoodReceiptItem, ProductCombinationSearch } from "@/schemas";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getTotalAmountTableFooter } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -199,6 +203,7 @@ export default function PendingForm({
         header: "Price",
         meta: {
           className: "text-right min-w-[100px] w-[110px]",
+          headerClassName: "text-right",
         },
         cell: ({ row }) => (
           <FormField
@@ -216,9 +221,10 @@ export default function PendingForm({
       },
       {
         accessorKey: "totalAmount",
-        header: () => <div className="text-right">Amount</div>,
+        header: "Amount",
         meta: {
           className: "text-right w-20",
+          headerClassName: "text-right",
         },
         cell: ({ row }) => (
           <LineColumn

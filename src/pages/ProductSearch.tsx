@@ -184,8 +184,8 @@ export default function ProductSearch() {
   }
 
   return (
-    <div className="ml-auto p-4 flex flex-col gap-4">
-      <InputGroup>
+    <div className="flex flex-col gap-2 p-2 md:gap-4 md:p-4">
+      <InputGroup className="bg-background">
         <InputGroupInput
           ref={inputRef}
           placeholder="Search..."

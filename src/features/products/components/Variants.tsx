@@ -16,9 +16,9 @@ import { Button } from "@/components/ui/button";
 import { VariantTypes } from "@/schemas";
 import { Pencil } from "lucide-react";
 
+import { hasRole, ROLES } from "@/utils/permissions";
 import { ToggleUpdater } from "@/hooks/useToggle";
 import ShowMore from "@/components/ShowMore";
-import { hasRole, ROLES } from "@/utils/permissions";
 import { useStore } from "@/stores";
 
 export default function Variants({
@@ -47,7 +47,7 @@ export default function Variants({
                   })
                 }
                 type="button"
-                variant="outline"
+                variant="secondary"
                 className="shadow-sm"
               >
                 <Pencil />
@@ -61,17 +61,17 @@ export default function Variants({
             defaultValue={variants
               .find((i) => i.isBreakpackFilter)
               ?.id?.toString()}
-            className="grid grid-cols-4 gap-4"
+            className="grid md:grid-cols-4 gap-4"
           >
             {variants.map((variant) => (
               <FieldLabel key={variant.id} htmlFor={variant.id?.toString()}>
                 <Field orientation="horizontal">
                   <FieldContent>
-                    <FieldTitle className="uppercase text-muted-foreground">
+                    <FieldTitle className="uppercase text-xs font-semibold text-muted-foreground">
                       {variant.name}
                     </FieldTitle>
                     <ShowMore>
-                      <ul className="text-sm flex gap-1 flex-col">
+                      <ul className="text-xs flex gap-1 flex-col">
                         {variant.values
                           .sort((a, b) => a.value.localeCompare(b.value))
                           .map((i) => (

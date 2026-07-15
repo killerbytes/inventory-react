@@ -8,17 +8,10 @@ import {
   GoodReceiptForm,
   GoodReceiptInput,
 } from "@/schemas";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import PendingOrderForm from "../../features/good-receipts/components/Form/PendingForm";
 import { useCreateGoodReceipt } from "@/features/good-receipts/hooks/useGoodReceipts";
 import { ERROR, goodReceiptItemDefault, ROUTES } from "@/utils/definitions";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
@@ -141,49 +134,37 @@ export default function Create() {
 
   return (
     <>
-      <div>
-        <Card>
-          <CardHeader className="px-2 md:px-4">
-            <CardTitle className="flex items-center gap-2">
-              <SidebarTrigger />
-              <div className="bg-border h-5 w-[1px]"></div>
-              Create Good Receipt
-            </CardTitle>
-            <CardAction>
-              <Input
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setJson(e.currentTarget.value);
-                  }
-                }}
-                placeholder="Paste JSON here..."
-              />
-            </CardAction>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4 px-2 md:px-4">
-            <PendingOrderForm form={form} />
-            <div className="flex justify-end mt-auto">
-              <Button
-                className="bg-orange-500"
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log(form.getValues(), form.formState.errors);
+      <PageHeader title="Create Good Receipt">
+        <Input
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setJson(e.currentTarget.value);
+            }
+          }}
+          placeholder="Paste JSON here..."
+        />
+      </PageHeader>
+      <div className="flex flex-col gap-4">
+        <PendingOrderForm form={form} />
+        <div className="flex justify-end mt-auto">
+          <Button
+            className="bg-orange-500"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              console.log(form.getValues(), form.formState.errors);
 
-                  form
-                    .handleSubmit(onSubmit)(e)
-                    .catch((error) => {
-                      console.error("Form submission error:", error);
-                    });
-                }}
-              >
-                Create Order
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              form
+                .handleSubmit(onSubmit)(e)
+                .catch((error) => {
+                  console.error("Form submission error:", error);
+                });
+            }}
+          >
+            Create Order
+          </Button>
+        </div>
       </div>
-      {/* {JSON.stringify(data)} */}
     </>
   );
 }

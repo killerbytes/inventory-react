@@ -68,7 +68,7 @@ function Select<T>(props: SelectProps<T>) {
       onValueChange={handleChange}
     >
       <SelectTrigger
-        className={cx("w-full", className)}
+        className={cx("w-full bg-background", className)}
         ref={triggerRef}
         tabIndex={tabIndex}
       >

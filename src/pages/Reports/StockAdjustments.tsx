@@ -6,18 +6,17 @@ import {
   UNIT_COLOR,
 } from "@/utils/definitions";
 import { useStockAdjustments } from "@/features/inventory/hooks/useInventory";
-import { PageHeader, PageHeaderTitle } from "@/components/PageHeader";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Card, CardContent } from "@/components/ui/card";
 import { filterProps, StockAdjustment } from "@/schemas";
 import { formatDateTime } from "@/utils/formatters";
+import { Camera, Loader, Plus } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Pager from "@/components/Pager";
-import { Loader } from "lucide-react";
 import { Link } from "react-router";
 import React from "react";
 
@@ -157,36 +156,33 @@ export default function StockAdjustments() {
 
   return (
     <>
-      <PageHeader>
-        <div className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px] mr-2" />
-          <div>
-            <PageHeaderTitle>Stock Adjustment</PageHeaderTitle>
-          </div>
-        </div>
+      <PageHeader title="Sales Orders">
+        <Button className="shadow-md bg-red-500">
+          <Camera />
+        </Button>
+        <Button className="shadow-md ">
+          <Plus /> Create Order
+        </Button>
       </PageHeader>
-      <Card>
-        <CardContent className="gap-4 flex flex-col">
-          <Input
-            placeholder="Search Product"
-            className="w-full"
-            value={filter.q}
-            onChange={(e) => {
-              setFilter((prev) => ({
-                ...prev,
-                q: e.target.value,
-                page: 1,
-              }));
-            }}
-          />
-          {isLoading && <Loader />}
-          <DataTable data={data.data} columns={columns} />
-          {data.meta.totalPages > 1 && (
-            <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
-          )}
-        </CardContent>
-      </Card>
+      <>
+        <Input
+          placeholder="Search Product"
+          className="w-full"
+          value={filter.q}
+          onChange={(e) => {
+            setFilter((prev) => ({
+              ...prev,
+              q: e.target.value,
+              page: 1,
+            }));
+          }}
+        />
+        {isLoading && <Loader />}
+        <DataTable data={data.data} columns={columns} />
+        {data.meta.totalPages > 1 && (
+          <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+        )}
+      </>
     </>
   );
 }

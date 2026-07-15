@@ -1,18 +1,11 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useSuppliersPaginated } from "@/features/suppliers/hooks/useSuppliers";
 import { PAGINATION, PAGINATION_RESPONSE, ROUTES } from "@/utils/definitions";
 import EditModal from "../../features/suppliers/components/EditModal";
 import AddModal from "../../features/suppliers/components/AddModal";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { filterProps, Supplier } from "@/schemas";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,30 +110,23 @@ export default function Suppliers() {
     [filter, handleFilterChange, handleToggle],
   );
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SidebarTrigger />
-            <div className="bg-border h-5 w-[1px]"></div>
-            Suppliers
-          </CardTitle>
-          <CardAction>
-            <Button
-              className="shadow-sm"
-              onClick={() => {
-                handleToggle({ addModal: true });
-              }}
-            >
-              <Plus /> Add Supplier
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
+    <>
+      <>
+        <PageHeader title="Suppliers">
+          <Button
+            className="shadow-sm"
+            onClick={() => {
+              handleToggle({ addModal: true });
+            }}
+          >
+            <Plus /> Add Supplier
+          </Button>
+        </PageHeader>
+        <>
           <div>
             <Input
               placeholder="Search supplier"
-              className="w-full mb-4"
+              className="w-full"
               value={filter.q}
               onChange={(e) => {
                 setFilter((prev) => ({
@@ -162,8 +148,8 @@ export default function Suppliers() {
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </>
+      </>
 
       {toggle.addModal && (
         <AddModal
@@ -183,6 +169,6 @@ export default function Suppliers() {
           data={selected as Supplier}
         />
       )}
-    </div>
+    </>
   );
 }

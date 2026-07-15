@@ -3,18 +3,11 @@ import {
   PAGINATION,
   PAGINATION_RESPONSE,
 } from "@/utils/definitions";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useMovements } from "@/features/inventory/hooks/useInventory";
 import DateRangePicker from "@/components/DateRangePicker";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
 import { endOfMonth, startOfMonth } from "date-fns";
+import PageHeader from "@/components/PageHeader";
 import Movements from "@/components/Movements";
 import { useSearchParams } from "react-router";
 import { Input } from "@/components/ui/input";
@@ -98,16 +91,9 @@ export default function InventoryMovements() {
   }, [searchParams]);
 
   return (
-    <Card>
-      <CardHeader className="px-2 md:px-4">
-        <CardTitle className="flex items-center gap-2">
-          <SidebarTrigger />
-          <div className="bg-border h-5 w-[1px]"></div>
-          Inventory Movements
-        </CardTitle>
-        <CardAction></CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4 px-2 md:px-4">
+    <>
+      <PageHeader title="Inventory Movements" />
+      <>
         <SectionCards data={data.summary || []} />
         <div className="flex flex-col md:flex-row gap-2 justify-between items-center">
           <Input
@@ -150,7 +136,7 @@ export default function InventoryMovements() {
         {data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}
-      </CardContent>
-    </Card>
+      </>
+    </>
   );
 }

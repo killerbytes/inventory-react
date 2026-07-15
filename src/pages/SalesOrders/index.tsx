@@ -7,25 +7,18 @@ import {
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useSalesOrdersPaginated } from "@/features/sales-orders/hooks/useSalesOrders";
 import SalesOrderModal from "../../features/sales-orders/components/SalesOrderModal";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import OCRModal from "@/features/sales-orders/components/OCRModal";
 import DateRangePicker from "@/components/DateRangePicker";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import SectionCards from "@/components/SectionCards";
 import { filterProps, SalesOrder } from "@/schemas";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
+import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
@@ -202,85 +195,77 @@ export default function SalesOrders() {
   ];
 
   return (
-    <div>
-      <Card>
-        <CardHeader className="px-2 md:px-4">
-          <CardTitle className="flex items-center gap-2">
-            <SidebarTrigger />
-            <div className="bg-border h-5 w-[1px]"></div>
-            Sales Orders
-          </CardTitle>
-          <CardAction className="gap-2 flex">
-            <Button
-              className="shadow-md bg-red-500"
-              onClick={() => {
-                setSelected(undefined);
-                handleToggle({ ocrModal: true });
-              }}
-            >
-              <Camera />
-            </Button>
-            <Button
-              className="shadow-md bg-green-500"
-              onClick={() => {
-                setSelected(undefined);
-                handleToggle({ salesOrderModal: true });
-              }}
-            >
-              <Plus /> Create Order
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 px-2 md:px-4">
-          <SectionCards data={data.summary} />
-          <div className="flex flex-col md:flex-row gap-2 ">
-            <div>
-              <DateRangePicker value={range} onChange={setRange} />
-            </div>
-            <div>
-              <Select
-                options={ORDER_STATUS_OPTIONS}
-                value={filter.status}
-                onChange={(selected) => {
-                  if (selected === "ALL") {
-                    setFilter(({ ...prev }) => ({ ...prev, status: "ALL" }));
-                  } else {
-                    setFilter((prev) => ({ ...prev, status: selected }));
-                  }
-                }}
-              />
-            </div>
+    <>
+      <PageHeader title="Sales Orders">
+        <Button
+          className="shadow-md bg-red-500"
+          onClick={() => {
+            setSelected(undefined);
+            handleToggle({ ocrModal: true });
+          }}
+        >
+          <Camera />
+        </Button>
+        <Button
+          className="shadow-md "
+          onClick={() => {
+            setSelected(undefined);
+            handleToggle({ salesOrderModal: true });
+          }}
+        >
+          <Plus /> Create Order
+        </Button>
+      </PageHeader>
+
+      <div className="flex flex-col gap-4 px-2 md:px-4">
+        <SectionCards data={data.summary} />
+        <div className="flex flex-col md:flex-row gap-2 ">
+          <div>
+            <DateRangePicker value={range} onChange={setRange} />
           </div>
-          {isLoading ? (
-            <Loader />
-          ) : (
-            <>
-              <DataTable
-                data={data.data || []}
-                columns={columns}
-                meta={{
-                  disabledRow: {
-                    status: ORDER_STATUS.VOID,
-                  },
-                }}
-                onRowClick={(item: SalesOrder) => {
-                  if (item.status === ORDER_STATUS.DRAFT) {
-                    setSelected(item);
-                    handleToggle({
-                      salesOrderModal: true,
-                    });
-                  } else {
-                    navigate(`${ROUTES.SALES_ORDERS}/${item.id}`);
-                  }
-                }}
-              />
-              {data.meta.totalPages > 1 && (
-                <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+          <div>
+            <Select
+              options={ORDER_STATUS_OPTIONS}
+              value={filter.status}
+              onChange={(selected) => {
+                if (selected === "ALL") {
+                  setFilter(({ ...prev }) => ({ ...prev, status: "ALL" }));
+                } else {
+                  setFilter((prev) => ({ ...prev, status: selected }));
+                }
+              }}
+            />
+          </div>
+        </div>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <>
+            <DataTable
+              data={data.data || []}
+              columns={columns}
+              meta={{
+                disabledRow: {
+                  status: ORDER_STATUS.VOID,
+                },
+              }}
+              onRowClick={(item: SalesOrder) => {
+                if (item.status === ORDER_STATUS.DRAFT) {
+                  setSelected(item);
+                  handleToggle({
+                    salesOrderModal: true,
+                  });
+                } else {
+                  navigate(`${ROUTES.SALES_ORDERS}/${item.id}`);
+                }
+              }}
+            />
+            {data.meta.totalPages > 1 && (
+              <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+            )}
+          </>
+        )}
+      </div>
       {toggle.salesOrderModal && (
         <SalesOrderModal
           data={selected as SalesOrder}
@@ -308,6 +293,6 @@ export default function SalesOrders() {
           }}
         />
       )}
-    </div>
+    </>
   );
 }
