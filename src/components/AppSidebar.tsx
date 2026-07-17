@@ -8,7 +8,6 @@ import {
   BookUser,
   Boxes,
   ChartCandlestick,
-  ChevronUp,
   ClipboardList,
   Container,
   CreditCard,
@@ -33,26 +32,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "./ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { ROLES, ROUTE_PERMISSIONS } from "@/utils/permissions";
-import ChangePasswordModal from "./modals/ChangePassword";
+import { ROUTE_PERMISSIONS } from "@/utils/permissions";
 import { formatDateTime } from "@/utils/formatters";
 import { Link, useLocation } from "react-router";
 import { ROUTES } from "@/utils/definitions";
-import { productServices } from "@/services";
-import { ApiErrorResponse } from "@/schemas";
-import useToggle from "@/hooks/useToggle";
-import { Button } from "./ui/button";
+import UserDropdown from "./UserDropdown";
 import { useStore } from "@/stores";
 import Http from "@/services/http";
-import { toast } from "sonner";
 import Header from "./Header";
-import UserIcon from "./User";
 import React from "react";
 
 const items = [
@@ -192,9 +179,6 @@ export default function AppSidebar() {
   const { setOpen, setOpenMobile } = useSidebar();
   const location = useLocation();
   const pathRef = React.useRef(location.pathname);
-  const { toggle, handleToggle } = useToggle({
-    changePasswordModal: false,
-  });
 
   React.useEffect(() => {
     if (location.pathname !== pathRef.current) {
@@ -211,16 +195,6 @@ export default function AppSidebar() {
     };
     getData();
   }, []);
-
-  const onUpdateGSheet = async () => {
-    try {
-      await productServices.updateSheet();
-      toast.success("GSheet updated successfully");
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error("Failed to update GSheet: " + apiError.message);
-    }
-  };
 
   const Menus = ({
     items,
@@ -290,57 +264,20 @@ export default function AppSidebar() {
                     !item.roles || item.roles.includes(authState.user.role),
                 )}
               />
-              {([ROLES.ADMIN, ROLES.MANAGER] as string[]).includes(
-                authState.user.role,
-              ) && (
-                <Button size="sm" variant="secondary" onClick={onUpdateGSheet}>
-                  Update GSheet
-                </Button>
-              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <UserIcon />
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                <DropdownMenuItem
-                  onClick={() => handleToggle({ changePasswordModal: true })}
-                >
-                  Change Password
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={authState.logout}>
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <footer className="text-center mt-auto py-2 border-t gap-2 flex flex-col text-xs">
+        <UserDropdown />
+        <div className="text-center mt-auto py-2 border-t gap-2 flex flex-col text-xs">
           <div className="">&copy; {new Date().getFullYear()} My Hardware</div>
-          <div className="uppercase">{build?.env}</div>
-          <div>{formatDateTime(String(build?.buildTime ?? ""))}</div>
-        </footer>
+          <div className="uppercase flex gap-2 justify-center">
+            {build?.env}
+            <div>{formatDateTime(String(build?.buildTime ?? ""))}</div>
+          </div>
+        </div>
       </SidebarFooter>
-      {toggle.changePasswordModal && (
-        <ChangePasswordModal
-          isOpen={true}
-          onClose={() => {
-            handleToggle({ changePasswordModal: false });
-          }}
-        />
-      )}
     </Sidebar>
   );
 }

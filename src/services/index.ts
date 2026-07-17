@@ -10,6 +10,7 @@ import ProductService from "./products";
 import PaymentService from "./payment";
 import InvoiceService from "./invoice";
 import ReportService from "./reports";
+import CommonService from "./common";
 import UserService from "./users";
 import AuthService from "./auth";
 import Http from "./http";
@@ -32,3 +33,4 @@ export const reportServices = new ReportService({ http });
 export const productCombinationServices = new ProductCombinationService({
   http,
 });
+export const commonServices = new CommonService();
