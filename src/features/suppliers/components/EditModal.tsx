@@ -9,22 +9,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  ApiErrorResponse,
+  Supplier,
+  supplierBaseSchema,
+  SupplierInput,
+} from "@/schemas";
 import { useDeleteSupplier, useUpdateSupplier } from "../hooks/useSuppliers";
-import { ApiErrorResponse, Supplier, supplierSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { ERROR } from "@/utils/definitions";
 import { useForm } from "react-hook-form";
+import SupplierForm from "./SupplierForm";
 import Modal from "@/components/Modal";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -42,12 +39,12 @@ export default function EditModal({
   const { mutate: updateSupplier, isPending: isUpdating } = useUpdateSupplier();
   const { mutate: deleteSupplier, isPending: isDeleting } = useDeleteSupplier();
   const [confirm, setConfirm] = React.useState(false);
-  const form = useForm<Supplier>({
-    resolver: zodResolver(supplierSchema),
+  const form = useForm<SupplierInput>({
+    resolver: zodResolver(supplierBaseSchema),
     defaultValues: { ...data },
   });
 
-  const onSubmit = async (values: Supplier) => {
+  const onSubmit = async (values: SupplierInput) => {
     updateSupplier(
       { id: Number(data.id), data: values },
       {
@@ -61,7 +58,7 @@ export default function EditModal({
           if (apiError.code === ERROR.VALIDATION_ERROR) {
             apiError.errors?.forEach((err) => {
               if (err.field) {
-                form.setError(err.field as keyof Supplier, {
+                form.setError(err.field as keyof SupplierInput, {
                   type: "server",
                   message: err.message,
                 });
@@ -85,7 +82,7 @@ export default function EditModal({
         if (apiError.code === ERROR.VALIDATION_ERROR) {
           apiError.errors?.forEach((err) => {
             if (err.field) {
-              form.setError(err.field as keyof Supplier, {
+              form.setError(err.field as keyof SupplierInput, {
                 type: "server",
                 message: err.message,
               });
@@ -118,83 +115,7 @@ export default function EditModal({
             }}
             className="space-y-8"
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Phone" {...field} rows={3} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="contact"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contact Person</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Contact"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Email"
-                      {...field}
-                      value={String(field.value ?? "")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <SupplierForm form={form} />
             <DialogFooter>
               <Button
                 type="button"
