@@ -101,8 +101,8 @@ export const PAGINATION = {
   PAGE_SIZE_OPTIONS: [25, 50, 100],
 };
 
-export const DATE_FORMAT = "MMM-dd-yy";
-export const DATETIME_FORMAT = "MMM-dd-yy h:mm a";
+export const DATE_FORMAT = "dd-MMM-yy";
+export const DATETIME_FORMAT = "dd-MMM-yy h:mm a";
 
 export const STATUS = ["DRAFT", "RECEIVED", "COMPLETED", "CANCELLED"];
 

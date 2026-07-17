@@ -4,7 +4,7 @@ import {
   ROUTES,
   UNIT_COLOR,
 } from "@/utils/definitions";
-import { formatCurrency, formatDateTime } from "@/utils/formatters";
+import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
 import { ColumnDef } from "@tanstack/react-table";
 import { InventoryMovement } from "@/schemas";
 import { DataTable } from "./DataTable";
@@ -116,7 +116,16 @@ export default function Movements({ data }: { data: InventoryMovement[] }) {
           );
         },
       },
-
+      {
+        accessorKey: "referenceDate",
+        header: "Reference Date",
+        meta: {
+          className: "w-0",
+        },
+        cell: ({ row }) => {
+          return formatDate(String(row.original.referenceDate));
+        },
+      },
       {
         accessorKey: "updatedAt",
         header: "Updated At",

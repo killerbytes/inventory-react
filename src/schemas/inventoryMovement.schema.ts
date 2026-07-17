@@ -13,6 +13,7 @@ export const inventoryMovementSchema = z.object({
   referenceType: z.string().nullish(),
   type: z.string(),
   reason: z.string(),
+  referenceDate: z.date(),
   updatedAt: z.date(),
   reference: z.number(),
 });
