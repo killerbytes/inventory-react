@@ -11,20 +11,14 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { ROLES } from "@/utils/permissions";
 import useToggle from "@/hooks/useToggle";
+import { getInitials } from "@/lib/utils";
 import { ChevronUp } from "lucide-react";
 import { useStore } from "@/stores";
 
 export default function UserDropdown() {
   const { data: user } = useCurrentUser();
   const { authState } = useStore();
-  const getInitials = (name: string) => {
-    const names = name.split(" ");
-    let initials = names[0].substring(0, 1).toUpperCase();
-    if (names.length > 1) {
-      initials += names[1].substring(0, 1).toUpperCase();
-    }
-    return initials;
-  };
+
   const { toggle, handleToggle } = useToggle({
     changePasswordModal: false,
   });

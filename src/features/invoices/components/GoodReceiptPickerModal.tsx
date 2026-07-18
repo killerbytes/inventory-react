@@ -1,21 +1,17 @@
-import {
-  ORDER_STATUS,
-  PAGINATION,
-  PAGINATION_RESPONSE,
-  STATUS_COLOR,
-} from "@/utils/definitions";
-import { filterProps, InvoiceGoodReceipt, PaginatedResponse } from "@/schemas";
+import { useGoodReceiptBySupplier } from "@/features/good-receipts/hooks/useGoodReceipts";
+import { ORDER_STATUS, PAGINATION, STATUS_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
+import { filterProps, InvoiceGoodReceipt } from "@/schemas";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DialogFooter } from "@/components/ui/dialog";
-import SectionCards from "@/components/SectionCards";
 import { Checkbox } from "@/components/ui/checkbox";
+import SummaryCard from "@/components/SummaryCard";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
-import { goodReceiptServices } from "@/services";
 import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
 import Modal from "@/components/Modal";
 import React from "react";
@@ -34,8 +30,6 @@ export default function GoodReceiptPickerModal({
   defaultSelected: InvoiceGoodReceipt[];
 }) {
   const [selected, setSelected] = React.useState<InvoiceGoodReceipt[]>([]);
-  const [data, setData] =
-    React.useState<PaginatedResponse<InvoiceGoodReceipt>>(PAGINATION_RESPONSE);
 
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
@@ -46,18 +40,13 @@ export default function GoodReceiptPickerModal({
     q: "",
   });
 
-  React.useEffect(() => {
-    const getData = async (id: number) => {
-      const data = await goodReceiptServices.getBySupplier(id, {
-        ...filter,
-        status: ORDER_STATUS.RECEIVED,
-      });
-      setData(data);
-    };
-    if (supplierId) {
-      getData(supplierId);
-    }
-  }, [supplierId, filter]);
+  const { data, isLoading } = useGoodReceiptBySupplier(
+    {
+      ...filter,
+      status: ORDER_STATUS.RECEIVED,
+    },
+    Number(supplierId),
+  );
 
   const columns: ColumnDef<InvoiceGoodReceipt>[] = React.useMemo(
     () => [
@@ -137,27 +126,39 @@ export default function GoodReceiptPickerModal({
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} title="Add Invoice">
-      <SectionCards data={data.summary} />
-
-      <ScrollArea
-        className="h-[280px]  rounded-md border"
-        tabIndex={-1}
-        autoFocus={false}
-      >
-        <DataTable
-          data={data.data}
-          columns={columns}
-          defaultSelected={defaultSelected}
-          onSelectionChange={React.useCallback(
-            (items: InvoiceGoodReceipt[]) => {
-              setSelected(items);
-            },
-            [],
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          {data?.summary && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xl">
+              <SummaryCard
+                label={data.summary.totalAmount.label}
+                value={formatCurrency(data.summary.totalAmount.value)}
+              />
+            </div>
           )}
-        />
-      </ScrollArea>
-      {data.meta.totalPages > 1 && (
-        <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+          <ScrollArea
+            className="h-[280px]  rounded-md border"
+            tabIndex={-1}
+            autoFocus={false}
+          >
+            <DataTable
+              data={data?.data || []}
+              columns={columns}
+              defaultSelected={defaultSelected}
+              onSelectionChange={React.useCallback(
+                (items: InvoiceGoodReceipt[]) => {
+                  setSelected(items);
+                },
+                [],
+              )}
+            />
+          </ScrollArea>
+          {data && data.meta.totalPages > 1 && (
+            <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+          )}
+        </>
       )}
       <DialogFooter>
         <Button

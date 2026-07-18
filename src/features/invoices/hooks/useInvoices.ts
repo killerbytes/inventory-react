@@ -1,12 +1,11 @@
 import {
   filterProps,
-  GoodReceipt,
   Invoice,
   InvoiceInput,
   PaginatedResponse,
 } from "@/schemas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { goodReceiptServices, invoiceServices } from "@/services";
+import { invoiceServices } from "@/services";
 import { AxiosError } from "axios";
 
 export const invoiceKeys = {
@@ -27,14 +26,6 @@ export const useInvoicesPaginated = (filter: filterProps) => {
   return useQuery<PaginatedResponse<Invoice>, AxiosError>({
     queryKey: invoiceKeys.paginated(filter),
     queryFn: () => invoiceServices.getAll(filter),
-    staleTime: 1000 * 60 * 5,
-  });
-};
-
-export const useGetBySupplier = (supplierId: number) => {
-  return useQuery<GoodReceipt[], AxiosError>({
-    queryKey: [...invoiceKeys.all, "by-supplier", supplierId],
-    queryFn: () => goodReceiptServices.getBySupplier(supplierId),
     staleTime: 1000 * 60 * 5,
   });
 };

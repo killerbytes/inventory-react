@@ -6,6 +6,7 @@ import {
   ReturnForm,
   SalesOrder,
   SalesOrderInput,
+  Summary,
 } from "@/schemas";
 import { productCombinationKeys } from "@/features/products/hooks/useProductCombination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -34,7 +35,18 @@ export const useSalesOrder = (id: number) => {
 };
 
 export const useSalesOrdersPaginated = (filter: filterProps) => {
-  return useQuery<PaginatedResponse<SalesOrder>, AxiosError>({
+  return useQuery<
+    PaginatedResponse<
+      SalesOrder,
+      {
+        totalAmount: Summary;
+        totalProfitAmount: Summary;
+        totalReturnAmount: Summary;
+        totalExchangeAmount: Summary;
+      }
+    >,
+    AxiosError
+  >({
     queryKey: salesOrderKeys.paginated(filter),
     queryFn: () => salesOrderServices.getAll(filter),
     staleTime: 1000 * 60 * 5,

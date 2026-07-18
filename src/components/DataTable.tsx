@@ -34,7 +34,7 @@ type Props<T> = {
 
 const DataTable = <T,>(props: Props<T>) => {
   const {
-    data,
+    data = [],
     columns,
     renderFooter,
     meta,
@@ -73,7 +73,7 @@ const DataTable = <T,>(props: Props<T>) => {
   });
 
   React.useEffect(() => {
-    if (data.length > 0 && meta?.subRows) {
+    if (data.length && meta?.subRows) {
       table.toggleAllRowsExpanded(true);
     }
   }, [data, table]);

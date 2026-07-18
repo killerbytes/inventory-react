@@ -7,17 +7,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  GLOBAL_COLOR,
-  ORDER_STATUS,
-  ROUTES,
-  UNIT_COLOR,
-} from "@/utils/definitions";
-import {
   GoodReceipt,
   GoodReceiptForm,
   GoodReceiptItem,
   ReturnItem,
 } from "@/schemas";
+import {
+  GLOBAL_COLOR,
+  ORDER_STATUS,
+  ROUTES,
+  UNIT_COLOR,
+} from "@/utils/definitions";
 import { CellContext, ColumnDef, HeaderContext } from "@tanstack/react-table";
 import ReturnExchangeModal from "@/components/modals/ReturnExchangeModal";
 import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
@@ -251,7 +251,7 @@ export default function PartialForm({
                 })),
               );
             }}
-            renderFooter={(data) => {
+            renderFooter={(data = []) => {
               const total = data.reduce(
                 (acc, item) => (acc += Number(item.totalAmount)),
                 0,

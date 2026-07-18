@@ -3,7 +3,6 @@ import {
   ORDER_STATUS,
   ORDER_STATUS_OPTIONS,
   PAGINATION,
-  PAGINATION_RESPONSE,
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
@@ -12,9 +11,9 @@ import SalesOrderModal from "../../features/sales-orders/components/SalesOrderMo
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import OCRModal from "@/features/sales-orders/components/OCRModal";
 import DateRangePicker from "@/components/DateRangePicker";
-import SectionCards from "@/components/SectionCards";
 import { filterProps, SalesOrder } from "@/schemas";
 import { endOfMonth, startOfMonth } from "date-fns";
+import SummaryCard from "@/components/SummaryCard";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
@@ -54,8 +53,7 @@ export default function SalesOrders() {
     status: filter.status === "ALL" ? undefined : filter.status,
   };
 
-  const { data = PAGINATION_RESPONSE, isLoading } =
-    useSalesOrdersPaginated(payload);
+  const { data, isLoading } = useSalesOrdersPaginated(payload);
 
   const [toggle, handleToggle] = useToggle({
     salesOrderModal: false,
@@ -218,7 +216,26 @@ export default function SalesOrders() {
       </PageHeader>
 
       <div className="flex flex-col gap-4 px-2 md:px-4">
-        <SectionCards data={data.summary} />
+        {data?.summary && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xl">
+            <SummaryCard
+              label={data.summary.totalAmount.label}
+              value={formatCurrency(data.summary.totalAmount.value)}
+            />
+            <SummaryCard
+              label={data.summary.totalProfitAmount.label}
+              value={formatCurrency(data.summary.totalProfitAmount.value)}
+            />
+            <SummaryCard
+              label={data.summary.totalReturnAmount.label}
+              value={formatCurrency(data.summary.totalReturnAmount.value)}
+            />
+            <SummaryCard
+              label={data.summary.totalExchangeAmount.label}
+              value={formatCurrency(data.summary.totalExchangeAmount.value)}
+            />
+          </div>
+        )}
         <div className="flex flex-col md:flex-row gap-2 ">
           <div>
             <DateRangePicker value={range} onChange={setRange} />
@@ -242,7 +259,7 @@ export default function SalesOrders() {
         ) : (
           <>
             <DataTable
-              data={data.data || []}
+              data={data?.data || []}
               columns={columns}
               meta={{
                 disabledRow: {
@@ -260,7 +277,7 @@ export default function SalesOrders() {
                 }
               }}
             />
-            {data.meta.totalPages > 1 && (
+            {data && data.meta.totalPages > 1 && (
               <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
             )}
           </>

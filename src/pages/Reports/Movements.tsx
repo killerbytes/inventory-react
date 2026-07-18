@@ -1,12 +1,12 @@
 import {
   INVENTORY_MOVEMENT_TYPE_OPTIONS,
   PAGINATION,
-  PAGINATION_RESPONSE,
 } from "@/utils/definitions";
 import { useMovements } from "@/features/inventory/hooks/useInventory";
 import DateRangePicker from "@/components/DateRangePicker";
-import SectionCards from "@/components/SectionCards";
+import { formatCurrency } from "@/utils/formatters";
 import { endOfMonth, startOfMonth } from "date-fns";
+import SummaryCard from "@/components/SummaryCard";
 import PageHeader from "@/components/PageHeader";
 import Movements from "@/components/Movements";
 import { useSearchParams } from "react-router";
@@ -58,7 +58,7 @@ export default function InventoryMovements() {
     };
   }, [debouncedQuery]);
 
-  const { data = PAGINATION_RESPONSE, isLoading } = useMovements(payload);
+  const { data, isLoading } = useMovements(payload);
 
   React.useEffect(() => {
     const params = new URLSearchParams();
@@ -94,7 +94,18 @@ export default function InventoryMovements() {
     <>
       <PageHeader title="Inventory Movements" />
       <>
-        <SectionCards data={data.summary || []} />
+        {data?.summary && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xl">
+            <SummaryCard
+              label={data.summary.totalValue.label}
+              value={formatCurrency(data.summary.totalValue.value)}
+            />
+            <SummaryCard
+              label={data.summary.totalQuantity.label}
+              value={data.summary.totalQuantity.value}
+            />
+          </div>
+        )}
         <div className="flex flex-col md:flex-row gap-2 justify-between items-center">
           <Input
             placeholder="Search Product"
@@ -132,8 +143,8 @@ export default function InventoryMovements() {
           </div>
         </div>
         <Loader isLoading={isLoading} />
-        <Movements data={data.data} />
-        {data.meta.totalPages > 1 && (
+        <Movements data={data?.data} />
+        {data && data.meta.totalPages > 1 && (
           <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
         )}
       </>

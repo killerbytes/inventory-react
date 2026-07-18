@@ -1,3 +1,4 @@
+import { Summary } from "@/schemas";
 import z from "zod";
 
 export const supplierBaseSchema = z.object({
@@ -26,3 +27,8 @@ export const supplierSchema = supplierBaseSchema.extend({
 
 export type SupplierInput = z.infer<typeof supplierBaseSchema>;
 export type Supplier = z.infer<typeof supplierSchema>;
+export type SupplierSummary = {
+  totalAmount: Summary;
+  totalReturnAmount: Summary;
+  totalExchangeAmount: Summary;
+};

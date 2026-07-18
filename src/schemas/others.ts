@@ -34,14 +34,16 @@ export interface Summary {
   value: number;
 }
 
-export type PaginatedResponse<T extends object> = {
+export type Meta = {
+  total: number;
+  totalPages: number;
+  currentPage: number;
+};
+
+export type PaginatedResponse<T extends object, S = object> = {
   data: T[];
-  meta: {
-    total: number;
-    totalPages: number;
-    currentPage: number;
-  };
-  summary?: Summary[];
+  meta: Meta;
+  summary?: S;
 };
 
 export interface ApiError {
@@ -60,7 +62,7 @@ export interface filterProps {
 }
 
 export interface pagerProps<T> {
-  meta: { totalPages: number };
+  meta: Meta;
   filter: T;
   setFilter: React.Dispatch<React.SetStateAction<T>>;
 }

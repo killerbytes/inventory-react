@@ -1,35 +1,23 @@
-import {
-  PAGINATION,
-  PAGINATION_RESPONSE,
-  ROUTES,
-  STATUS_COLOR,
-} from "@/utils/definitions";
-import {
-  ApiErrorResponse,
-  filterProps,
-  GoodReceipt,
-  PaginatedResponse,
-} from "@/schemas";
+import { useGoodReceiptBySupplier } from "@/features/good-receipts/hooks/useGoodReceipts";
+import { PAGINATION, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { useSupplier } from "@/features/suppliers/hooks/useSuppliers";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import SectionCards from "@/components/SectionCards";
+import { filterProps, GoodReceipt } from "@/schemas";
+import SummaryCard from "@/components/SummaryCard";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { goodReceiptServices } from "@/services";
 import { Link, useParams } from "react-router";
 import { cx } from "class-variance-authority";
 import { Input } from "@/components/ui/input";
+import Loader from "@/components/Loader";
 import Pager from "@/components/Pager";
-import { toast } from "sonner";
 import React from "react";
 
 export default function SupplierDetails() {
   const { id } = useParams();
-  const [data, setData] =
-    React.useState<PaginatedResponse<GoodReceipt>>(PAGINATION_RESPONSE);
   const { data: supplier } = useSupplier(Number(id));
   const [filter, setFilter] = React.useState<filterProps>({
     limit: PAGINATION.PAGE_SIZE,
@@ -39,21 +27,7 @@ export default function SupplierDetails() {
     q: "",
   });
 
-  const getData = React.useCallback(async () => {
-    try {
-      const data: PaginatedResponse<GoodReceipt> =
-        await goodReceiptServices.getBySupplier(Number(id), filter);
-
-      setData(data);
-    } catch (error) {
-      const apiError = error as ApiErrorResponse;
-      toast.error(apiError.message);
-    }
-  }, [filter, id]);
-
-  React.useEffect(() => {
-    getData();
-  }, [getData]);
+  const { data, isLoading } = useGoodReceiptBySupplier(filter, Number(id));
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -159,38 +133,57 @@ export default function SupplierDetails() {
   );
   return (
     <>
-      <PageHeader
-        title={supplier?.name}
-        description={
-          <>
-            <div>{supplier?.address}</div>
-            <p className="whitespace-pre">{supplier?.phone}</p>
-          </>
-        }
-      >
-        {/* <Button disabled>Create Invoice</Button> */}
-      </PageHeader>
-      <>
-        <SectionCards data={data.summary} />
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <PageHeader
+            title={supplier?.name}
+            description={
+              <>
+                <div>{supplier?.address}</div>
+                <p className="whitespace-pre">{supplier?.phone}</p>
+              </>
+            }
+          >
+            {/* <Button disabled>Create Invoice</Button> */}
+          </PageHeader>
+          {data?.summary && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xl">
+              <SummaryCard
+                label={data.summary.totalAmount.label}
+                value={formatCurrency(data.summary.totalAmount.value)}
+              />
+              <SummaryCard
+                label={data.summary.totalReturnAmount.label}
+                value={formatCurrency(data.summary.totalReturnAmount.value)}
+              />
+              <SummaryCard
+                label={data?.summary.totalExchangeAmount.label}
+                value={formatCurrency(data.summary.totalExchangeAmount.value)}
+              />
+            </div>
+          )}
 
-        <Input
-          placeholder="Search Reference"
-          className="w-full"
-          value={filter.q}
-          onChange={(e) => {
-            setFilter((prev) => ({
-              ...prev,
-              q: e.target.value,
-              page: 1,
-            }));
-          }}
-        />
+          <Input
+            placeholder="Search Reference"
+            className="w-full"
+            value={filter.q}
+            onChange={(e) => {
+              setFilter((prev) => ({
+                ...prev,
+                q: e.target.value,
+                page: 1,
+              }));
+            }}
+          />
 
-        <DataTable data={data.data || []} columns={columns} />
-        {data.meta.totalPages > 1 && (
-          <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
-        )}
-      </>
+          <DataTable data={data?.data || []} columns={columns} />
+          {data && data.meta.totalPages > 1 && (
+            <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+          )}
+        </>
+      )}
     </>
   );
 }

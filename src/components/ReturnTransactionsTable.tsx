@@ -149,7 +149,7 @@ export default function ReturnTransactionsTable({
                     <DataTable
                       data={returns}
                       columns={columns}
-                      renderFooter={(data) => {
+                      renderFooter={(data = []) => {
                         const total = data.reduce(
                           (acc, item) => (acc += Number(item.totalAmount)),
                           0,
@@ -175,7 +175,7 @@ export default function ReturnTransactionsTable({
                     <DataTable
                       data={exchanges}
                       columns={columns}
-                      renderFooter={(data) => {
+                      renderFooter={(data = []) => {
                         const total = data.reduce(
                           (acc, item) => (acc += Number(item.totalAmount)),
                           0,

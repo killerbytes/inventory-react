@@ -18,7 +18,7 @@ export default function Pager<T extends filterProps>({
   setFilter,
 }: pagerProps<T>) {
   const { page = 0, limit } = filter;
-  const pageCount = meta.totalPages;
+  const pageCount = meta.totalPages || 0;
   const paginationLimits = PAGINATION.PAGE_SIZE_OPTIONS.map((i) => ({
     label: i,
     value: i,

@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/command";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import ProductLookupInput from "@/components/forms/ProductLookupInput";
-import { Articles, OCRForm, ocrFormSchema } from "@/schemas";
 import GroupedCommandList from "@/components/GroupedCommandList";
 import { Camera, Loader2, Trash2, Upload } from "lucide-react";
+import { Articles, OCRForm, ocrFormSchema } from "@/schemas";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -387,7 +387,7 @@ export default function OCRModal({
                         <DataTable
                           data={tableData}
                           columns={columns}
-                          renderFooter={(data) => {
+                          renderFooter={(data = []) => {
                             const total = data.reduce(
                               (acc, item) =>
                                 (acc +=

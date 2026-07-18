@@ -1,9 +1,4 @@
-import {
-  PAGINATION,
-  PAGINATION_RESPONSE,
-  ROUTES,
-  STATUS_COLOR,
-} from "@/utils/definitions";
+import { PAGINATION, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { useInvoicesPaginated } from "@/features/invoices/hooks/useInvoices";
 import InvoiceModal from "../../features/invoices/components/InvoiceModal";
 import { formatCurrency, formatDate } from "@/utils/formatters";
@@ -36,8 +31,7 @@ export default function Invoices() {
     order: "DESC",
     q: "",
   });
-  const { data = PAGINATION_RESPONSE, isLoading } =
-    useInvoicesPaginated(filter);
+  const { data, isLoading } = useInvoicesPaginated(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     setFilter((prevState) => ({ ...prevState, ...data }));
@@ -192,7 +186,7 @@ export default function Invoices() {
                 navigate(`${ROUTES.INVOICES}/${item.id}`);
               }
             }}
-            data={data.data || []}
+            data={data?.data || []}
             columns={columns}
             renderFooter={(rows: Invoice[]) => {
               return (
@@ -212,7 +206,7 @@ export default function Invoices() {
               );
             }}
           />
-          {data.meta.totalPages > 1 && (
+          {data && data.meta.totalPages > 1 && (
             <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
           )}
         </>

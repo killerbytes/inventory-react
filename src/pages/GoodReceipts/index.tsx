@@ -1,17 +1,16 @@
 import {
   ORDER_STATUS_OPTIONS,
   PAGINATION,
-  PAGINATION_RESPONSE,
   ROUTES,
   STATUS_COLOR,
 } from "@/utils/definitions";
 import { useGoodReceiptsPaginated } from "@/features/good-receipts/hooks/useGoodReceipts";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import DateRangePicker from "@/components/DateRangePicker";
-import SectionCards from "@/components/SectionCards";
 import { Link, useNavigate } from "react-router-dom";
 import { GoodReceipt, filterProps } from "@/schemas";
 import { endOfMonth, startOfMonth } from "date-fns";
+import SummaryCard from "@/components/SummaryCard";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { mappedStatusHistory } from "@/lib/utils";
@@ -53,12 +52,7 @@ export default function GoodReceipts() {
     status: filter.status === "ALL" ? undefined : filter.status,
   };
 
-  const {
-    data = PAGINATION_RESPONSE,
-    isLoading,
-    isError,
-    error,
-  } = useGoodReceiptsPaginated(payload);
+  const { data, isLoading, isError, error } = useGoodReceiptsPaginated(payload);
 
   if (isError) {
     toast.error(error?.message);
@@ -202,8 +196,22 @@ export default function GoodReceipts() {
         </Link>
       </PageHeader>
       <div className="flex flex-col gap-4 px-2 md:px-4">
-        <SectionCards data={data.summary || []} />
-
+        {data?.summary && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xl">
+            <SummaryCard
+              label={data.summary.totalAmount.label}
+              value={formatCurrency(data.summary.totalAmount.value)}
+            />
+            <SummaryCard
+              label={data.summary.totalPayableAmount.label}
+              value={formatCurrency(data.summary.totalPayableAmount.value)}
+            />
+            <SummaryCard
+              label={data.summary.totalReturnAmount.label}
+              value={formatCurrency(data.summary.totalReturnAmount.value)}
+            />
+          </div>
+        )}
         <div className="flex flex-col md:flex-row gap-2  ">
           <div>
             <DateRangePicker value={range} onChange={setRange} />
@@ -238,13 +246,13 @@ export default function GoodReceipts() {
         ) : (
           <>
             <DataTable
-              data={data.data || []}
+              data={data?.data || []}
               columns={columns}
               onRowClick={(item: GoodReceipt) =>
                 navigate(`${ROUTES.GOOD_RECEIPT}/${item.id}`)
               }
             />
-            {data.meta.totalPages > 1 && (
+            {data && data.meta.totalPages > 1 && (
               <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
             )}
           </>

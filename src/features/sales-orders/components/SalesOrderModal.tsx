@@ -702,7 +702,7 @@ export default function SalesOrderModal({
                       <DataTable
                         data={tableData}
                         columns={columns}
-                        renderFooter={(data) => {
+                        renderFooter={(data = []) => {
                           const total = getTotalAmountTableFooter(data);
                           return (
                             <>

@@ -1,21 +1,21 @@
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { ROUTE_PERMISSIONS } from "@/utils/permissions";
 import { ProtectedRoute } from "./ProtectedRoute";
-import PriceManager from "@/pages/PriceManager";
-import Popular from "@/pages/Reports/Popular";
-import NoSales from "@/pages/Reports/NoSales";
 import { ROUTES } from "@/utils/definitions";
-import Profit from "@/pages/Reports/Profit";
-import Forbidden from "@/pages/Forbidden";
-import Dashboard from "@/pages/Dashboard";
 import { authServices } from "@/services";
 import Loader from "@/components/Loader";
 import Layout from "@/components/Layout";
 import { useRoutes } from "react-router";
-import NotFound from "@/pages/NotFound";
 import { useStore } from "@/stores";
-import React, { lazy } from "react";
+import React, { lazy, Suspense } from "react";
 
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Forbidden = lazy(() => import("@/pages/Forbidden"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const PriceManager = lazy(() => import("@/pages/PriceManager"));
+const Popular = lazy(() => import("@/pages/Reports/Popular"));
+const Profit = lazy(() => import("@/pages/Reports/Profit"));
+const NoSales = lazy(() => import("@/pages/Reports/NoSales"));
 const Login = lazy(() => import("@/pages/Login"));
 const Suppliers = lazy(() => import("@/pages/Suppliers"));
 const Customers = lazy(() => import("@/pages/Customers"));
@@ -364,5 +364,5 @@ export const AppRoutes = () => {
     return <Loader />;
   }
 
-  return <>{element}</>;
+  return <Suspense fallback={<Loader />}>{element}</Suspense>;
 };

@@ -4,6 +4,7 @@ import {
   GoodReceiptInput,
   PaginatedResponse,
   ReturnForm,
+  Summary,
 } from "@/schemas";
 import { productCombinationKeys } from "@/features/products/hooks/useProductCombination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,7 +31,17 @@ export const useGoodReceipt = (id: number) => {
 };
 
 export const useGoodReceiptsPaginated = (filter: filterProps) => {
-  return useQuery<PaginatedResponse<GoodReceipt>, AxiosError>({
+  return useQuery<
+    PaginatedResponse<
+      GoodReceipt,
+      {
+        totalAmount: Summary;
+        totalPayableAmount: Summary;
+        totalReturnAmount: Summary;
+      }
+    >,
+    AxiosError
+  >({
     queryKey: goodReceiptKeys.paginated(filter),
     queryFn: () => goodReceiptServices.getAll(filter),
     staleTime: 1000 * 60 * 5,
@@ -83,5 +94,23 @@ export const useCreateSupplierReturns = () => {
       queryClient.invalidateQueries({ queryKey: goodReceiptKeys.all });
       queryClient.invalidateQueries({ queryKey: productCombinationKeys.all });
     },
+  });
+};
+
+export const useGoodReceiptBySupplier = (filter: filterProps, id: number) => {
+  return useQuery<
+    PaginatedResponse<
+      GoodReceipt,
+      {
+        totalAmount: Summary;
+        totalReturnAmount: Summary;
+        totalExchangeAmount: Summary;
+      }
+    >,
+    AxiosError
+  >({
+    queryKey: ["goodReceipts", "bySupplier", id, filter],
+    queryFn: () => goodReceiptServices.getBySupplier(Number(id), filter),
+    staleTime: 1000 * 60 * 5,
   });
 };

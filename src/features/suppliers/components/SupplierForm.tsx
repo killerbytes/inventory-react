@@ -1,18 +1,14 @@
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Supplier, SupplierInput } from "@/schemas";
-import { Button } from "@/components/ui/button";
+import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Trash2 } from "lucide-react";
+import { SupplierInput } from "@/schemas";
 
 export default function SupplierForm({
   form,

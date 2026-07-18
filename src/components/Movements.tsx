@@ -1,5 +1,6 @@
 import {
   INVENTORY_MOVEMENT_REFERENCE_TYPE,
+  INVENTORY_MOVEMENT_TYPE,
   INVENTORY_MOVEMENT_TYPE_COLOR,
   ROUTES,
   UNIT_COLOR,
@@ -12,7 +13,11 @@ import ColorBadge from "./ColorBadge";
 import { Link } from "react-router";
 import React from "react";
 
-export default function Movements({ data }: { data: InventoryMovement[] }) {
+export default function Movements({
+  data,
+}: {
+  data: InventoryMovement[] | undefined;
+}) {
   const columns = React.useMemo<ColumnDef<InventoryMovement>[]>(
     () => [
       {
@@ -143,10 +148,11 @@ export default function Movements({ data }: { data: InventoryMovement[] }) {
     ],
     [],
   );
+
   return (
     <>
       <DataTable
-        data={data}
+        data={data || []}
         columns={columns}
         meta={{
           disabledRow: {

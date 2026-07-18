@@ -4,6 +4,7 @@ import {
   PaginatedResponse,
   PriceHistory,
   StockAdjustment,
+  Summary,
 } from "@/schemas";
 import {
   NoSales,
@@ -33,7 +34,13 @@ export const usePriceHistory = (filter: filterProps) => {
 };
 
 export const useMovements = (filter: filterProps) => {
-  return useQuery<PaginatedResponse<InventoryMovement>, AxiosError>({
+  return useQuery<
+    PaginatedResponse<
+      InventoryMovement,
+      { totalValue: Summary; totalQuantity: Summary }
+    >,
+    AxiosError
+  >({
     queryKey: [...inventoryKeys.movements, filter],
     queryFn: () => inventoryServices.getMovements(filter),
     staleTime: 1000 * 60 * 5,

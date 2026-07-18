@@ -3,6 +3,7 @@ import {
   PaginatedResponse,
   Supplier,
   SupplierInput,
+  SupplierSummary,
 } from "@/schemas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supplierServices } from "@/services";
@@ -35,7 +36,7 @@ export const useSupplier = (id: number) => {
 };
 
 export const useSuppliersPaginated = (filter: filterProps) => {
-  return useQuery<PaginatedResponse<Supplier>, AxiosError>({
+  return useQuery<PaginatedResponse<Supplier, SupplierSummary>, AxiosError>({
     queryKey: supplierKeys.paginated(filter),
     queryFn: () => supplierServices.getAll(filter),
     staleTime: 1000 * 60 * 5,
