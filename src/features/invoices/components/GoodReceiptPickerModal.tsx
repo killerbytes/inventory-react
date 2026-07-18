@@ -124,6 +124,13 @@ export default function GoodReceiptPickerModal({
     [],
   );
 
+  const handleSelectionChange = React.useCallback(
+    (items: InvoiceGoodReceipt[]) => {
+      setSelected(items);
+    },
+    [],
+  );
+
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} title="Add Invoice">
       {isLoading ? (
@@ -147,12 +154,7 @@ export default function GoodReceiptPickerModal({
               data={data?.data || []}
               columns={columns}
               defaultSelected={defaultSelected}
-              onSelectionChange={React.useCallback(
-                (items: InvoiceGoodReceipt[]) => {
-                  setSelected(items);
-                },
-                [],
-              )}
+              onSelectionChange={handleSelectionChange}
             />
           </ScrollArea>
           {data && data.meta.totalPages > 1 && (
