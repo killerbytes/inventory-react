@@ -1,13 +1,13 @@
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { ROUTE_PERMISSIONS } from "@/utils/permissions";
 import { ProtectedRoute } from "./ProtectedRoute";
+import React, { lazy, Suspense } from "react";
 import { ROUTES } from "@/utils/definitions";
 import { authServices } from "@/services";
 import Loader from "@/components/Loader";
 import Layout from "@/components/Layout";
 import { useRoutes } from "react-router";
 import { useStore } from "@/stores";
-import React, { lazy, Suspense } from "react";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Forbidden = lazy(() => import("@/pages/Forbidden"));
@@ -37,7 +37,7 @@ const Payments = lazy(() => import("@/pages/Payments"));
 const PriceHistory = lazy(() => import("@/pages/Reports/PriceHistoryPage"));
 const Reorders = lazy(() => import("@/pages/Reports/ReorderLevels"));
 const Settings = lazy(() => import("@/pages/Settings"));
-const ProductSearch = lazy(() => import("@/pages/ProductSearch"));
+const Search = lazy(() => import("@/pages/Search"));
 const SupplierDetails = lazy(() => import("@/pages/Suppliers/Details"));
 const BarcodeScanner = lazy(() => import("@/pages/BarcodeScanner"));
 
@@ -330,7 +330,7 @@ export const AppRoutes = () => {
         </ProtectedRoute>
       ),
     },
-    { path: ROUTES.SEARCH, element: <ProductSearch /> },
+    { path: ROUTES.SEARCH, element: <Search /> },
     { path: ROUTES.SCANNER, element: <BarcodeScanner /> },
     {
       path: ROUTES.PRICE_MANAGER,

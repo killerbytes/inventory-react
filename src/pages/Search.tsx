@@ -5,7 +5,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
-import { productCombinationServices } from "@/services";
+import { getMappedSearchProductCombinations } from "@/lib/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { useCategories } from "@/hooks/useCategories";
 import { Link, useSearchParams } from "react-router";
@@ -35,57 +35,20 @@ export default function ProductSearch() {
     [category, isLoading],
   );
 
-  const getData = React.useCallback(async (search: string) => {
-    if (!search || search.length < 2) {
-      setData([]);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await productCombinationServices.search({
-        search,
-        limit: 100,
-      });
-
-      const result = [];
-      const words = search
-        .toLowerCase()
-        .replace(/['"#]/g, "") // Remove all quotes to prevent tsquery syntax errors
-        .split(" ")
-        .filter((i) => i.length > 0);
-
-      for (const item of res) {
-        const productCombination = item.combinations.filter(
-          (i: ProductCombination) => {
-            const name = i.name.toLowerCase();
-            return words.every((word) => name.includes(word.toLowerCase()));
-          },
-        );
-
-        result.push(
-          ...productCombination.map((i: ProductCombination) => ({
-            ...i,
-            product: {
-              categoryId: item.categoryId,
-            },
-          })),
-        );
-      }
-
-      setData(result);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const debouncedQuery = useDebounce(search, 300);
 
+  const getData = React.useCallback(async () => {
+    setLoading(true);
+    const data = await getMappedSearchProductCombinations({
+      search: debouncedQuery,
+    });
+    setData(data);
+    setLoading(false);
+  }, [debouncedQuery]);
+
   React.useEffect(() => {
-    getData(debouncedQuery);
-  }, [debouncedQuery, getData]);
+    getData();
+  }, [getData]);
 
   React.useEffect(() => {
     if (debouncedQuery) {
@@ -113,8 +76,6 @@ export default function ProductSearch() {
       {
         accessorKey: "Product",
         cell: ({ row }: { row: Row<ProductCombination> }) => {
-          console.log(mappedCategory);
-
           return (
             <div className="flex flex-col">
               <span className="text-[10px] uppercase text-muted-foreground">
@@ -227,7 +188,15 @@ export default function ProductSearch() {
           </>
         )}
       </InputGroup>
-      <DataTable data={data} columns={columns} />
+      <div
+        className={cx(
+          "relative rounded overflow-hidden",
+          loading && "min-h-[200px]",
+        )}
+      >
+        <Loader isLoading={loading} />
+        <DataTable data={data} columns={columns} />
+      </div>
     </div>
   );
 }
