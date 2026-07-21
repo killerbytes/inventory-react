@@ -7,7 +7,7 @@ import {
   STATUS_COLOR,
 } from "@/utils/definitions";
 import { useSalesOrdersPaginated } from "@/features/sales-orders/hooks/useSalesOrders";
-import SalesOrderModal from "../../features/sales-orders/components/SalesOrderModal";
+import SalesOrderModal from "@/features/sales-orders/components/SalesOrderModal";
 import { formatCurrency, formatDateTime } from "@/utils/formatters";
 import OCRModal from "@/features/sales-orders/components/OCRModal";
 import DateRangePicker from "@/components/DateRangePicker";

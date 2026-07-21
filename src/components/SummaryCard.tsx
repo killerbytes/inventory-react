@@ -10,10 +10,12 @@ export default function SummaryCard({
   if (!value) return null;
 
   return (
-    <Card className="gap-2 py-4" key={label}>
-      <CardContent className="px-4 text-sm text-muted-foreground">
+    <Card className="gap-2 py-4 h-full" key={label}>
+      <CardContent className="px-4 text-sm text-muted-foreground flex flex-col h-full">
         {label}
-        <CardTitle className="text-lg text-foreground">{value}</CardTitle>
+        <CardTitle className="text-lg text-foreground mt-auto">
+          {value}
+        </CardTitle>
       </CardContent>
     </Card>
   );

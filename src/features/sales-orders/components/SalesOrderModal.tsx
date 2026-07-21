@@ -89,7 +89,7 @@ export default function SalesOrderModal({
   isOpen,
   onClose,
 }: {
-  data: SalesOrder;
+  data?: SalesOrder;
   isOpen: boolean;
   onClose: (reload: boolean) => void;
 }) {

@@ -17,7 +17,7 @@ export default function ColorBadge({
   return (
     <Badge
       className={cx(
-        "text-[9px]",
+        "text-[8px] px-1.5",
         className,
         colorMap[unit] || "bg-white text-black",
       )}
