@@ -535,10 +535,10 @@ export default function SalesOrderModal({
       onOpenChange={() => onClose(false)}
       size="xl"
     >
-      <div className="no-scrollbar -mx-4 max-h-[60vh] overflow-y-auto px-4 md:max-h-full">
-        {isLoading || (loading && <Loader />)}
-        <Form {...form}>
-          <form className="flex flex-col gap-4 ">
+      {isLoading || (loading && <Loader />)}
+      <Form {...form}>
+        <form className="flex flex-col gap-4 ">
+          <div className="max-h-[80vh] overflow-y-auto flex gap-4 flex-col">
             <FormField
               control={form.control}
               name="customerId"
@@ -692,13 +692,13 @@ export default function SalesOrderModal({
                 />
               </TabsContent>
             </Tabs>
-            <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
-              <FormField
-                control={form.control}
-                name="salesOrderItems"
-                render={() => (
-                  <FormItem className="w-full mb-4">
-                    <FormControl>
+            <FormField
+              control={form.control}
+              name="salesOrderItems"
+              render={() => (
+                <FormItem className="">
+                  <FormControl>
+                    <div className="max-h-[300px] overflow-y-auto rounded-md border">
                       <DataTable
                         data={tableData}
                         columns={columns}
@@ -732,12 +732,12 @@ export default function SalesOrderModal({
                           );
                         }}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="isDelivery"
@@ -819,74 +819,76 @@ export default function SalesOrderModal({
                 </CardContent>
               </Card>
             )}
-          </form>
-        </Form>
-      </div>
-      <DialogFooter>
-        {data && (
-          <div className="mr-auto">
-            <ConfirmDialog title={`Void order`} onConfirm={onDeleteOrder}>
-              <Button
-                variant="outline"
-                className="text-red-500 shadow-sm"
-                tabIndex={-1}
-                disabled={deleteSalesOrderLoading}
-              >
-                <Trash2 />
+          </div>
+          <DialogFooter>
+            {data && (
+              <div className="mr-auto">
+                <ConfirmDialog title={`Void order`} onConfirm={onDeleteOrder}>
+                  <Button
+                    variant="outline"
+                    className="text-red-500 shadow-sm"
+                    tabIndex={-1}
+                    disabled={deleteSalesOrderLoading}
+                  >
+                    <Trash2 />
+                  </Button>
+                </ConfirmDialog>
+              </div>
+            )}
+
+            <Button
+              className="shadow-sm"
+              variant="secondary"
+              type="button"
+              disabled={createSalesOrderLoading || updateSalesOrderLoading}
+              onClick={(e) => {
+                console.log(form.getValues(), form.formState.errors);
+                form.handleSubmit((props) =>
+                  data
+                    ? onSave({ ...props, status: ORDER_STATUS.DRAFT })
+                    : onSubmit({ ...props, status: ORDER_STATUS.DRAFT }),
+                )(e);
+              }}
+            >
+              {createSalesOrderLoading ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Save />
+              )}
+              Save as Draft
+            </Button>
+            <ConfirmDialog
+              title="Create Invoice"
+              description="Are you sure you want to create this invoice? This action cannot be undone."
+              isLoading={createSalesOrderLoading || updateSalesOrderLoading}
+              shouldConfirm={() =>
+                formData.salesOrderItems?.some(({ combinations }) =>
+                  Object.values(WHOLESALE_UNITS).includes(
+                    combinations?.unit ?? "",
+                  ),
+                ) ?? false
+              }
+              onConfirm={(e) => {
+                e.preventDefault();
+                console.log(form.getValues(), form.formState.errors);
+                form
+                  .handleSubmit((props) =>
+                    data
+                      ? onSave({ ...props, status: ORDER_STATUS.RECEIVED })
+                      : onSubmit({ ...props, status: ORDER_STATUS.RECEIVED }),
+                  )(e)
+                  .catch((error) => {
+                    console.error("Form submission error:", error);
+                  });
+              }}
+            >
+              <Button className="shadow-sm hidden md:inline-flex">
+                <BanknoteArrowUp /> Create Order
               </Button>
             </ConfirmDialog>
-          </div>
-        )}
-
-        <Button
-          className="shadow-sm"
-          variant="secondary"
-          type="button"
-          disabled={createSalesOrderLoading || updateSalesOrderLoading}
-          onClick={(e) => {
-            console.log(form.getValues(), form.formState.errors);
-            form.handleSubmit((props) =>
-              data
-                ? onSave({ ...props, status: ORDER_STATUS.DRAFT })
-                : onSubmit({ ...props, status: ORDER_STATUS.DRAFT }),
-            )(e);
-          }}
-        >
-          {createSalesOrderLoading ? (
-            <Spinner data-icon="inline-start" />
-          ) : (
-            <Save />
-          )}
-          Save as Draft
-        </Button>
-        <ConfirmDialog
-          title="Create Invoice"
-          description="Are you sure you want to create this invoice? This action cannot be undone."
-          isLoading={createSalesOrderLoading || updateSalesOrderLoading}
-          shouldConfirm={() =>
-            formData.salesOrderItems?.some(({ combinations }) =>
-              Object.values(WHOLESALE_UNITS).includes(combinations?.unit ?? ""),
-            ) ?? false
-          }
-          onConfirm={(e) => {
-            e.preventDefault();
-            console.log(form.getValues(), form.formState.errors);
-            form
-              .handleSubmit((props) =>
-                data
-                  ? onSave({ ...props, status: ORDER_STATUS.RECEIVED })
-                  : onSubmit({ ...props, status: ORDER_STATUS.RECEIVED }),
-              )(e)
-              .catch((error) => {
-                console.error("Form submission error:", error);
-              });
-          }}
-        >
-          <Button className="shadow-sm hidden md:inline-flex">
-            <BanknoteArrowUp /> Create Order
-          </Button>
-        </ConfirmDialog>
-      </DialogFooter>
+          </DialogFooter>
+        </form>
+      </Form>
 
       {/* {JSON.stringify(tableData, null, 2)} */}
     </Modal>

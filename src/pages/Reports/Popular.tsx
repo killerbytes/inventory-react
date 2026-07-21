@@ -69,7 +69,7 @@ export default function PopularPage() {
           return (
             <Link
               to={`${ROUTES.PRODUCTS}/${combinations.productId}`}
-              className="flex gap-2 items-center"
+              className="flex gap-2 items-center text-primary"
             >
               <ColorBadge colorMap={UNIT_COLOR}>
                 {String(combinations.unit)}

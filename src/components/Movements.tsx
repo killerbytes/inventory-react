@@ -26,7 +26,7 @@ export default function Movements({
         cell: ({ row }) => {
           return (
             <Link
-              className="flex gap-2 items-center"
+              className="flex gap-2 items-center text-primary"
               to={`${ROUTES.PRODUCTS}/${row.original.combination?.productId}`}
             >
               <ColorBadge colorMap={UNIT_COLOR}>

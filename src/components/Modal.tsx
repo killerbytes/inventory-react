@@ -41,7 +41,7 @@ export default function Modal({
     >
       <DialogContent
         className={cx(
-          "w-full bg-main px-2 md:px-6",
+          "w-full bg-main px-2 py-4 md:p-6 max-h-[98vh] overflow-auto",
           `${Modal.sizes[size]}`,
           className,
         )}

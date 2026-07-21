@@ -55,7 +55,7 @@ export default function NoSalesPage() {
           return (
             <Link
               to={`${ROUTES.PRODUCTS}/${row.original.productId}`}
-              className="flex gap-2 items-center"
+              className="flex gap-2 items-center text-primary"
             >
               <ColorBadge colorMap={UNIT_COLOR}>
                 {String(row.original.unit)}
@@ -67,9 +67,13 @@ export default function NoSalesPage() {
       },
       {
         accessorKey: "inventory.quantity",
+        meta: {
+          className: "text-right",
+        },
         header: ({ column }) => {
           return (
             <ColumnSort
+              align="right"
               filter={filter}
               handleFilterChange={handleFilterChange}
               column={column}

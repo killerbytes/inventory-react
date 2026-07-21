@@ -75,7 +75,7 @@ export default function ProfitPage() {
           return (
             <Link
               to={`${ROUTES.PRODUCTS}/${combinations?.productId}`}
-              className="flex gap-2 items-center"
+              className="flex gap-2 items-center text-primary"
             >
               <ColorBadge colorMap={UNIT_COLOR}>{String(unit)}</ColorBadge>
               {name}
@@ -103,9 +103,13 @@ export default function ProfitPage() {
       },
       {
         accessorKey: "totalProfit",
+        meta: {
+          className: "text-right",
+        },
         header: ({ column }) => {
           return (
             <ColumnSort
+              align="right"
               filter={filter}
               handleFilterChange={handleFilterChange}
               column={column}

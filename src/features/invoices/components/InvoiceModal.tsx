@@ -169,148 +169,140 @@ export default function InvoiceModal({
     <Modal isOpen={isOpen} onOpenChange={onClose} title="Add Invoice" size="lg">
       <Form {...form}>
         <form className="flex flex-col gap-4">
-          <div className="flex gap-2">
-            <FormField
-              control={form.control}
-              name="supplierId"
-              render={({ field }) => (
-                <FormItem className="w-full md:w-1/2">
-                  <FormLabel>Supplier</FormLabel>
-                  <Autocomplete
-                    value={
-                      suppliers.find((supplier) => supplier.id === field.value)
-                        ?.name
-                    }
-                    options={suppliers}
-                    placeholder="Supplier"
-                    onChange={(value) => {
-                      form.setValue("supplierId", Number(value.id), {
-                        shouldValidate: true,
-                      });
-                    }}
-                  />
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="invoiceNumber"
-              render={({ field }) => (
-                <FormItem className="w-full md:w-1/2">
-                  <FormLabel>Invoice Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Supplier Invoice No." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="invoiceDate"
-              render={({ field }) => (
-                <FormItem className="w-full md:w-1/2">
-                  <FormLabel>Invoice Date</FormLabel>
-                  <FormControl>
-                    <DatePicker {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="dueDate"
-              render={({ field }) => (
-                <FormItem className="w-full md:w-1/2">
-                  <FormLabel>Due Date</FormLabel>
-                  <FormControl>
-                    <DatePicker {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Notes</FormLabel>
-                <FormControl>
-                  <Textarea {...field} value={field.value ?? ""} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div>
-            <Button
-              className="shadow-sm"
-              type="button"
-              size="sm"
-              disabled={!supplier.field.value}
-              onClick={() => handleToggle({ goodReceiptPickerModal: true })}
-            >
-              <Plus />
-            </Button>
-          </div>
-
-          <FormField
-            control={form.control}
-            name="gr"
-            render={() => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <ScrollArea
-                    className="max-h-[280px]  rounded-md border"
-                    tabIndex={-1}
-                    autoFocus={false}
-                  >
-                    <DataTable
-                      data={tableData}
-                      columns={columns}
-                      renderFooter={(rows: InvoiceGoodReceipt[]) => {
-                        return (
-                          <TableRow className="font-bold">
-                            <TableCell>Total Amount</TableCell>
-                            <TableCell colSpan={10} className="text-right">
-                              {formatCurrency(
-                                rows?.reduce(
-                                  (acc: number, item: InvoiceGoodReceipt) =>
-                                    acc +
-                                    Number(item.totalAmount) -
-                                    Number(item.totalReturnAmount),
-                                  0,
-                                ),
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
+          <div className="max-h-[70vh] overflow-y-auto flex gap-4 flex-col">
+            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 items-start">
+              <FormField
+                control={form.control}
+                name="supplierId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Supplier</FormLabel>
+                    <Autocomplete
+                      value={
+                        suppliers.find(
+                          (supplier) => supplier.id === field.value,
+                        )?.name
+                      }
+                      options={suppliers}
+                      placeholder="Supplier"
+                      onChange={(value) => {
+                        form.setValue("supplierId", Number(value.id), {
+                          shouldValidate: true,
+                        });
                       }}
                     />
-                  </ScrollArea>
-                </FormControl>
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {toggle.goodReceiptPickerModal && (
-            <GoodReceiptPickerModal
-              isOpen
-              onClose={() => handleToggle({ goodReceiptPickerModal: false })}
-              supplierId={Number(supplier.field.value)}
-              onSubmit={(selected) => {
-                onPickerSubmit(selected);
-              }}
-              defaultSelected={fields}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="invoiceNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Invoice Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Supplier Invoice No." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="invoiceDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Invoice Date</FormLabel>
+                    <FormControl>
+                      <DatePicker {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Due Date</FormLabel>
+                    <FormControl>
+                      <DatePicker {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          )}
+            <div>
+              <Button
+                className="shadow-sm"
+                type="button"
+                size="sm"
+                disabled={!supplier.field.value}
+                onClick={() => handleToggle({ goodReceiptPickerModal: true })}
+              >
+                <Plus /> Add Good Receipts
+              </Button>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="gr"
+              render={() => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <div
+                      className="max-h-[300px] overflow-y-auto rounded-md border"
+                      tabIndex={-1}
+                      autoFocus={false}
+                    >
+                      <DataTable
+                        data={tableData}
+                        columns={columns}
+                        renderFooter={(rows: InvoiceGoodReceipt[]) => {
+                          return (
+                            <TableRow className="font-bold">
+                              <TableCell>Total Amount</TableCell>
+                              <TableCell colSpan={10} className="text-right">
+                                {formatCurrency(
+                                  rows?.reduce(
+                                    (acc: number, item: InvoiceGoodReceipt) =>
+                                      acc +
+                                      Number(item.totalAmount) -
+                                      Number(item.totalReturnAmount),
+                                    0,
+                                  ),
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }}
+                      />
+                    </div>
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <DialogFooter>
             <ConfirmDialog
               title="Create Invoice"
@@ -329,6 +321,17 @@ export default function InvoiceModal({
           </DialogFooter>
         </form>
       </Form>
+      {toggle.goodReceiptPickerModal && (
+        <GoodReceiptPickerModal
+          isOpen
+          onClose={() => handleToggle({ goodReceiptPickerModal: false })}
+          supplierId={Number(supplier.field.value)}
+          onSubmit={(selected) => {
+            onPickerSubmit(selected);
+          }}
+          defaultSelected={fields}
+        />
+      )}
     </Modal>
   );
 }

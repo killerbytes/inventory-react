@@ -1,6 +1,6 @@
-import { PAGINATION, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { useInvoicesPaginated } from "@/features/invoices/hooks/useInvoices";
-import InvoiceModal from "../../features/invoices/components/InvoiceModal";
+import InvoiceModal from "@/features/invoices/components/InvoiceModal";
+import { PAGINATION, ROUTES, STATUS_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { DataTable } from "@/components/DataTable";
@@ -41,6 +41,9 @@ export default function Invoices() {
     () => [
       {
         accessorKey: "invoiceNumber",
+        meta: {
+          className: "truncate max-w-40",
+        },
         header: ({ column }) => {
           return (
             <ColumnSort

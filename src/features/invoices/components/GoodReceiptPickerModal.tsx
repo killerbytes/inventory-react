@@ -1,5 +1,6 @@
 import { useGoodReceiptBySupplier } from "@/features/good-receipts/hooks/useGoodReceipts";
 import { ORDER_STATUS, PAGINATION, STATUS_COLOR } from "@/utils/definitions";
+import { FormControl, FormField, FormItem } from "@/components/ui/form";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { filterProps, InvoiceGoodReceipt } from "@/schemas";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -132,46 +133,45 @@ export default function GoodReceiptPickerModal({
   );
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onClose} title="Add Invoice">
-      {isLoading ? (
-        <Loader />
-      ) : (
-        <>
-          {data?.summary && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xl">
-              <SummaryCard
-                label={data.summary.totalAmount.label}
-                value={formatCurrency(data.summary.totalAmount.value)}
+    <Modal isOpen={isOpen} onOpenChange={onClose} title="Select Good Receipts">
+      <div className="flex flex-col gap-4">
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <>
+            {data?.summary && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xl">
+                <SummaryCard
+                  label={data.summary.totalAmount.label}
+                  value={formatCurrency(data.summary.totalAmount.value)}
+                />
+              </div>
+            )}
+            <div className="overflow-auto w-full grid gap-2 max-h-[300px]">
+              <DataTable
+                data={data?.data || []}
+                columns={columns}
+                defaultSelected={defaultSelected}
+                onSelectionChange={handleSelectionChange}
               />
             </div>
-          )}
-          <ScrollArea
-            className="h-[280px]  rounded-md border"
-            tabIndex={-1}
-            autoFocus={false}
+
+            {data && data.meta.totalPages > 1 && (
+              <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
+            )}
+          </>
+        )}
+        <DialogFooter>
+          <Button
+            className="shadow-sm"
+            type="submit"
+            disabled={!selected.length}
+            onClick={() => onSubmit(selected)}
           >
-            <DataTable
-              data={data?.data || []}
-              columns={columns}
-              defaultSelected={defaultSelected}
-              onSelectionChange={handleSelectionChange}
-            />
-          </ScrollArea>
-          {data && data.meta.totalPages > 1 && (
-            <Pager meta={data.meta} filter={filter} setFilter={setFilter} />
-          )}
-        </>
-      )}
-      <DialogFooter>
-        <Button
-          className="shadow-sm"
-          type="submit"
-          disabled={!selected.length}
-          onClick={() => onSubmit(selected)}
-        >
-          Select
-        </Button>
-      </DialogFooter>
+            Select
+          </Button>
+        </DialogFooter>
+      </div>
     </Modal>
   );
 }

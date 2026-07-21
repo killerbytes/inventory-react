@@ -33,6 +33,10 @@ export default function Payments() {
     () => [
       {
         accessorKey: "payment.referenceNo",
+        meta: {
+          className: "truncate max-w-40",
+        },
+
         header: ({ column }) => {
           return (
             <ColumnSort

@@ -16,6 +16,7 @@ import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Tooltip from "@/components/Tooltip";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";
@@ -52,6 +53,7 @@ export default function StockAdjustments() {
         cell: ({ row }) => {
           return (
             <Link
+              className="text-primary"
               to={`${ROUTES.PRODUCTS}/${row.original.combination?.productId}`}
             >
               {row.original.combination?.name}
@@ -147,7 +149,11 @@ export default function StockAdjustments() {
         header: "Notes",
         meta: {
           headerClassName: "w-[100px]",
-          className: "w-0 text-ellipsis w-[100px]",
+          className: "w-0 text-ellipsis w-[100px] truncate max-w-40",
+        },
+        cell: ({ row }) => {
+          const note = row.original.notes || "";
+          return <Tooltip content={note}>{note}</Tooltip>;
         },
       },
     ],
@@ -156,14 +162,7 @@ export default function StockAdjustments() {
 
   return (
     <>
-      <PageHeader title="Sales Orders">
-        <Button className="shadow-md bg-red-500">
-          <Camera />
-        </Button>
-        <Button className="shadow-md ">
-          <Plus /> Create Order
-        </Button>
-      </PageHeader>
+      <PageHeader title="Stock Adjustments" />
       <>
         <Input
           placeholder="Search Product"
