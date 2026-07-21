@@ -538,7 +538,7 @@ export default function SalesOrderModal({
       {isLoading || (loading && <Loader />)}
       <Form {...form}>
         <form className="flex flex-col gap-4 ">
-          <div className="max-h-[80vh] overflow-y-auto flex gap-4 flex-col">
+          <div className="max-h-[70vh] overflow-y-auto flex gap-4 flex-col">
             <FormField
               control={form.control}
               name="customerId"
@@ -564,7 +564,7 @@ export default function SalesOrderModal({
               )}
             />
 
-            <div className="grid  sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
               <FormField
                 control={form.control}
                 name="salesOrderNumber"
