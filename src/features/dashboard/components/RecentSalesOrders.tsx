@@ -14,32 +14,23 @@ import { mappedStatusHistory } from "@/lib/utils";
 import ColorBadge from "@/components/ColorBadge";
 import { useNavigate } from "react-router-dom";
 import { cx } from "class-variance-authority";
-import { DateRange } from "react-day-picker";
-import Loader from "@/components/Loader";
 import React from "react";
 
 export default function RecentSalesOrders() {
   const navigate = useNavigate();
-  const [range] = React.useState<DateRange>({
-    from: new Date(),
-    to: new Date(),
-  });
-  const [filter] = React.useState<filterProps>({
-    limit: 5,
-    page: PAGINATION.PAGE,
-    order: "DESC",
-    sort: "orderDate",
-    status: "ALL",
-  });
-  const payload = {
-    ...filter,
-    ...(range?.from && range?.to && { startDate: range.from }),
-    ...(range?.from && range?.to && { endDate: range.to }),
+  const payload = React.useMemo<filterProps>(
+    () => ({
+      limit: 5,
+      page: PAGINATION.PAGE,
+      order: "DESC",
+      sort: "orderDate",
+      startDate: new Date(),
+      endDate: new Date(),
+    }),
+    [],
+  );
 
-    status: filter.status === "ALL" ? undefined : filter.status,
-  };
-
-  const { data, isLoading } = useSalesOrdersPaginated(payload);
+  const { data } = useSalesOrdersPaginated(payload);
 
   const columns: ColumnDef<SalesOrder>[] = [
     {

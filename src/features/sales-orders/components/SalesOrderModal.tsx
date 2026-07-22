@@ -2,6 +2,7 @@ import {
   ApiError,
   ApiErrorResponse,
   ProductCombination,
+  ProductCombinationSearch,
   SalesOrder,
   SalesOrderForm,
   salesOrderFormSchema,
@@ -46,7 +47,6 @@ import { productCombinationServices } from "@/services";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogFooter } from "@/components/ui/dialog";
-import { ProductCombinationSearch } from "@/schemas";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Autocomplete from "@/components/Autcomplete";
@@ -226,7 +226,7 @@ export default function SalesOrderModal({
 
   async function onSave(values: SalesOrderForm) {
     updateSalesOrder(
-      { id: Number(data.id), data: values as SalesOrder },
+      { id: Number(data?.id), data: values as SalesOrder },
       {
         onSuccess: () => {
           localStorage.removeItem(
@@ -286,7 +286,7 @@ export default function SalesOrderModal({
   }, [data, saveDraft, formData]);
 
   async function onDeleteOrder() {
-    deleteSalesOrder(Number(data.id), {
+    deleteSalesOrder(Number(data?.id), {
       onSuccess: () => {
         toast.success(`Sales Order deleted successfully`);
         onClose(true);

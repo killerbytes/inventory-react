@@ -4,24 +4,14 @@ import Movements from "@/components/Movements";
 import React from "react";
 
 export default function RecentInventoryMovements() {
-  const filter = {
-    limit: 5,
-    page: 1,
-    type: "ALL",
-    q: "",
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
-  };
-
-  const payload = React.useMemo(() => {
-    return {
-      ...filter,
-      q: filter.q === "" ? undefined : filter.q,
-      type: filter.type === "ALL" ? undefined : filter.type,
-      startDate: filter.from?.toISOString(),
-      endDate: filter.to?.toISOString(),
-    };
-  }, [filter]);
+  const payload = React.useMemo(
+    () => ({
+      limit: 5,
+      startDate: startOfMonth(new Date()),
+      endDate: endOfMonth(new Date()),
+    }),
+    [],
+  );
 
   const { data } = useMovements(payload);
 

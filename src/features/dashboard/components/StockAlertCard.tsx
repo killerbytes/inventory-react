@@ -1,7 +1,7 @@
 import { useReorderLevels } from "@/features/inventory/hooks/useInventory";
 import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
-import { AlertCircle, TriangleAlertIcon } from "lucide-react";
 import SummaryCard from "@/components/SummaryCard";
+import { TriangleAlertIcon } from "lucide-react";
 import { filterProps } from "@/schemas";
 import React from "react";
 

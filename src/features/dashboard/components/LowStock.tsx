@@ -1,11 +1,6 @@
-import {
-  PAGINATION,
-  PAGINATION_RESPONSE,
-  ROUTES,
-  UNIT_COLOR,
-} from "@/utils/definitions";
+import { PAGINATION_RESPONSE, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { useReorderLevels } from "@/features/inventory/hooks/useInventory";
-import { NoSales, Reorder } from "@/schemas/reports.schema";
+import { Reorder } from "@/schemas/reports.schema";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import ColorBadge from "@/components/ColorBadge";
@@ -16,15 +11,17 @@ import { Link } from "react-router";
 import React from "react";
 
 export default function LowStock() {
-  const [filter] = React.useState<filterProps>({
-    limit: 5,
-    page: PAGINATION.PAGE,
-    sort: "lastSoldAt",
-    order: "DESC",
-    q: "",
-  });
+  const payload = React.useMemo<filterProps>(
+    () => ({
+      limit: 5,
+      sort: "lastSoldAt",
+      order: "DESC",
+      q: "",
+    }),
+    [],
+  );
 
-  const { data = PAGINATION_RESPONSE } = useReorderLevels(filter);
+  const { data = PAGINATION_RESPONSE } = useReorderLevels(payload);
 
   const columns = React.useMemo<ColumnDef<Reorder>[]>(
     () => [
@@ -78,7 +75,7 @@ export default function LowStock() {
         },
       },
     ],
-    [filter],
+    [],
   );
   return (
     <div className="flex flex-col gap-2">

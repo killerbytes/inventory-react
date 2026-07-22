@@ -8,15 +8,14 @@ import {
 import { useStockAdjustments } from "@/features/inventory/hooks/useInventory";
 import { filterProps, StockAdjustment } from "@/schemas";
 import { formatDateTime } from "@/utils/formatters";
-import { Camera, Loader, Plus } from "lucide-react";
 import { DataTable } from "@/components/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import PageHeader from "@/components/PageHeader";
 import ColumnSort from "@/components/ColumnSort";
 import ColorBadge from "@/components/ColorBadge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Tooltip from "@/components/Tooltip";
+import { Loader } from "lucide-react";
 import Pager from "@/components/Pager";
 import { Link } from "react-router";
 import React from "react";

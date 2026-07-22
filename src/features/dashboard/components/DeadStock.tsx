@@ -22,7 +22,7 @@ export default function DeadStock() {
     sort: "quantity",
   });
 
-  const { data = PAGINATION_RESPONSE, isLoading } = useNoSales(filter);
+  const { data = PAGINATION_RESPONSE } = useNoSales(filter);
 
   const handleFilterChange = React.useCallback((data: filterProps) => {
     const { sort } = data;

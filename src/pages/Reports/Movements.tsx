@@ -53,8 +53,8 @@ export default function InventoryMovements() {
       ...debouncedQuery,
       q: debouncedQuery.q === "" ? undefined : debouncedQuery.q,
       type: debouncedQuery.type === "ALL" ? undefined : debouncedQuery.type,
-      startDate: debouncedQuery.from?.toISOString(),
-      endDate: debouncedQuery.to?.toISOString(),
+      startDate: debouncedQuery.from,
+      endDate: debouncedQuery.to,
     };
   }, [debouncedQuery]);
 

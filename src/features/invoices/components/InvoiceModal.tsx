@@ -17,7 +17,6 @@ import { useController, useFieldArray, useForm } from "react-hook-form";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import GoodReceiptPickerModal from "./GoodReceiptPickerModal";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCreateInvoice } from "../hooks/useInvoices";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { zodResolver } from "@hookform/resolvers/zod";

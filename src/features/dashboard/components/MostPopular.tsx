@@ -1,28 +1,22 @@
 import { Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { usePopularProducts } from "@/features/inventory/hooks/useInventory";
-import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
+import { PAGINATION_RESPONSE } from "@/utils/definitions";
 import { endOfMonth, startOfMonth } from "date-fns";
-import { DateRange } from "react-day-picker";
 import { filterProps } from "@/schemas";
 import React from "react";
 
 export default function MostPopular() {
-  const [range, setRange] = React.useState<DateRange>({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
-  });
-  const [filter, setFilter] = React.useState<filterProps>({
-    limit: 5,
-    page: PAGINATION.PAGE,
-    sort: "transactionCount",
-  });
-  const payload = {
-    ...filter,
-    ...(range?.from && range?.to && { startDate: range.from }),
-    ...(range?.from && range?.to && { endDate: range.to }),
-  };
+  const payload = React.useMemo<filterProps>(
+    () => ({
+      limit: 5,
+      sort: "transactionCount",
+      startDate: startOfMonth(new Date()),
+      endDate: endOfMonth(new Date()),
+    }),
+    [],
+  );
 
-  const { data = PAGINATION_RESPONSE, isLoading } = usePopularProducts(payload);
+  const { data = PAGINATION_RESPONSE } = usePopularProducts(payload);
 
   const COLORS = [
     "var(--chart-1)",

@@ -5,14 +5,13 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { useDailySalesOrder } from "@/features/sales-orders/hooks/useSalesOrders";
 import { formatCurrency } from "@/utils/formatters";
 
 export default function WeeklySalesGraph() {
-  const { data, isLoading } = useDailySalesOrder();
+  const { data } = useDailySalesOrder();
 
   return (
     <div className="flex flex-col gap-2 h-full min-h-[300px]">
@@ -36,7 +35,6 @@ export default function WeeklySalesGraph() {
             fontSize={12}
           />
           <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-          {/* <Legend /> */}
           <Bar
             dataKey="totalAmount"
             fill="var(--chart-1)"

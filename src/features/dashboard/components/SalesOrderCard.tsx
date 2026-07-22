@@ -42,9 +42,19 @@ export default function SalesOrderCard() {
   const { data } = useSalesOrdersPaginated(payload);
   const { data: previous } = useSalesOrdersPaginated(previousPayload);
 
+  const currentTotal = data?.summary?.totalAmount?.value ?? 0;
+  const previousTotal = previous?.summary?.totalAmount?.value ?? 0;
+
+  const percentageChange = React.useMemo(() => {
+    if (!previousTotal || previousTotal === 0) {
+      return currentTotal > 0 ? 100 : 0;
+    }
+    return ((currentTotal - previousTotal) / previousTotal) * 100;
+  }, [currentTotal, previousTotal]);
+
   return (
     <>
-      {data?.summary && (
+      {data?.summary && previous?.summary && (
         <SummaryCard
           label="Today's Sale"
           value={
@@ -52,35 +62,18 @@ export default function SalesOrderCard() {
               <div
                 className={cx(
                   "text-lg font-semibold",
-                  ((data.summary.totalAmount.value -
-                    (previous?.summary?.totalAmount.value || 0)) /
-                    (previous?.summary?.totalAmount.value || 0)) *
-                    100 >
-                    0
-                    ? "text-green-500"
-                    : "text-red-500",
+                  percentageChange > 0 ? "text-green-500" : "text-red-500",
                 )}
               >
-                {formatCurrency(data.summary.totalAmount.value)}
+                {formatCurrency(currentTotal)}
               </div>
               <div
-                className={`text-xs ${
-                  ((data.summary.totalAmount.value -
-                    (previous?.summary?.totalAmount.value || 0)) /
-                    (previous?.summary?.totalAmount.value || 0)) *
-                    100 >
-                  0
-                    ? "text-green-500"
-                    : "text-red-500"
-                }`}
-              >
-                {formatCurrency(
-                  ((data.summary.totalAmount.value -
-                    (previous?.summary?.totalAmount.value || 0)) /
-                    (previous?.summary?.totalAmount.value || 0)) *
-                    100,
+                className={cx(
+                  "text-xs",
+                  percentageChange > 0 ? "text-green-500" : "text-red-500",
                 )}
-                % vs Yesterday
+              >
+                {percentageChange.toFixed(1)}% vs Yesterday
               </div>
             </div>
           }
