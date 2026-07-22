@@ -1,54 +1,61 @@
-# React + TypeScript + Vite
+---
+title: "Modern Inventory Management System"
+date: "2026-07-19"
+tags: ["React", "TypeScript", "Tailwind CSS", "Enterprise", "UI/UX"]
+---
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Modern Inventory Management System
 
-Currently, two official plugins are available:
+A comprehensive, scalable, and responsive web application designed to streamline business operations, from tracking products and managing stock to processing sales and generating invoices.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Overview
 
-## Expanding the ESLint configuration
+The **Inventory Management System** is an enterprise-grade solution built to provide businesses with real-time insights into their supply chain and sales. I engineered a robust front-end architecture focused on performance, type safety, and user experience, enabling complex data interactions without sacrificing speed or usability.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Tech Stack & Tools
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **Core Frameworks:** React 19, TypeScript, Vite
+- **Styling & UI:** Tailwind CSS v4, Radix UI primitives, Lucide React (Icons)
+- **State Management & Data Fetching:** Zustand, TanStack React Query v5
+- **Forms & Validation:** React Hook Form, Zod
+- **Routing:** React Router v7
+- **Advanced Utilities:** TanStack Table (Data Grids), `dnd-kit` (Drag & Drop), `html5-qrcode` (Barcode Scanning), `recharts` (Reporting/Dashboards)
+- **Testing & Tooling:** Vitest, ESLint, Prettier
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ✨ Key Features
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 1. Comprehensive Dashboard & Analytics
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+Provides a high-level overview of critical business metrics, stock alerts, and sales performance. Integrated dynamic reporting helps users make informed decisions quickly.
+
+### 2. End-to-End Inventory Control
+
+Complete lifecycle management for products. Features include stock level tracking, categorization, supplier management, and the ability to seamlessly handle Goods Receipts.
+
+### 3. Sales & Invoicing Workflows
+
+Integrated modules for managing Customers, creating Sales Orders, and processing Payments. The system can dynamically generate professional invoices for immediate printing or PDF export.
+
+### 4. Hardware Integration (Barcode Scanning)
+
+Incorporated built-in barcode scanner capabilities directly into the browser to speed up product lookups, inventory audits, and point-of-sale workflows.
+
+### 5. Highly Interactive & Accessible UI
+
+Utilized Radix UI and Tailwind CSS to build a bespoke design system featuring:
+
+- **Dark/Light Mode Support** for user preference and reduced eye strain.
+- **Keyboard Navigable Data Grids** using TanStack Table for efficient data entry.
+- **Accessible Components** including Modals, Dropdowns, and Comboboxes.
+
+## 💡 Engineering Highlights
+
+- **Type-Safe Architecture:** Enforced strict TypeScript configurations across the entire codebase to catch errors at compile-time, resulting in highly reliable code.
+- **Optimized Data Fetching:** Leveraged TanStack React Query for aggressive caching, background refetching, and optimistic UI updates, ensuring the application feels instantaneous.
+- **Complex Form Handling:** Implemented Zod schemas in conjunction with React Hook Form to handle complex validation logic (e.g., dynamic line items in invoices) with minimal re-renders.
+
+## 🎯 The Result
+
+The final product is a highly performant, maintainable, and user-friendly application capable of scaling alongside growing business demands. The modular architecture ensures that new features can be added rapidly, making it a future-proof foundation for any retail or warehouse operation.
+
+README generated with antigravity
