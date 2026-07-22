@@ -59,6 +59,8 @@ export interface filterProps {
   sort?: string;
   status?: string;
   order?: "ASC" | "DESC";
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export interface pagerProps<T> {

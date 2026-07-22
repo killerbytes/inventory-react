@@ -10,10 +10,8 @@ export const reorderSchema = z.object({
 });
 
 export const popularSchema = z.object({
-  name: z.string(),
   combinations: productCombinationSchema,
-  lastSoldAt: z.string(),
-  quantity: z.coerce.number(),
+  transactionCount: z.coerce.number(),
 });
 
 export const profitSchema = z.object({

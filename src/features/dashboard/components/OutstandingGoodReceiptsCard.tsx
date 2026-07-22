@@ -82,7 +82,11 @@ export default function OutstandingGoodReceiptsCards() {
     data?.summary && (
       <SummaryCard
         label="Total Outstanding Good Receipts"
-        value={formatCurrency(data?.summary?.totalAmount.value)}
+        value={
+          <span className="text-yellow-500">
+            {formatCurrency(data?.summary?.totalAmount.value)}
+          </span>
+        }
       />
     )
   );

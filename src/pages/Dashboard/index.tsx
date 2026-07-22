@@ -4,9 +4,13 @@ import CreateProductModal from "@/features/products/components/CreateProductModa
 import RecentSalesOrders from "@/features/dashboard/components/RecentSalesOrders";
 import LastMonthProfitCard from "@/features/dashboard/components/LastMonthProfit";
 import SalesOrderModal from "@/features/sales-orders/components/SalesOrderModal";
+import WeeklySalesGraph from "@/features/dashboard/components/WeekSalesGraph";
 import StockAlertCard from "@/features/dashboard/components/StockAlertCard";
 import SalesOrderCard from "@/features/dashboard/components/SalesOrderCard";
 import AddSupplierModal from "../../features/suppliers/components/AddModal";
+import MostPopular from "@/features/dashboard/components/MostPopular";
+import DeadStock from "@/features/dashboard/components/DeadStock";
+import LowStock from "@/features/dashboard/components/LowStock";
 import { Button, buttonVariants } from "@/components/ui/button";
 import AddCustomerModal from "../Customers/AddModal";
 import PageHeader from "@/components/PageHeader";
@@ -25,26 +29,16 @@ export default function Dashboard() {
   return (
     <>
       <PageHeader title="Dashboard"></PageHeader>
-      <div className="flex flex-col gap-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="flex flex-col gap-6 md:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-12">
           <SalesOrderCard />
-          <LastMonthProfitCard />
-          <StockAlertCard />
           <OutstandingGoodReceiptsCards />
+          <StockAlertCard />
+          <LastMonthProfitCard />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-          <Link
-            to={ROUTES.GOOD_RECEIPT_CREATE}
-            className={cx(
-              buttonVariants({ variant: "default" }),
-              "shadow-md !bg-orange-500 text-white",
-            )}
-          >
-            <Plus /> Good Receipt
-          </Link>
-
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-12">
           <Button
-            className="shadow-md "
+            className="shadow-md !bg-green-500 "
             onClick={() => {
               handleToggle({ salesOrderModal: true });
             }}
@@ -52,8 +46,18 @@ export default function Dashboard() {
             <Plus /> Sales Order
           </Button>
 
+          <Link
+            to={ROUTES.GOOD_RECEIPT_CREATE}
+            className={cx(
+              buttonVariants({ variant: "default" }),
+              "shadow-md !bg-orange-500 ",
+            )}
+          >
+            <Plus /> Good Receipt
+          </Link>
+
           <Button
-            className="shadow-sm"
+            className="shadow-sm !bg-gray-500"
             onClick={() => {
               handleToggle({ createProductModal: true });
             }}
@@ -62,7 +66,7 @@ export default function Dashboard() {
           </Button>
 
           <Button
-            className="shadow-sm"
+            className="shadow-sm !bg-purple-500"
             onClick={() => {
               handleToggle({ addCustomerModal: true });
             }}
@@ -71,7 +75,7 @@ export default function Dashboard() {
           </Button>
 
           <Button
-            className="shadow-sm"
+            className="shadow-sm !bg-cyan-500"
             onClick={() => {
               handleToggle({ addSupplierModal: true });
             }}
@@ -82,6 +86,14 @@ export default function Dashboard() {
 
         <RecentSalesOrders />
         <RecentInventoryMovements />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-12">
+          <DeadStock />
+          <LowStock />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-12">
+          <WeeklySalesGraph />
+          <MostPopular />
+        </div>
       </div>
 
       {toggle.salesOrderModal && (

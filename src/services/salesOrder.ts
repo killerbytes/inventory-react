@@ -25,4 +25,9 @@ export default class SalesOrderService extends BaseService<
 
     return response;
   };
+
+  dailySales = async () => {
+    const response = await this.http.get(`${this.url}/daily-sales`);
+    return response;
+  };
 }

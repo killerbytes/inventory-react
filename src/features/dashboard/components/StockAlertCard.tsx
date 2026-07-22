@@ -1,5 +1,6 @@
 import { useReorderLevels } from "@/features/inventory/hooks/useInventory";
 import { PAGINATION, PAGINATION_RESPONSE } from "@/utils/definitions";
+import { AlertCircle, TriangleAlertIcon } from "lucide-react";
 import SummaryCard from "@/components/SummaryCard";
 import { filterProps } from "@/schemas";
 import React from "react";
@@ -15,5 +16,14 @@ export default function StockAlertCard() {
 
   const { data = PAGINATION_RESPONSE } = useReorderLevels(filter);
 
-  return <SummaryCard label="Low Stock" value={data.meta.total} />;
+  return (
+    <SummaryCard
+      label="Low Stock"
+      value={
+        <span className="text-red-500 flex items-center gap-1">
+          <TriangleAlertIcon size={18} /> {data.meta.total}
+        </span>
+      }
+    />
+  );
 }

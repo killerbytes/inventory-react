@@ -23,6 +23,7 @@ export const salesOrderKeys = {
     filter,
   ],
   ocr: () => [...salesOrderKeys.all, "ocr"],
+  daily: () => [...salesOrderKeys.all, "daily"],
 };
 
 export const useSalesOrder = (id: number) => {
@@ -119,5 +120,19 @@ export const useCreateReturnExchange = () => {
 export const useOCR = () => {
   return useMutation<OCRForm, AxiosError, FormData>({
     mutationFn: (data: FormData) => salesOrderServices.ocr(data),
+  });
+};
+
+export const useDailySalesOrder = () => {
+  return useQuery<
+    {
+      name: string;
+      totalAmount: number;
+    }[],
+    AxiosError
+  >({
+    queryKey: salesOrderKeys.all,
+    queryFn: () => salesOrderServices.dailySales(),
+    staleTime: 1000 * 60 * 5,
   });
 };
