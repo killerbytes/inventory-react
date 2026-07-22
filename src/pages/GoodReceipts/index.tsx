@@ -204,11 +204,19 @@ export default function GoodReceipts() {
             />
             <SummaryCard
               label={data.summary.totalPayableAmount.label}
-              value={formatCurrency(data.summary.totalPayableAmount.value)}
+              value={
+                <span className="text-red-500">
+                  {formatCurrency(data.summary.totalPayableAmount.value)}
+                </span>
+              }
             />
             <SummaryCard
               label={data.summary.totalReturnAmount.label}
-              value={formatCurrency(data.summary.totalReturnAmount.value)}
+              value={
+                <span className="text-yellow-500">
+                  {formatCurrency(data.summary.totalReturnAmount.value)}
+                </span>
+              }
             />
           </div>
         )}

@@ -207,7 +207,14 @@ export default function AppSidebar() {
   }) => {
     return items.map((item) => (
       <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton asChild isActive={item.url === location.pathname}>
+        <SidebarMenuButton
+          asChild
+          isActive={
+            item.url === "/"
+              ? location.pathname === "/"
+              : location.pathname.includes(item.url)
+          }
+        >
           <Link to={item.url}>
             <item.icon className="text-gray-400" />
             <span>{item.title}</span>

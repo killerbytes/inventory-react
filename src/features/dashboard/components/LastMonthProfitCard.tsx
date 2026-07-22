@@ -24,7 +24,11 @@ export default function LastMonthProfitCard() {
       {data?.summary && (
         <SummaryCard
           label="Last Month's Profit"
-          value={formatCurrency(data.summary.totalProfitAmount.value)}
+          value={
+            <span className="text-green-500">
+              {formatCurrency(data.summary.totalProfitAmount.value)}
+            </span>
+          }
         />
       )}
     </>

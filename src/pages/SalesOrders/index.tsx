@@ -224,16 +224,24 @@ export default function SalesOrders() {
             />
             <SummaryCard
               label={data.summary.totalProfitAmount.label}
-              value={formatCurrency(data.summary.totalProfitAmount.value)}
+              value={
+                <span className="text-green-500">
+                  {formatCurrency(data.summary.totalProfitAmount.value)}
+                </span>
+              }
             />
-            <SummaryCard
-              label={data.summary.totalReturnAmount.label}
-              value={formatCurrency(data.summary.totalReturnAmount.value)}
-            />
-            <SummaryCard
-              label={data.summary.totalExchangeAmount.label}
-              value={formatCurrency(data.summary.totalExchangeAmount.value)}
-            />
+            {data.summary.totalReturnAmount.value && (
+              <SummaryCard
+                label={data.summary.totalReturnAmount.label}
+                value={formatCurrency(data.summary.totalReturnAmount.value)}
+              />
+            )}
+            {data.summary.totalExchangeAmount.value && (
+              <SummaryCard
+                label={data.summary.totalExchangeAmount.label}
+                value={formatCurrency(data.summary.totalExchangeAmount.value)}
+              />
+            )}
           </div>
         )}
         <div className="flex flex-col md:flex-row gap-2 ">
