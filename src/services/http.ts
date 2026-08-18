@@ -44,6 +44,12 @@ export default class Http {
               console.log('===> http.ts:44 ~ originalRequest', originalRequest);
               if (originalRequest && !originalRequest._retry) {
                 if (originalRequest.url?.includes("/auth/refresh-token")) {
+                  useStore.getState().authState.setToken(null);
+                  if (typeof window !== "undefined" && window.location.pathname !== ROUTES.LOGIN) {
+                    const currentUrl =
+                      window.location.pathname + window.location.search;
+                    window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                  }
                   throw error;
                 }
                 originalRequest._retry = true;
@@ -118,18 +124,14 @@ export default class Http {
       } catch (error) {
         const apiError = error as ApiErrorResponse;
         const currentUrl = window.location.pathname + window.location.search;
-        localStorage.setItem("apiError", apiError.message);
+        if (apiError?.message && typeof localStorage !== "undefined") {
+          localStorage.setItem("apiError", apiError.message);
+        }
 
-        switch (apiError.message) {
-          case "invalid signature":
-          case "Invalid refresh token":
-          case "jwt must be provided":
-          case "Token validation failed":
-            useStore.getState().authState.setToken(null);
-            if (window.location.pathname !== ROUTES.LOGIN) {
-              window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
-            }
-            break;
+        // On any refresh token failure (401, missing cookie, expired token), clear state & redirect to login
+        useStore.getState().authState.setToken(null);
+        if (typeof window !== "undefined" && window.location.pathname !== ROUTES.LOGIN) {
+          window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
         }
         throw error;
       } finally {
