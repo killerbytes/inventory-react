@@ -12,9 +12,18 @@ RUN npm ci
 # Copy application source code
 COPY . .
 
-# Set build-time API URL to relative path /api
-ARG VITE_API_URL=/api
+# Set build-time Vite environment variables
+ARG VITE_APP_NAME="INVENTORY"
+ARG VITE_APP_TITLE="Hardware"
+ARG VITE_API_URL="/api"
+ARG VITE_CURRENCY="PHP"
+ARG VITE_ENV="PRODUCTION"
+
+ENV VITE_APP_NAME=$VITE_APP_NAME
+ENV VITE_APP_TITLE=$VITE_APP_TITLE
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_CURRENCY=$VITE_CURRENCY
+ENV VITE_ENV=$VITE_ENV
 
 # Build static production assets
 RUN npm run build

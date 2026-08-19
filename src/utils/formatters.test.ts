@@ -17,6 +17,13 @@ describe('Formatters & Utilities', () => {
       const result = formatCurrency(0);
       expect(result).toMatch(/0\.00/);
     });
+
+    it('falls back gracefully to PHP when VITE_CURRENCY is undefined', () => {
+      vi.stubEnv('VITE_CURRENCY', '');
+      expect(() => formatCurrency(500)).not.toThrow();
+      const result = formatCurrency(500);
+      expect(result).toMatch(/500\.00/);
+    });
   });
 
   describe('getScore', () => {

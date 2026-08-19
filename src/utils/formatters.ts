@@ -3,9 +3,14 @@ import { format } from "date-fns";
 import { DATE_FORMAT, DATETIME_FORMAT } from "./definitions";
 
 export const formatCurrency = (value: number) => {
+  const rawCurrency = import.meta.env.VITE_CURRENCY;
+  const currency =
+    typeof rawCurrency === "string" && rawCurrency.trim()
+      ? rawCurrency.trim()
+      : "PHP";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: import.meta.env.VITE_CURRENCY,
+    currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
