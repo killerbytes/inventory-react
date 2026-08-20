@@ -46,11 +46,6 @@ export default class Http {
               if (originalRequest && !originalRequest._retry) {
                 if (originalRequest.url?.includes("/auth/refresh-token")) {
                   useStore.getState().authState.setToken(null);
-                  if (typeof window !== "undefined" && window.location.pathname !== ROUTES.LOGIN) {
-                    const currentUrl =
-                      window.location.pathname + window.location.search;
-                    window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
-                  }
                   throw error;
                 }
                 originalRequest._retry = true;
@@ -61,21 +56,10 @@ export default class Http {
                   return this.axiosInstance(originalRequest);
                 } catch (retryError) {
                   useStore.getState().authState.setToken(null);
-                  if (window.location.pathname !== ROUTES.LOGIN) {
-                    const currentUrl =
-                      window.location.pathname + window.location.search;
-                    window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
-                  }
-
                   throw retryError;
                 }
               } else {
                 useStore.getState().authState.setToken(null);
-                if (window.location.pathname !== ROUTES.LOGIN) {
-                  const currentUrl =
-                    window.location.pathname + window.location.search;
-                  window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
-                }
               }
               throw error;
             }
@@ -124,16 +108,12 @@ export default class Http {
         return accessToken;
       } catch (error) {
         const apiError = error as ApiErrorResponse;
-        const currentUrl = window.location.pathname + window.location.search;
         if (apiError?.message && typeof localStorage !== "undefined") {
           localStorage.setItem("apiError", apiError.message);
         }
 
-        // On any refresh token failure (401, missing cookie, expired token), clear state & redirect to login
+        // On any refresh token failure (401, missing cookie, expired token), clear state cleanly
         useStore.getState().authState.setToken(null);
-        if (typeof window !== "undefined" && window.location.pathname !== ROUTES.LOGIN) {
-          window.location.href = `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(currentUrl)}`;
-        }
         throw error;
       } finally {
         this.refreshPromise = null;

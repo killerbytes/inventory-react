@@ -93,7 +93,10 @@ describe("Http Service - 401 Interceptor and Refresh Token Handling", () => {
     expect(useStore.getState().authState.token).toBeNull();
   });
 
-  it("should clear auth token and attempt redirect to LOGIN when refreshToken fails on a protected route", async () => {
+  it("should clear auth token and NOT trigger hard window.location redirect when refreshToken fails on a public or protected route", async () => {
+    (window as any).location.pathname = "/search";
+    (window as any).location.href = "/search?search=tubu";
+
     const http = new Http();
 
     vi.spyOn(http, "post").mockRejectedValue({
@@ -104,7 +107,7 @@ describe("Http Service - 401 Interceptor and Refresh Token Handling", () => {
     await expect(http.refreshToken()).rejects.toBeDefined();
 
     expect(useStore.getState().authState.token).toBeNull();
-    expect((window as any).location.href).toContain("/login");
+    expect((window as any).location.href).toBe("/search?search=tubu");
   });
 
   it("should NOT trigger redirect loop if already on LOGIN route when refreshToken fails", async () => {
