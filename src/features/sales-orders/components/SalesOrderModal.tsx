@@ -256,7 +256,10 @@ export default function SalesOrderModal({
 
   const saveDraft = React.useCallback(
     debounce((newDraft: SalesOrderForm) => {
-      if (newDraft.salesOrderItems.every((item) => item.combinationId === -1)) {
+      if (
+        !newDraft.salesOrderNumber &&
+        newDraft.salesOrderItems.every((item) => item.combinationId === -1)
+      ) {
         return;
       }
 

@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import {
   Sidebar,
-  SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
@@ -226,8 +225,8 @@ export default function AppSidebar() {
 
   return (
     <Sidebar variant="inset">
-      <SidebarContent>
-        <Header />
+      <Header />
+      <div className="scrollbar-none  overflow-auto">
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-widest">
             Application
@@ -274,7 +273,7 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarContent>
+      </div>
       <SidebarFooter>
         <UserDropdown />
         <div className="text-center mt-auto py-2 border-t gap-2 flex flex-col text-xs">
