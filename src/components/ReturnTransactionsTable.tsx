@@ -4,7 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import { GLOBAL_COLOR, ROUTES, UNIT_COLOR } from "@/utils/definitions";
+import { GLOBAL_COLOR, INVENTORY_MOVEMENT_TYPE, ROUTES, UNIT_COLOR } from "@/utils/definitions";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { ReturnItem, ReturnTransactionInput } from "@/schemas";
 import { ColumnDef } from "@tanstack/react-table";
@@ -24,7 +24,6 @@ export default function ReturnTransactionsTable({
   // const data = _data.map((item) => {
   //   return mapReturnTransactionToDomain(item);
   // });
-
   const columns = React.useMemo<ColumnDef<ReturnItem>[]>(
     () => [
       {
@@ -119,9 +118,9 @@ export default function ReturnTransactionsTable({
 
       <Accordion type="multiple" className="w-full">
         {data?.map((item) => {
-          const returns = item.returnItems.filter((i) => i.type === "RETURN");
+          const returns = item.returnItems.filter((i) => i.type === INVENTORY_MOVEMENT_TYPE.RETURN_IN);
           const exchanges = item.returnItems.filter(
-            (i) => i.type === "EXCHANGE",
+            (i) => i.type === INVENTORY_MOVEMENT_TYPE.EXCHANGE_IN,
           );
           return (
             <AccordionItem value={String(item.id)} key={item.id}>

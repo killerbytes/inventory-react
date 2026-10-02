@@ -127,48 +127,47 @@ export default function SalesOrderDetails() {
 
                 {(data?.status === ORDER_STATUS.RECEIVED ||
                   data?.status === ORDER_STATUS.COMPLETED) && (
-                  <>
-                    {hasRole(authState.user.role, [
-                      ROLES.ADMIN,
-                      ROLES.MANAGER,
-                    ]) && (
-                      <DropdownMenuItem
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          handleToggle({
-                            cancelModal: true,
-                            dropdownMenu: false,
-                          });
-                        }}
-                      >
-                        <Ban color="red" />
-                        Cancel Order
-                      </DropdownMenuItem>
-                    )}
-                    {hasRole(authState.user.role, [
-                      ROLES.ADMIN,
-                      ROLES.MANAGER,
-                    ]) && (
-                      <DropdownMenuItem
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          setReturnEnabled(!returnEnabled);
-                          handleToggle({
-                            dropdownMenu: false,
-                          });
-                        }}
-                      >
-                        <Undo />
-                        Return/Exchange
-                      </DropdownMenuItem>
-                    )}
-                  </>
-                )}
+                    <>
+                      {hasRole(authState.user.role, [
+                        ROLES.ADMIN,
+                        ROLES.MANAGER,
+                      ]) && (
+                          <DropdownMenuItem
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              handleToggle({
+                                cancelModal: true,
+                                dropdownMenu: false,
+                              });
+                            }}
+                          >
+                            <Ban color="red" />
+                            Cancel Order
+                          </DropdownMenuItem>
+                        )}
+                      {hasRole(authState.user.role, [
+                        ROLES.ADMIN,
+                        ROLES.MANAGER,
+                      ]) && (
+                          <DropdownMenuItem
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              setReturnEnabled(!returnEnabled);
+                              handleToggle({
+                                dropdownMenu: false,
+                              });
+                            }}
+                          >
+                            <Undo />
+                            Return/Exchange
+                          </DropdownMenuItem>
+                        )}
+                    </>
+                  )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
         </PageHeader>
-
         <>
           {data && <Static data={data} />}
           {data?.status === ORDER_STATUS.CANCELLED && (
@@ -231,8 +230,8 @@ export default function SalesOrderDetails() {
                   <TableCell className="text-right font-bold">
                     {formatCurrency(
                       Number(data?.totalAmount) -
-                        totalReturnAmount +
-                        totalExchangeAmount,
+                      totalReturnAmount +
+                      totalExchangeAmount,
                     )}
                   </TableCell>
                 </TableRow>
