@@ -111,14 +111,13 @@ export default function ReturnTransactionsTable({
     ],
     [],
   );
-
   return (
     <>
       <Label className="font-bold">Return Transactions</Label>
 
       <Accordion type="multiple" className="w-full">
         {data?.map((item) => {
-          const returns = item.returnItems.filter((i) => i.type === INVENTORY_MOVEMENT_TYPE.RETURN_IN);
+          const returns = item.returnItems.filter((i) => i.type === INVENTORY_MOVEMENT_TYPE.RETURN_IN || i.type === INVENTORY_MOVEMENT_TYPE.SUPPLIER_RETURN_OUT);
           const exchanges = item.returnItems.filter(
             (i) => i.type === INVENTORY_MOVEMENT_TYPE.EXCHANGE_IN,
           );
