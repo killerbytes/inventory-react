@@ -18,7 +18,7 @@ export default function PageHeader({
         <div className="bg-border h-5 w-[1px]"></div>
         <div>
           <div className="text-lg font-bold">{title}</div>
-          <div className="text-sm">{description}</div>
+          <div className="text-sm text-gray-400">{description}</div>
         </div>
       </div>
       <div className="gap-2 flex ml-auto">{children}</div>

@@ -95,7 +95,7 @@ export default function SalesOrderDetails() {
   return (
     <>
       <>
-        <PageHeader title={`Sales Order #${data?.salesOrderNumber}`}>
+        <PageHeader title={`Sales Order #${data?.salesOrderNumber}`} description={`ID: ${data?.id}`}>
           <ColorBadge colorMap={STATUS_COLOR}>
             {String(data?.status)}
           </ColorBadge>

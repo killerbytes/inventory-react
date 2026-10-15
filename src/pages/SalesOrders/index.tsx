@@ -66,6 +66,13 @@ export default function SalesOrders() {
 
   const columns: ColumnDef<SalesOrder>[] = [
     {
+      accessorKey: "id",
+      header: "ID",
+      meta: {
+        className: "text-xs text-muted-foreground",
+      },
+    },
+    {
       accessorKey: "salesOrderNumber",
       header: ({ column }) => {
         return (
@@ -183,8 +190,8 @@ export default function SalesOrders() {
           >
             {formatCurrency(
               Number(totalAmount) -
-                Number(totalReturnAmount) +
-                Number(totalExchangeAmount),
+              Number(totalReturnAmount) +
+              Number(totalExchangeAmount),
             )}
           </div>
         );

@@ -107,14 +107,14 @@ export const getMappedSearchProductCombinations = async (params: {
 
     const combinations = isMatch
       ? item.combinations.map((i: ProductCombination) => ({
-          ...i,
-          name: `${i.name} ***${item.description}***`,
-          product: item,
-        }))
+        ...i,
+        name: `${i.name} ***${item.description}***`,
+        product: item,
+      }))
       : item.combinations.map((i: ProductCombination) => ({
-          ...i,
-          product: { categoryId: item.categoryId },
-        }));
+        ...i,
+        product: { categoryId: item.categoryId },
+      }));
 
     const filtered = (combinations ?? []).filter((i: ProductCombination) => {
       const name = i.name.toLowerCase();

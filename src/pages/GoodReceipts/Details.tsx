@@ -154,7 +154,7 @@ export default function Details() {
 
   return (
     <>
-      <PageHeader title={data?.referenceNo || ""}>
+      <PageHeader title={data?.referenceNo || ""} description={`ID: ${data?.id}`}>
         <ColorBadge colorMap={STATUS_COLOR}>{String(data?.status)}</ColorBadge>
         <DropdownMenu
           open={toggle.dropdownMenu}
@@ -211,7 +211,7 @@ export default function Details() {
             )}
             {hasRole(authState.user.role, [ROLES.ADMIN, ROLES.MANAGER]) &&
               (data?.status === ORDER_STATUS.RECEIVED ||
-              data?.status === ORDER_STATUS.COMPLETED ? (
+                data?.status === ORDER_STATUS.COMPLETED ? (
                 <DropdownMenuItem
                   onSelect={() => {
                     setReturnEnabled(!returnEnabled);
@@ -264,40 +264,40 @@ export default function Details() {
           )}
         {(data?.status === ORDER_STATUS.RECEIVED ||
           data?.status === ORDER_STATUS.COMPLETED) && (
-          <div className="md:w-1/3 flex ml-auto">
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-bold">Order Amount</TableCell>
-                  <TableHead className="text-right">
-                    {formatCurrency(Number(data?.totalAmount))}
-                  </TableHead>
-                </TableRow>
-
-                {totalReturnAmount > 0 && (
+            <div className="md:w-1/3 flex ml-auto">
+              <Table>
+                <TableBody>
                   <TableRow>
-                    <TableCell>Returns</TableCell>
-                    <TableHead className="text-right text-red-500">
-                      -{formatCurrency(totalReturnAmount)}
+                    <TableCell className="font-bold">Order Amount</TableCell>
+                    <TableHead className="text-right">
+                      {formatCurrency(Number(data?.totalAmount))}
                     </TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={1} className="font-bold">
-                    Grand Total
-                  </TableCell>
-                  <TableCell className="text-right font-bold">
-                    {formatCurrency(
-                      Number(data?.totalAmount) - totalReturnAmount,
-                    )}
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </div>
-        )}
+
+                  {totalReturnAmount > 0 && (
+                    <TableRow>
+                      <TableCell>Returns</TableCell>
+                      <TableHead className="text-right text-red-500">
+                        -{formatCurrency(totalReturnAmount)}
+                      </TableHead>
+                    </TableRow>
+                  )}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={1} className="font-bold">
+                      Grand Total
+                    </TableCell>
+                    <TableCell className="text-right font-bold">
+                      {formatCurrency(
+                        Number(data?.totalAmount) - totalReturnAmount,
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </div>
+          )}
       </div>
       {toggle.orderHistoryModal && data?.goodReceiptStatusHistory && (
         <OrderHistoryModal

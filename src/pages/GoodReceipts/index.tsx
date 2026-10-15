@@ -66,6 +66,9 @@ export default function GoodReceipts() {
     () => [
       {
         accessorKey: "id",
+        meta: {
+          className: 'text-muted-foreground text-xs'
+        },
         header: ({ column }) => {
           return (
             <ColumnSort
